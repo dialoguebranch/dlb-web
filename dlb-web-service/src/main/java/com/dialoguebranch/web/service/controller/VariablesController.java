@@ -1,0 +1,364 @@
+/*
+ *
+ *                   Copyright (c) 2023 Fruit Tree Labs (www.fruittreelabs.com)
+ *
+ *     This material is part of the DialogueBranch Platform, and is covered by the MIT License
+ *      as outlined below. Based on original source code licensed under the following terms:
+ *
+ *                                            ----------
+ *
+ * Copyright 2019-2022 WOOL Foundation - Licensed under the MIT License:
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+package com.dialoguebranch.web.service.controller;
+
+import com.dialoguebranch.execution.DLBVariableStore;
+import com.dialoguebranch.execution.DLBVariableStoreChange;
+import com.dialoguebranch.web.service.Application;
+import com.dialoguebranch.web.service.ProtocolVersion;
+import com.dialoguebranch.web.service.QueryRunner;
+import com.dialoguebranch.web.service.exception.BadRequestException;
+import com.dialoguebranch.web.service.exception.ErrorCode;
+import com.dialoguebranch.web.service.exception.HttpError;
+import com.dialoguebranch.web.service.exception.HttpFieldError;
+import com.dialoguebranch.web.service.execution.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import nl.rrd.utils.AppComponents;
+import nl.rrd.utils.datetime.DateTimeUtils;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+
+@RestController
+@SecurityRequirement(name = "X-Auth-Token")
+@RequestMapping(value = {"/v{version}/variables", "/variables"})
+@Tag(name = "3. Variables", description = "End-points for retrieving or setting DialogueBranch Variables")
+public class VariablesController {
+
+	@Autowired
+	Application application;
+
+	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
+
+	// ----------------------------------------------------------- //
+	// ---------- END-POINT: "/variables/get-variables" ---------- //
+	// ----------------------------------------------------------- //
+
+	@Operation(
+		summary = "Retrieve all- or a subset of DialogueBranch variables for a given user",
+		description = "Use this end-point to get the latest known DialogueBranch Variables values for a " +
+			"given user (either the currently logged in user, or the one provided through the " +
+			"end-point). Either provide a list of variable names for which to retrieve its " +
+			"values, or leave this empty to retrieve all known DialogueBranch Variable data.")
+	@RequestMapping(value="/get-variables", method=RequestMethod.GET)
+	public Map<String,Object> getVariables(
+			HttpServletRequest request,
+			HttpServletResponse response,
+
+			@Parameter(hidden = true, description = "API Version to use, e.g. '1'")
+			@PathVariable(value = "version")
+			String version,
+
+			@Parameter(description = "A space-separated list of DialogueBranch variable names, or leave " +
+					"empty to retrieve all known variables")
+			@RequestParam(value="variableNames", required=false)
+			String variableNames,
+
+			@Parameter(description = "The user for which to request DialogueBranch variable info (leave " +
+					"empty if executing for the currently authenticated user)")
+			@RequestParam(value="delegateUser", required=false)
+			String delegateUser) throws Exception {
+
+		// If no versionName is provided, or versionName is empty, assume the latest version
+		if (version == null || version.equals("")) {
+			version = ProtocolVersion.getLatestVersion().versionName();
+		}
+
+		// Log this call to the service log
+		String logInfo = "GET /v" + version + "/variables/get-variables?names=" + variableNames;
+		if(!(delegateUser == null) && (!delegateUser.equals(""))) logInfo += "&delegateUser="+delegateUser;
+		logger.info(logInfo);
+
+		// Make sure the passed on String is not null
+		String variableNameList = Objects.requireNonNullElse(variableNames, "");
+
+		if(delegateUser == null || delegateUser.equals("")) {
+			return QueryRunner.runQuery(
+				(protocolVersion, user) -> doGetVariables(user, variableNameList),
+				version, request, response, delegateUser, application);
+		} else {
+			return QueryRunner.runQuery(
+				(protocolVersion, user) -> doGetVariables(delegateUser, variableNameList),
+				version, request, response, delegateUser, application);
+		}
+	}
+
+	/**
+	 * For the given {@code userId} returns a mapping from names to value of DialogueBranch Variables for
+	 * those variables provided in the given {@code variableNames} string. The {@code variableNames}
+	 * string should be a 'space-separated' list of valid DialogueBranch Variable names (e.g. "variable1
+	 * variable_two variable-three").
+	 *
+	 * @param userId the DialogueBranch user for which to retrieve variable data.
+	 * @param variableNames a space-separated list of variable names, or the empty string
+	 * @return a mapping of variable names to variable values
+	 * @throws Exception in case of an error retrieving variable data from file.
+	 * TODO: Return a list of DLBVariable objects
+	 */
+	private Map<String,Object> doGetVariables(String userId, String variableNames)
+			throws Exception {
+		UserService userService = application.getApplicationManager()
+				.getActiveUserService(userId);
+
+		DLBVariableStore variableStore = userService.getVariableStore();
+
+		variableNames = variableNames.trim();
+
+		List<String> nameList;
+		if (variableNames.length() == 0) {
+		nameList = variableStore.getSortedDLBVariableNames();
+		} else {
+			List<String> invalidNames = new ArrayList<>();
+			String[] nameArray = variableNames.split("\\s+");
+			for (String name : nameArray) {
+				if (!name.matches("[A-Za-z]\\w*"))
+					invalidNames.add(name);
+			}
+			if (!invalidNames.isEmpty()) {
+				HttpFieldError error = new HttpFieldError("names",
+						"Invalid variable names: " +
+								String.join(", ", invalidNames));
+				throw BadRequestException.withInvalidInput(error);
+			}
+			nameList = Arrays.asList(nameArray);
+		}
+
+		Map<String,Object> result = new LinkedHashMap<>();
+		for (String name : nameList) {
+			result.put(name, variableStore.getDLBVariable(name).getValue());
+		}
+		return result;
+	}
+
+	// ---------------------------------------------------------- //
+	// ---------- END-POINT: "/variables/set-variable" ---------- //
+	// ---------------------------------------------------------- //
+
+	@Operation(
+		summary = "Set the value of a single DialogueBranch Variable for a given user",
+		description = "Use this end-point to get set a DialogueBranch Variable to a specific value (or to " +
+				"remove the stored value by setting it to the empty string.")
+	@RequestMapping(value="/set-variable", method=RequestMethod.POST)
+	public void setVariable(
+		HttpServletRequest request,
+		HttpServletResponse response,
+
+		@Parameter(hidden = true, description = "API Version to use, e.g. '1'")
+		@PathVariable(value = "version")
+		String version,
+
+		@Parameter(description = "The name of the DialogueBranch Variable to set")
+		@RequestParam(value="name")
+		String name,
+
+		@Parameter(description = "The value for the DialogueBranch Variable (or leave empty to erase the " +
+				"DialogueBranch variable)")
+		@RequestParam(value="value", required=false)
+		String value,
+
+		@Parameter(description = "The user for which to set the DialogueBranch variable (leave empty if " +
+				"setting for the currently authenticated user)")
+		@RequestParam(value="delegateUser",required=false,defaultValue="")
+		String delegateUser,
+
+		@Parameter(description = "The current time zone of the DialogueBranch user (as IANA, e.g. " +
+				"'Europe/Lisbon')")
+		@RequestParam(value="timeZone")
+		String timeZone
+	) throws Exception {
+
+		// If no versionName is provided, or versionName is empty, assume the latest version
+		if (version == null || version.equals("")) {
+			version = ProtocolVersion.getLatestVersion().versionName();
+		}
+
+		// Log this call to the service log
+		String logInfo = "POST /v" + version + "/variables/set-variable?name=" + name;
+		if(!(value == null) && (!value.equals(""))) logInfo += "&value="+value;
+		if(!(delegateUser == null) && (!delegateUser.equals(""))) logInfo += "&delegateUser="
+				+ delegateUser;
+		if(!(timeZone == null)) logInfo += "&timeZone=" + timeZone;
+		logger.info(logInfo);
+
+		if(delegateUser == null || delegateUser.equals("")) {
+			QueryRunner.runQuery((protocolVersion, user) ->
+				doSetVariable(user, name, value, timeZone),
+				version, request, response, delegateUser, application);
+		} else {
+			QueryRunner.runQuery((protocolVersion, user) ->
+				doSetVariable(delegateUser, name, value, timeZone),
+				version, request, response, delegateUser, application);
+		}
+	}
+
+	/**
+	 * Sets a DialogueBranch Variable defined by the given {@code name} to the given {@code value} for the
+	 * specified {@code userId} in the given {@code timeZone}.
+	 * @param userId the {@link String} identifier of the user for whom to set the variable.
+	 * @param name the name of the DialogueBranch Variable
+	 * @param value the value for the DialogueBranch Variable (or {@code null} in case the variable should be
+	 *              reset).
+	 * @return {@code null}
+	 * @throws Exception in case of an invalid variable name, invalid timezone, or an error
+	 * 					 accessing the variable store.
+	 */
+	private Object doSetVariable(String userId, String name, String value,
+								 String timeZoneString) throws Exception {
+		List<HttpFieldError> errors = new ArrayList<>();
+
+		if (!name.matches("[A-Za-z]\\w*")) {
+			errors.add(new HttpFieldError("name",
+					"Invalid variable name: " + name));
+			throw BadRequestException.withInvalidInput(errors);
+		}
+
+		// Update the DialogueBranch User's time zone with the latest given value
+		ZoneId timeZoneId = ControllerFunctions.parseTimeZone(timeZoneString);
+		UserService userService = application.getApplicationManager().getActiveUserService(userId);
+		userService.getDialogueBranchUser().setTimeZone(timeZoneId);
+
+		ZonedDateTime eventTime = DateTimeUtils.nowMs(timeZoneId);
+
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy - HH:mm:ss Z");
+
+		if(value == null) {
+			logger.info("Received request to remove DialogueBranch Variable '" + name + "' at eventTime '" +
+					eventTime.format(formatter) + "' in time zone '" + timeZoneString + "'");
+			userService.getVariableStore().removeByName(name,true,
+					eventTime, DLBVariableStoreChange.Source.WEB_SERVICE);
+		} else {
+			userService.getVariableStore().setValue(name, value, true, eventTime,
+					DLBVariableStoreChange.Source.WEB_SERVICE);
+		}
+		return null;
+	}
+
+	// ----------------------------------------------------------- //
+	// ---------- END-POINT: "/variables/set-variables" ---------- //
+	// ----------------------------------------------------------- //
+
+	@Operation(
+		summary = "Set the value of one or multiple DialogueBranch Variable for a given user",
+		description = "Use this end-point to get set one or many DialogueBranch Variables to their given " +
+				"values (or to remove the stored value by setting it to the empty string.")
+	@RequestMapping(value="/set-variables", method=RequestMethod.POST)
+	public void setVariables(
+			HttpServletRequest request,
+			HttpServletResponse response,
+
+			@Parameter(hidden = true, description = "API Version to use, e.g. '1'")
+			@PathVariable(value = "version")
+			String version,
+
+			@Parameter(description = "The user for which to set the DialogueBranch variables (leave empty " +
+					"if setting for the currently authenticated user)")
+			@RequestParam(value="delegateUser",required=false)
+			String delegateUser,
+
+			@Parameter(description = "The current time zone of the DialogueBranch user (as IANA, e.g. " +
+					"'Europe/Lisbon')")
+			@RequestParam(value="timeZone")
+			String timeZone,
+
+			@Parameter(description = "A JSON map of DialogueBranch Variable names to values")
+			@RequestBody
+			Map<String,Object> variables) throws Exception {
+
+		// If no versionName is provided, or versionName is empty, assume the latest version
+		if (version == null || version.equals("")) {
+			version = ProtocolVersion.getLatestVersion().versionName();
+		}
+
+		// Log this call to the service log
+		String logInfo = "POST /v" + version + "/variables/set-variables";
+		if(!(delegateUser == null) && (!delegateUser.equals(""))) logInfo += "?delegateUser="+delegateUser;
+		logger.info(logInfo);
+
+		if(delegateUser == null || delegateUser.equals("")) {
+			QueryRunner.runQuery((protocolVersion, user) -> doSetVariables(user, variables, timeZone),
+				version, request, response, delegateUser, application);
+		} else {
+			QueryRunner.runQuery((protocolVersion, user) ->
+							doSetVariables(delegateUser, variables, timeZone),
+				version, request, response, delegateUser, application);
+		}
+	}
+
+	/**
+	 * Sets the DialogueBranch Variables in the given {@code variables} map for the given
+	 * {@code userId}.
+	 * @param userId the {@link String} identifier of the user for whom to set the variables.
+	 * @param variables a mapping of DialogueBranch Variable names to value.
+	 * @return {@code null}
+	 * @throws Exception in case of an invalid variable name, or an error writing variables to the
+	 * 					 database.
+	 */
+	private Object doSetVariables(String userId, Map<String,Object> variables,
+								  String timeZoneString) throws Exception {
+
+		List<String> invalidNames = new ArrayList<>();
+		for (String name : variables.keySet()) {
+			if (!name.matches("[A-Za-z]\\w*"))
+				invalidNames.add(name);
+		}
+
+		if (!invalidNames.isEmpty()) {
+			HttpError error = new HttpError(ErrorCode.INVALID_INPUT,
+					"Invalid variable names: " +
+					String.join(", ", invalidNames));
+			throw new BadRequestException(error);
+		}
+
+		// Update the DialogueBranch User's time zone with the latest given value
+		ZoneId timeZoneId = ControllerFunctions.parseTimeZone(timeZoneString);
+		UserService userService = application.getApplicationManager().getActiveUserService(userId);
+		userService.getDialogueBranchUser().setTimeZone(timeZoneId);
+
+		DLBVariableStore variableStore = userService.getVariableStore();
+		for(Map.Entry<String, Object> entry : variables.entrySet()) {
+			variableStore.setValue(
+					entry.getKey(),
+					entry.getValue(),
+					true,
+					DateTimeUtils.nowMs(userService.getDialogueBranchUser().getTimeZone()),
+					DLBVariableStoreChange.Source.WEB_SERVICE);
+		}
+
+		return null;
+	}
+}

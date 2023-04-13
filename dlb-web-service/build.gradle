@@ -1,0 +1,226 @@
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+}
+
+plugins {
+	id 'java'
+	id 'java-library'
+	id 'war'
+	id 'eclipse-wtp'
+	id 'org.springframework.boot' version '3.0.2'
+	id 'com.bmuschko.cargo' version '2.9.0'
+	id 'org.hidetake.ssh' version '2.10.1'
+}
+
+group = 'com.dialoguebranch'
+version = '1.0.0' // run updateVersion after changing this property
+sourceCompatibility = 17
+targetCompatibility = 17
+archivesBaseName = 'dlb-web-service'
+
+configurations {
+	providedRuntime
+}
+
+dependencies {
+	// Enabling this dependency will include the required dlb-core-java from local source.
+	// The location of this project is defined in ../settings.gradle and assumes that it
+	// is located at "../../dlb-core-java" (relative to this file).
+	implementation project(':dlb-core-java')
+
+	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5',
+			'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+	// https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
+	implementation 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
+
+	// https://mvnrepository.com/artifact/org.springframework/spring-context-support
+	implementation 'org.springframework:spring-context-support:6.0.4'
+
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web
+	implementation 'org.springframework.boot:spring-boot-starter-web:3.0.2'
+
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-tomcat
+	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat:3.0.2'
+
+	// https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+
+	// Used for the Azure Data Lake Integration
+
+		// https://mvnrepository.com/artifact/com.azure/azure-sdk-bom
+		implementation 'com.azure:azure-sdk-bom:1.2.8'
+
+		// https://mvnrepository.com/artifact/com.azure/azure-storage-file-datalake
+		implementation 'com.azure:azure-storage-file-datalake:12.13.2'
+
+	// https://mvnrepository.com/artifact/org.codehaus.cargo/cargo-core
+	cargo 'org.codehaus.cargo:cargo-core:1.10.4'
+
+	// https://mvnrepository.com/artifact/org.codehaus.cargo/cargo-ant
+	cargo 'org.codehaus.cargo:cargo-ant:1.10.4'
+}
+
+def cargoTomcatDeployPath = project.hasProperty('tomcatDeployPath') ? tomcatDeployPath : ''
+def cargoRemoteTomcatHost = project.hasProperty('remoteTomcatHost') ? remoteTomcatHost : ''
+def cargoRemoteTomcatUser = project.hasProperty('remoteTomcatUser') ? remoteTomcatUser : ''
+def cargoRemoteTomcatPassword = project.hasProperty('remoteTomcatPassword') ? remoteTomcatPassword : ''
+def cargoRemoteTomcatPort = project.hasProperty('remoteTomcatPort') ? remoteTomcatPort : 0
+
+cargo {
+	containerId = 'tomcat8x'
+
+	deployable {
+		context = cargoTomcatDeployPath
+	}
+
+	remote {
+		hostname = cargoRemoteTomcatHost
+		username = cargoRemoteTomcatUser
+		password = cargoRemoteTomcatPassword
+	}
+}
+
+tasks.matching({ it.name =~ /cargo.*Remote/ }).each() {
+	it.port = cargoRemoteTomcatPort.toInteger()
+}
+
+task updateConfig {
+	group = "configuration"
+	description = "Generates an updated version of service.properties that includes values from 'gradle.properties' starting with 'dlb-config'."
+
+	doLast() {
+		Properties props = new Properties()
+		def propPrefix = 'dlb-config'
+		project.properties.each { key, value ->
+			if (!key.startsWith(propPrefix))
+				return
+			key = key.substring(propPrefix.length())
+			key = key[0].toLowerCase() + key.substring(1)
+			props[key] = value
+		}
+
+		// Add the current time as buildTime property
+		props['buildTime'] = new Date().format("MM/dd/yyyy HH:mm:ss")
+
+		def resDir = file('src/main/resources')
+		resDir.mkdirs()
+		def out = new File(resDir, 'service.properties')
+		out.withWriter('UTF-8') {
+			props.store(it, 'DO NOT EDIT, generated with gradlew updateConfig')
+		}
+	}
+}
+
+def listDirFiles(dir, writer) {
+	writer.write('[')
+	def first = true
+	dir.eachFile() { child ->
+		if (!child.name.startsWith('.')) {
+			if (!first)
+				writer.write(',')
+			if (child.isDirectory()) {
+				writer.write('{"' + child.name + '":')
+				listDirFiles(child, writer)
+				writer.write('}')
+				first = false
+			} else if (child.name.endsWith('.json') || child.name.endsWith('.dlb')) {
+				writer.write('"' + child.name + '"')
+				first = false
+			}
+		}
+	}
+	writer.write(']')
+}
+
+task listDialogueFiles {
+	group = 'configuration'
+	description = 'Lists dialogue files and writes them to dialogues.json'
+
+	doLast() {
+		def dlgDir = file('src/main/resources/dialogues')
+		def dlgFile = file('src/main/resources/dialogues/dialogues.json')
+		dlgFile.withWriter('UTF-8') { writer ->
+			writer.write('{')
+			def first = true
+			dlgDir.eachDir() { dir ->
+				if (first)
+					first = false
+				else
+					writer.write(',')
+				writer.write('"' + dir.name + '":')
+				listDirFiles(dir, writer)
+			}
+			writer.write('}')
+		}
+	}
+}
+
+task updateVersion {
+	group = 'versioning'
+	description = 'Writes the current version to files containing the version number.'
+
+	doLast() {
+		ant.replaceregexp(file: 'src/main/webapp/WEB-INF/web.xml',
+			match: "<display-name>DialogueBranch Web Service .+</display-name>",
+			replace: "<display-name>DialogueBranch Web Service ${version}</display-name>")
+		ant.replaceregexp(file: 'src/main/resources/deployment.properties',
+			match: "version=.+",
+			replace: "version=${version}")
+	}
+}
+
+task checkResources {
+	group = 'build'
+	description = 'Checks if required resource files exist and are up-to-date.'
+
+	dependsOn updateConfig, listDialogueFiles
+}
+
+test {
+	testLogging.showStandardStreams = true
+}
+
+gradle.taskGraph.whenReady {
+	tasks.withType(Test) {
+		def props = new Properties()
+		def propsFile = file('gradle.test.properties')
+		if (propsFile.exists()) {
+			propsFile.withReader('UTF-8') {
+				props.load(it)
+			}
+			props.each { key, value ->
+				systemProperty key, value
+			}
+		}
+	}
+}
+
+javadoc {
+	options {
+		links 'https://docs.oracle.com/en/java/javase/11/docs/api/'
+		addStringOption('Xdoclint:all,-html', '-quiet')
+	}
+}
+
+/**
+ * Creates a copy of the dlb-web-service-VERSION.war to dlb-web-service-latest.war
+ * in the build/libs folder.
+ * */
+task generateStaticWar(type: Copy) {
+	dependsOn 'build'
+	group = 'build'
+	description = 'Generates a .war file named dlb-web-service-latest.war.'
+
+	from layout.buildDirectory.file("libs/dlb-web-service-"+version+".war")
+	into layout.buildDirectory.dir("libs")
+	rename "dlb-web-service-"+version+".war", "dlb-web-service-latest.war"
+}
+
+tasks.named("build") { finalizedBy("generateStaticWar") }
+
+processResources.dependsOn checkResources
