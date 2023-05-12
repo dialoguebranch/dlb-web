@@ -207,20 +207,4 @@ javadoc {
 	}
 }
 
-/**
- * Creates a copy of the dlb-web-service-VERSION.war to dlb-web-service-latest.war
- * in the build/libs folder.
- * */
-task generateStaticWar(type: Copy) {
-	dependsOn 'build'
-	group = 'build'
-	description = 'Generates a .war file named dlb-web-service-latest.war.'
-
-	from layout.buildDirectory.file("libs/dlb-web-service-"+version+".war")
-	into layout.buildDirectory.dir("libs")
-	rename "dlb-web-service-"+version+".war", "dlb-web-service-latest.war"
-}
-
-tasks.named("build") { finalizedBy("generateStaticWar") }
-
 processResources.dependsOn checkResources
