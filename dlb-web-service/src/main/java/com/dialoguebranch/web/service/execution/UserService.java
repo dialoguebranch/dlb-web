@@ -71,7 +71,7 @@ public class UserService {
 	private DLBTranslationContext translationContext = null;
 
 	// dialogueLanguageMap: map from dialogue name -> language -> dialogue description
-	protected Map<String, Map<String, DLBDialogueDescription>> dialogueLanguageMap =
+	protected Map<String, Map<String, DLBFileDescription>> dialogueLanguageMap =
 			new LinkedHashMap<>();
 
 	// --------------------------------------------------------
@@ -121,11 +121,11 @@ public class UserService {
 		loggedDialogueStore = new LoggedDialogueStore(dialogueBranchUser.getId(), this);
 
 		// create dialogueLanguageMap
-		List<DLBDialogueDescription> dialogues = applicationManager.getDialogueDescriptions();
-		for (DLBDialogueDescription dialogue : dialogues) {
-			String name = dialogue.getDialogueName();
-			Map<String, DLBDialogueDescription> langMap =
-					dialogueLanguageMap.computeIfAbsent(name, k -> new LinkedHashMap<>());
+		List<DLBFileDescription> dialogues = applicationManager.getDialogueDescriptions();
+		for (DLBFileDescription dialogue : dialogues) {
+			Map<String, DLBFileDescription> langMap =
+				dialogueLanguageMap.computeIfAbsent(dialogue.getDialogueName(),
+						k -> new LinkedHashMap<>());
 			langMap.put(dialogue.getLanguage(), dialogue);
 		}
 	}
@@ -222,7 +222,7 @@ public class UserService {
 
 		logger.info("User '" + dialogueBranchUser.getId() + "' is starting dialogue '" + dialogueId + "'");
 
-		DLBDialogueDescription dialogueDescription =
+		DLBFileDescription dialogueDescription =
 				getDialogueDescriptionFromId(dialogueId, language);
 
 		if (dialogueDescription == null) {
@@ -430,8 +430,8 @@ public class UserService {
 	 * @param language an ISO language tag
 	 * @return a list of dialogue names
 	 */
-	public List<DLBDialogueDescription> getAvailableDialogues(String language) {
-		List<DLBDialogueDescription> filteredAvailableDialogues =
+	public List<DLBFileDescription> getAvailableDialogues(String language) {
+		List<DLBFileDescription> filteredAvailableDialogues =
 				new ArrayList<>();
 		Locale prefLocale;
 		try {
@@ -442,7 +442,7 @@ public class UserService {
 					language) + ": " + ex.getMessage());
 			prefLocale = Locale.getDefault();
 		}
-		for (Map<String,DLBDialogueDescription> langMap :
+		for (Map<String, DLBFileDescription> langMap :
 				dialogueLanguageMap.values()) {
 			List<String> keys = new ArrayList<>(langMap.keySet());
 			I18nLanguageFinder i18nFinder = new I18nLanguageFinder(keys);
@@ -466,10 +466,9 @@ public class UserService {
 	 * @param language an ISO language tag or null
 	 * @return the dialogue description or null
 	 */
-	public DLBDialogueDescription getDialogueDescriptionFromId(
+	public DLBFileDescription getDialogueDescriptionFromId(
 			String dialogueId, String language) {
-		for (DLBDialogueDescription dialogueDescription :
-				this.getAvailableDialogues(language)) {
+		for (DLBFileDescription dialogueDescription : this.getAvailableDialogues(language)) {
 			if (dialogueDescription.getDialogueName().equals(dialogueId)) {
 				return dialogueDescription;
 			}
@@ -488,7 +487,7 @@ public class UserService {
 	 * @throws DLBException if the dialogue definition is not found
 	 */
 	public DLBDialogue getDialogueDefinition(
-			DLBDialogueDescription dialogueDescription) throws DLBException {
+			DLBFileDescription dialogueDescription) throws DLBException {
 		return this.applicationManager.getDialogueDefinition(dialogueDescription,
 				translationContext);
 	}
@@ -508,7 +507,7 @@ public class UserService {
 	public DialogueState getDialogueState(LoggedDialogue loggedDialogue,
 										  int loggedInteractionIndex) throws DLBException {
 		String dialogueName = loggedDialogue.getDialogueName();
-		DLBDialogueDescription dialogueDescription =
+		DLBFileDescription dialogueDescription =
 				getDialogueDescriptionFromId(dialogueName,
 				loggedDialogue.getLanguage());
 		if (dialogueDescription == null) {

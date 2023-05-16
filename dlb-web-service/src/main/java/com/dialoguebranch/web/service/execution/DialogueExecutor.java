@@ -88,7 +88,7 @@ public class DialogueExecutor {
 	 * @throws IOException if a communication error occurs.
 	 * @throws DLBException if the request is invalid.
 	 */
-	public ExecuteNodeResult startDialogue(DLBDialogueDescription dialogueDescription,
+	public ExecuteNodeResult startDialogue(DLBFileDescription dialogueDescription,
 										   DLBDialogue dialogueDefinition, String nodeId, String sessionId,
 										   long sessionStartTime)
 			throws DatabaseException, IOException, DLBException {
@@ -199,7 +199,7 @@ public class DialogueExecutor {
 			String dialogueId = externalNodePointer.getDialogueId();
 			String nodeId = externalNodePointer.getNodeId();
 
-			DLBDialogueDescription dialogueDescription =
+			DLBFileDescription dialogueDescription =
 					userService.getDialogueDescriptionFromId(dialogueId, language);
 			if (dialogueDescription == null) {
 				throw new DLBException(DLBException.Type.DIALOGUE_NOT_FOUND,

@@ -30,7 +30,7 @@ package com.dialoguebranch.web.service.execution;
 import com.dialoguebranch.exception.DLBException;
 import com.dialoguebranch.i18n.DLBTranslationContext;
 import com.dialoguebranch.model.DLBDialogue;
-import com.dialoguebranch.model.DLBDialogueDescription;
+import com.dialoguebranch.model.DLBFileDescription;
 import com.dialoguebranch.parser.DLBFileLoader;
 import com.dialoguebranch.parser.DLBProjectParser;
 import com.dialoguebranch.parser.DLBProjectParserResult;
@@ -137,7 +137,7 @@ public class ApplicationManager {
 	
 	// ---------- Getters:
 	
-	public List<DLBDialogueDescription> getDialogueDescriptions() {
+	public List<DLBFileDescription> getDialogueDescriptions() {
 		return new ArrayList<>(dlbProject.getDialogues().keySet());
 	}
 
@@ -215,14 +215,14 @@ public class ApplicationManager {
 	
 	// ---------- Dialogue Management:
 
-	public DLBDialogue getDialogueDefinition(DLBDialogueDescription dialogueDescription,
-											 DLBTranslationContext translationContext) throws DLBException {
+	public DLBDialogue getDialogueDefinition(DLBFileDescription dialogueDescription,
+											 DLBTranslationContext translationContext)
+			throws DLBException {
 		DLBDialogue dialogue;
 		if (translationContext == null)
 			dialogue = dlbProject.getDialogues().get(dialogueDescription);
 		else
-			dialogue = dlbProject.getTranslatedDialogue(dialogueDescription,
-					translationContext);
+			dialogue = dlbProject.getTranslatedDialogue(dialogueDescription, translationContext);
 		if (dialogue != null)
 			return dialogue;
 		throw new DLBException(DLBException.Type.DIALOGUE_NOT_FOUND,
@@ -231,7 +231,7 @@ public class ApplicationManager {
 					dialogueDescription.getLanguage() + "'.");
 	}
 	
-	public List<DLBDialogueDescription> getAvailableDialogues() {
+	public List<DLBFileDescription> getAvailableDialogues() {
 		return new ArrayList<>(dlbProject.getDialogues().keySet());
 	}
 
