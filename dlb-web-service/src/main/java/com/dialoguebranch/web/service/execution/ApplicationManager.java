@@ -54,11 +54,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The DialogueBranch Web Service maintains one instance of a {@link ApplicationManager}. This class keeps
- * track of the different active {@link UserService} instances that are needed to serve individual
- * user's of the DialogueBranch Web Service, as well as other application wide objects.
+ * The DialogueBranch Web Service maintains one instance of a {@link ApplicationManager}. This class
+ * keeps track of the different active {@link UserService} instances that are needed to serve
+ * individual user's of the DialogueBranch Web Service, as well as other application wide objects.
  *
- * @author Harm op den Akker
+ * @author Harm op den Akker (Fruit Tree Labs)
  * @author Tessa Beinema
  */
 public class ApplicationManager {
@@ -75,11 +75,12 @@ public class ApplicationManager {
 	// ---------------------------------- //
 	
 	/**
-	 * Creates an instance of an {@link ApplicationManager}, that loads in a predefined list of DialogueBranch
-	 * dialogues.
+	 * Creates an instance of an {@link ApplicationManager}, that loads in a predefined list of
+	 * DialogueBranch dialogues.
 	 *
 	 * @throws DLBServiceConfigurationException In case any part of the application could not be
-	 *                                   initialized due to an incorrectly set config parameter.
+	 *                                          initialized due to an incorrectly set config
+	 *                                          parameter.
 	 */
 	public ApplicationManager(DLBFileLoader dlbFileLoader) throws DLBServiceConfigurationException {
 		UserServiceFactory appConfig = UserServiceFactory.getInstance();
@@ -88,7 +89,8 @@ public class ApplicationManager {
 		try {
 			readResult = dlbProjectParser.parse();
 		} catch (IOException ex) {
-			throw new RuntimeException("Error while reading DialogueBranch project: " + ex.getMessage(), ex);
+			throw new RuntimeException("Error while reading DialogueBranch project: "
+					+ ex.getMessage(), ex);
 		}
 		for (String path : readResult.getParseErrors().keySet()) {
 			logger.error("Failed to parse " + path + ":");

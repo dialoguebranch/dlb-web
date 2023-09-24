@@ -99,7 +99,7 @@ public class DLBVariableStoreJSONStorageHandler implements DLBVariableStoreStora
             File dataDir = new File(dataDirectory);
             FileUtils.mkdir(dataDir);
             File dataFile = new File(dataDir,
-                    variableStore.getDLBUser().getId() + ".json");
+                    variableStore.getUser().getId() + ".json");
 
             // Write the DLBVariableStore only as a list of DLBVariables
             // (for easier deserialization).

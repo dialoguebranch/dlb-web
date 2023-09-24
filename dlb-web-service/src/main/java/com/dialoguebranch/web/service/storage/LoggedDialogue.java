@@ -210,7 +210,7 @@ public class LoggedDialogue implements DLBLoggedDialogue {
 	 */
 	@JsonIgnore
 	public long getLatestInteractionTimestamp() {
-		if(interactionList.size() == 0) return this.getUtcTime();
+		if(interactionList.isEmpty()) return this.getUtcTime();
 		else {
 			return interactionList.get(interactionList.size()-1).getTimestamp();
 		}

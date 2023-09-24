@@ -47,8 +47,8 @@ public class DefaultUserServiceFactory extends UserServiceFactory {
 
 	/**
 	 * Creates an instance of a {@link DefaultUserServiceFactory} with a given
-	 * {@link DLBVariableStoreStorageHandler} that is used to read and write DialogueBranch variables to
-	 * persistent storage.
+	 * {@link DLBVariableStoreStorageHandler} that is used to read and write DialogueBranch
+	 * variables to persistent storage.
 	 * @param storageHandler the {@link DLBVariableStoreStorageHandler} that is passed on to the
 	 *                       {@link UserService} for reading and writing DialogueBranch variables to
 	 *                       persistent storage.

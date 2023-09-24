@@ -28,19 +28,14 @@
 package com.dialoguebranch.web.service.controller;
 
 import com.dialoguebranch.web.service.ServiceContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.view.RedirectView;
-import jakarta.servlet.ServletContext;
 
 @Configuration
 @Controller
 public class SwaggerController {
-	
-	@Autowired
-	private ServletContext context;
 
 	@RequestMapping("/")
 	public RedirectView redirectRoot() {

@@ -59,9 +59,9 @@ public class ExternalVariableServiceUpdater implements DLBVariableStoreOnChangeL
 	public void onChange(DLBVariableStore dlbVariableStore,
 						 List<DLBVariableStoreChange> changes) {
 
-		String userId = dlbVariableStore.getDLBUser().getId();
+		String userId = dlbVariableStore.getUser().getId();
 		String userTimeZoneString
-				= dlbVariableStore.getDLBUser().getTimeZone().toString();
+				= dlbVariableStore.getUser().getTimeZone().toString();
 
 		List<DLBVariable> variablesToUpdate = new ArrayList<>();
 

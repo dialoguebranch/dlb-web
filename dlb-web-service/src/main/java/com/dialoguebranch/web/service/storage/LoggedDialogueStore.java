@@ -338,8 +338,6 @@ public class LoggedDialogueStore {
 			if(match) return latestStoredLoggedDialogue;
 		}
 
-		LoggedDialogue result = null;
-
 		File[] userLogFiles;
 
 		synchronized (LOCK) {

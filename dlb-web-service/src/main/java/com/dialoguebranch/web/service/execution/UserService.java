@@ -197,8 +197,8 @@ public class UserService {
 	 * the first step of the dialogue. If you specify a {@code nodeId}, it will start at that node.
 	 * Otherwise, it starts at the "Start" node.
 	 *
-	 * This method is called as a result of a user action (i.e. a call to the /dialogue/start end-
-	 * point).
+	 * <p>This method is called as a result of a user action (i.e. a call to the /dialogue/start
+	 * end-point).</p>
 	 *
 	 * <p>You can specify an ISO language tag such as "en-US" or "en".</p>
 	 *
@@ -261,7 +261,7 @@ public class UserService {
 	public ExecuteNodeResult progressDialogueSession(DialogueState state, int replyId)
 			throws DatabaseException, IOException, DLBException {
 		ActiveDialogue dialogue = state.getActiveDialogue();
-		String dialogueName = dialogue.getDialogueName();
+		String dialogueName = dialogue.getDialogueFileDescription().getDialogueName();
 		String nodeName = dialogue.getCurrentNode().getTitle();
 		logger.info(String.format(
 				"User %s progresses dialogue with reply %s.%s.%s",
@@ -272,7 +272,7 @@ public class UserService {
 	public ExecuteNodeResult revertDialogueSession(DialogueState state, ZonedDateTime eventTime)
 			throws DLBException {
 		ActiveDialogue dialogue = state.getActiveDialogue();
-		String dialogueName = dialogue.getDialogueName();
+		String dialogueName = dialogue.getDialogueDefinition().getDialogueName();
 		String nodeName = dialogue.getCurrentNode().getTitle();
 		logger.info(String.format(
 				"User %s goes back in dialogue from node %s.%s",
@@ -403,7 +403,6 @@ public class UserService {
 						String varName = dlbVariable.getName();
 						Object varValue = dlbVariable.getValue();
 						ZonedDateTime varUpdated = dlbVariable.getZonedUpdatedTime();
-						Object varValueObject;
 
 						variableStore.setValue(varName, varValue, true, varUpdated,
 								DLBVariableStoreChange.Source.EXTERNAL_VARIABLE_SERVICE);

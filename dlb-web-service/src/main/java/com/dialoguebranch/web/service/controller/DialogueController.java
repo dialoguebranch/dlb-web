@@ -71,8 +71,8 @@ import java.util.UUID;
 /**
  * Controller for the /dialogue/... end-points of the DialogueBranch Web Service.
  *
- * @author Dennis Hofs (RRD)
- * @author Harm op den Akker
+ * @author Dennis Hofs (Roessingh Research and Development)
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 @RestController
 @SecurityRequirement(name = "X-Auth-Token")
@@ -134,18 +134,18 @@ public class DialogueController {
 	) throws Exception {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
-		if (version == null || version.equals("")) {
+		if (version == null || version.isEmpty()) {
 			version = ProtocolVersion.getLatestVersion().versionName();
 		}
 
 		// Log this call to the service log
 		String logInfo = "POST /v" + version + "/dialogue/start?dialogueName=" + dialogueName +
 				"&language=" + language + "&timeZone=" + timeZone;
-		if(delegateUser != null && !delegateUser.equals("")) logInfo += "&delegateUser=" + delegateUser;
-		if(sessionId != null && !sessionId.equals("")) logInfo += "&sessionId=" + sessionId;
+		if(delegateUser != null && !delegateUser.isEmpty()) logInfo += "&delegateUser=" + delegateUser;
+		if(sessionId != null && !sessionId.isEmpty()) logInfo += "&sessionId=" + sessionId;
 		logger.info(logInfo);
 
-		if(delegateUser == null || delegateUser.equals("")) {
+		if(delegateUser == null || delegateUser.isEmpty()) {
 			return QueryRunner.runQuery(
 					(protocolVersion, user) -> doStartDialogue(user, dialogueName,
 							language, timeZone, sessionId),
@@ -166,7 +166,7 @@ public class DialogueController {
 	 * @param timeZone the timeZone of the client as one of {@code TimeZone.getAvailableIDs()}
 	 *                 (IANA Codes)
 	 * @param sessionId the (optional) identifier that should be added to the logging of dialogues
-	 *                    for this started dialogue session (may be {@code null}).
+	 *                    for this started dialogue session (which may be {@code null}).
 	 * @return the {@link DialogueMessage} that represents the start node of the dialogue.
 	 * @throws HttpException in case of an error in the dialogue execution.
 	 * @throws DatabaseException in case of an error in retrieving the current active user.
@@ -181,7 +181,7 @@ public class DialogueController {
 		userService.getDialogueBranchUser().setTimeZone(timeZoneId);
 
 		// If no sessionId was provided, generate a unique one now
-		if(sessionId == null || sessionId.equals("")) {
+		if(sessionId == null || sessionId.isEmpty()) {
 			sessionId = UUID.randomUUID().toString().toLowerCase();
 			while(userService.existsSessionId(sessionId)) {
 				sessionId = UUID.randomUUID().toString().toLowerCase();
@@ -270,7 +270,7 @@ public class DialogueController {
 	) throws Exception {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
-		if (version == null || version.equals("")) {
+		if (version == null || version.isEmpty()) {
 			version = ProtocolVersion.getLatestVersion().versionName();
 		}
 
@@ -278,10 +278,10 @@ public class DialogueController {
 		String logInfo = "POST /v" + version + "/dialogue/progress?loggedDialogueId="
 				+ loggedDialogueId + "&loggedInteractionIndex=" + loggedInteractionIndex
 				+ "&replyId=" + replyId;
-		if(!(delegateUser == null) && (!delegateUser.equals(""))) logInfo += "&delegateUser="+delegateUser;
+		if(!(delegateUser == null) && (!delegateUser.isEmpty())) logInfo += "&delegateUser="+delegateUser;
 		logger.info(logInfo);
 
-		if(delegateUser == null || delegateUser.equals("")) {
+		if(delegateUser == null || delegateUser.isEmpty()) {
 			return QueryRunner.runQuery(
 				(protocolVersion, user) -> doProgressDialogue(user, request,
 						loggedDialogueId, loggedInteractionIndex, replyId),
@@ -320,7 +320,7 @@ public class DialogueController {
 			body = FileUtils.readFileString(input);
 		}
 		Map<String,?> variables = new LinkedHashMap<>();
-		if (body.trim().length() > 0) {
+		if (!body.trim().isEmpty()) {
 			try {
 				variables = JsonMapper.parse(body,
 						new TypeReference<>() {
@@ -389,17 +389,17 @@ public class DialogueController {
 	) throws Exception {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
-		if (version == null || version.equals("")) {
+		if (version == null || version.isEmpty()) {
 			version = ProtocolVersion.getLatestVersion().versionName();
 		}
 
 		// Log this call to the service log
 		String logInfo = "POST /v" + version + "/dialogue/continue?dialogueName="
 				+ dialogueName + "&timeZone=" + timeZone;
-		if(!(delegateUser == null) && (!delegateUser.equals(""))) logInfo += "&delegateUser="+delegateUser;
+		if(!(delegateUser == null) && (!delegateUser.isEmpty())) logInfo += "&delegateUser="+delegateUser;
 		logger.info(logInfo);
 
-		if(delegateUser == null || delegateUser.equals("")) {
+		if(delegateUser == null || delegateUser.isEmpty()) {
 			return QueryRunner.runQuery(
 					(protocolVersion, user) -> doContinueDialogue(user, dialogueName, timeZone),
 					version, request, response, delegateUser, application);
@@ -414,7 +414,7 @@ public class DialogueController {
 	/**
 	 * Processes a call to the /dialogue/continue end-point.
 	 * @param userId the user for which to continue executing the dialogue (leave empty if
-	 *                   executing for the currently authenticated user)").
+	 *               executing for the currently authenticated user).
 	 * @param dialogueName name of the DialogueBranch Dialogue to continue (excluding .dlb).
 	 * @param timeZone the current time zone of the DialogueBranch user (as IANA, e.g. 'Europe/Lisbon').
 	 * @return a {@link NullableResponse} object containing the {@link DialogueMessage} or
@@ -495,18 +495,18 @@ public class DialogueController {
 		String delegateUser) throws Exception {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
-		if (version == null || version.equals("")) {
+		if (version == null || version.isEmpty()) {
 			version = ProtocolVersion.getLatestVersion().versionName();
 		}
 
 		// Log this call to the service log
 		String logInfo = "POST /v" + version + "/dialogue/cancel?loggedDialogueId="
 				+ loggedDialogueId;
-		if(!(delegateUser == null) && (!delegateUser.equals(""))) logInfo += "&delegateUser="
+		if(!(delegateUser == null) && (!delegateUser.isEmpty())) logInfo += "&delegateUser="
 				+ delegateUser;
 		logger.info(logInfo);
 
-		if(delegateUser == null || delegateUser.equals("")) {
+		if(delegateUser == null || delegateUser.isEmpty()) {
 			QueryRunner.runQuery((protocolVersion, user) -> doCancelDialogue(user,
 							loggedDialogueId),
 					version, request, response, delegateUser, application);
@@ -574,18 +574,18 @@ public class DialogueController {
 	) throws Exception {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
-		if (version == null || version.equals("")) {
+		if (version == null || version.isEmpty()) {
 			version = ProtocolVersion.getLatestVersion().versionName();
 		}
 
 		// Log this call to the service log
 		String logInfo = "POST /v" + version + "/dialogue/back?loggedDialogueId="
 				+ loggedDialogueId + "&loggedInteractionIndex=" + loggedInteractionIndex;
-		if(!(delegateUser == null) && (!delegateUser.equals(""))) logInfo += "&delegateUser="
+		if(!(delegateUser == null) && (!delegateUser.isEmpty())) logInfo += "&delegateUser="
 				+ delegateUser;
 		logger.info(logInfo);
 
-		if(delegateUser == null || delegateUser.equals("")) {
+		if(delegateUser == null || delegateUser.isEmpty()) {
 			return QueryRunner.runQuery(
 				(protocolVersion, user) -> doBackDialogue(user, loggedDialogueId,
 						loggedInteractionIndex),
@@ -664,17 +664,17 @@ public class DialogueController {
 	) throws Exception {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
-		if (version == null || version.equals("")) {
+		if (version == null || version.isEmpty()) {
 			version = ProtocolVersion.getLatestVersion().versionName();
 		}
 
 		// Log this call to the service log
 		String logInfo = "GET /v" + version + "/dialogue/get-ongoing";
-		if(!(delegateUser == null) && (!delegateUser.equals(""))) logInfo += "?delegateUser="
+		if(!(delegateUser == null) && (!delegateUser.isEmpty())) logInfo += "?delegateUser="
 				+ delegateUser;
 		logger.info(logInfo);
 
-		if(delegateUser == null || delegateUser.equals("")) {
+		if(delegateUser == null || delegateUser.isEmpty()) {
 			return QueryRunner.runQuery(
 					(protocolVersion, user) -> doGetOngoingDialogue(user),
 					version, request, response, delegateUser, application);

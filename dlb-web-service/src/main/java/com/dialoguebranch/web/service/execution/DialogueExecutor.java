@@ -100,7 +100,7 @@ public class DialogueExecutor {
 		// Collects all the DialogueBranch Variables needed to execute this file and update from an external
 		// variable service (if enabled).
 		Set<String> variablesNeeded = dialogueDefinition.getVariablesNeeded();
-		logger.info("Dialogue '" + dialogue.getDialogueName() +
+		logger.info("Dialogue '" + dialogue.getDialogueDefinition().getDialogueName() +
 				"' uses the following set of DialogueBranch Variables: "+variablesNeeded);
 		if(!variablesNeeded.isEmpty())
 			userService.updateVariablesFromExternalService(variablesNeeded);
@@ -194,7 +194,7 @@ public class DialogueExecutor {
 		} else { // The dialogue continues with a pointer to another .dlb script
 			loggedDialogue.setCompleted(true);
 			userService.getLoggedDialogueStore().saveToSession(loggedDialogue);
-			String language = dialogue.getDialogueDescription().getLanguage();
+			String language = dialogue.getDialogueFileDescription().getLanguage();
 			DLBNodePointerExternal externalNodePointer = (DLBNodePointerExternal)nodePointer;
 			String dialogueId = externalNodePointer.getDialogueId();
 			String nodeId = externalNodePointer.getNodeId();

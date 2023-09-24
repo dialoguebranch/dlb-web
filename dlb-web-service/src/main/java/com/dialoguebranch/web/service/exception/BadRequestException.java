@@ -90,17 +90,16 @@ public class BadRequestException extends HttpException {
 		return withInvalidInput(Arrays.asList(fieldErrors));
 	}
 
-	public static BadRequestException withInvalidInput(
-			List<HttpFieldError> fieldErrors) {
+	public static BadRequestException withInvalidInput(List<HttpFieldError> fieldErrors) {
 		StringBuilder errorMsg = new StringBuilder();
 		String newline = System.getProperty("line.separator");
+
 		for (HttpFieldError fieldError : fieldErrors) {
-			if (errorMsg.length() > 0)
-				errorMsg.append(newline);
+			if (!errorMsg.isEmpty()) errorMsg.append(newline);
 			errorMsg.append(fieldError.getMessage());
 		}
-		HttpError error = new HttpError(ErrorCode.INVALID_INPUT,
-				errorMsg.toString());
+
+		HttpError error = new HttpError(ErrorCode.INVALID_INPUT, errorMsg.toString());
 		for (HttpFieldError fieldError : fieldErrors) {
 			error.addFieldError(fieldError);
 		}

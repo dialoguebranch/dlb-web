@@ -83,7 +83,7 @@ public class AuthController {
 			LoginParametersPayload loginParametersPayload) throws Exception {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
-		if (version == null || version.equals("")) {
+		if (version == null || version.isEmpty()) {
 			version = ProtocolVersion.getLatestVersion().versionName();
 		}
 
@@ -112,11 +112,11 @@ public class AuthController {
 		String password = loginParametersPayload.getPassword();
 		Integer tokenExpiration = loginParametersPayload.getTokenExpiration();
 		List<HttpFieldError> fieldErrors = new ArrayList<>();
-		if (user == null || user.length() == 0) {
+		if (user == null || user.isEmpty()) {
 			fieldErrors.add(new HttpFieldError("user",
 					"Parameter \"user\" not defined"));
 		}
-		if (password == null || password.length() == 0) {
+		if (password == null || password.isEmpty()) {
 			fieldErrors.add(new HttpFieldError("password",
 					"Parameter \"password\" not defined"));
 		}

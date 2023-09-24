@@ -95,19 +95,19 @@ public class VariablesController {
 			String delegateUser) throws Exception {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
-		if (version == null || version.equals("")) {
+		if (version == null || version.isEmpty()) {
 			version = ProtocolVersion.getLatestVersion().versionName();
 		}
 
 		// Log this call to the service log
 		String logInfo = "GET /v" + version + "/variables/get-variables?names=" + variableNames;
-		if(!(delegateUser == null) && (!delegateUser.equals(""))) logInfo += "&delegateUser="+delegateUser;
+		if(!(delegateUser == null) && (!delegateUser.isEmpty())) logInfo += "&delegateUser="+delegateUser;
 		logger.info(logInfo);
 
 		// Make sure the passed on String is not null
 		String variableNameList = Objects.requireNonNullElse(variableNames, "");
 
-		if(delegateUser == null || delegateUser.equals("")) {
+		if(delegateUser == null || delegateUser.isEmpty()) {
 			return QueryRunner.runQuery(
 				(protocolVersion, user) -> doGetVariables(user, variableNameList),
 				version, request, response, delegateUser, application);
@@ -140,7 +140,7 @@ public class VariablesController {
 		variableNames = variableNames.trim();
 
 		List<String> nameList;
-		if (variableNames.length() == 0) {
+		if (variableNames.isEmpty()) {
 		nameList = variableStore.getSortedDLBVariableNames();
 		} else {
 			List<String> invalidNames = new ArrayList<>();
@@ -203,19 +203,19 @@ public class VariablesController {
 	) throws Exception {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
-		if (version == null || version.equals("")) {
+		if (version == null || version.isEmpty()) {
 			version = ProtocolVersion.getLatestVersion().versionName();
 		}
 
 		// Log this call to the service log
 		String logInfo = "POST /v" + version + "/variables/set-variable?name=" + name;
-		if(!(value == null) && (!value.equals(""))) logInfo += "&value="+value;
-		if(!(delegateUser == null) && (!delegateUser.equals(""))) logInfo += "&delegateUser="
+		if(!(value == null) && (!value.isEmpty())) logInfo += "&value="+value;
+		if(!(delegateUser == null) && (!delegateUser.isEmpty())) logInfo += "&delegateUser="
 				+ delegateUser;
 		if(!(timeZone == null)) logInfo += "&timeZone=" + timeZone;
 		logger.info(logInfo);
 
-		if(delegateUser == null || delegateUser.equals("")) {
+		if(delegateUser == null || delegateUser.isEmpty()) {
 			QueryRunner.runQuery((protocolVersion, user) ->
 				doSetVariable(user, name, value, timeZone),
 				version, request, response, delegateUser, application);
@@ -300,16 +300,16 @@ public class VariablesController {
 			Map<String,Object> variables) throws Exception {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
-		if (version == null || version.equals("")) {
+		if (version == null || version.isEmpty()) {
 			version = ProtocolVersion.getLatestVersion().versionName();
 		}
 
 		// Log this call to the service log
 		String logInfo = "POST /v" + version + "/variables/set-variables";
-		if(!(delegateUser == null) && (!delegateUser.equals(""))) logInfo += "?delegateUser="+delegateUser;
+		if(!(delegateUser == null) && (!delegateUser.isEmpty())) logInfo += "?delegateUser="+delegateUser;
 		logger.info(logInfo);
 
-		if(delegateUser == null || delegateUser.equals("")) {
+		if(delegateUser == null || delegateUser.isEmpty()) {
 			QueryRunner.runQuery((protocolVersion, user) -> doSetVariables(user, variables, timeZone),
 				version, request, response, delegateUser, application);
 		} else {

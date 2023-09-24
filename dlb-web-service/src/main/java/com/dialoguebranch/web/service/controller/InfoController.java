@@ -71,7 +71,7 @@ public class InfoController {
 	) {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
-		if (version == null || version.equals("")) {
+		if (version == null || version.isEmpty()) {
 			version = ProtocolVersion.getLatestVersion().versionName();
 		}
 
@@ -87,7 +87,7 @@ public class InfoController {
 		long hours = TimeUnit.MILLISECONDS.toHours(upTimeMillis);
 		upTimeMillis = upTimeMillis - (hours * 3600000);
 		long minutes = TimeUnit.MILLISECONDS.toMinutes(upTimeMillis);
-		String upTimeString = "" + days + "d " + hours + "h " + minutes + "m";
+		String upTimeString = days + "d " + hours + "h " + minutes + "m";
 
 		return new ServiceInfoPayload(
 				Configuration.getInstance().get(Configuration.BUILD_TIME),

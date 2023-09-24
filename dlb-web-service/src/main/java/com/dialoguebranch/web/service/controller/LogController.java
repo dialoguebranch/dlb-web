@@ -51,9 +51,8 @@ import java.util.List;
  * Controller for the /log/... end-points of the DialogueBranch Web Service. These end-points provide external
  * access to logged dialogue information.
  *
- * @author Harm op den Akker
+ * @author Harm op den Akker (Fruit Tree Labs)
 */
-
 @RestController
 @SecurityRequirement(name = "X-Auth-Token")
 @RequestMapping(value = {"/v{version}/log", "/log"})
@@ -76,33 +75,33 @@ public class LogController {
 				"the given sessionId")
 	@RequestMapping(value="/get-session", method= RequestMethod.GET)
 	public List<LoggedDialogue> getSession(
-			HttpServletRequest request,
-			HttpServletResponse response,
+		HttpServletRequest request,
+		HttpServletResponse response,
 
-			@Parameter(hidden = true, description = "API Version to use, e.g. '1'")
-			@PathVariable(value = "version")
-			String version,
+		@Parameter(hidden = true, description = "API Version to use, e.g. '1'")
+		@PathVariable(value = "version")
+		String version,
 
-			@Parameter(description = "Session ID for which to check its existence.")
-			@RequestParam(value="sessionId")
-			String sessionId,
+		@Parameter(description = "Session ID for which to check its existence.")
+		@RequestParam(value="sessionId")
+		String sessionId,
 
-			@Parameter(description = "The user for which to check the session id (if left empty" +
-					" it is assumed to be the currently logged in user.")
-			@RequestParam(value="delegateUser", required = false)
-			String delegateUser) throws Exception {
+		@Parameter(description = "The user for which to check the session id (if left empty" +
+				" it is assumed to be the currently logged in user.")
+		@RequestParam(value="delegateUser", required = false)
+		String delegateUser) throws Exception {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
-		if (version == null || version.equals("")) {
+		if (version == null || version.isEmpty()) {
 			version = ProtocolVersion.getLatestVersion().versionName();
 		}
 
 		// Log this call to the service log
 		String logInfo = "GET /v" + version + "/log/get-session?sessionId=" + sessionId;
-		if(delegateUser != null && !delegateUser.equals("")) logInfo += "&delegateUser=" + delegateUser;
+		if(delegateUser != null && !delegateUser.isEmpty()) logInfo += "&delegateUser=" + delegateUser;
 		logger.info(logInfo);
 
-		if(delegateUser == null || delegateUser.equals("")) {
+		if(delegateUser == null || delegateUser.isEmpty()) {
 			return QueryRunner.runQuery(
 					(protocolVersion, user) -> doGetSession(user, sessionId),
 					version, request, response, delegateUser, application);
@@ -151,16 +150,16 @@ public class LogController {
 			String delegateUser) throws Exception {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
-		if (version == null || version.equals("")) {
+		if (version == null || version.isEmpty()) {
 			version = ProtocolVersion.getLatestVersion().versionName();
 		}
 
 		// Log this call to the service log
 		String logInfo = "GET /v" + version + "/log/verify-id?sessionId=" + sessionId;
-		if(delegateUser != null && !delegateUser.equals("")) logInfo += "&delegateUser=" + delegateUser;
+		if(delegateUser != null && !delegateUser.isEmpty()) logInfo += "&delegateUser=" + delegateUser;
 		logger.info(logInfo);
 
-		if(delegateUser == null || delegateUser.equals("")) {
+		if(delegateUser == null || delegateUser.isEmpty()) {
 			return QueryRunner.runQuery(
 					(protocolVersion, user) -> doVerifyId(user, sessionId),
 					version, request, response, delegateUser, application);
