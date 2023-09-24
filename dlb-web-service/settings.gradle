@@ -1,0 +1,3 @@
+include ':dlb-web-service'
+include ':dlb-core-java'
+project(':dlb-core-java').projectDir = file("../../dlb-core-java")
