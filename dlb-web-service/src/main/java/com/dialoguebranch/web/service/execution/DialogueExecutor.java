@@ -119,7 +119,7 @@ public class DialogueExecutor {
 				eventTime, sessionId, sessionStartTime);
 		loggedDialogue.setDialogueName(dialogueDefinition.getDialogueName());
 		loggedDialogue.setLanguage(dialogueDescription.getLanguage());
-		loggedDialogue = updateLoggedDialogue(startNode, loggedDialogue, -1);
+		updateLoggedDialogue(startNode, loggedDialogue, -1);
 		userService.getLoggedDialogueStore().saveToSession(loggedDialogue);
 		return new ExecuteNodeResult(dialogueDefinition, startNode,
 				loggedDialogue, loggedDialogue.getInteractionList().size() - 1);
@@ -184,7 +184,7 @@ public class DialogueExecutor {
 			} catch (EvaluationException e) {
 				throw new RuntimeException("Expression evaluation error: " + e.getMessage(), e);
 			}
-			loggedDialogue = updateLoggedDialogue(nextNode, loggedDialogue, userActionIndex);
+			updateLoggedDialogue(nextNode, loggedDialogue, userActionIndex);
 			userService.getLoggedDialogueStore().saveToSession(loggedDialogue);
 			if (nextNode == null)
 				return null;
@@ -261,14 +261,14 @@ public class DialogueExecutor {
 	 * @param loggedDialogue the {@link LoggedDialogue} to update.
 	 * @param previousIndex the previous interaction index
 	 */
-	private LoggedDialogue updateLoggedDialogue(DLBNode node, LoggedDialogue loggedDialogue,
-												int previousIndex) {
+	private void updateLoggedDialogue(DLBNode node, LoggedDialogue loggedDialogue,
+									  int previousIndex) {
 		if (node != null) {
 			StringBuilder agentStatement = new StringBuilder();
 			for (DLBNodeBody.Segment segment : node.getBody().getSegments()) {
 				agentStatement.append(segment.toString());
 			}
-			String loggableAgentStatement = agentStatement.toString();
+			String readableAgentStatement = agentStatement.toString();
 
 			loggedDialogue.getInteractionList().add(new DLBLoggedInteraction(
 				System.currentTimeMillis(),
@@ -277,7 +277,7 @@ public class DialogueExecutor {
 				loggedDialogue.getDialogueName(),
 				node.getTitle(),
 				previousIndex,
-				loggableAgentStatement,
+				readableAgentStatement,
 				-1)
 			);
 
@@ -286,7 +286,6 @@ public class DialogueExecutor {
 			loggedDialogue.setCompleted(true);
 		}
 
-		return loggedDialogue;
 	}
 
 }
