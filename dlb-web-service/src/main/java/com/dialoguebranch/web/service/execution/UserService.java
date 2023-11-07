@@ -27,7 +27,7 @@
 
 package com.dialoguebranch.web.service.execution;
 
-import com.dialoguebranch.exception.DLBException;
+import com.dialoguebranch.exception.ExecutionException;
 import com.dialoguebranch.execution.*;
 import com.dialoguebranch.i18n.DLBTranslationContext;
 import com.dialoguebranch.model.*;
@@ -212,7 +212,7 @@ public class UserService {
 	 */
 	public ExecuteNodeResult startDialogueSession(String dialogueId, String nodeId, String language,
 												  String sessionId, long sessionStartTime)
-			throws DatabaseException, IOException, DLBException {
+			throws DatabaseException, IOException, ExecutionException {
 
 		// This should not happen as this method should only be called by
 		// DialogueController.doStartDialogue() that already ensures a unique sessionId
@@ -226,7 +226,7 @@ public class UserService {
 				getDialogueDescriptionFromId(dialogueId, language);
 
 		if (dialogueDescription == null) {
-			throw new DLBException(DLBException.Type.DIALOGUE_NOT_FOUND,
+			throw new ExecutionException(ExecutionException.Type.DIALOGUE_NOT_FOUND,
 					"Dialogue not found: " + dialogueId);
 		}
 		DLBDialogue dialogue = getDialogueDefinition(dialogueDescription);
@@ -256,10 +256,10 @@ public class UserService {
 	 * @return the next node or null
 	 * @throws DatabaseException if a database error occurs
 	 * @throws IOException if a communication error occurs
-	 * @throws DLBException if the request is invalid
+	 * @throws ExecutionException if the request is invalid
 	 */
 	public ExecuteNodeResult progressDialogueSession(DialogueState state, int replyId)
-			throws DatabaseException, IOException, DLBException {
+			throws DatabaseException, IOException, ExecutionException {
 		ActiveDialogue dialogue = state.getActiveDialogue();
 		String dialogueName = dialogue.getDialogueFileDescription().getDialogueName();
 		String nodeName = dialogue.getCurrentNode().getTitle();
@@ -270,7 +270,7 @@ public class UserService {
 	}
 
 	public ExecuteNodeResult revertDialogueSession(DialogueState state, ZonedDateTime eventTime)
-			throws DLBException {
+			throws ExecutionException {
 		ActiveDialogue dialogue = state.getActiveDialogue();
 		String dialogueName = dialogue.getDialogueDefinition().getDialogueName();
 		String nodeName = dialogue.getCurrentNode().getTitle();
@@ -281,7 +281,7 @@ public class UserService {
 	}
 
 	public ExecuteNodeResult continueDialogueSession(DialogueState state, ZonedDateTime eventTime)
-		throws DLBException {
+		throws ExecutionException {
 		return dialogueExecutor.executeCurrentNode(state,eventTime);
 	}
 
@@ -316,7 +316,7 @@ public class UserService {
 	 *                  this change of DialogueBranch Variables
 	 */
 	public void storeReplyInput(Map<String,?> variables, ZonedDateTime eventTime)
-			throws DLBException {
+			throws ExecutionException {
 		variableStore.addAll(variables,true,eventTime,
 				DLBVariableStoreChange.Source.INPUT_REPLY);
 	}
@@ -477,40 +477,40 @@ public class UserService {
 
 	/**
 	 * Retrieves the dialogue definition for the specified description, or throws
-	 * a {@link DLBException} with {@link
-	 * DLBException.Type#DIALOGUE_NOT_FOUND DIALOGUE_NOT_FOUND} if no such
+	 * a {@link ExecutionException} with {@link
+	 * ExecutionException.Type#DIALOGUE_NOT_FOUND DIALOGUE_NOT_FOUND} if no such
 	 * dialogue definition exists in this service manager.
 	 * 
 	 * @param dialogueDescription the sought dialogue description
 	 * @return the {@link DLBDialogue} containing the DialogueBranch dialogue representation.
-	 * @throws DLBException if the dialogue definition is not found
+	 * @throws ExecutionException if the dialogue definition is not found
 	 */
 	public DLBDialogue getDialogueDefinition(
-			DialogueBranchFileDescriptor dialogueDescription) throws DLBException {
+			DialogueBranchFileDescriptor dialogueDescription) throws ExecutionException {
 		return this.applicationManager.getDialogueDefinition(dialogueDescription,
 				translationContext);
 	}
 
 	public DialogueState getDialogueState(String loggedDialogueId,
-			int loggedInteractionIndex) throws DLBException, DatabaseException,
+			int loggedInteractionIndex) throws ExecutionException, DatabaseException,
 			IOException {
 		LoggedDialogue loggedDialogue =
 				loggedDialogueStore.findLoggedDialogue(loggedDialogueId);
 		if (loggedDialogue == null) {
-			throw new DLBException(DLBException.Type.DIALOGUE_NOT_FOUND,
+			throw new ExecutionException(ExecutionException.Type.DIALOGUE_NOT_FOUND,
 					"Logged dialogue not found");
 		}
 		return getDialogueState(loggedDialogue, loggedInteractionIndex);
 	}
 
 	public DialogueState getDialogueState(LoggedDialogue loggedDialogue,
-										  int loggedInteractionIndex) throws DLBException {
+										  int loggedInteractionIndex) throws ExecutionException {
 		String dialogueName = loggedDialogue.getDialogueName();
 		DialogueBranchFileDescriptor dialogueDescription =
 				getDialogueDescriptionFromId(dialogueName,
 				loggedDialogue.getLanguage());
 		if (dialogueDescription == null) {
-			throw new DLBException(DLBException.Type.DIALOGUE_NOT_FOUND,
+			throw new ExecutionException(ExecutionException.Type.DIALOGUE_NOT_FOUND,
 					"Dialogue not found: " + dialogueName);
 		}
 		DLBDialogue dialogueDefinition = getDialogueDefinition(
@@ -518,7 +518,7 @@ public class UserService {
 		List<DLBLoggedInteraction> interactions =
 				loggedDialogue.getInteractionList();
 		if (loggedInteractionIndex < 0 || loggedInteractionIndex >= interactions.size()) {
-			throw new DLBException(DLBException.Type.INTERACTION_NOT_FOUND,
+			throw new ExecutionException(ExecutionException.Type.INTERACTION_NOT_FOUND,
 					String.format(
 					"Interaction \"%s\" not found in logged dialogue \"%s\"",
 					loggedInteractionIndex, loggedDialogue.getId()));
@@ -527,7 +527,7 @@ public class UserService {
 				.get(loggedInteractionIndex).getNodeId();
 		DLBNode node = dialogueDefinition.getNodeById(nodeId);
 		if (node == null) {
-			throw new DLBException(DLBException.Type.NODE_NOT_FOUND,
+			throw new ExecutionException(ExecutionException.Type.NODE_NOT_FOUND,
 					String.format("Node \"%s\" not found in dialogue \"%s\"",
 							nodeId, dialogueName));
 		}

@@ -32,7 +32,7 @@ import com.dialoguebranch.web.service.execution.ApplicationManager;
 import com.dialoguebranch.web.service.execution.DefaultUserServiceFactory;
 import com.dialoguebranch.web.service.execution.UserServiceFactory;
 import com.dialoguebranch.web.service.storage.DLBVariableStoreJSONStorageHandler;
-import com.dialoguebranch.parser.DLBResourceFileLoader;
+import com.dialoguebranch.parser.ResourceFileLoader;
 import nl.rrd.utils.AppComponents;
 import org.slf4j.Logger;
 import org.springframework.boot.SpringApplication;
@@ -110,7 +110,7 @@ ApplicationListener<ApplicationEvent> {
 
 		try {
 			applicationManager = new ApplicationManager(
-					new DLBResourceFileLoader("dialogues"));
+					new ResourceFileLoader("dialogues"));
 		} catch(DLBServiceConfigurationException e) {
 			logger.error("Unable to initialize DialogueBranch Web Service due to configuration errors.");
 			System.exit(1);

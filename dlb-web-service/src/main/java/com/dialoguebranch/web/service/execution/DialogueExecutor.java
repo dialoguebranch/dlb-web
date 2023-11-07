@@ -27,7 +27,7 @@
 
 package com.dialoguebranch.web.service.execution;
 
-import com.dialoguebranch.exception.DLBException;
+import com.dialoguebranch.exception.ExecutionException;
 import com.dialoguebranch.execution.ActiveDialogue;
 import com.dialoguebranch.execution.ExecuteNodeResult;
 import com.dialoguebranch.model.*;
@@ -86,12 +86,12 @@ public class DialogueExecutor {
 	 * @return the start node or specified node.
 	 * @throws DatabaseException if a database error occurs.
 	 * @throws IOException if a communication error occurs.
-	 * @throws DLBException if the request is invalid.
+	 * @throws ExecutionException if the request is invalid.
 	 */
 	public ExecuteNodeResult startDialogue(DialogueBranchFileDescriptor dialogueDescription,
 										   DLBDialogue dialogueDefinition, String nodeId, String sessionId,
 										   long sessionStartTime)
-			throws DatabaseException, IOException, DLBException {
+			throws DatabaseException, IOException, ExecutionException {
 
 		ActiveDialogue dialogue = new ActiveDialogue(dialogueDescription,
 				dialogueDefinition);
@@ -146,10 +146,10 @@ public class DialogueExecutor {
 	 * @return the next node or null
 	 * @throws DatabaseException if a database error occurs
 	 * @throws IOException if a communication error occurs
-	 * @throws DLBException if the request is invalid
+	 * @throws ExecutionException if the request is invalid
 	 */
 	public ExecuteNodeResult progressDialogue(DialogueState state, int replyId)
-			throws DatabaseException, IOException, DLBException {
+			throws DatabaseException, IOException, ExecutionException {
 
 		// Define the event time that is passed along and used for logging
 		ZonedDateTime progressDialogueEventTime =
@@ -202,7 +202,7 @@ public class DialogueExecutor {
 			DialogueBranchFileDescriptor dialogueDescription =
 					userService.getDialogueDescriptionFromId(dialogueId, language);
 			if (dialogueDescription == null) {
-				throw new DLBException(DLBException.Type.DIALOGUE_NOT_FOUND,
+				throw new ExecutionException(ExecutionException.Type.DIALOGUE_NOT_FOUND,
 						"Dialogue not found: " + dialogueId);
 			}
 			DLBDialogue newDialogue = userService.getDialogueDefinition(dialogueDescription);
@@ -213,7 +213,7 @@ public class DialogueExecutor {
 	}
 
 	public ExecuteNodeResult backDialogue(DialogueState state, ZonedDateTime eventTime)
-			throws DLBException {
+			throws ExecutionException {
 		LoggedDialogue loggedDialogue = (LoggedDialogue)state.getLoggedDialogue();
 		List<DLBLoggedInteraction> interactions = loggedDialogue.getInteractionList();
 		int prevIndex = findPreviousAgentInteractionIndex(interactions,

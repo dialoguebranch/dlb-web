@@ -27,13 +27,13 @@
 
 package com.dialoguebranch.web.service.execution;
 
-import com.dialoguebranch.exception.DLBException;
+import com.dialoguebranch.exception.ExecutionException;
 import com.dialoguebranch.i18n.DLBTranslationContext;
 import com.dialoguebranch.model.DLBDialogue;
 import com.dialoguebranch.model.DialogueBranchFileDescriptor;
-import com.dialoguebranch.parser.DLBFileLoader;
-import com.dialoguebranch.parser.DLBProjectParser;
-import com.dialoguebranch.parser.DLBProjectParserResult;
+import com.dialoguebranch.parser.FileLoader;
+import com.dialoguebranch.parser.ProjectParser;
+import com.dialoguebranch.parser.ProjectParserResult;
 import com.dialoguebranch.web.service.controller.schema.LoginParametersPayload;
 import com.dialoguebranch.web.service.controller.schema.LoginResultPayload;
 import com.dialoguebranch.web.service.exception.DLBServiceConfigurationException;
@@ -82,12 +82,12 @@ public class ApplicationManager {
 	 *                                          initialized due to an incorrectly set config
 	 *                                          parameter.
 	 */
-	public ApplicationManager(DLBFileLoader dlbFileLoader) throws DLBServiceConfigurationException {
+	public ApplicationManager(FileLoader fileLoader) throws DLBServiceConfigurationException {
 		UserServiceFactory appConfig = UserServiceFactory.getInstance();
-		DLBProjectParser dlbProjectParser = new DLBProjectParser(dlbFileLoader);
-		DLBProjectParserResult readResult;
+		ProjectParser projectParser = new ProjectParser(fileLoader);
+		ProjectParserResult readResult;
 		try {
-			readResult = dlbProjectParser.parse();
+			readResult = projectParser.parse();
 		} catch (IOException ex) {
 			throw new RuntimeException("Error while reading DialogueBranch project: "
 					+ ex.getMessage(), ex);
@@ -219,7 +219,7 @@ public class ApplicationManager {
 
 	public DLBDialogue getDialogueDefinition(DialogueBranchFileDescriptor dialogueDescription,
 											 DLBTranslationContext translationContext)
-			throws DLBException {
+			throws ExecutionException {
 		DLBDialogue dialogue;
 		if (translationContext == null)
 			dialogue = dlbProject.getDialogues().get(dialogueDescription);
@@ -227,7 +227,7 @@ public class ApplicationManager {
 			dialogue = dlbProject.getTranslatedDialogue(dialogueDescription, translationContext);
 		if (dialogue != null)
 			return dialogue;
-		throw new DLBException(DLBException.Type.DIALOGUE_NOT_FOUND,
+		throw new ExecutionException(ExecutionException.Type.DIALOGUE_NOT_FOUND,
 			"Pre-loaded dialogue not found for dialogue '" +
 					dialogueDescription.getDialogueName() + "' in language '" +
 					dialogueDescription.getLanguage() + "'.");

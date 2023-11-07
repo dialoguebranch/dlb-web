@@ -27,7 +27,7 @@
 
 package com.dialoguebranch.web.service.controller;
 
-import com.dialoguebranch.exception.DLBException;
+import com.dialoguebranch.exception.ExecutionException;
 import com.dialoguebranch.web.service.exception.BadRequestException;
 import com.dialoguebranch.web.service.exception.HttpException;
 import com.dialoguebranch.web.service.exception.HttpFieldError;
@@ -90,18 +90,18 @@ public class ControllerFunctions {
 
 	/**
 	 * Generates a {@link HttpException} with a valid HTTP Status Code from the given
-	 * {@link DLBException}.
-	 * @param exception the {@link DLBException} that should be "wrapped" into an
+	 * {@link ExecutionException}.
+	 * @param exception the {@link ExecutionException} that should be "wrapped" into an
 	 * 					{@link HttpException}.
 	 * @return the {@link HttpException} object representing the error including a valid status
 	 * 		   code.
 	 */
-	public static HttpException createHttpException(DLBException exception) {
+	public static HttpException createHttpException(ExecutionException exception) {
 		return switch (exception.getType()) {
 			case AGENT_NOT_FOUND, DIALOGUE_NOT_FOUND, NODE_NOT_FOUND, REPLY_NOT_FOUND, NO_ACTIVE_DIALOGUE ->
 					new NotFoundException(exception.getMessage());
 			default ->
-					throw new RuntimeException("Unexpected DLBException: " +
+					throw new RuntimeException("Unexpected ExecutionException: " +
 							exception.getMessage(), exception);
 		};
 	}

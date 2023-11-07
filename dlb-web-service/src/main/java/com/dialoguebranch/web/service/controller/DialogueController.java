@@ -27,7 +27,7 @@
 
 package com.dialoguebranch.web.service.controller;
 
-import com.dialoguebranch.exception.DLBException;
+import com.dialoguebranch.exception.ExecutionException;
 import com.dialoguebranch.execution.ExecuteNodeResult;
 import com.dialoguebranch.model.DLBLoggedInteraction;
 import com.dialoguebranch.model.DLBMessageSource;
@@ -201,7 +201,7 @@ public class DialogueController {
 					dialogueName, null, language, sessionId, System.currentTimeMillis());
 			return DialogueMessageFactory.generateDialogueMessage(node);
 		} catch (
-				DLBException e) {
+				ExecutionException e) {
 			throw ControllerFunctions.createHttpException(e);
 		}
 	}
@@ -348,7 +348,7 @@ public class DialogueController {
 				return new NullableResponse<>(null);
 			DialogueMessage reply = DialogueMessageFactory.generateDialogueMessage(nextNode);
 			return new NullableResponse<>(reply);
-		} catch (DLBException e) {
+		} catch (ExecutionException e) {
 			throw ControllerFunctions.createHttpException(e);
 		}
 	}
@@ -454,7 +454,7 @@ public class DialogueController {
 				DialogueState state = userService.getDialogueState(currentDialogue,
 						currentDialogue.getInteractionList().size() - 1);
 				node = userService.continueDialogueSession(state,continueDialogueEventTime);
-			} catch (DLBException ex) {
+			} catch (ExecutionException ex) {
 				throw ControllerFunctions.createHttpException(ex);
 			}
 			DialogueMessage result =
@@ -629,7 +629,7 @@ public class DialogueController {
 			ExecuteNodeResult prevNode = userService.revertDialogueSession(state,
 					backDialogueEventTime);
 			return DialogueMessageFactory.generateDialogueMessage(prevNode);
-		} catch (DLBException e) {
+		} catch (ExecutionException e) {
 			throw ControllerFunctions.createHttpException(e);
 		}
 	}
