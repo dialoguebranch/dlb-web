@@ -29,8 +29,8 @@ package com.dialoguebranch.web.service.execution;
 
 import com.dialoguebranch.exception.ExecutionException;
 import com.dialoguebranch.i18n.DLBTranslationContext;
-import com.dialoguebranch.model.DLBDialogue;
-import com.dialoguebranch.model.DialogueBranchFileDescriptor;
+import com.dialoguebranch.model.Dialogue;
+import com.dialoguebranch.model.FileDescriptor;
 import com.dialoguebranch.parser.FileLoader;
 import com.dialoguebranch.parser.ProjectParser;
 import com.dialoguebranch.parser.ProjectParserResult;
@@ -139,7 +139,7 @@ public class ApplicationManager {
 	
 	// ---------- Getters:
 	
-	public List<DialogueBranchFileDescriptor> getDialogueDescriptions() {
+	public List<FileDescriptor> getDialogueDescriptions() {
 		return new ArrayList<>(dlbProject.getDialogues().keySet());
 	}
 
@@ -217,10 +217,10 @@ public class ApplicationManager {
 	
 	// ---------- Dialogue Management:
 
-	public DLBDialogue getDialogueDefinition(DialogueBranchFileDescriptor dialogueDescription,
-											 DLBTranslationContext translationContext)
+	public Dialogue getDialogueDefinition(FileDescriptor dialogueDescription,
+                                          DLBTranslationContext translationContext)
 			throws ExecutionException {
-		DLBDialogue dialogue;
+		Dialogue dialogue;
 		if (translationContext == null)
 			dialogue = dlbProject.getDialogues().get(dialogueDescription);
 		else
@@ -233,7 +233,7 @@ public class ApplicationManager {
 					dialogueDescription.getLanguage() + "'.");
 	}
 	
-	public List<DialogueBranchFileDescriptor> getAvailableDialogues() {
+	public List<FileDescriptor> getAvailableDialogues() {
 		return new ArrayList<>(dlbProject.getDialogues().keySet());
 	}
 

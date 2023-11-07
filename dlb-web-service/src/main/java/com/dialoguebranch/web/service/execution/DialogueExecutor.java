@@ -88,9 +88,9 @@ public class DialogueExecutor {
 	 * @throws IOException if a communication error occurs.
 	 * @throws ExecutionException if the request is invalid.
 	 */
-	public ExecuteNodeResult startDialogue(DialogueBranchFileDescriptor dialogueDescription,
-										   DLBDialogue dialogueDefinition, String nodeId, String sessionId,
-										   long sessionStartTime)
+	public ExecuteNodeResult startDialogue(FileDescriptor dialogueDescription,
+                                           Dialogue dialogueDefinition, String nodeId, String sessionId,
+                                           long sessionStartTime)
 			throws DatabaseException, IOException, ExecutionException {
 
 		ActiveDialogue dialogue = new ActiveDialogue(dialogueDescription,
@@ -175,7 +175,7 @@ public class DialogueExecutor {
 			userService.getLoggedDialogueStore().saveToSession(loggedDialogue);
 			throw new RuntimeException("Expression evaluation error: " + ex.getMessage(), ex);
 		}
-		DLBDialogue dialogueDefinition = state.getDialogueDefinition();
+		Dialogue dialogueDefinition = state.getDialogueDefinition();
 		DLBNode nextNode;
 		if (nodePointer instanceof NodePointerInternal) {
 			try {
@@ -199,13 +199,13 @@ public class DialogueExecutor {
 			String dialogueId = externalNodePointer.getDialogueId();
 			String nodeId = externalNodePointer.getNodeId();
 
-			DialogueBranchFileDescriptor dialogueDescription =
+			FileDescriptor dialogueDescription =
 					userService.getDialogueDescriptionFromId(dialogueId, language);
 			if (dialogueDescription == null) {
 				throw new ExecutionException(ExecutionException.Type.DIALOGUE_NOT_FOUND,
 						"Dialogue not found: " + dialogueId);
 			}
-			DLBDialogue newDialogue = userService.getDialogueDefinition(dialogueDescription);
+			Dialogue newDialogue = userService.getDialogueDefinition(dialogueDescription);
 
 			return this.startDialogue(dialogueDescription, newDialogue, nodeId,
 					loggedDialogue.getSessionId(), loggedDialogue.getSessionStartTime());

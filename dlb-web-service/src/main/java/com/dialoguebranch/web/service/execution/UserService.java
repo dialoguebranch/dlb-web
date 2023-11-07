@@ -71,7 +71,7 @@ public class UserService {
 	private DLBTranslationContext translationContext = null;
 
 	// dialogueLanguageMap: map from dialogue name -> language -> dialogue description
-	protected Map<String, Map<String, DialogueBranchFileDescriptor>> dialogueLanguageMap =
+	protected Map<String, Map<String, FileDescriptor>> dialogueLanguageMap =
 			new LinkedHashMap<>();
 
 	// --------------------------------------------------------
@@ -121,9 +121,9 @@ public class UserService {
 		loggedDialogueStore = new LoggedDialogueStore(dialogueBranchUser.getId(), this);
 
 		// create dialogueLanguageMap
-		List<DialogueBranchFileDescriptor> dialogues = applicationManager.getDialogueDescriptions();
-		for (DialogueBranchFileDescriptor dialogue : dialogues) {
-			Map<String, DialogueBranchFileDescriptor> langMap =
+		List<FileDescriptor> dialogues = applicationManager.getDialogueDescriptions();
+		for (FileDescriptor dialogue : dialogues) {
+			Map<String, FileDescriptor> langMap =
 				dialogueLanguageMap.computeIfAbsent(dialogue.getDialogueName(),
 						k -> new LinkedHashMap<>());
 			langMap.put(dialogue.getLanguage(), dialogue);
@@ -222,14 +222,14 @@ public class UserService {
 
 		logger.info("User '" + dialogueBranchUser.getId() + "' is starting dialogue '" + dialogueId + "'");
 
-		DialogueBranchFileDescriptor dialogueDescription =
+		FileDescriptor dialogueDescription =
 				getDialogueDescriptionFromId(dialogueId, language);
 
 		if (dialogueDescription == null) {
 			throw new ExecutionException(ExecutionException.Type.DIALOGUE_NOT_FOUND,
 					"Dialogue not found: " + dialogueId);
 		}
-		DLBDialogue dialogue = getDialogueDefinition(dialogueDescription);
+		Dialogue dialogue = getDialogueDefinition(dialogueDescription);
 
 		return dialogueExecutor.startDialogue(dialogueDescription, dialogue, nodeId, sessionId,
 				sessionStartTime);
@@ -429,8 +429,8 @@ public class UserService {
 	 * @param language an ISO language tag
 	 * @return a list of dialogue names
 	 */
-	public List<DialogueBranchFileDescriptor> getAvailableDialogues(String language) {
-		List<DialogueBranchFileDescriptor> filteredAvailableDialogues =
+	public List<FileDescriptor> getAvailableDialogues(String language) {
+		List<FileDescriptor> filteredAvailableDialogues =
 				new ArrayList<>();
 		Locale prefLocale;
 		try {
@@ -441,7 +441,7 @@ public class UserService {
 					language) + ": " + ex.getMessage());
 			prefLocale = Locale.getDefault();
 		}
-		for (Map<String, DialogueBranchFileDescriptor> langMap :
+		for (Map<String, FileDescriptor> langMap :
 				dialogueLanguageMap.values()) {
 			List<String> keys = new ArrayList<>(langMap.keySet());
 			I18nLanguageFinder i18nFinder = new I18nLanguageFinder(keys);
@@ -465,9 +465,9 @@ public class UserService {
 	 * @param language an ISO language tag or null
 	 * @return the dialogue description or null
 	 */
-	public DialogueBranchFileDescriptor getDialogueDescriptionFromId(
+	public FileDescriptor getDialogueDescriptionFromId(
 			String dialogueId, String language) {
-		for (DialogueBranchFileDescriptor dialogueDescription : this.getAvailableDialogues(language)) {
+		for (FileDescriptor dialogueDescription : this.getAvailableDialogues(language)) {
 			if (dialogueDescription.getDialogueName().equals(dialogueId)) {
 				return dialogueDescription;
 			}
@@ -482,11 +482,11 @@ public class UserService {
 	 * dialogue definition exists in this service manager.
 	 * 
 	 * @param dialogueDescription the sought dialogue description
-	 * @return the {@link DLBDialogue} containing the DialogueBranch dialogue representation.
+	 * @return the {@link Dialogue} containing the DialogueBranch dialogue representation.
 	 * @throws ExecutionException if the dialogue definition is not found
 	 */
-	public DLBDialogue getDialogueDefinition(
-			DialogueBranchFileDescriptor dialogueDescription) throws ExecutionException {
+	public Dialogue getDialogueDefinition(
+			FileDescriptor dialogueDescription) throws ExecutionException {
 		return this.applicationManager.getDialogueDefinition(dialogueDescription,
 				translationContext);
 	}
@@ -506,14 +506,14 @@ public class UserService {
 	public DialogueState getDialogueState(LoggedDialogue loggedDialogue,
 										  int loggedInteractionIndex) throws ExecutionException {
 		String dialogueName = loggedDialogue.getDialogueName();
-		DialogueBranchFileDescriptor dialogueDescription =
+		FileDescriptor dialogueDescription =
 				getDialogueDescriptionFromId(dialogueName,
 				loggedDialogue.getLanguage());
 		if (dialogueDescription == null) {
 			throw new ExecutionException(ExecutionException.Type.DIALOGUE_NOT_FOUND,
 					"Dialogue not found: " + dialogueName);
 		}
-		DLBDialogue dialogueDefinition = getDialogueDefinition(
+		Dialogue dialogueDefinition = getDialogueDefinition(
 				dialogueDescription);
 		List<DLBLoggedInteraction> interactions =
 				loggedDialogue.getInteractionList();
