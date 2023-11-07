@@ -31,9 +31,9 @@ import com.dialoguebranch.exception.ExecutionException;
 import com.dialoguebranch.execution.ActiveDialogue;
 import com.dialoguebranch.execution.ExecuteNodeResult;
 import com.dialoguebranch.model.*;
-import com.dialoguebranch.model.nodepointer.DLBNodePointer;
-import com.dialoguebranch.model.nodepointer.DLBNodePointerExternal;
-import com.dialoguebranch.model.nodepointer.DLBNodePointerInternal;
+import com.dialoguebranch.model.nodepointer.NodePointer;
+import com.dialoguebranch.model.nodepointer.NodePointerExternal;
+import com.dialoguebranch.model.nodepointer.NodePointerInternal;
 import com.dialoguebranch.web.service.storage.LoggedDialogue;
 import nl.rrd.utils.AppComponents;
 import nl.rrd.utils.datetime.DateTimeUtils;
@@ -168,7 +168,7 @@ public class DialogueExecutor {
 		int userActionIndex = loggedDialogue.getInteractionList().size() - 1;
 
 		// Find next dialogue node:
-		DLBNodePointer nodePointer;
+		NodePointer nodePointer;
 		try {
 			nodePointer = dialogue.processReplyAndGetNodePointer(replyId,progressDialogueEventTime);
 		} catch (EvaluationException ex) {
@@ -177,9 +177,9 @@ public class DialogueExecutor {
 		}
 		DLBDialogue dialogueDefinition = state.getDialogueDefinition();
 		DLBNode nextNode;
-		if (nodePointer instanceof DLBNodePointerInternal) {
+		if (nodePointer instanceof NodePointerInternal) {
 			try {
-				nextNode = dialogue.progressDialogue((DLBNodePointerInternal)nodePointer,
+				nextNode = dialogue.progressDialogue((NodePointerInternal)nodePointer,
 								progressDialogueEventTime);
 			} catch (EvaluationException e) {
 				throw new RuntimeException("Expression evaluation error: " + e.getMessage(), e);
@@ -195,7 +195,7 @@ public class DialogueExecutor {
 			loggedDialogue.setCompleted(true);
 			userService.getLoggedDialogueStore().saveToSession(loggedDialogue);
 			String language = dialogue.getDialogueFileDescription().getLanguage();
-			DLBNodePointerExternal externalNodePointer = (DLBNodePointerExternal)nodePointer;
+			NodePointerExternal externalNodePointer = (NodePointerExternal)nodePointer;
 			String dialogueId = externalNodePointer.getDialogueId();
 			String nodeId = externalNodePointer.getNodeId();
 
