@@ -46,7 +46,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * A {@link LoggedDialogueStore} is a class that acts as the storage for {@link LoggedDialogue}
+ * A {@link LoggedDialogueStore} is a class that acts as the storage for {@link ServerLoggedDialogue}
  * objects, used in the execution of dialogues by the DialogueBranch Web Service.
  *
  * <p>A {@link LoggedDialogueStore} does not maintain any data in-memory, but immediately stores
@@ -62,7 +62,7 @@ public class LoggedDialogueStore {
 	private final String userId;
 	private final File userLogDirectory;
 	private static final Object LOCK = new Object();
-	private LoggedDialogue latestStoredLoggedDialogue = null;
+	private ServerLoggedDialogue latestStoredServerLoggedDialogue = null;
 
 	// ------------------------------------ //
 	// ---------- Constructor(s) ---------- //
@@ -132,32 +132,32 @@ public class LoggedDialogueStore {
 	// ---------- Public Operations ---------- //
 	// --------------------------------------- //
 
-	public LoggedDialogue findLoggedDialogue(String id)
+	public ServerLoggedDialogue findLoggedDialogue(String id)
 			throws DatabaseException, IOException {
 		return readLatestDialogueWithConditions(false,null,id);
 	}
 
-	public LoggedDialogue findLatestOngoingDialogue(String dialogueName)
+	public ServerLoggedDialogue findLatestOngoingDialogue(String dialogueName)
 			throws DatabaseException, IOException {
 		return readLatestDialogueWithConditions(true,dialogueName,null);
 	}
 
-	public LoggedDialogue findLatestOngoingDialogue()
+	public ServerLoggedDialogue findLatestOngoingDialogue()
 			throws IOException, DatabaseException {
 		return readLatestDialogueWithConditions(true, null, null);
 	}
 
-	public void setDialogueCancelled(LoggedDialogue loggedDialogue)
+	public void setDialogueCancelled(ServerLoggedDialogue serverLoggedDialogue)
 			throws DatabaseException, IOException {
-		loggedDialogue.setCancelled(true);
-		saveToSession(loggedDialogue);
+		serverLoggedDialogue.setCancelled(true);
+		saveToSession(serverLoggedDialogue);
 	}
 
-	public void saveToSession(LoggedDialogue dialogue)
+	public void saveToSession(ServerLoggedDialogue dialogue)
 			throws DatabaseException, IOException {
-		this.latestStoredLoggedDialogue = dialogue;
+		this.latestStoredServerLoggedDialogue = dialogue;
 		synchronized(LOCK) {
-			List<LoggedDialogue> dialogues = readSessionWith(dialogue);
+			List<ServerLoggedDialogue> dialogues = readSessionWith(dialogue);
 			saveToSession(dialogue.getSessionId(), dialogue.getSessionStartTime(), dialogues);
 		}
 	}
@@ -169,9 +169,9 @@ public class LoggedDialogueStore {
 	 */
 	public boolean existsSessionId(String sessionId) throws DatabaseException {
 		// First check whether the latest stored in-memory dialogue may be a match
-		if(latestStoredLoggedDialogue != null) {
-			if(latestStoredLoggedDialogue.getSessionId() != null) {
-				if(latestStoredLoggedDialogue.getSessionId().equals(sessionId)) return true;
+		if(latestStoredServerLoggedDialogue != null) {
+			if(latestStoredServerLoggedDialogue.getSessionId() != null) {
+				if(latestStoredServerLoggedDialogue.getSessionId().equals(sessionId)) return true;
 			}
 		}
 
@@ -193,7 +193,7 @@ public class LoggedDialogueStore {
 		return false;
 	}
 
-	public List<LoggedDialogue> readSession(String sessionId) throws DatabaseException, IOException {
+	public List<ServerLoggedDialogue> readSession(String sessionId) throws DatabaseException, IOException {
 		File[] userLogFiles;
 
 		synchronized (LOCK) {
@@ -216,7 +216,7 @@ public class LoggedDialogueStore {
 	// -------------------------------------------------- //
 
 	private void saveToSession(String sessionId, long sessionStartTime,
-									  List<LoggedDialogue> dialogues) throws IOException {
+									  List<ServerLoggedDialogue> dialogues) throws IOException {
 		synchronized (LOCK) {
 			String json = JsonMapper.generate(dialogues);
 			File dataFile = new File(userLogDirectory, sessionStartTime + " " + sessionId +
@@ -229,16 +229,16 @@ public class LoggedDialogueStore {
 		}
 	}
 
-	private List<LoggedDialogue> readSession(String sessionId, long sessionStartTime)
+	private List<ServerLoggedDialogue> readSession(String sessionId, long sessionStartTime)
 			throws DatabaseException, IOException {
 		File dataFile = new File(userLogDirectory, sessionStartTime + " " + sessionId +
 				".json");
 		return readSession(dataFile);
 	}
 
-	private List<LoggedDialogue> readSession(File sessionFile)
+	private List<ServerLoggedDialogue> readSession(File sessionFile)
 			throws DatabaseException, IOException {
-		List<LoggedDialogue> result;
+		List<ServerLoggedDialogue> result;
 		synchronized (LOCK) {
 			if (!sessionFile.exists())
 				return new ArrayList<>();
@@ -253,89 +253,89 @@ public class LoggedDialogueStore {
 								": " + ex.getMessage(), ex);
 			}
 		}
-		result.sort(Comparator.comparingLong(LoggedDialogue::getUtcTime));
+		result.sort(Comparator.comparingLong(ServerLoggedDialogue::getUtcTime));
 		return result;
 	}
 
 	/**
 	 * Provide the complete list of all LoggedDialogues that are part of the same session as the
-	 * given loggedDialogue, including itself.
+	 * given serverLoggedDialogue, including itself.
 	 *
-	 * @param loggedDialogue the {@link LoggedDialogue} for which to retrieve all of his friends.
-	 * @return a List of LoggedDialogue objects that form the complete session that the given
-	 *         {@code loggedDialogue} is part of, including itself
+	 * @param serverLoggedDialogue the {@link ServerLoggedDialogue} for which to retrieve all of his friends.
+	 * @return a List of ServerLoggedDialogue objects that form the complete session that the given
+	 *         {@code serverLoggedDialogue} is part of, including itself
 	 * @throws DatabaseException in case of an error reading from the dialogue log files.
 	 * @throws IOException in case of an error reading from the dialogue log files.
 	 */
-	private List<LoggedDialogue> readSessionWith(LoggedDialogue loggedDialogue)
+	private List<ServerLoggedDialogue> readSessionWith(ServerLoggedDialogue serverLoggedDialogue)
 			throws DatabaseException, IOException {
 		// Read all logged dialogues in this session from file
-		List<LoggedDialogue> dialogues = readSession(loggedDialogue.getSessionId(),
-				loggedDialogue.getSessionStartTime());
+		List<ServerLoggedDialogue> dialogues = readSession(serverLoggedDialogue.getSessionId(),
+				serverLoggedDialogue.getSessionStartTime());
 
-		// Remove any loggedDialogue (well, it should only be 1) that has the same id as the one
+		// Remove any serverLoggedDialogue (well, it should only be 1) that has the same id as the one
 		// we are adding.
-		dialogues.removeIf(dialogue -> dialogue.getId().equals(loggedDialogue.getId()));
+		dialogues.removeIf(dialogue -> dialogue.getId().equals(serverLoggedDialogue.getId()));
 
-		// Add the new (updated) loggedDialogue provided
-		dialogues.add(loggedDialogue);
+		// Add the new (updated) serverLoggedDialogue provided
+		dialogues.add(serverLoggedDialogue);
 
 		// Sort by time
-		dialogues.sort(Comparator.comparingLong(LoggedDialogue::getUtcTime));
+		dialogues.sort(Comparator.comparingLong(ServerLoggedDialogue::getUtcTime));
 		return dialogues;
 	}
 
 	/**
 	 * Dig through the given {@code user}'s log files, and look for the latest
-	 * {@link LoggedDialogue} that matches the conditions provided. This method will look through
+	 * {@link ServerLoggedDialogue} that matches the conditions provided. This method will look through
 	 * all the user's dialogue log files in order (newest to oldest), and return the first
-	 * occurrence of a {@link LoggedDialogue} that matches all conditions.
+	 * occurrence of a {@link ServerLoggedDialogue} that matches all conditions.
 	 *
 	 * <p>If {@code mustBeOngoing} is {@code true} this method will only return a
-	 * {@link LoggedDialogue} for which the #isCancelled and #isCompleted parameters are both false.
+	 * {@link ServerLoggedDialogue} for which the #isCancelled and #isCompleted parameters are both false.
 	 * Otherwise, these parameters are ignored.</p>
 	 *
-	 * <p>If a {@code dialogueName} is provided, the returned {@link LoggedDialogue} must have this
+	 * <p>If a {@code dialogueName} is provided, the returned {@link ServerLoggedDialogue} must have this
 	 * given dialogue name. If {@code null} is provided, the condition is ignored.</p>
 	 *
-	 * <p>If a {@code id} is provided, the returned {@link LoggedDialogue} must have this id. If
+	 * <p>If a {@code id} is provided, the returned {@link ServerLoggedDialogue} must have this id. If
 	 * {@code null} is provided, the condition is ignored.</p>
 	 *
-	 * <p>Finally, if no {@link LoggedDialogue} is found that matches all given conditions, this
+	 * <p>Finally, if no {@link ServerLoggedDialogue} is found that matches all given conditions, this
 	 * method will return {@code null}.</p>
 	 *
 	 * @param mustBeOngoing true if this method should only look for "ongoing" dialogues.
 	 * @param dialogueName an optional dialogue name to look for (or {@code null}).
 	 * @param id an optional id to look for (or {@code null}).
-	 * @return the {@link LoggedDialogue} that matches the conditions, or {@code null} if none can
+	 * @return the {@link ServerLoggedDialogue} that matches the conditions, or {@code null} if none can
 	 *         be found.
 	 * @throws DatabaseException in case of an error reading from the dialogue log files.
 	 * @throws IOException in case of an error reading from the dialogue log files.
 	 */
-	private LoggedDialogue readLatestDialogueWithConditions(boolean mustBeOngoing,
-															String dialogueName, String id)
+	private ServerLoggedDialogue readLatestDialogueWithConditions(boolean mustBeOngoing,
+																  String dialogueName, String id)
 			throws DatabaseException, IOException {
 
-		// We maintain a reference to the latest stored LoggedDialogue in memory, which
+		// We maintain a reference to the latest stored ServerLoggedDialogue in memory, which
 		// is the prime candidate for any search, so we check it first.
-		if(this.latestStoredLoggedDialogue != null) {
+		if(this.latestStoredServerLoggedDialogue != null) {
 			boolean match = true;
 
 			if(mustBeOngoing) {
-				if(latestStoredLoggedDialogue.isCancelled()
-						|| latestStoredLoggedDialogue.isCompleted()) match = false;
+				if(latestStoredServerLoggedDialogue.isCancelled()
+						|| latestStoredServerLoggedDialogue.isCompleted()) match = false;
 			}
 
 			if(match && dialogueName != null) {
-				if(!latestStoredLoggedDialogue.getDialogueName().equals(dialogueName))
+				if(!latestStoredServerLoggedDialogue.getDialogueName().equals(dialogueName))
 					match = false;
 			}
 
 			if(match && id != null) {
-				if(!latestStoredLoggedDialogue.getId().equals(id)) match = false;
+				if(!latestStoredServerLoggedDialogue.getId().equals(id)) match = false;
 			}
 
-			if(match) return latestStoredLoggedDialogue;
+			if(match) return latestStoredServerLoggedDialogue;
 		}
 
 		File[] userLogFiles;
@@ -350,9 +350,9 @@ public class LoggedDialogueStore {
 		Arrays.sort(userLogFiles);
 
 		for(File f : userLogFiles) {
-			List<LoggedDialogue> loggedDialogues = readSessionFile(f);
-			if(loggedDialogues != null) {
-				for(LoggedDialogue ld : loggedDialogues) {
+			List<ServerLoggedDialogue> serverLoggedDialogues = readSessionFile(f);
+			if(serverLoggedDialogues != null) {
+				for(ServerLoggedDialogue ld : serverLoggedDialogues) {
 					boolean match = true;
 
 					if(mustBeOngoing) {
@@ -377,16 +377,16 @@ public class LoggedDialogueStore {
 
 	/**
 	 * Private method used to read the JSON contents of a given dialogue log session file and return
-	 * it as a List of LoggedDialogue objects.
+	 * it as a List of ServerLoggedDialogue objects.
 	 * @param sessionFile the File pointer to the dialogue log session file.
-	 * @return a List of LoggedDialogue objects.
+	 * @return a List of ServerLoggedDialogue objects.
 	 * @throws DatabaseException in case of a read error.
 	 * @throws IOException in case of a read error.
 	 */
-	private List<LoggedDialogue> readSessionFile(File sessionFile)
+	private List<ServerLoggedDialogue> readSessionFile(File sessionFile)
 			throws DatabaseException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
-		List<LoggedDialogue> result;
+		List<ServerLoggedDialogue> result;
 		synchronized(LOCK) {
 			try {
 				result = mapper.readValue(sessionFile,

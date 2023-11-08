@@ -34,7 +34,7 @@ import com.dialoguebranch.model.*;
 import com.dialoguebranch.model.nodepointer.NodePointer;
 import com.dialoguebranch.model.nodepointer.NodePointerExternal;
 import com.dialoguebranch.model.nodepointer.NodePointerInternal;
-import com.dialoguebranch.web.service.storage.LoggedDialogue;
+import com.dialoguebranch.web.service.storage.ServerLoggedDialogue;
 import nl.rrd.utils.AppComponents;
 import nl.rrd.utils.datetime.DateTimeUtils;
 import nl.rrd.utils.exception.DatabaseException;
@@ -115,14 +115,14 @@ public class DialogueExecutor {
 			throw new RuntimeException("Expression evaluation error: " + e.getMessage(), e);
 		}
 
-		LoggedDialogue loggedDialogue = new LoggedDialogue(userService.getDialogueBranchUser().getId(),
+		ServerLoggedDialogue serverLoggedDialogue = new ServerLoggedDialogue(userService.getDialogueBranchUser().getId(),
 				eventTime, sessionId, sessionStartTime);
-		loggedDialogue.setDialogueName(dialogueDefinition.getDialogueName());
-		loggedDialogue.setLanguage(dialogueDescription.getLanguage());
-		updateLoggedDialogue(startNode, loggedDialogue, -1);
-		userService.getLoggedDialogueStore().saveToSession(loggedDialogue);
+		serverLoggedDialogue.setDialogueName(dialogueDefinition.getDialogueName());
+		serverLoggedDialogue.setLanguage(dialogueDescription.getLanguage());
+		updateLoggedDialogue(startNode, serverLoggedDialogue, -1);
+		userService.getLoggedDialogueStore().saveToSession(serverLoggedDialogue);
 		return new ExecuteNodeResult(dialogueDefinition, startNode,
-				loggedDialogue, loggedDialogue.getInteractionList().size() - 1);
+				serverLoggedDialogue, serverLoggedDialogue.getInteractionList().size() - 1);
 	}
 	
 	/**
@@ -155,24 +155,24 @@ public class DialogueExecutor {
 		ZonedDateTime progressDialogueEventTime =
 				DateTimeUtils.nowMs(userService.getDialogueBranchUser().getTimeZone());
 
-		LoggedDialogue loggedDialogue = (LoggedDialogue)state.getLoggedDialogue();
+		ServerLoggedDialogue serverLoggedDialogue = (ServerLoggedDialogue)state.getLoggedDialogue();
 		ActiveDialogue dialogue = state.getActiveDialogue();
 		String userStatement = dialogue.getUserStatementFromReplyId(replyId);
 
-		// Update the loggedDialogue with this interaction
-		loggedDialogue.getInteractionList().add(new LoggedInteraction(
+		// Update the serverLoggedDialogue with this interaction
+		serverLoggedDialogue.getInteractionList().add(new LoggedInteraction(
 				System.currentTimeMillis(), MessageSource.USER, "USER",
-				loggedDialogue.getDialogueName(), dialogue.getCurrentNode().getTitle(), state.getLoggedInteractionIndex(),
+				serverLoggedDialogue.getDialogueName(), dialogue.getCurrentNode().getTitle(), state.getLoggedInteractionIndex(),
 				userStatement, replyId));
 
-		int userActionIndex = loggedDialogue.getInteractionList().size() - 1;
+		int userActionIndex = serverLoggedDialogue.getInteractionList().size() - 1;
 
 		// Find next dialogue node:
 		NodePointer nodePointer;
 		try {
 			nodePointer = dialogue.processReplyAndGetNodePointer(replyId,progressDialogueEventTime);
 		} catch (EvaluationException ex) {
-			userService.getLoggedDialogueStore().saveToSession(loggedDialogue);
+			userService.getLoggedDialogueStore().saveToSession(serverLoggedDialogue);
 			throw new RuntimeException("Expression evaluation error: " + ex.getMessage(), ex);
 		}
 		Dialogue dialogueDefinition = state.getDialogueDefinition();
@@ -184,16 +184,16 @@ public class DialogueExecutor {
 			} catch (EvaluationException e) {
 				throw new RuntimeException("Expression evaluation error: " + e.getMessage(), e);
 			}
-			updateLoggedDialogue(nextNode, loggedDialogue, userActionIndex);
-			userService.getLoggedDialogueStore().saveToSession(loggedDialogue);
+			updateLoggedDialogue(nextNode, serverLoggedDialogue, userActionIndex);
+			userService.getLoggedDialogueStore().saveToSession(serverLoggedDialogue);
 			if (nextNode == null)
 				return null;
-			return new ExecuteNodeResult(dialogueDefinition, nextNode, loggedDialogue,
-					loggedDialogue.getInteractionList().size() - 1);
+			return new ExecuteNodeResult(dialogueDefinition, nextNode, serverLoggedDialogue,
+					serverLoggedDialogue.getInteractionList().size() - 1);
 
 		} else { // The dialogue continues with a pointer to another .dlb script
-			loggedDialogue.setCompleted(true);
-			userService.getLoggedDialogueStore().saveToSession(loggedDialogue);
+			serverLoggedDialogue.setCompleted(true);
+			userService.getLoggedDialogueStore().saveToSession(serverLoggedDialogue);
 			String language = dialogue.getDialogueFileDescription().getLanguage();
 			NodePointerExternal externalNodePointer = (NodePointerExternal)nodePointer;
 			String dialogueId = externalNodePointer.getDialogueId();
@@ -208,17 +208,17 @@ public class DialogueExecutor {
 			Dialogue newDialogue = userService.getDialogueDefinition(dialogueDescription);
 
 			return this.startDialogue(dialogueDescription, newDialogue, nodeId,
-					loggedDialogue.getSessionId(), loggedDialogue.getSessionStartTime());
+					serverLoggedDialogue.getSessionId(), serverLoggedDialogue.getSessionStartTime());
 		}
 	}
 
 	public ExecuteNodeResult backDialogue(DialogueState state, ZonedDateTime eventTime)
 			throws ExecutionException {
-		LoggedDialogue loggedDialogue = (LoggedDialogue)state.getLoggedDialogue();
-		List<LoggedInteraction> interactions = loggedDialogue.getInteractionList();
+		ServerLoggedDialogue serverLoggedDialogue = (ServerLoggedDialogue)state.getLoggedDialogue();
+		List<LoggedInteraction> interactions = serverLoggedDialogue.getInteractionList();
 		int prevIndex = findPreviousAgentInteractionIndex(interactions,
 				state.getLoggedInteractionIndex());
-		DialogueState backState = userService.getDialogueState(loggedDialogue,
+		DialogueState backState = userService.getDialogueState(serverLoggedDialogue,
 				prevIndex);
 		return executeCurrentNode(backState, eventTime);
 	}
@@ -236,7 +236,7 @@ public class DialogueExecutor {
 	}
 
 	public ExecuteNodeResult executeCurrentNode(DialogueState state, ZonedDateTime eventTime) {
-		LoggedDialogue loggedDialogue = (LoggedDialogue)state.getLoggedDialogue();
+		ServerLoggedDialogue serverLoggedDialogue = (ServerLoggedDialogue)state.getLoggedDialogue();
 		ActiveDialogue dialogue = state.getActiveDialogue();
 		dialogue.setDLBVariableStore(userService.getVariableStore());
 		Node node = dialogue.getCurrentNode();
@@ -246,7 +246,7 @@ public class DialogueExecutor {
 			throw new RuntimeException("Expression evaluation error: " + e.getMessage(), e);
 		}
 		return new ExecuteNodeResult(state.getDialogueDefinition(),
-				node, loggedDialogue, state.getLoggedInteractionIndex());
+				node, serverLoggedDialogue, state.getLoggedInteractionIndex());
 	}
 
 	/**
@@ -258,10 +258,10 @@ public class DialogueExecutor {
 	 * <p>If the node is null or it has no replies, the dialogue is marked as completed.</p>
 	 * 
 	 * @param node the current node or null
-	 * @param loggedDialogue the {@link LoggedDialogue} to update.
+	 * @param serverLoggedDialogue the {@link ServerLoggedDialogue} to update.
 	 * @param previousIndex the previous interaction index
 	 */
-	private void updateLoggedDialogue(Node node, LoggedDialogue loggedDialogue,
+	private void updateLoggedDialogue(Node node, ServerLoggedDialogue serverLoggedDialogue,
 									  int previousIndex) {
 		if (node != null) {
 			StringBuilder agentStatement = new StringBuilder();
@@ -270,11 +270,11 @@ public class DialogueExecutor {
 			}
 			String readableAgentStatement = agentStatement.toString();
 
-			loggedDialogue.getInteractionList().add(new LoggedInteraction(
+			serverLoggedDialogue.getInteractionList().add(new LoggedInteraction(
 				System.currentTimeMillis(),
 				MessageSource.AGENT,
 				node.getHeader().getSpeaker(),
-				loggedDialogue.getDialogueName(),
+				serverLoggedDialogue.getDialogueName(),
 				node.getTitle(),
 				previousIndex,
 				readableAgentStatement,
@@ -283,7 +283,7 @@ public class DialogueExecutor {
 
 		}
 		if (node == null || node.getBody().getReplies().isEmpty()) {
-			loggedDialogue.setCompleted(true);
+			serverLoggedDialogue.setCompleted(true);
 		}
 
 	}

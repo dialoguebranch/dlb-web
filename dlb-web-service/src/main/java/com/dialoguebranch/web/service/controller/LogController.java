@@ -31,7 +31,7 @@ import com.dialoguebranch.web.service.execution.UserService;
 import com.dialoguebranch.web.service.Application;
 import com.dialoguebranch.web.service.ProtocolVersion;
 import com.dialoguebranch.web.service.QueryRunner;
-import com.dialoguebranch.web.service.storage.LoggedDialogue;
+import com.dialoguebranch.web.service.storage.ServerLoggedDialogue;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -74,7 +74,7 @@ public class LogController {
 		description = "This method will retrieve all know logging information associated with " +
 				"the given sessionId")
 	@RequestMapping(value="/get-session", method= RequestMethod.GET)
-	public List<LoggedDialogue> getSession(
+	public List<ServerLoggedDialogue> getSession(
 		HttpServletRequest request,
 		HttpServletResponse response,
 
@@ -112,7 +112,7 @@ public class LogController {
 		}
 	}
 
-	private List<LoggedDialogue> doGetSession(String userId, String sessionId)
+	private List<ServerLoggedDialogue> doGetSession(String userId, String sessionId)
 			throws DatabaseException, IOException {
 		UserService userService =
 				application.getApplicationManager().getActiveUserService(userId);

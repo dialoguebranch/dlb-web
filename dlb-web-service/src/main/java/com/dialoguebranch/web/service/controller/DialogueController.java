@@ -43,7 +43,7 @@ import com.dialoguebranch.web.service.controller.schema.OngoingDialoguePayload;
 import com.dialoguebranch.web.service.exception.BadRequestException;
 import com.dialoguebranch.web.service.exception.HttpException;
 import com.dialoguebranch.web.service.execution.UserService;
-import com.dialoguebranch.web.service.storage.LoggedDialogue;
+import com.dialoguebranch.web.service.storage.ServerLoggedDialogue;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -439,7 +439,7 @@ public class DialogueController {
 		ZonedDateTime continueDialogueEventTime =
 				DateTimeUtils.nowMs(userService.getDialogueBranchUser().getTimeZone());
 
-		LoggedDialogue currentDialogue = userService.getLoggedDialogueStore().
+		ServerLoggedDialogue currentDialogue = userService.getLoggedDialogueStore().
 				findLatestOngoingDialogue(dialogueName);
 		LoggedInteraction lastInteraction = null;
 		if (currentDialogue != null && !currentDialogue.getInteractionList().isEmpty()) {
@@ -700,7 +700,7 @@ public class DialogueController {
 		UserService userService = application.getApplicationManager()
 				.getActiveUserService(userId);
 
-		LoggedDialogue latestOngoingDialogue =
+		ServerLoggedDialogue latestOngoingDialogue =
 				userService.getLoggedDialogueStore().findLatestOngoingDialogue(userId);
 
 		if(latestOngoingDialogue != null) {

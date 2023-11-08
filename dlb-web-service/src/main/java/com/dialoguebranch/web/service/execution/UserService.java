@@ -295,10 +295,10 @@ public class UserService {
 			throws DatabaseException, IOException {
 		logger.info("User '" + dialogueBranchUser.getId() + "' cancels dialogue with Id '"
 				+ loggedDialogueId + "'.");
-		LoggedDialogue loggedDialogue =
+		ServerLoggedDialogue serverLoggedDialogue =
 				loggedDialogueStore.findLoggedDialogue(loggedDialogueId);
-		if(loggedDialogue != null)
-			loggedDialogueStore.setDialogueCancelled(loggedDialogue);
+		if(serverLoggedDialogue != null)
+			loggedDialogueStore.setDialogueCancelled(serverLoggedDialogue);
 		else
 			logger.warn("User '" + dialogueBranchUser.getId() + "' attempted to cancel dialogue with Id '"
 					+ loggedDialogueId + "', but no such dialogue could be found.");
@@ -494,7 +494,7 @@ public class UserService {
 	public DialogueState getDialogueState(String loggedDialogueId,
 			int loggedInteractionIndex) throws ExecutionException, DatabaseException,
 			IOException {
-		LoggedDialogue loggedDialogue =
+		ServerLoggedDialogue loggedDialogue =
 				loggedDialogueStore.findLoggedDialogue(loggedDialogueId);
 		if (loggedDialogue == null) {
 			throw new ExecutionException(ExecutionException.Type.DIALOGUE_NOT_FOUND,
@@ -503,7 +503,7 @@ public class UserService {
 		return getDialogueState(loggedDialogue, loggedInteractionIndex);
 	}
 
-	public DialogueState getDialogueState(LoggedDialogue loggedDialogue,
+	public DialogueState getDialogueState(ServerLoggedDialogue loggedDialogue,
 										  int loggedInteractionIndex) throws ExecutionException {
 		String dialogueName = loggedDialogue.getDialogueName();
 		FileDescriptor dialogueDescription =
@@ -549,7 +549,7 @@ public class UserService {
 		return loggedDialogueStore.existsSessionId(sessionId);
 	}
 
-	public List<LoggedDialogue> getDialogueSessionLog(String sessionId) throws IOException, DatabaseException {
+	public List<ServerLoggedDialogue> getDialogueSessionLog(String sessionId) throws IOException, DatabaseException {
 		logger.info("Getting dialogue log session data for user '" + dialogueBranchUser.getId() +
 				"' and sessionId '" + sessionId + "'.");
 		return loggedDialogueStore.readSession(sessionId);

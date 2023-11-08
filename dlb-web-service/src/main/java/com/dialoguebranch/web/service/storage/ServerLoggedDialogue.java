@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown=true)
-public class LoggedDialogue implements com.dialoguebranch.model.LoggedDialogue {
+public class ServerLoggedDialogue implements com.dialoguebranch.model.LoggedDialogue {
 
 	private String id;
 	private String sessionId;
@@ -53,7 +53,7 @@ public class LoggedDialogue implements com.dialoguebranch.model.LoggedDialogue {
 	private boolean cancelled;
 	private List<LoggedInteraction> interactionList = new ArrayList<>();
 
-	public LoggedDialogue() {
+	public ServerLoggedDialogue() {
 	}
 
 	/**
@@ -65,8 +65,8 @@ public class LoggedDialogue implements com.dialoguebranch.model.LoggedDialogue {
 	 * @param sessionId an optional externally provided id to be added to the logs (or
 	 *                    {@code null}).
 	 */
-	public LoggedDialogue(String user, ZonedDateTime dialogueStartTime, String sessionId,
-						  long sessionStartTime) {
+	public ServerLoggedDialogue(String user, ZonedDateTime dialogueStartTime, String sessionId,
+								long sessionStartTime) {
 		this.user = user;
 		this.utcTime = dialogueStartTime.toInstant().toEpochMilli();
 		this.timezone = dialogueStartTime.getZone().toString();
@@ -204,8 +204,8 @@ public class LoggedDialogue implements com.dialoguebranch.model.LoggedDialogue {
 
 	/**
 	 * Returns the timestamp (milliseconds since Jan 1st 1970 UTC) of the latest step in this
-	 * {@link LoggedDialogue}.
-	 * @return the timestamp of the latest step in this {@link LoggedDialogue}.
+	 * {@link ServerLoggedDialogue}.
+	 * @return the timestamp of the latest step in this {@link ServerLoggedDialogue}.
 	 */
 	@JsonIgnore
 	public long getLatestInteractionTimestamp() {

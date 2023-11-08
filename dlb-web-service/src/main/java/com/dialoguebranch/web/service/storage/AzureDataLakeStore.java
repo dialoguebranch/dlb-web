@@ -138,7 +138,7 @@ public class AzureDataLakeStore {
 
 	/**
 	 * Populate the local dialogue log folder for the given user, identified by the
-	 * {@code dialogueBranchUser}. This method will retrieve a "recent" set of LoggedDialogue log files from
+	 * {@code dialogueBranchUser}. This method will retrieve a "recent" set of ServerLoggedDialogue log files from
 	 * the Azure Data Lake, and saves them into the local dialogue log folder for the given user.
 	 *
 	 * @param dialogueBranchUser the id of the DialogueBranch user for whom to look for dialogues.
