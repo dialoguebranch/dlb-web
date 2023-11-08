@@ -515,7 +515,7 @@ public class UserService {
 		}
 		Dialogue dialogueDefinition = getDialogueDefinition(
 				dialogueDescription);
-		List<DLBLoggedInteraction> interactions =
+		List<LoggedInteraction> interactions =
 				loggedDialogue.getInteractionList();
 		if (loggedInteractionIndex < 0 || loggedInteractionIndex >= interactions.size()) {
 			throw new ExecutionException(ExecutionException.Type.INTERACTION_NOT_FOUND,
@@ -525,7 +525,7 @@ public class UserService {
 		}
 		String nodeId = loggedDialogue.getInteractionList()
 				.get(loggedInteractionIndex).getNodeId();
-		DLBNode node = dialogueDefinition.getNodeById(nodeId);
+		Node node = dialogueDefinition.getNodeById(nodeId);
 		if (node == null) {
 			throw new ExecutionException(ExecutionException.Type.NODE_NOT_FOUND,
 					String.format("Node \"%s\" not found in dialogue \"%s\"",

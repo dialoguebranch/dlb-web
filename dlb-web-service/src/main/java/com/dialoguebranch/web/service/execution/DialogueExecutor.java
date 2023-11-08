@@ -108,7 +108,7 @@ public class DialogueExecutor {
 		// The timestamp of this "start dialogue" trigger will be passed on and used for logging
 		ZonedDateTime eventTime = DateTimeUtils.nowMs(userService.getDialogueBranchUser().getTimeZone());
 
-		DLBNode startNode;
+		Node startNode;
 		try {
 			startNode = dialogue.startDialogue(nodeId,eventTime);
 		} catch (EvaluationException e) {
@@ -160,8 +160,8 @@ public class DialogueExecutor {
 		String userStatement = dialogue.getUserStatementFromReplyId(replyId);
 
 		// Update the loggedDialogue with this interaction
-		loggedDialogue.getInteractionList().add(new DLBLoggedInteraction(
-				System.currentTimeMillis(), DLBMessageSource.USER, "USER",
+		loggedDialogue.getInteractionList().add(new LoggedInteraction(
+				System.currentTimeMillis(), MessageSource.USER, "USER",
 				loggedDialogue.getDialogueName(), dialogue.getCurrentNode().getTitle(), state.getLoggedInteractionIndex(),
 				userStatement, replyId));
 
@@ -176,7 +176,7 @@ public class DialogueExecutor {
 			throw new RuntimeException("Expression evaluation error: " + ex.getMessage(), ex);
 		}
 		Dialogue dialogueDefinition = state.getDialogueDefinition();
-		DLBNode nextNode;
+		Node nextNode;
 		if (nodePointer instanceof NodePointerInternal) {
 			try {
 				nextNode = dialogue.progressDialogue((NodePointerInternal)nodePointer,
@@ -215,7 +215,7 @@ public class DialogueExecutor {
 	public ExecuteNodeResult backDialogue(DialogueState state, ZonedDateTime eventTime)
 			throws ExecutionException {
 		LoggedDialogue loggedDialogue = (LoggedDialogue)state.getLoggedDialogue();
-		List<DLBLoggedInteraction> interactions = loggedDialogue.getInteractionList();
+		List<LoggedInteraction> interactions = loggedDialogue.getInteractionList();
 		int prevIndex = findPreviousAgentInteractionIndex(interactions,
 				state.getLoggedInteractionIndex());
 		DialogueState backState = userService.getDialogueState(loggedDialogue,
@@ -223,13 +223,13 @@ public class DialogueExecutor {
 		return executeCurrentNode(backState, eventTime);
 	}
 
-	private int findPreviousAgentInteractionIndex(List<DLBLoggedInteraction> interactions,
+	private int findPreviousAgentInteractionIndex(List<LoggedInteraction> interactions,
 												  int start) {
-		DLBLoggedInteraction interaction = interactions.get(start);
+		LoggedInteraction interaction = interactions.get(start);
 		while (interaction.getPreviousIndex() != -1) {
 			int index = interaction.getPreviousIndex();
 			interaction = interactions.get(index);
-			if (interaction.getMessageSource() == DLBMessageSource.AGENT)
+			if (interaction.getMessageSource() == MessageSource.AGENT)
 				return index;
 		}
 		return start;
@@ -239,7 +239,7 @@ public class DialogueExecutor {
 		LoggedDialogue loggedDialogue = (LoggedDialogue)state.getLoggedDialogue();
 		ActiveDialogue dialogue = state.getActiveDialogue();
 		dialogue.setDLBVariableStore(userService.getVariableStore());
-		DLBNode node = dialogue.getCurrentNode();
+		Node node = dialogue.getCurrentNode();
 		try {
 			node = dialogue.executeDLBNode(node,eventTime);
 		} catch (EvaluationException e) {
@@ -261,18 +261,18 @@ public class DialogueExecutor {
 	 * @param loggedDialogue the {@link LoggedDialogue} to update.
 	 * @param previousIndex the previous interaction index
 	 */
-	private void updateLoggedDialogue(DLBNode node, LoggedDialogue loggedDialogue,
+	private void updateLoggedDialogue(Node node, LoggedDialogue loggedDialogue,
 									  int previousIndex) {
 		if (node != null) {
 			StringBuilder agentStatement = new StringBuilder();
-			for (DLBNodeBody.Segment segment : node.getBody().getSegments()) {
+			for (NodeBody.Segment segment : node.getBody().getSegments()) {
 				agentStatement.append(segment.toString());
 			}
 			String readableAgentStatement = agentStatement.toString();
 
-			loggedDialogue.getInteractionList().add(new DLBLoggedInteraction(
+			loggedDialogue.getInteractionList().add(new LoggedInteraction(
 				System.currentTimeMillis(),
-				DLBMessageSource.AGENT,
+				MessageSource.AGENT,
 				node.getHeader().getSpeaker(),
 				loggedDialogue.getDialogueName(),
 				node.getTitle(),

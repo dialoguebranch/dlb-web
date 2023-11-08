@@ -27,14 +27,14 @@
 
 package com.dialoguebranch.web.service.execution;
 
-import com.dialoguebranch.model.DLBProject;
+import com.dialoguebranch.model.Project;
 import nl.rrd.utils.exception.DatabaseException;
 
 import java.io.IOException;
 
 public abstract class UserServiceFactory {
 
-	private DLBProject dialogueBranchProject;
+	private Project dialogueBranchProject;
 	private static UserServiceFactory instance = null;
 
 	// ----- Constructors
@@ -54,11 +54,11 @@ public abstract class UserServiceFactory {
 
 	// ----- Getters & Setters
 
-	public void setDialogueBranchProject(DLBProject dialogueBranchProject) {
+	public void setDialogueBranchProject(Project dialogueBranchProject) {
 		this.dialogueBranchProject = dialogueBranchProject;
 	}
 
-	public DLBProject getDialogueBranchProject() {
+	public Project getDialogueBranchProject() {
 		return dialogueBranchProject;
 	}
 

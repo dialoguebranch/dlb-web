@@ -29,8 +29,8 @@ package com.dialoguebranch.web.service.controller;
 
 import com.dialoguebranch.exception.ExecutionException;
 import com.dialoguebranch.execution.ExecuteNodeResult;
-import com.dialoguebranch.model.DLBLoggedInteraction;
-import com.dialoguebranch.model.DLBMessageSource;
+import com.dialoguebranch.model.LoggedInteraction;
+import com.dialoguebranch.model.MessageSource;
 import com.dialoguebranch.model.DialogueState;
 import com.dialoguebranch.model.protocol.DialogueMessage;
 import com.dialoguebranch.model.protocol.DialogueMessageFactory;
@@ -441,14 +441,14 @@ public class DialogueController {
 
 		LoggedDialogue currentDialogue = userService.getLoggedDialogueStore().
 				findLatestOngoingDialogue(dialogueName);
-		DLBLoggedInteraction lastInteraction = null;
+		LoggedInteraction lastInteraction = null;
 		if (currentDialogue != null && !currentDialogue.getInteractionList().isEmpty()) {
 			lastInteraction = currentDialogue.getInteractionList().get(
 					currentDialogue.getInteractionList().size() - 1);
 		}
 
 		if (lastInteraction != null && lastInteraction.getMessageSource() ==
-				DLBMessageSource.AGENT) {
+				MessageSource.AGENT) {
 			ExecuteNodeResult node;
 			try {
 				DialogueState state = userService.getDialogueState(currentDialogue,

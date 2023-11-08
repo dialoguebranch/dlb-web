@@ -27,8 +27,7 @@
 
 package com.dialoguebranch.web.service.storage;
 
-import com.dialoguebranch.model.DLBLoggedDialogue;
-import com.dialoguebranch.model.DLBLoggedInteraction;
+import com.dialoguebranch.model.LoggedInteraction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -39,7 +38,7 @@ import java.util.List;
 import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown=true)
-public class LoggedDialogue implements DLBLoggedDialogue {
+public class LoggedDialogue implements com.dialoguebranch.model.LoggedDialogue {
 
 	private String id;
 	private String sessionId;
@@ -52,7 +51,7 @@ public class LoggedDialogue implements DLBLoggedDialogue {
 	private String language;
 	private boolean completed;
 	private boolean cancelled;
-	private List<DLBLoggedInteraction> interactionList = new ArrayList<>();
+	private List<LoggedInteraction> interactionList = new ArrayList<>();
 
 	public LoggedDialogue() {
 	}
@@ -194,12 +193,12 @@ public class LoggedDialogue implements DLBLoggedDialogue {
 	}
 
 	@Override
-	public List<DLBLoggedInteraction> getInteractionList() {
+	public List<LoggedInteraction> getInteractionList() {
 		return interactionList;
 	}
 
 	@Override
-	public void setInteractionList(List<DLBLoggedInteraction> interactionList) {
+	public void setInteractionList(List<LoggedInteraction> interactionList) {
 		this.interactionList = interactionList;
 	}
 

@@ -41,7 +41,7 @@ import com.dialoguebranch.web.service.Configuration;
 import com.dialoguebranch.web.service.UserCredentials;
 import com.dialoguebranch.web.service.UserFile;
 import com.dialoguebranch.web.service.storage.AzureDataLakeStore;
-import com.dialoguebranch.model.DLBProject;
+import com.dialoguebranch.model.Project;
 import nl.rrd.utils.AppComponents;
 import nl.rrd.utils.exception.DatabaseException;
 import nl.rrd.utils.exception.ParseException;
@@ -64,7 +64,7 @@ import java.util.List;
 public class ApplicationManager {
 
 	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
-	private final DLBProject dlbProject;
+	private final Project project;
 	private final List<UserService> activeUserServices = new ArrayList<>();
 	private final List<UserCredentials> userCredentials;
 	private String externalVariableServiceAPIToken;
@@ -106,8 +106,8 @@ public class ApplicationManager {
 		}
 		if (!readResult.getParseErrors().isEmpty())
 			throw new RuntimeException("Failed to load all dialogues.");
-		dlbProject = readResult.getProject();
-		appConfig.setDialogueBranchProject(dlbProject);
+		project = readResult.getProject();
+		appConfig.setDialogueBranchProject(project);
 
 		// Read all UserCredentials from users.xml
 		try {
@@ -140,7 +140,7 @@ public class ApplicationManager {
 	// ---------- Getters:
 	
 	public List<FileDescriptor> getDialogueDescriptions() {
-		return new ArrayList<>(dlbProject.getDialogues().keySet());
+		return new ArrayList<>(project.getDialogues().keySet());
 	}
 
 	/**
@@ -222,9 +222,9 @@ public class ApplicationManager {
 			throws ExecutionException {
 		Dialogue dialogue;
 		if (translationContext == null)
-			dialogue = dlbProject.getDialogues().get(dialogueDescription);
+			dialogue = project.getDialogues().get(dialogueDescription);
 		else
-			dialogue = dlbProject.getTranslatedDialogue(dialogueDescription, translationContext);
+			dialogue = project.getTranslatedDialogue(dialogueDescription, translationContext);
 		if (dialogue != null)
 			return dialogue;
 		throw new ExecutionException(ExecutionException.Type.DIALOGUE_NOT_FOUND,
@@ -234,7 +234,7 @@ public class ApplicationManager {
 	}
 	
 	public List<FileDescriptor> getAvailableDialogues() {
-		return new ArrayList<>(dlbProject.getDialogues().keySet());
+		return new ArrayList<>(project.getDialogues().keySet());
 	}
 
 	public String getExternalVariableServiceAPIToken() {
