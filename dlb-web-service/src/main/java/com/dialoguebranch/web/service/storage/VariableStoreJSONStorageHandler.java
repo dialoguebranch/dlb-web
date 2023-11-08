@@ -27,10 +27,10 @@
 
 package com.dialoguebranch.web.service.storage;
 
-import com.dialoguebranch.execution.DLBUser;
-import com.dialoguebranch.execution.DLBVariable;
-import com.dialoguebranch.execution.DLBVariableStore;
-import com.dialoguebranch.execution.DLBVariableStoreChange;
+import com.dialoguebranch.execution.User;
+import com.dialoguebranch.execution.Variable;
+import com.dialoguebranch.execution.VariableStore;
+import com.dialoguebranch.execution.VariableStoreChange;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,39 +47,39 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * A {@link DLBVariableStoreJSONStorageHandler} can manage reading and writing
- * {@link DLBVariableStore}s to and from JSON file representations.
- * You can instantiate an instance of a {@link DLBVariableStoreJSONStorageHandler} by providing a
+ * A {@link VariableStoreJSONStorageHandler} can manage reading and writing
+ * {@link VariableStore}s to and from JSON file representations.
+ * You can instantiate an instance of a {@link VariableStoreJSONStorageHandler} by providing a
  * root dataDirectory. The storage handler will assume/create a single {username}.json file for
  * every DialogueBranch User that will contain a JSON representation of the DialogueBranch Variable Store.
  *
  * @author Harm op den Akker
  */
-public class DLBVariableStoreJSONStorageHandler implements DLBVariableStoreStorageHandler {
+public class VariableStoreJSONStorageHandler implements VariableStoreStorageHandler {
 
     private String dataDirectory;
     private static final Object LOCK = new Object();
     private final Logger logger =
             AppComponents.getLogger(ClassUtils.getUserClass(getClass()).getSimpleName());
 
-    public DLBVariableStoreJSONStorageHandler(String dataDirectory) {
+    public VariableStoreJSONStorageHandler(String dataDirectory) {
         this.dataDirectory = dataDirectory;
     }
 
     @Override
-    public DLBVariableStore read(DLBUser dlbUser) throws IOException, ParseException {
+    public VariableStore read(User user) throws IOException, ParseException {
         synchronized (LOCK) {
             File dataDir = new File(dataDirectory);
             FileUtils.mkdir(dataDir);
-            File dataFile = new File(dataDir, dlbUser.getId() + ".json");
+            File dataFile = new File(dataDir, user.getId() + ".json");
             if (!dataFile.exists())
-                return new DLBVariableStore(dlbUser);
+                return new VariableStore(user);
             ObjectMapper mapper = new ObjectMapper();
 
             try {
-                DLBVariable[] dlbVariables = mapper.readValue(dataFile,
-                        new TypeReference<DLBVariable[]>() {});
-                return new DLBVariableStore(dlbUser, dlbVariables);
+                Variable[] variables = mapper.readValue(dataFile,
+                        new TypeReference<Variable[]>() {});
+                return new VariableStore(user, variables);
             } catch (JsonProcessingException ex) {
                 throw new ParseException(
                         "Failed to parse variable store file: " +
@@ -89,7 +89,7 @@ public class DLBVariableStoreJSONStorageHandler implements DLBVariableStoreStora
     }
 
     @Override
-    public void write(DLBVariableStore variableStore) throws IOException {
+    public void write(VariableStore variableStore) throws IOException {
         synchronized (LOCK) {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.registerModule(new JavaTimeModule());
@@ -101,15 +101,15 @@ public class DLBVariableStoreJSONStorageHandler implements DLBVariableStoreStora
             File dataFile = new File(dataDir,
                     variableStore.getUser().getId() + ".json");
 
-            // Write the DLBVariableStore only as a list of DLBVariables
+            // Write the VariableStore only as a list of DLBVariables
             // (for easier deserialization).
             objectMapper.writeValue(dataFile,variableStore.getDLBVariables());
         }
     }
 
     @Override
-    public void onChange(DLBVariableStore variableStore,
-                         List<DLBVariableStoreChange> changes) {
+    public void onChange(VariableStore variableStore,
+                         List<VariableStoreChange> changes) {
         try {
             write(variableStore);
         } catch(IOException e) {

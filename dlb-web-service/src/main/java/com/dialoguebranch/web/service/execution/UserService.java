@@ -54,16 +54,16 @@ import java.util.*;
 
 /**
  * A {@link UserService} is a service class that handles all communication with the DialogueBranch Web Service
- * for a specific {@link DLBUser}.
+ * for a specific {@link User}.
  * 
  * @author Harm op den Akker
  * @author Tessa Beinema
  */
 public class UserService {
 
-	private final DLBUser dialogueBranchUser;
+	private final User dialogueBranchUser;
 	private final ApplicationManager applicationManager;
-	private final DLBVariableStore variableStore;
+	private final VariableStore variableStore;
 	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
 	private final LoggedDialogueStore loggedDialogueStore;
 	private final DialogueExecutor dialogueExecutor;
@@ -79,21 +79,21 @@ public class UserService {
 	// --------------------------------------------------------
 	
 	/**
-	 * Instantiates a {@link UserService} for a given {@link DLBUser}. The UserService creates a
-	 * {@link DLBVariableStore} instance and loads in all known variables for the user.
-	 * @param dialogueBranchUser The {@link DLBUser} for which this {@link UserService} is handling the
+	 * Instantiates a {@link UserService} for a given {@link User}. The UserService creates a
+	 * {@link VariableStore} instance and loads in all known variables for the user.
+	 * @param dialogueBranchUser The {@link User} for which this {@link UserService} is handling the
 	 *                 interactions.
 	 * @param applicationManager the server's {@link ApplicationManager} instance.
-	 * @param onVarChangeListener the {@link DLBVariableStoreOnChangeListener} that will be added
-	 *                            to the {@link DLBVariableStore} instance that this
+	 * @param onVarChangeListener the {@link VariableStoreOnChangeListener} that will be added
+	 *                            to the {@link VariableStore} instance that this
 	 *                            {@link UserService} creates.
-	 * @param externalVariableServiceUpdater a {@link DLBVariableStoreOnChangeListener} that
+	 * @param externalVariableServiceUpdater a {@link VariableStoreOnChangeListener} that
 	 *                                       listens to updates on the DialogueBranch Variable store and
 	 *                                       notifies the external variable service if the changes
 	 *                                       made did not come from that service in the first place.
 	 */
-	public UserService(DLBUser dialogueBranchUser, ApplicationManager applicationManager,
-					   DLBVariableStoreOnChangeListener onVarChangeListener,
+	public UserService(User dialogueBranchUser, ApplicationManager applicationManager,
+					   VariableStoreOnChangeListener onVarChangeListener,
 					   ExternalVariableServiceUpdater externalVariableServiceUpdater)
 			throws DatabaseException, IOException {
 
@@ -101,8 +101,8 @@ public class UserService {
 		this.applicationManager = applicationManager;
 
 		Configuration config = AppComponents.get(Configuration.class);
-		DLBVariableStoreStorageHandler storageHandler =
-				new DLBVariableStoreJSONStorageHandler(config.getDataDir() +
+		VariableStoreStorageHandler storageHandler =
+				new VariableStoreJSONStorageHandler(config.getDataDir() +
 						File.separator + config.getDirectoryNameVariables());
 		try {
 			this.variableStore = storageHandler.read(dialogueBranchUser);
@@ -135,10 +135,10 @@ public class UserService {
 	// -----------------------------------------------------------
 	
 	/**
-	 * Returns the {@link DLBUser} which this {@link UserService} is serving.
-	 * @return the {@link DLBUser} which this {@link UserService} is serving.
+	 * Returns the {@link User} which this {@link UserService} is serving.
+	 * @return the {@link User} which this {@link UserService} is serving.
 	 */
-	public DLBUser getDialogueBranchUser() {
+	public User getDialogueBranchUser() {
 		return dialogueBranchUser;
 	}
 
@@ -171,12 +171,12 @@ public class UserService {
 	}
 
 	/**
-	 * Returns the {@link DLBVariableStore} for the {@link DLBUser} governed by this
+	 * Returns the {@link VariableStore} for the {@link User} governed by this
 	 * {@link UserService}.
-	 * @return the {@link DLBVariableStore} for the {@link DLBUser} governed by this
+	 * @return the {@link VariableStore} for the {@link User} governed by this
 	 *         {@link UserService}.
 	 */
-	public DLBVariableStore getVariableStore() {
+	public VariableStore getVariableStore() {
 		return variableStore;
 	}
 
@@ -318,13 +318,13 @@ public class UserService {
 	public void storeReplyInput(Map<String,?> variables, ZonedDateTime eventTime)
 			throws ExecutionException {
 		variableStore.addAll(variables,true,eventTime,
-				DLBVariableStoreChange.Source.INPUT_REPLY);
+				VariableStoreChange.Source.INPUT_REPLY);
 	}
 
 
 	/**
 	 * This function ensures that for all DialogueBranch Variables in the given {@link Set}, of
-	 * {@code variableNames} an up-to-date value is loaded into the {@link DLBVariableStore}
+	 * {@code variableNames} an up-to-date value is loaded into the {@link VariableStore}
 	 * for this user represented by this {@link UserService} through an external DialogueBranch Variable
 	 * Service if, and only if one has been configured. If {@code
 	 * config.getExternalVariableServiceEnabled() == false} this method will cause no changes to occur.
@@ -340,14 +340,14 @@ public class UserService {
 			logger.info("URL: "+config.getExternalVariableServiceURL());
 			logger.info("API Version: "+config.getExternalVariableServiceAPIVersion());
 
-			List<DLBVariable> varsToUpdate = new ArrayList<>();
+			List<Variable> varsToUpdate = new ArrayList<>();
 			for(String variableName : variableNames) {
-				DLBVariable dlbVariable = variableStore.getDLBVariable(variableName);
-				if(dlbVariable != null) {
-					logger.info("A DialogueBranch Variable '"+variableName+"' exists for User '" + dialogueBranchUser.getId() + "': "+dlbVariable);
-					varsToUpdate.add(dlbVariable);
+				Variable variable = variableStore.getDLBVariable(variableName);
+				if(variable != null) {
+					logger.info("A DialogueBranch Variable '"+variableName+"' exists for User '" + dialogueBranchUser.getId() + "': "+ variable);
+					varsToUpdate.add(variable);
 				} else {
-					varsToUpdate.add(new DLBVariable(variableName,null,null,null));
+					varsToUpdate.add(new Variable(variableName,null,null,null));
 				}
 			}
 
@@ -372,18 +372,18 @@ public class UserService {
 							allRequestParams); // The allRequestParams must have been built for all the query params
 			UriComponents uriComponents = builder.build().encode(); // encode() is to ensure that characters like {, }, are preserved and not encoded. Skip if not needed.
 
-			DLBVariable[] retrievedVariables = null;
-			ResponseEntity<DLBVariable[]> response = null;
+			Variable[] retrievedVariables = null;
+			ResponseEntity<Variable[]> response = null;
 			try {
 				response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST,
-						entity, DLBVariable[].class);
+						entity, Variable[].class);
 
 				// If call not successful, retry once after login
 				if (response.getStatusCode() != HttpStatus.OK) {
 					applicationManager.loginToExternalVariableService();
 
 					response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST,
-							entity, DLBVariable[].class);
+							entity, Variable[].class);
 
 				}
 			} catch (Exception e) {
@@ -398,14 +398,14 @@ public class UserService {
 					logger.info("Received response from DialogueBranch Variable Service: no variable updates needed.");
 				} else {
 					logger.info("Received response from DialogueBranch Variable Service: the following variables have updated values:");
-					for (DLBVariable dlbVariable : retrievedVariables) {
-						logger.info(dlbVariable.toString());
-						String varName = dlbVariable.getName();
-						Object varValue = dlbVariable.getValue();
-						ZonedDateTime varUpdated = dlbVariable.getZonedUpdatedTime();
+					for (Variable variable : retrievedVariables) {
+						logger.info(variable.toString());
+						String varName = variable.getName();
+						Object varValue = variable.getValue();
+						ZonedDateTime varUpdated = variable.getZonedUpdatedTime();
 
 						variableStore.setValue(varName, varValue, true, varUpdated,
-								DLBVariableStoreChange.Source.EXTERNAL_VARIABLE_SERVICE);
+								VariableStoreChange.Source.EXTERNAL_VARIABLE_SERVICE);
 					}
 				}
 			}

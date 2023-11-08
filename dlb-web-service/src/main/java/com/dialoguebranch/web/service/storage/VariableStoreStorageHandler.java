@@ -27,17 +27,17 @@
 
 package com.dialoguebranch.web.service.storage;
 
-import com.dialoguebranch.execution.DLBUser;
-import com.dialoguebranch.execution.DLBVariableStore;
-import com.dialoguebranch.execution.DLBVariableStoreOnChangeListener;
+import com.dialoguebranch.execution.User;
+import com.dialoguebranch.execution.VariableStore;
+import com.dialoguebranch.execution.VariableStoreOnChangeListener;
 import nl.rrd.utils.exception.ParseException;
 
 import java.io.IOException;
 
-public interface DLBVariableStoreStorageHandler extends DLBVariableStoreOnChangeListener {
+public interface VariableStoreStorageHandler extends VariableStoreOnChangeListener {
 
-    DLBVariableStore read(DLBUser user) throws IOException, ParseException;
+    VariableStore read(User user) throws IOException, ParseException;
 
-    void write(DLBVariableStore variableStore) throws IOException;
+    void write(VariableStore variableStore) throws IOException;
 
 }

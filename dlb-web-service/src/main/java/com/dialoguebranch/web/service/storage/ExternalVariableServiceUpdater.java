@@ -27,10 +27,10 @@
 
 package com.dialoguebranch.web.service.storage;
 
-import com.dialoguebranch.execution.DLBVariable;
-import com.dialoguebranch.execution.DLBVariableStore;
-import com.dialoguebranch.execution.DLBVariableStoreChange;
-import com.dialoguebranch.execution.DLBVariableStoreOnChangeListener;
+import com.dialoguebranch.execution.Variable;
+import com.dialoguebranch.execution.VariableStore;
+import com.dialoguebranch.execution.VariableStoreChange;
+import com.dialoguebranch.execution.VariableStoreOnChangeListener;
 import com.dialoguebranch.web.service.Configuration;
 import com.dialoguebranch.web.service.execution.ApplicationManager;
 import nl.rrd.utils.AppComponents;
@@ -44,7 +44,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.*;
 
-public class ExternalVariableServiceUpdater implements DLBVariableStoreOnChangeListener {
+public class ExternalVariableServiceUpdater implements VariableStoreOnChangeListener {
 
 	private final Logger logger =
 			AppComponents.getLogger(ClassUtils.getUserClass(getClass()).getSimpleName());
@@ -56,19 +56,19 @@ public class ExternalVariableServiceUpdater implements DLBVariableStoreOnChangeL
 	}
 
 	@Override
-	public void onChange(DLBVariableStore dlbVariableStore,
-						 List<DLBVariableStoreChange> changes) {
+	public void onChange(VariableStore variableStore,
+						 List<VariableStoreChange> changes) {
 
-		String userId = dlbVariableStore.getUser().getId();
+		String userId = variableStore.getUser().getId();
 		String userTimeZoneString
-				= dlbVariableStore.getUser().getTimeZone().toString();
+				= variableStore.getUser().getTimeZone().toString();
 
-		List<DLBVariable> variablesToUpdate = new ArrayList<>();
+		List<Variable> variablesToUpdate = new ArrayList<>();
 
-		for(DLBVariableStoreChange change : changes) {
-			DLBVariableStoreChange.Source source = change.getSource();
+		for(VariableStoreChange change : changes) {
+			VariableStoreChange.Source source = change.getSource();
 
-			if(!source.equals(DLBVariableStoreChange.Source.EXTERNAL_VARIABLE_SERVICE)) {
+			if(!source.equals(VariableStoreChange.Source.EXTERNAL_VARIABLE_SERVICE)) {
 				// This change to the variable store did not come from an update through the
 				// external variable service, so the external variable service should be notified
 
@@ -78,7 +78,7 @@ public class ExternalVariableServiceUpdater implements DLBVariableStoreOnChangeL
 					logger.info("URL: " + config.getExternalVariableServiceURL());
 					logger.info("API Version: " + config.getExternalVariableServiceAPIVersion());
 
-					if(change instanceof DLBVariableStoreChange.Clear) {
+					if(change instanceof VariableStoreChange.Clear) {
 						RestTemplate restTemplate = new RestTemplate();
 						HttpHeaders requestHeaders = new HttpHeaders();
 						requestHeaders.set("X-Auth-Token",
@@ -107,30 +107,30 @@ public class ExternalVariableServiceUpdater implements DLBVariableStoreOnChangeL
 							entity,
 							Object.class);
 
-					} else if (change instanceof DLBVariableStoreChange.Remove) {
+					} else if (change instanceof VariableStoreChange.Remove) {
 						Collection<String> variableNames
-							= ((DLBVariableStoreChange.Remove) change).getVariableNames();
+							= ((VariableStoreChange.Remove) change).getVariableNames();
 
 						for (String variableName : variableNames) {
 							long updatedTime = change.getTime().toEpochSecond() * 1000;
 
 							variablesToUpdate.add(
-								new DLBVariable(
+								new Variable(
 									variableName,
 									null,
 									updatedTime,
 									userTimeZoneString));
 						}
-					} else if (change instanceof DLBVariableStoreChange.Put) {
+					} else if (change instanceof VariableStoreChange.Put) {
 						Map<String,Object> changedVariables
-							= ((DLBVariableStoreChange.Put) change).getVariables();
+							= ((VariableStoreChange.Put) change).getVariables();
 
 						long updatedTime = change.getTime().toEpochSecond() * 1000;
 
 						for(String variableName : changedVariables.keySet()) {
 							Object variableValue = changedVariables.get(variableName);
 							variablesToUpdate.add(
-								new DLBVariable(
+								new Variable(
 									variableName,
 									null,
 									updatedTime,

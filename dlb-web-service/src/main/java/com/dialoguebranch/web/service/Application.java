@@ -31,7 +31,7 @@ import com.dialoguebranch.web.service.exception.DLBServiceConfigurationException
 import com.dialoguebranch.web.service.execution.ApplicationManager;
 import com.dialoguebranch.web.service.execution.DefaultUserServiceFactory;
 import com.dialoguebranch.web.service.execution.UserServiceFactory;
-import com.dialoguebranch.web.service.storage.DLBVariableStoreJSONStorageHandler;
+import com.dialoguebranch.web.service.storage.VariableStoreJSONStorageHandler;
 import com.dialoguebranch.parser.ResourceFileLoader;
 import nl.rrd.utils.AppComponents;
 import org.slf4j.Logger;
@@ -105,7 +105,7 @@ ApplicationListener<ApplicationEvent> {
 		);
 
 		UserServiceFactory userServiceFactory = new DefaultUserServiceFactory(
-			new DLBVariableStoreJSONStorageHandler(config.getDataDir()+"/variables"));
+			new VariableStoreJSONStorageHandler(config.getDataDir()+"/variables"));
 		UserServiceFactory.setInstance(userServiceFactory);
 
 		try {

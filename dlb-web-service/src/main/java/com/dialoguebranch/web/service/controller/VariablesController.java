@@ -27,8 +27,8 @@
 
 package com.dialoguebranch.web.service.controller;
 
-import com.dialoguebranch.execution.DLBVariableStore;
-import com.dialoguebranch.execution.DLBVariableStoreChange;
+import com.dialoguebranch.execution.VariableStore;
+import com.dialoguebranch.execution.VariableStoreChange;
 import com.dialoguebranch.web.service.Application;
 import com.dialoguebranch.web.service.ProtocolVersion;
 import com.dialoguebranch.web.service.QueryRunner;
@@ -128,14 +128,14 @@ public class VariablesController {
 	 * @param variableNames a space-separated list of variable names, or the empty string
 	 * @return a mapping of variable names to variable values
 	 * @throws Exception in case of an error retrieving variable data from file.
-	 * TODO: Return a list of DLBVariable objects
+	 * TODO: Return a list of Variable objects
 	 */
 	private Map<String,Object> doGetVariables(String userId, String variableNames)
 			throws Exception {
 		UserService userService = application.getApplicationManager()
 				.getActiveUserService(userId);
 
-		DLBVariableStore variableStore = userService.getVariableStore();
+		VariableStore variableStore = userService.getVariableStore();
 
 		variableNames = variableNames.trim();
 
@@ -260,10 +260,10 @@ public class VariablesController {
 			logger.info("Received request to remove DialogueBranch Variable '" + name + "' at eventTime '" +
 					eventTime.format(formatter) + "' in time zone '" + timeZoneString + "'");
 			userService.getVariableStore().removeByName(name,true,
-					eventTime, DLBVariableStoreChange.Source.WEB_SERVICE);
+					eventTime, VariableStoreChange.Source.WEB_SERVICE);
 		} else {
 			userService.getVariableStore().setValue(name, value, true, eventTime,
-					DLBVariableStoreChange.Source.WEB_SERVICE);
+					VariableStoreChange.Source.WEB_SERVICE);
 		}
 		return null;
 	}
@@ -349,14 +349,14 @@ public class VariablesController {
 		UserService userService = application.getApplicationManager().getActiveUserService(userId);
 		userService.getDialogueBranchUser().setTimeZone(timeZoneId);
 
-		DLBVariableStore variableStore = userService.getVariableStore();
+		VariableStore variableStore = userService.getVariableStore();
 		for(Map.Entry<String, Object> entry : variables.entrySet()) {
 			variableStore.setValue(
 					entry.getKey(),
 					entry.getValue(),
 					true,
 					DateTimeUtils.nowMs(userService.getDialogueBranchUser().getTimeZone()),
-					DLBVariableStoreChange.Source.WEB_SERVICE);
+					VariableStoreChange.Source.WEB_SERVICE);
 		}
 
 		return null;

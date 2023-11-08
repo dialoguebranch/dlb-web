@@ -27,9 +27,9 @@
 
 package com.dialoguebranch.web.service.execution;
 
-import com.dialoguebranch.execution.DLBUser;
+import com.dialoguebranch.execution.User;
 import com.dialoguebranch.web.service.storage.ExternalVariableServiceUpdater;
-import com.dialoguebranch.web.service.storage.DLBVariableStoreStorageHandler;
+import com.dialoguebranch.web.service.storage.VariableStoreStorageHandler;
 import nl.rrd.utils.exception.DatabaseException;
 
 import java.io.IOException;
@@ -39,7 +39,7 @@ import java.io.IOException;
  */
 public class DefaultUserServiceFactory extends UserServiceFactory {
 
-	private final DLBVariableStoreStorageHandler storageHandler;
+	private final VariableStoreStorageHandler storageHandler;
 
 	// --------------------------------------------------------
 	// -------------------- Constructor(s) --------------------
@@ -47,13 +47,13 @@ public class DefaultUserServiceFactory extends UserServiceFactory {
 
 	/**
 	 * Creates an instance of a {@link DefaultUserServiceFactory} with a given
-	 * {@link DLBVariableStoreStorageHandler} that is used to read and write DialogueBranch
+	 * {@link VariableStoreStorageHandler} that is used to read and write DialogueBranch
 	 * variables to persistent storage.
-	 * @param storageHandler the {@link DLBVariableStoreStorageHandler} that is passed on to the
+	 * @param storageHandler the {@link VariableStoreStorageHandler} that is passed on to the
 	 *                       {@link UserService} for reading and writing DialogueBranch variables to
 	 *                       persistent storage.
 	 */
-	public DefaultUserServiceFactory(DLBVariableStoreStorageHandler storageHandler) {
+	public DefaultUserServiceFactory(VariableStoreStorageHandler storageHandler) {
 		this.storageHandler = storageHandler;
 	}
 
@@ -65,7 +65,7 @@ public class DefaultUserServiceFactory extends UserServiceFactory {
 	public UserService createUserService(String userId, ApplicationManager applicationManager)
 			throws DatabaseException, IOException {
 		return new UserService(
-				new DLBUser(userId),
+				new User(userId),
 				applicationManager,
 				storageHandler,
 				new ExternalVariableServiceUpdater(applicationManager));
