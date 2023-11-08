@@ -29,7 +29,7 @@ package com.dialoguebranch.web.service.execution;
 
 import com.dialoguebranch.exception.ExecutionException;
 import com.dialoguebranch.execution.*;
-import com.dialoguebranch.i18n.DLBTranslationContext;
+import com.dialoguebranch.i18n.TranslationContext;
 import com.dialoguebranch.model.*;
 import com.dialoguebranch.web.service.storage.*;
 import nl.rrd.utils.AppComponents;
@@ -68,7 +68,7 @@ public class UserService {
 	private final LoggedDialogueStore loggedDialogueStore;
 	private final DialogueExecutor dialogueExecutor;
 
-	private DLBTranslationContext translationContext = null;
+	private TranslationContext translationContext = null;
 
 	// dialogueLanguageMap: map from dialogue name -> language -> dialogue description
 	protected Map<String, Map<String, FileDescriptor>> dialogueLanguageMap =
@@ -143,20 +143,20 @@ public class UserService {
 	}
 
 	/**
-	 * Returns the {@link DLBTranslationContext} describing the relevant contextual parameters
+	 * Returns the {@link TranslationContext} describing the relevant contextual parameters
 	 * needed to select the right translations.
-	 * @return the {@link DLBTranslationContext}.
+	 * @return the {@link TranslationContext}.
 	 */
-	public DLBTranslationContext getTranslationContext() {
+	public TranslationContext getTranslationContext() {
 		return translationContext;
 	}
 
 	/**
-	 * Sets the {@link DLBTranslationContext} describing the relevant contextual parameters
+	 * Sets the {@link TranslationContext} describing the relevant contextual parameters
 	 * needed to select the right translations.
-	 * @param translationContext the {@link DLBTranslationContext}.
+	 * @param translationContext the {@link TranslationContext}.
 	 */
-	public void setTranslationContext(DLBTranslationContext translationContext) {
+	public void setTranslationContext(TranslationContext translationContext) {
 		this.translationContext = translationContext;
 	}
 	

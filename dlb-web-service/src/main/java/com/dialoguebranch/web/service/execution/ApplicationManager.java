@@ -28,7 +28,7 @@
 package com.dialoguebranch.web.service.execution;
 
 import com.dialoguebranch.exception.ExecutionException;
-import com.dialoguebranch.i18n.DLBTranslationContext;
+import com.dialoguebranch.i18n.TranslationContext;
 import com.dialoguebranch.model.Dialogue;
 import com.dialoguebranch.model.FileDescriptor;
 import com.dialoguebranch.parser.FileLoader;
@@ -218,7 +218,7 @@ public class ApplicationManager {
 	// ---------- Dialogue Management:
 
 	public Dialogue getDialogueDefinition(FileDescriptor dialogueDescription,
-                                          DLBTranslationContext translationContext)
+                                          TranslationContext translationContext)
 			throws ExecutionException {
 		Dialogue dialogue;
 		if (translationContext == null)
