@@ -1,5 +1,6 @@
 :root {
-	--font-family-sans:'Raleway',Avenir Next W02,system-ui,-apple-system,Segoe UI,Roboto;
+	--font-family-serif:'Roboto Slab',Avenir Next W02,system-ui,-apple-system,Segoe UI,Roboto;
+	--font-family-logo:'Natural Log';
 
     /* Definition of colors */
     --color-black: rgb(0,0,0);
@@ -25,7 +26,7 @@
 
 body {
 	background-color: var(--color-background);
-	font-family: var(--font-family-sans);
+	font-family: var(--font-family-serif);
 	font-weight: 300;
 	color: var(--color-text);
 }
