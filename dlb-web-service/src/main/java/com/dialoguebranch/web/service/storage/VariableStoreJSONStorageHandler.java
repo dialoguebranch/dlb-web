@@ -103,7 +103,7 @@ public class VariableStoreJSONStorageHandler implements VariableStoreStorageHand
 
             // Write the VariableStore only as a list of DLBVariables
             // (for easier deserialization).
-            objectMapper.writeValue(dataFile,variableStore.getDLBVariables());
+            objectMapper.writeValue(dataFile,variableStore.getVariables());
         }
     }
 

@@ -141,7 +141,7 @@ public class VariablesController {
 
 		List<String> nameList;
 		if (variableNames.isEmpty()) {
-		nameList = variableStore.getSortedDLBVariableNames();
+		nameList = variableStore.getSortedVariableNames();
 		} else {
 			List<String> invalidNames = new ArrayList<>();
 			String[] nameArray = variableNames.split("\\s+");
@@ -160,7 +160,7 @@ public class VariablesController {
 
 		Map<String,Object> result = new LinkedHashMap<>();
 		for (String name : nameList) {
-			result.put(name, variableStore.getDLBVariable(name).getValue());
+			result.put(name, variableStore.getVariable(name).getValue());
 		}
 		return result;
 	}

@@ -342,7 +342,7 @@ public class UserService {
 
 			List<Variable> varsToUpdate = new ArrayList<>();
 			for(String variableName : variableNames) {
-				Variable variable = variableStore.getDLBVariable(variableName);
+				Variable variable = variableStore.getVariable(variableName);
 				if(variable != null) {
 					logger.info("A DialogueBranch Variable '"+variableName+"' exists for User '" + dialogueBranchUser.getId() + "': "+ variable);
 					varsToUpdate.add(variable);
@@ -533,7 +533,7 @@ public class UserService {
 		}
 		ActiveDialogue activeDialogue = new ActiveDialogue(
 				dialogueDescription, dialogueDefinition);
-		activeDialogue.setDLBVariableStore(variableStore);
+		activeDialogue.setVariableStore(variableStore);
 		activeDialogue.setCurrentNode(node);
 		return new DialogueState(dialogueDescription, dialogueDefinition,
 				loggedDialogue, loggedInteractionIndex, activeDialogue);

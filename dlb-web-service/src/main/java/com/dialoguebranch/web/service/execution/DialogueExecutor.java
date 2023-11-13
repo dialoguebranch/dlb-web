@@ -95,7 +95,7 @@ public class DialogueExecutor {
 
 		ActiveDialogue dialogue = new ActiveDialogue(dialogueDescription,
 				dialogueDefinition);
-		dialogue.setDLBVariableStore(userService.getVariableStore());
+		dialogue.setVariableStore(userService.getVariableStore());
 
 		// Collects all the DialogueBranch Variables needed to execute this file and update from an external
 		// variable service (if enabled).
@@ -238,10 +238,10 @@ public class DialogueExecutor {
 	public ExecuteNodeResult executeCurrentNode(DialogueState state, ZonedDateTime eventTime) {
 		ServerLoggedDialogue serverLoggedDialogue = (ServerLoggedDialogue)state.getLoggedDialogue();
 		ActiveDialogue dialogue = state.getActiveDialogue();
-		dialogue.setDLBVariableStore(userService.getVariableStore());
+		dialogue.setVariableStore(userService.getVariableStore());
 		Node node = dialogue.getCurrentNode();
 		try {
-			node = dialogue.executeDLBNode(node,eventTime);
+			node = dialogue.executeNode(node,eventTime);
 		} catch (EvaluationException e) {
 			throw new RuntimeException("Expression evaluation error: " + e.getMessage(), e);
 		}
