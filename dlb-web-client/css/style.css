@@ -1,0 +1,87 @@
+:root {
+	--font-family-sans:'Raleway',Avenir Next W02,system-ui,-apple-system,Segoe UI,Roboto;
+
+    /* Definition of colors */
+    --color-black: rgb(0,0,0);
+    --color-light-grey: rgb(200,200,200);
+    --color-darken: rgba(0,0,0,0.5);
+    --color-brighten: rgba(255,255,255,0.5);
+    --color-orange-darker: rgb(119, 81, 24);
+    --color-orange-dark: rgb(153,102,0);
+    --color-orange-medium: rgb(179, 141, 83);
+    --color-orange-light: rgb(246, 203, 139);
+    
+    /* Definition of color elements */
+    --color-background: var(--color-light-grey);
+    --color-box: var(--color-orange-darker);
+    --color-lines: var(--color-orange-dark);
+    --color-lines-highlight: var(--color-orange-light);
+    --color-text: var(--color-black);
+    --color-text-subtle: var(--color-orange-darker);
+    --color-text-shadow: var(--color-black);
+    --color-text-emphasis: var(--color-orange-dark);
+    --color-text-highlight: var(--color-orange-light);
+}
+
+body {
+	background-color: var(--color-background);
+	font-family: var(--font-family-sans);
+	font-weight: 300;
+	color: var(--color-text);
+}
+
+#client-text {
+    font-weight: 700;
+}
+
+#login-form {
+    background-color: var(--color-box);
+    border-radius: 20px;
+}
+
+/* Login Form */
+
+input[type=text], input[type=password] {
+	font-family: var(--font-family-sans);
+	font-size: 0.8em;
+	width: 100%;
+	padding: 12px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-sizing: border-box;
+	margin-top: 16px;
+	margin-bottom: 6px;
+	resize: vertical;
+}
+
+input[type=submit] {
+	font-family: var(--font-family-sans);
+	background-color: var(--color-orange-dark);
+	color: white;
+	padding: 12px 60px;
+	border: none;
+	border-radius: 10px;
+	cursor: pointer;
+	margin-top: 8px;
+}
+
+td.login-table-labels {
+    font-weight: 700;
+}
+
+/* Debug Console */
+
+#debug-console {
+    background-color: rgb(156, 141, 141);
+}
+
+#toggle-debug-console {
+    font-family: var(--font-family-sans);
+	background-color: var(--color-orange-dark);
+	color: white;
+	padding: 12px 60px;
+	border: none;
+	border-radius: 10px;
+	cursor: pointer;
+	margin-top: 8px;
+}

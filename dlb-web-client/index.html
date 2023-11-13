@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Dialogue Branch Web Client</title>
+
+        <script type="text/javascript">
+            // Updating the clientVersion will force re-loading all css and javascript includes (avoiding caching issues)
+            var clientVersion = '0.1.0';
+            document.write('<link rel="stylesheet" type="text/css" href="css/style.css?v=' + clientVersion + '" />');
+            document.write('<link rel="stylesheet" type="text/css" href="css/positioning.css?v=' + clientVersion + '" />');
+            document.write('<link rel="stylesheet" type="text/css" media="screen and (max-width: 900px)" href="css/mobile.css?v=' + clientVersion + '" />');
+
+            function loadJavaScript(name) {
+                document.write('<s' + 'cript src="js/' + name + '.js?v=' + clientVersion + '"></s' + 'cript>');
+            }
+
+            loadJavaScript('dlb-client');
+            loadJavaScript('dlb-controller');
+        </script>
+
+    </head>
+
+<body>
+
+    <div id="main-container">
+
+        <div id="dlb-logo"></div>
+
+        <div id="client-text">Web Client Test Application</div>
+
+        <div id="login-form">
+            <form name="loginform" onsubmit = "login()" method="post">
+                
+                <table width="100%">
+                <tr>
+                    <td class="login-table-labels"><label for="name">Username:</label></td>
+                    <td class="login-table-spacer"></td>
+                    <td class="login-table-forms">
+                        <input type="text" id="username" name="username" placeholder="Username...">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="login-table-labels"><label for="email">Password:</label></td>
+                    <td class="login-table-spacer"></td>
+                    <td class="login-table-forms">
+                        <input type="password" id="password" name="password" placeholder="Password...">
+                        <span id="contact-email-error"></span><br>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="login-table-labels"></td>
+                    <td class="login-table-spacer"></td>
+                    <td class="login-table-submit">
+                        <input type="submit" id="login-button" value="Login">
+                    </td>
+                </tr>
+
+                </table>
+                        
+            </form>
+        </div> <!-- End login-form -->
+        
+        <button type="button" id="toggle-debug-console">Toggle Debug</button> 
+
+        <div id="debug-console">
+            <textarea rows="15" cols="50" id="debug-textarea"></textarea>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
