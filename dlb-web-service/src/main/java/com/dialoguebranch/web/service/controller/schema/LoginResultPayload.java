@@ -31,28 +31,34 @@ import com.dialoguebranch.web.service.controller.AuthController;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * A {@link LoginResultPayload} is returned by the /auth/login end-point as handled by the
- * {@link AuthController} in case of a successful
- * login and contains the username and JSON Web Token, which can be serialized /
- * deserialized to the following JSON Format:
+ * A {@link LoginResultPayload} is returned by the /auth/login end-point as handled by the {@link
+ * AuthController} in case of a successful login and contains the username and JSON Web Token, which
+ * can be serialized / deserialized to the following JSON Format:
  * <pre>
  * {
- *   "user": "user",
+ *   "user": "john",
+ *   "role": "admin",
  *   "token": "See <a href="https://jwt.io/">jwt.io</a>"
  * }
  * </pre>
  *
- * @author Harm op den Akker
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 public class LoginResultPayload {
 
 	@Schema(description = "Username associated with this authentication token",
-			example = "user")
+			example = "john")
 	private String user;
+
+	@Schema(description = "The role of the authenticated user",
+			example = "admin")
+	private String role;
 
 	@Schema(description = "The JSON Web Token that was generated for the user",
 			example = "See https://jwt.io/")
 	private String token;
+
+
 
 	// --------------------------------------------------------
 	// -------------------- Constructor(s) --------------------
@@ -64,13 +70,16 @@ public class LoginResultPayload {
 	public LoginResultPayload() { }
 
 	/**
-	 * Creates an instance of a {@link LoginResultPayload} with a given {@code user} and
-	 * {@code token}.
+	 * Creates an instance of a {@link LoginResultPayload} with a given {@code user} and {@code
+	 * token}.
+	 *
 	 * @param user the username of the user that performed a successful login.
+	 * @param role the role of the user associated with this {@link LoginResultPayload}.
 	 * @param token the JSON Web Token generated for the user as a {@link String}.
 	 */
-	public LoginResultPayload(String user, String token) {
+	public LoginResultPayload(String user, String role, String token) {
 		this.user = user;
+		this.role = role;
 		this.token = token;
 	}
 
@@ -83,7 +92,7 @@ public class LoginResultPayload {
 	 * @return the username of the user that performed a successful login.
 	 */
 	public String getUser() {
-		return user;
+		return this.user;
 	}
 
 	/**
@@ -92,6 +101,22 @@ public class LoginResultPayload {
 	 */
 	public void setUser(String user) {
 		this.user = user;
+	}
+
+	/**
+	 * Returns the role of the user associated with this {@link LoginResultPayload}.
+	 * @return the role of the user associated with this {@link LoginResultPayload}.
+	 */
+	public String getRole() {
+		return this.role;
+	}
+
+	/**
+	 * Sets the role of the user associated with this {@link LoginResultPayload}.
+	 * @param role the role of the user associated with this {@link LoginResultPayload}.
+	 */
+	public void setRole(String role) {
+		this.role = role;
 	}
 
 	/**

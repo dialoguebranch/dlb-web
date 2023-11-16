@@ -68,7 +68,9 @@ public class AuthController {
 		description = "Log in to the service by providing a username, password and indicating " +
 			"the desired duration of the authentication token in minutes. If you want to obtain " +
 			"an authentication token that does not expire, either provide '0' or 'never' as the " +
-			"value for '*tokenExpiration*'.")
+			"value for '*tokenExpiration*'. This method returns a JSON object containing the " +
+			"provided '*user*' name, the '*role*' of the user, and the JWT '*token*' that may be " +
+			"used to authenticate subsequent API calls.")
 	@RequestMapping(value="/login", method= RequestMethod.POST, consumes={
 			MediaType.APPLICATION_JSON_VALUE })
 	public LoginResultPayload login(
@@ -131,18 +133,16 @@ public class AuthController {
 		UserCredentials userCredentials = UserFile.findUser(user);
 		String invalidError = "Username or password is invalid";
 		if (userCredentials == null) {
-			logger.info("Failed login attempt for user {}: user unknown",
-					user);
+			logger.info("Failed login attempt for user {}: user unknown.", user);
 			throw new UnauthorizedException(ErrorCode.INVALID_CREDENTIALS,
 					invalidError);
 		}
 		if (!userCredentials.getPassword().equals(password)) {
-			logger.info("Failed login attempt for user {}: invalid credentials",
-					user);
+			logger.info("Failed login attempt for user {}: invalid credentials.", user);
 			throw new UnauthorizedException(ErrorCode.INVALID_CREDENTIALS,
 					invalidError);
 		}
-		logger.info("User {} logged in", userCredentials.getUsername());
+		logger.info("User {} logged in.", userCredentials.getUsername());
 
 		Date expiration = null;
 
@@ -157,11 +157,14 @@ public class AuthController {
 				expiration);
 		String token = AuthToken.createToken(details);
 
-		return new LoginResultPayload(userCredentials.getUsername(), token);
+		return new LoginResultPayload(
+				userCredentials.getUsername(),
+				userCredentials.getRole(),
+				token);
 	}
 
-	private void validateForbiddenQueryParams(HttpServletRequest request,
-			String... paramNames) throws BadRequestException {
+	private void validateForbiddenQueryParams(HttpServletRequest request, String... paramNames)
+			throws BadRequestException {
 		if (request.getQueryString() == null)
 			return;
 		Map<String,String> params;

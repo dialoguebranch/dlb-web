@@ -65,7 +65,7 @@ function loginEventHandler(event) {
 function loginSuccess(data) {
     // A successful login attempt results in a data containing a 'user' and 'token' value
     if('user' in data && 'token' in data) {
-        logToDebugConsole("User '"+data.user+"' successfully logged in, and received the following token: "+data.token);
+        logToDebugConsole("User '"+data.user+"' with role '"+data.role+"' successfully logged in, and received the following token: "+data.token);
         document.getElementById("login-form").style.display = 'none';
    
     // Any other result indicates some type of error
