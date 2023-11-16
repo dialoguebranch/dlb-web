@@ -56,8 +56,12 @@ function logToDebugConsole(line) {
 function loginEventHandler(event) {
     event.preventDefault();
 
-    var formUsername = document.getElementById("username").value;
-    var formPassword = document.getElementById("password").value;
+    // Remove any possible previous error indications
+    document.getElementById("login-form-password-field").classList.remove("login-form-error-class");
+    document.getElementById("login-form-username-field").classList.remove("login-form-error-class");
+
+    var formUsername = document.getElementById("login-form-username-field").value;
+    var formPassword = document.getElementById("login-form-password-field").value;
 
     callLogin(formUsername, formPassword, 0);
 }
@@ -70,7 +74,19 @@ function loginSuccess(data) {
    
     // Any other result indicates some type of error
     } else {
+        logToDebugConsole("Login attempt failed with errorcode '"+data.code+"' and message '"+data.message+"'.");
         console.log("Login attempt failed with errorcode '"+data.code+"' and message '"+data.message+"'.");
+
+        if(data.code == "INVALID_CREDENTIALS") {
+            document.getElementById("login-form-password-field").classList.add("login-form-error-class");
+            document.getElementById("login-form-username-field").classList.add("login-form-error-class");
+        } else if (data.code == "INVALID_INPUT") {
+            const errorMessage = JSON.parse(data.message);
+            for(let i=0; i<errorMessage.length; i++) {
+                if(errorMessage[i].field == "user") document.getElementById("login-form-username-field").classList.add("login-form-error-class");
+                if(errorMessage[i].field == "password") document.getElementById("login-form-password-field").classList.add("login-form-error-class");
+            }
+        }
     }
 }
 

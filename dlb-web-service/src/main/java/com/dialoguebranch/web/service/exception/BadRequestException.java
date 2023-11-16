@@ -28,6 +28,10 @@
 package com.dialoguebranch.web.service.exception;
 
 import com.dialoguebranch.web.service.controller.ErrorController;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import nl.rrd.utils.AppComponents;
+import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -38,65 +42,141 @@ import java.util.List;
 
 /**
  * This exception results in an HTTP response with status 400 Bad Request. The exception message
- * (default "Bad Request") will be written to the response. It is handled by the
- * {@link ErrorController ErrorController}.
+ * (default "Bad Request") will be written to the response. It is handled by the {@link
+ * ErrorController}.
  * 
- * @author Dennis Hofs (RRD)
+ * @author Dennis Hofs (Roessingh Research and Development)
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 @ResponseStatus(value=HttpStatus.BAD_REQUEST)
 public class BadRequestException extends HttpException {
 
+	private static final Logger logger = AppComponents.getLogger("BadRequestException");
+
 	@Serial
 	private static final long serialVersionUID = 1L;
-	
+
+	/**
+	 * Creates an instance of a {@link BadRequestException} with the simple message "Bad Request".
+	 */
 	public BadRequestException() {
 		super("Bad Request");
 	}
 
+	/**
+	 * Creates an instance of a {@link BadRequestException} with the given {@code message}.
+	 *
+	 * @param message the message of the exception.
+	 */
 	public BadRequestException(String message) {
 		super(message);
 	}
-	
+
+	/**
+	 * Creates an instance of a {@link BadRequestException} with the given {@code code} and {@code
+	 * message}.
+	 *
+	 * @param code the error code.
+	 * @param message the message of the exception.
+	 */
 	public BadRequestException(String code, String message) {
 		super(code, message);
 	}
-	
+
+	/**
+	 * Creates an instance of a {@link BadRequestException} as a wrapper around the given {@link
+	 * HttpError}.
+	 *
+	 * @param error the {@link HttpError}.
+	 */
 	public BadRequestException(HttpError error) {
 		super(error);
 	}
-	
+
+	/**
+	 * Generate a {@link BadRequestException} by adding the {@link HttpFieldError}s of the given
+	 * {@code other} {@link BadRequestException} to the existing list of field errors in this {@link
+	 * BadRequestException}. The resulting {@link BadRequestException} will be a wrapper around a
+	 * {@link HttpError} with error code {@link ErrorCode#INVALID_INPUT}, and an error message that
+	 * is a JSON representation of the provided list of {@link HttpFieldError}s.
+	 *
+	 * @param other the list of {@link HttpFieldError}s to add to the existing list in this {@link
+	 *              BadRequestException}.
+	 * @return a new {@link BadRequestException} object.
+	 */
 	public BadRequestException appendInvalidInput(BadRequestException other) {
 		List<HttpFieldError> errors = new ArrayList<>();
 		errors.addAll(getError().getFieldErrors());
 		errors.addAll(other.getError().getFieldErrors());
 		return withInvalidInput(errors);
 	}
-	
-	public BadRequestException appendInvalidInput(
-			HttpFieldError... fieldErrors) {
+
+	/**
+	 * Generate a {@link BadRequestException} by adding the given array of {@link HttpFieldError}s
+	 * to the existing list of field errors in this {@link BadRequestException}. The resulting
+	 * {@link BadRequestException} will be a wrapper around a {@link HttpError} with error code
+	 * {@link ErrorCode#INVALID_INPUT}, and an error message that is a JSON representation of the
+	 * provided list of {@link HttpFieldError}s.
+	 *
+	 * @param fieldErrors the list of {@link HttpFieldError}s to add to the existing list in this
+	 *                   {@link BadRequestException}.
+	 * @return a new {@link BadRequestException} object.
+	 */
+	public BadRequestException appendInvalidInput(HttpFieldError... fieldErrors) {
 		return appendInvalidInput(Arrays.asList(fieldErrors));
 	}
-	
-	public BadRequestException appendInvalidInput(
-			List<HttpFieldError> fieldErrors) {
+
+	/**
+	 * Generate a {@link BadRequestException} by adding the given {@link List} of {@link
+	 * HttpFieldError}s to the existing list of field errors in this {@link BadRequestException}.
+	 * The resulting {@link BadRequestException} will be a wrapper around a {@link HttpError} with
+	 * error code {@link ErrorCode#INVALID_INPUT}, and an error message that is a JSON
+	 * representation of the provided list of {@link HttpFieldError}s.
+	 *
+	 * @param fieldErrors the list of {@link HttpFieldError}s to add to the existing list in this
+	 *                   {@link BadRequestException}.
+	 * @return a new {@link BadRequestException} object.
+	 */
+	public BadRequestException appendInvalidInput(List<HttpFieldError> fieldErrors) {
 		List<HttpFieldError> newErrors = new ArrayList<>();
 		newErrors.addAll(getError().getFieldErrors());
 		newErrors.addAll(fieldErrors);
 		return withInvalidInput(newErrors);
 	}
-	
-	public static BadRequestException withInvalidInput(
-			HttpFieldError... fieldErrors) {
+
+	/**
+	 * Generate a {@link BadRequestException} from an array of {@link HttpFieldError}s. The
+	 * resulting {@link BadRequestException} will be a wrapper around a {@link HttpError} with error
+	 * code {@link ErrorCode#INVALID_INPUT}, and an error message that is a JSON representation of
+	 * the provided list of {@link HttpFieldError}s.
+	 *
+	 * @param fieldErrors the list of {@link HttpFieldError}s that make up the {@link
+	 *        BadRequestException}
+	 * @return a new {@link BadRequestException} object.
+	 */
+	public static BadRequestException withInvalidInput(HttpFieldError... fieldErrors) {
 		return withInvalidInput(Arrays.asList(fieldErrors));
 	}
 
-	public static BadRequestException withInvalidInput(List<HttpFieldError> fieldErrors) {
+	/**
+	 * Generate a {@link BadRequestException} from a {@link List} of {@link HttpFieldError}s. The
+	 * resulting {@link BadRequestException} will be a wrapper around a {@link HttpError} with error
+	 * code {@link ErrorCode#INVALID_INPUT}, and an error message that is a JSON representation of
+	 * the provided list of {@link HttpFieldError}s.
+	 * 
+	 * @param fieldErrors the list of {@link HttpFieldError}s that make up the {@link
+	 *        BadRequestException}
+	 * @return a new {@link BadRequestException} object.
+	 */
+	public static BadRequestException withInvalidInput(List<HttpFieldError> fieldErrors)  {
 		StringBuilder errorMsg = new StringBuilder();
-		String newline = System.getProperty("line.separator");
 
-		for (HttpFieldError fieldError : fieldErrors) {
-			if (!errorMsg.isEmpty()) errorMsg.append(newline);
-			errorMsg.append(fieldError.getMessage());
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			errorMsg.append(mapper.writeValueAsString(fieldErrors));
+		} catch (JsonProcessingException e) {
+			logger.warn("Unable to automatically generate JSON error message from field errors.");
+			errorMsg.append("[]"); // Set the errorMsg to be an empty JSON list
 		}
 
 		HttpError error = new HttpError(ErrorCode.INVALID_INPUT, errorMsg.toString());

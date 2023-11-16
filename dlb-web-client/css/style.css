@@ -47,12 +47,16 @@ input[type=text], input[type=password] {
 	font-size: 0.8em;
 	width: 100%;
 	padding: 12px;
-	border: 1px solid #ccc;
+	border: 2px solid #ccc;
 	border-radius: 4px;
 	box-sizing: border-box;
 	margin-top: 16px;
 	margin-bottom: 6px;
 	resize: vertical;
+}
+
+.login-form-error-class {
+	border: 2px solid red !important;
 }
 
 input[type=submit] {
