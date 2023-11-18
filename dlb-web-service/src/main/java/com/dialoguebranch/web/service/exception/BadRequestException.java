@@ -163,7 +163,7 @@ public class BadRequestException extends HttpException {
 	 * resulting {@link BadRequestException} will be a wrapper around a {@link HttpError} with error
 	 * code {@link ErrorCode#INVALID_INPUT}, and an error message that is a JSON representation of
 	 * the provided list of {@link HttpFieldError}s.
-	 * 
+	 *
 	 * @param fieldErrors the list of {@link HttpFieldError}s that make up the {@link
 	 *        BadRequestException}
 	 * @return a new {@link BadRequestException} object.

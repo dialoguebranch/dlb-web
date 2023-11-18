@@ -48,6 +48,11 @@ td.login-table-forms {
     vertical-align: top;
 }
 
+td.login-table-remember {
+    width: 100%;
+    text-align: right;
+}
+
 td.login-table-submit {
     width: auto;
     vertical-align: top;
