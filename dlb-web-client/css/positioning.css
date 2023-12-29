@@ -59,12 +59,20 @@ td.login-table-submit {
     text-align: right;
 }
 
+/* Version Info */
+
+#version-info {
+    position: absolute;
+    bottom: 5px;
+    right: 15px;
+}
+
 /* Debug Console */
 
 #debug-console {
     position:absolute;
     width:100%;
-    bottom:10px;
+    bottom:5px;
     left:0px;
     height: 200px;
 	margin: auto;
@@ -84,5 +92,5 @@ textarea#debug-textarea {
 
 #toggle-debug-console {
     position: absolute;
-    bottom: 220px;
+    bottom: 210px;
 }

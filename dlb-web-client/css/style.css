@@ -74,6 +74,13 @@ td.login-table-labels {
     font-weight: 700;
 }
 
+/* Version Info */
+
+#version-info {
+    font-size: 10px;
+	font-weight: 500;
+}
+
 /* Debug Console */
 
 #debug-console {

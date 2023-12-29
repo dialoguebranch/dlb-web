@@ -9,7 +9,7 @@ window.onload = function() {
     });
 
     document.getElementById("toggle-debug-console").addEventListener("click", (e)=> {
-        toggleDebugConsole(e);
+        toggleDebugConsole();
     });
 
     // Initialize the logger
@@ -19,10 +19,12 @@ window.onload = function() {
     // Initialize the ClientState object and take actions
     this.clientState = new ClientState(this.logger);
     this.clientState.loadFromCookie();
-    setDebugConsoleVisibility(this.clientState.debugConsoleVisible);
+    
 
     // Make a call to the Web Service for service info.
     callInfo();
+
+    updateUIState();
 };
 
 // -----------------------------------------------------------
@@ -33,7 +35,12 @@ window.onload = function() {
 
 function infoSuccess(data) {
     if('build' in data) {
+        this.clientState.serviceVersion = data.serviceVersion;
+        this.clientState.protocolVersion = data.protocolVersion;
+        this.clientState.build = data.build;
+        this.clientState.upTime = data.upTime;
         this.logger.info("Connected to Dialogue Branch Web Service v"+data.serviceVersion+", using protocol version "+data.protocolVersion+" (build: '"+data.build+"' running for "+data.upTime+").");
+        updateUIState();
     }
 }
 
@@ -99,6 +106,26 @@ function loginError(data) {
 // -------------------- User Interface Handling --------------------
 // -----------------------------------------------------------------
 
+function updateUIState() {
+
+    // ----- Update Service Info
+
+    if(this.clientState.serviceVersion != null) {
+        document.getElementById("version-info").innerHTML = "Connected to Dialogue Branch Web Service v" + this.clientState.serviceVersion + ".";
+    } else {
+        document.getElementById("version-info").innerHTML = "Not connected.";
+    }
+
+    setDebugConsoleVisibility(this.clientState.debugConsoleVisible);
+
+    if(this.clientState.loggedIn) {
+        this.logger.debug("Updating UI State: A user is logged in.");
+    } else {
+        this.logger.debug("Updating UI State: No user currently logged in.");
+    }
+}
+
+
 // ---------- Debug Console ----------
 
 /**
@@ -106,7 +133,7 @@ function loginError(data) {
  * around. Store the new state in the ClientState.
  * @param {*} event 
  */
-function toggleDebugConsole(event) {
+function toggleDebugConsole() {
     if(this.clientState.debugConsoleVisible) {
         setDebugConsoleVisibility(false);
         this.clientState.debugConsoleVisible = false;
@@ -124,10 +151,12 @@ function toggleDebugConsole(event) {
 function setDebugConsoleVisibility(visible) {
     if(visible) {
         document.getElementById("debug-console").style.display = 'inline';
-        document.getElementById("toggle-debug-console").style.bottom = '220px';
+        document.getElementById("toggle-debug-console").style.bottom = '210px';
+        document.getElementById("version-info").style.bottom = '210px';
     } else {
         document.getElementById("debug-console").style.display = 'none';
-        document.getElementById("toggle-debug-console").style.bottom = '10px';
+        document.getElementById("toggle-debug-console").style.bottom = '5px';
+        document.getElementById("version-info").style.bottom = '5px';
     }
 }
 
