@@ -15,6 +15,8 @@
                 document.write('<s' + 'cript src="js/' + name + '.js?v=' + clientVersion + '"></s' + 'cript>');
             }
 
+            loadJavaScript('classes/ClientState');
+            loadJavaScript('classes/Logger');
             loadJavaScript('dlb-client');
             loadJavaScript('dlb-controller');
         </script>

@@ -21,11 +21,13 @@ window.onload = function() {
     this.clientState.loadFromCookie();
     setDebugConsoleVisibility(this.clientState.debugConsoleVisible);
 
-    
-
     // Make a call to the Web Service for service info.
     callInfo();
 };
+
+// -----------------------------------------------------------
+// -------------------- DLB Client Access --------------------
+// -----------------------------------------------------------
 
 // ---------- Info ----------
 
@@ -37,46 +39,6 @@ function infoSuccess(data) {
 
 function infoError(data) {
 
-}
-
-// ---------- Debug Console ----------
-
-/**
- * Toggle the visibility of the Debug Console. If it was visible before, make it invisible, and the other way
- * around. Store the new state in the ClientState.
- * @param {*} event 
- */
-function toggleDebugConsole(event) {
-    if(this.clientState.debugConsoleVisible) {
-        setDebugConsoleVisibility(false);
-        this.clientState.debugConsoleVisible = false;
-    } else {
-        setDebugConsoleVisibility(true);
-        this.clientState.debugConsoleVisible = true;
-    }
-}
-
-/**
- * Sets the visibility of the Debug Console based on the given parameter 'visible'. If true, the Debug Console
- * will be made visible, and vice versa.
- * @param {boolean} visible 
- */
-function setDebugConsoleVisibility(visible) {
-    if(visible) {
-        document.getElementById("debug-console").style.display = 'inline';
-        document.getElementById("toggle-debug-console").style.bottom = '220px';
-    } else {
-        document.getElementById("debug-console").style.display = 'none';
-        document.getElementById("toggle-debug-console").style.bottom = '10px';
-    }
-}
-
-/**
- * Adds a given line of text to end of the debug console text area.
- * @param {String} line the line of text to add to the debug console textarea.
- */
-function logToDebugConsole(line, logLevel) {
-    document.getElementById("debug-textarea").value += "\n" + line;
 }
 
 // ---------- Login ----------
@@ -133,6 +95,48 @@ function loginError(data) {
     console.log(data);
 }
 
+// -----------------------------------------------------------------
+// -------------------- User Interface Handling --------------------
+// -----------------------------------------------------------------
+
+// ---------- Debug Console ----------
+
+/**
+ * Toggle the visibility of the Debug Console. If it was visible before, make it invisible, and the other way
+ * around. Store the new state in the ClientState.
+ * @param {*} event 
+ */
+function toggleDebugConsole(event) {
+    if(this.clientState.debugConsoleVisible) {
+        setDebugConsoleVisibility(false);
+        this.clientState.debugConsoleVisible = false;
+    } else {
+        setDebugConsoleVisibility(true);
+        this.clientState.debugConsoleVisible = true;
+    }
+}
+
+/**
+ * Sets the visibility of the Debug Console based on the given parameter 'visible'. If true, the Debug Console
+ * will be made visible, and vice versa.
+ * @param {boolean} visible 
+ */
+function setDebugConsoleVisibility(visible) {
+    if(visible) {
+        document.getElementById("debug-console").style.display = 'inline';
+        document.getElementById("toggle-debug-console").style.bottom = '220px';
+    } else {
+        document.getElementById("debug-console").style.display = 'none';
+        document.getElementById("toggle-debug-console").style.bottom = '10px';
+    }
+}
+
+// -----------------------------------------------------------
+// -------------------- Utility Functions --------------------
+// -----------------------------------------------------------
+
+// ---------- Cookie Storing / Loading ----------
+
 function setCookie(cname, cvalue, exdays) {
     const d = new Date();
     d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
@@ -153,72 +157,4 @@ function getCookie(cname) {
         }
     }
     return "";
-}
-
-/**
- * A ClientState object models the state of the Dialogue Branch Web Client.
- * It should be passed a reference to a custom Logger object so that it may
- * log its actions to the client's custom debug console.
- *
- * Author: Harm op den Akker (Fruit Tree Labs)
- */
-class ClientState {
-
-    constructor(logger) {
-        this._logger = logger;
-    }
-
-    /**
-     * @param {boolean} loggedIn 
-     */
-    set loggedIn(loggedIn) {
-        this._loggedIn = loggedIn;
-        this._logger.debug("ClientState updated: loggedIn = "+loggedIn);
-    }
-
-    get loggedIn() {
-        return this._loggedIn;
-    }
-
-    /**
-     * @param {boolean} debugConsoleVisible
-     */
-    set debugConsoleVisible(debugConsoleVisible) {
-        this._debugConsoleVisible = debugConsoleVisible;
-        setCookie('state.debugConsoleVisible',this._debugConsoleVisible,365);
-        this._logger.debug("ClientState updated: debugConsoleVisible = "+debugConsoleVisible);
-    }
-
-    get debugConsoleVisible() {
-        return this._debugConsoleVisible;
-    }
-
-    loadFromCookie() {
-        var cookieValue = getCookie('state.debugConsoleVisible');
-        if(cookieValue == "true") this._debugConsoleVisible = true;
-        else this._debugConsoleVisible = false;
-    }
-
-}
-
-class Logger {
-
-    constructor() {
-        this._logArea = document.getElementById("debug-textarea");
-    }
-
-    set logLevel(logLevel) {
-        this._logLevel = logLevel;
-    }
-
-    info(line) {
-        this._logArea.value += "\n" + "INFO: " + line;
-    }
-
-    debug(line) {
-        if(this._logLevel >= LOG_LEVEL_DEBUG) {
-            this._logArea.value += "\n" + "DEBUG: " + line;
-        }
-    }
-
 }
