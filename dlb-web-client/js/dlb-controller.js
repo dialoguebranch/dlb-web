@@ -12,10 +12,16 @@ window.onload = function() {
         toggleDebugConsole(e);
     });
 
+    // Initialize the logger
+    this.logger = new Logger();
+    this.logger.logLevel = LOG_LEVEL_DEBUG;
+
     // Initialize the ClientState object and take actions
-    this.clientState = new ClientState();
+    this.clientState = new ClientState(this.logger);
     this.clientState.loadFromCookie();
     setDebugConsoleVisibility(this.clientState.debugConsoleVisible);
+
+    
 
     // Make a call to the Web Service for service info.
     callInfo();
@@ -25,7 +31,7 @@ window.onload = function() {
 
 function infoSuccess(data) {
     if('build' in data) {
-        logToDebugConsole("Connected to Dialogue Branch Web Service v"+data.serviceVersion+", using protocol version "+data.protocolVersion+" (build: '"+data.build+"' running for "+data.upTime+").");
+        this.logger.info("Connected to Dialogue Branch Web Service v"+data.serviceVersion+", using protocol version "+data.protocolVersion+" (build: '"+data.build+"' running for "+data.upTime+").");
     }
 }
 
@@ -69,7 +75,7 @@ function setDebugConsoleVisibility(visible) {
  * Adds a given line of text to end of the debug console text area.
  * @param {String} line the line of text to add to the debug console textarea.
  */
-function logToDebugConsole(line) {
+function logToDebugConsole(line, logLevel) {
     document.getElementById("debug-textarea").value += "\n" + line;
 }
 
@@ -92,20 +98,21 @@ function loginSuccess(data) {
     // A successful login attempt results in a data containing a 'user', 'role', and 'token' value
     if('user' in data && 'token' in data) {
         var formRemember = document.getElementById("login-form-remember-box").checked;
-        logToDebugConsole("User '"+data.user+"' with role '"+data.role+"' successfully logged in, and received the following token: "+data.token);
+        this.logger.info("User '"+data.user+"' with role '"+data.role+"' successfully logged in, and received the following token: "+data.token);
         if(formRemember) {
             setCookie('user.name',data.user,365);
             setCookie('user.authToken',data.token,365);
             setCookie('user.role',data.role,365);
 
-            logToDebugConsole("Stored user info in cookie: user.name '"+getCookie('user.name')+"', user.role '"+getCookie('user.role')+"', user.authToken '"+getCookie('user.authToken')+"'.");
+            this.logger.info("Stored user info in cookie: user.name '"+getCookie('user.name')+"', user.role '"+getCookie('user.role')+"', user.authToken '"+getCookie('user.authToken')+"'.");
         }
+        this.clientState.loggedIn = true;
         document.getElementById("login-form").style.display = 'none';
 
    
     // Any other result indicates some type of error
     } else {
-        logToDebugConsole("Login attempt failed with errorcode '"+data.code+"' and message '"+data.message+"'.");
+        this.logger.info("Login attempt failed with errorcode '"+data.code+"' and message '"+data.message+"'.");
         console.log("Login attempt failed with errorcode '"+data.code+"' and message '"+data.message+"'.");
 
         if(data.code == "INVALID_CREDENTIALS") {
@@ -150,10 +157,28 @@ function getCookie(cname) {
 
 /**
  * A ClientState object models the state of the Dialogue Branch Web Client.
+ * It should be passed a reference to a custom Logger object so that it may
+ * log its actions to the client's custom debug console.
  *
  * Author: Harm op den Akker (Fruit Tree Labs)
  */
 class ClientState {
+
+    constructor(logger) {
+        this._logger = logger;
+    }
+
+    /**
+     * @param {boolean} loggedIn 
+     */
+    set loggedIn(loggedIn) {
+        this._loggedIn = loggedIn;
+        this._logger.debug("ClientState updated: loggedIn = "+loggedIn);
+    }
+
+    get loggedIn() {
+        return this._loggedIn;
+    }
 
     /**
      * @param {boolean} debugConsoleVisible
@@ -161,6 +186,7 @@ class ClientState {
     set debugConsoleVisible(debugConsoleVisible) {
         this._debugConsoleVisible = debugConsoleVisible;
         setCookie('state.debugConsoleVisible',this._debugConsoleVisible,365);
+        this._logger.debug("ClientState updated: debugConsoleVisible = "+debugConsoleVisible);
     }
 
     get debugConsoleVisible() {
@@ -171,6 +197,28 @@ class ClientState {
         var cookieValue = getCookie('state.debugConsoleVisible');
         if(cookieValue == "true") this._debugConsoleVisible = true;
         else this._debugConsoleVisible = false;
+    }
+
+}
+
+class Logger {
+
+    constructor() {
+        this._logArea = document.getElementById("debug-textarea");
+    }
+
+    set logLevel(logLevel) {
+        this._logLevel = logLevel;
+    }
+
+    info(line) {
+        this._logArea.value += "\n" + "INFO: " + line;
+    }
+
+    debug(line) {
+        if(this._logLevel >= LOG_LEVEL_DEBUG) {
+            this._logArea.value += "\n" + "DEBUG: " + line;
+        }
     }
 
 }

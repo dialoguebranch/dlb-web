@@ -1,3 +1,6 @@
+const LOG_LEVEL_INFO = 0;
+const LOG_LEVEL_DEBUG = 1;
+
 /**
  * Performs a call to the /info/all end-point. 
  */
