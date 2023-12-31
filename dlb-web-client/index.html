@@ -15,6 +15,7 @@
                 document.write('<s' + 'cript src="js/' + name + '.js?v=' + clientVersion + '"></s' + 'cript>');
             }
 
+            loadJavaScript('classes/User');
             loadJavaScript('classes/ClientState');
             loadJavaScript('classes/Logger');
             loadJavaScript('dlb-client');
@@ -30,6 +31,10 @@
         <div id="dlb-logo"></div>
 
         <div id="client-text">Web Client Test Application</div>
+
+        <div id="menu-bar">
+            <button type="button" id="menu-bar-list-dialogues">List Dialogues</button>
+        </div>
 
         <div id="login-form">
             <form name="loginform" onsubmit = "login()" method="post">
@@ -70,7 +75,7 @@
 
         <span id="version-info">Some version info here.</span>
         
-        <button type="button" id="toggle-debug-console">Toggle Debug</button> 
+        <button type="button" id="toggle-debug-console">Toggle Debug</button>
 
         <div id="debug-console">
             <textarea rows="15" cols="50" id="debug-textarea"></textarea>

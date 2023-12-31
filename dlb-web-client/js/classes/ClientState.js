@@ -25,6 +25,17 @@ class ClientState {
         return this._loggedIn;
     }
 
+    /**
+     * @param {User} user
+     */
+    set user(user) {
+        this._user = user;   
+    }
+
+    get user() {
+        return this._user;
+    }
+
     // ----- debugConsoleVisible
 
     /**

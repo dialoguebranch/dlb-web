@@ -68,6 +68,10 @@ function loginSuccess(data) {
     if('user' in data && 'token' in data) {
         var formRemember = document.getElementById("login-form-remember-box").checked;
         this.logger.info("User '"+data.user+"' with role '"+data.role+"' successfully logged in, and received the following token: "+data.token);
+        loggedInUser = new User(data.user,data.role,data.authToken);
+        this.clientState.user = loggedInUser;
+        this.clientState.loggedIn = true;
+        
         if(formRemember) {
             setCookie('user.name',data.user,365);
             setCookie('user.authToken',data.token,365);
@@ -75,8 +79,9 @@ function loginSuccess(data) {
 
             this.logger.info("Stored user info in cookie: user.name '"+getCookie('user.name')+"', user.role '"+getCookie('user.role')+"', user.authToken '"+getCookie('user.authToken')+"'.");
         }
-        this.clientState.loggedIn = true;
+        
         document.getElementById("login-form").style.display = 'none';
+        updateUIState();
 
    
     // Any other result indicates some type of error
@@ -110,8 +115,15 @@ function updateUIState() {
 
     // ----- Update Service Info
 
+    versionInfoBox = document.getElementById("version-info");
+
     if(this.clientState.serviceVersion != null) {
-        document.getElementById("version-info").innerHTML = "Connected to Dialogue Branch Web Service v" + this.clientState.serviceVersion + ".";
+        versionInfoBox.innerHTML = "Connected to Dialogue Branch Web Service v" + this.clientState.serviceVersion;
+        if(this.clientState.loggedIn) {
+            versionInfoBox.innerHTML += " as user '" + this.clientState.user.name + "'.";
+        } else {
+            versionInfoBox.innerHTML += ".";
+        }
     } else {
         document.getElementById("version-info").innerHTML = "Not connected.";
     }
@@ -119,9 +131,9 @@ function updateUIState() {
     setDebugConsoleVisibility(this.clientState.debugConsoleVisible);
 
     if(this.clientState.loggedIn) {
-        this.logger.debug("Updating UI State: A user is logged in.");
+        document.getElementById("menu-bar").style.display = 'block';
     } else {
-        this.logger.debug("Updating UI State: No user currently logged in.");
+        document.getElementById("menu-bar").style.display = 'none';
     }
 }
 
@@ -151,12 +163,12 @@ function toggleDebugConsole() {
 function setDebugConsoleVisibility(visible) {
     if(visible) {
         document.getElementById("debug-console").style.display = 'inline';
-        document.getElementById("toggle-debug-console").style.bottom = '210px';
-        document.getElementById("version-info").style.bottom = '210px';
+        document.getElementById("toggle-debug-console").style.bottom = '220px';
+        document.getElementById("version-info").style.bottom = '220px';
     } else {
         document.getElementById("debug-console").style.display = 'none';
-        document.getElementById("toggle-debug-console").style.bottom = '5px';
-        document.getElementById("version-info").style.bottom = '5px';
+        document.getElementById("toggle-debug-console").style.bottom = '10px';
+        document.getElementById("version-info").style.bottom = '10px';
     }
 }
 

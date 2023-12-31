@@ -35,12 +35,24 @@ body {
     font-weight: 700;
 }
 
+/* Menu Bar */
+
+#menu-bar-list-dialogues {
+    font-family: var(--font-family-sans);
+	background-color: var(--color-orange-dark);
+	color: white;
+	padding: 12px 30px;
+	border: none;
+	border-radius: 10px;
+	cursor: pointer;
+}
+
+/* Login Form */
+
 #login-form {
     background-color: var(--color-box);
     border-radius: 20px;
 }
-
-/* Login Form */
 
 input[type=text], input[type=password] {
 	font-family: var(--font-family-sans);
