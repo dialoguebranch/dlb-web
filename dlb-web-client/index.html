@@ -5,7 +5,7 @@
 
         <script type="text/javascript">
             // Updating the clientVersion will force re-loading all css and javascript includes (avoiding caching issues)
-            var clientVersion = '0.1.0';
+            var clientVersion = '0.1.1';
             document.write('<link rel="stylesheet" type="text/css" href="css/fonts.css?v=' + clientVersion + '" />');
             document.write('<link rel="stylesheet" type="text/css" href="css/style.css?v=' + clientVersion + '" />');
             document.write('<link rel="stylesheet" type="text/css" href="css/positioning.css?v=' + clientVersion + '" />');
@@ -18,7 +18,8 @@
             loadJavaScript('classes/User');
             loadJavaScript('classes/ClientState');
             loadJavaScript('classes/Logger');
-            loadJavaScript('dlb-client');
+            loadJavaScript('classes/ServerInfo');
+            loadJavaScript('classes/DialogueBranchClient');
             loadJavaScript('dlb-controller');
         </script>
 

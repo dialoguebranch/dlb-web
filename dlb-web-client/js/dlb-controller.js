@@ -24,13 +24,19 @@ window.onload = function() {
     this.logger = new Logger();
     this.logger.logLevel = LOG_LEVEL_DEBUG;
 
+    this.dialogueBranchClient = new DialogueBranchClient("http://localhost:8080/dlb-web-service/v1");
+
     // Initialize the ClientState object and take actions
     this.clientState = new ClientState(this.logger);
     this.clientState.loadFromCookie();
-    
+
+    // If user info was loaded from Cookie
+    if(this.clientState.user != null) {
+        validateAuthToken(this.clientState.user.authToken);
+    }
 
     // Make a call to the Web Service for service info.
-    callInfo();
+    this.dialogueBranchClient.callInfo();
 
     updateUIState();
 };
@@ -41,19 +47,10 @@ window.onload = function() {
 
 // ---------- Info ----------
 
-function infoSuccess(data) {
-    if('build' in data) {
-        this.clientState.serviceVersion = data.serviceVersion;
-        this.clientState.protocolVersion = data.protocolVersion;
-        this.clientState.build = data.build;
-        this.clientState.upTime = data.upTime;
-        this.logger.info("Connected to Dialogue Branch Web Service v"+data.serviceVersion+", using protocol version "+data.protocolVersion+" (build: '"+data.build+"' running for "+data.upTime+").");
-        updateUIState();
-    }
-}
-
-function infoError(data) {
-
+function customInfoSuccess() {
+    serverInfo = this.dialogueBranchClient.serverInfo;
+    this.logger.info("Connected to Dialogue Branch Web Service v"+serverInfo.serviceVersion+", using protocol version "+serverInfo.protocolVersion+" (build: '"+serverInfo.build+"' running for "+serverInfo.upTime+").");
+    updateUIState();
 }
 
 // ---------- Login ----------
@@ -68,10 +65,10 @@ function actionLogin(event) {
     var formUsername = document.getElementById("login-form-username-field").value;
     var formPassword = document.getElementById("login-form-password-field").value;
 
-    callLogin(formUsername, formPassword, 0);
+    this.dialogueBranchClient.callLogin(formUsername, formPassword, 0);
 }
 
-function loginSuccess(data) {
+function customLoginSuccess(data) {
     // A successful login attempt results in a data containing a 'user', 'role', and 'token' value
     if('user' in data && 'token' in data) {
         var formRemember = document.getElementById("login-form-remember-box").checked;
@@ -108,7 +105,7 @@ function loginSuccess(data) {
     }
 }
 
-function loginError(data) {
+function customLoginError(data) {
     console.log("loginError called with the following data: ");
     console.log(data);
 }
@@ -123,8 +120,9 @@ function updateUIState() {
 
     versionInfoBox = document.getElementById("version-info");
 
-    if(this.clientState.serviceVersion != null) {
-        versionInfoBox.innerHTML = "Connected to Dialogue Branch Web Service v" + this.clientState.serviceVersion;
+    if(this.dialogueBranchClient.serverInfo != null) {
+        serverInfo = this.dialogueBranchClient.serverInfo;
+        versionInfoBox.innerHTML = "Connected to Dialogue Branch Web Service v" + serverInfo.serviceVersion;
         if(this.clientState.loggedIn) {
             versionInfoBox.innerHTML += " as user '" + this.clientState.user.name + "'.";
         } else {
@@ -194,6 +192,7 @@ function actionLogout() {
 }
 
 // ---------- List Dialogues ----------
+
 function actionListDialogues() {
 
 }

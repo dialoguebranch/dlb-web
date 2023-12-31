@@ -25,6 +25,8 @@ class ClientState {
         return this._loggedIn;
     }
 
+    // ----- User
+
     /**
      * @param {User} user
      */
@@ -34,6 +36,19 @@ class ClientState {
 
     get user() {
         return this._user;
+    }
+
+    // ----- ServerInfo
+
+    /**
+     * @param {ServerInfo} serverInfo
+     */
+    set serverInfo(serverInfo) {
+        this._serverInfo = serverInfo;   
+    }
+
+    get serverInfo() {
+        return this._serverInfo;
     }
 
     // ----- debugConsoleVisible
@@ -51,56 +66,22 @@ class ClientState {
         return this._debugConsoleVisible;
     }
 
-    // ----- serviceVersion
-
-    set serviceVersion(serviceVersion) {
-        this._serviceVersion = serviceVersion;
-        this._logger.debug("ClientState updated: serviceVersion = " + serviceVersion);
-    }
-
-    get serviceVersion() {
-        return this._serviceVersion;
-    }
-
-    // ----- protocolVersion
-
-    set protocolVersion(protocolVersion) {
-        this._protocolVersion = protocolVersion;
-        this._logger.debug("ClientState updated: protocolVersion = " + protocolVersion);
-    }
-
-    get protocolVersion() {
-        return this._protocolVersion;
-    }
-
-    // ----- build
-
-    set build(build) {
-        this._build = build;
-        this._logger.debug("ClientState updated: build = " + build);
-    }
-
-    get build() {
-        return this._build;
-    }
-
-    // ----- upTime
-
-    set upTime(upTime) {
-        this._upTime = upTime;
-        this._logger.debug("ClientState updated: upTime = " + upTime);
-    }
-
-    get upTime() {
-        return this._upTime;
-    }
-
     // ----- Initialize from Cookie
 
     loadFromCookie() {
         var cookieValue = getCookie('state.debugConsoleVisible');
         if(cookieValue == "true") this._debugConsoleVisible = true;
         else this._debugConsoleVisible = false;
+
+        var cookieUserName = getCookie('user.name');
+        var cookieUserRole = getCookie('user.role');
+        var cookieUserAuthToken = getCookie('user.authToken');
+
+        // All variables are non-empty / non-null
+        if(cookieUserName && cookieUserRole && cookieUserAuthToken) {
+            user = new User(cookieUserName, cookieUserRole, cookieUserAuthToken);
+            this._user = user;
+        }
     }
 
 }
