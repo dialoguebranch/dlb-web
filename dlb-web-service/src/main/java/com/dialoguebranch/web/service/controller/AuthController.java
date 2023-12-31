@@ -30,6 +30,7 @@ package com.dialoguebranch.web.service.controller;
 import com.dialoguebranch.web.service.*;
 import com.dialoguebranch.web.service.controller.schema.LoginParametersPayload;
 import com.dialoguebranch.web.service.controller.schema.LoginResultPayload;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import nl.rrd.utils.AppComponents;
 import nl.rrd.utils.datetime.DateTimeUtils;
 import nl.rrd.utils.exception.ParseException;
@@ -161,6 +162,35 @@ public class AuthController {
 				userCredentials.getUsername(),
 				userCredentials.getRole(),
 				token);
+	}
+
+	@SecurityRequirement(name = "X-Auth-Token")
+	@Operation(summary = "Validate a given authentication token",
+		description = "If your client application has a stored authentication token you may use" +
+			"this method to check whether or not that is a valid token. This method will either" +
+			"return 'true', or throw an Authentication error.")
+	@RequestMapping(value="/validate", method= RequestMethod.POST)
+	public boolean validate(
+		HttpServletRequest request,
+		HttpServletResponse response,
+
+		@Parameter(hidden = true, description = "API Version to use, e.g. '1'")
+		@PathVariable(value = "version")
+		String version
+	) throws Exception {
+
+		// If no versionName is provided, or versionName is empty, assume the latest version
+		if (version == null || version.isEmpty()) {
+			version = ProtocolVersion.getLatestVersion().versionName();
+		}
+
+		// Log this call to the service log
+		logger.info("POST /v" + version + "/auth/validate");
+
+		synchronized (AUTH_LOCK) {
+			QueryRunner.validateToken(request,application);
+			return true;
+		}
 	}
 
 	private void validateForbiddenQueryParams(HttpServletRequest request, String... paramNames)
