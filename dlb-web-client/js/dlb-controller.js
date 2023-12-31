@@ -23,16 +23,19 @@ window.onload = function() {
     // Initialize the logger
     this.logger = new Logger();
     this.logger.logLevel = LOG_LEVEL_DEBUG;
+    this.logger.info("Initialized Logger with log level '" + dialogueBranchConfig.logLevel + "'.");
 
-    this.dialogueBranchClient = new DialogueBranchClient("http://localhost:8080/dlb-web-service/v1");
+    this.dialogueBranchClient = new DialogueBranchClient(dialogueBranchConfig.baseUrl);
+    this.logger.info("Initalized DialogueBranchClient for base url '"+ dialogueBranchConfig.baseUrl + "'.");
 
     // Initialize the ClientState object and take actions
     this.clientState = new ClientState(this.logger);
     this.clientState.loadFromCookie();
+    console.log(this.clientState);
 
-    // If user info was loaded from Cookie
+    // If user info was loaded from Cookie, validate the authToken that was found
     if(this.clientState.user != null) {
-        validateAuthToken(this.clientState.user.authToken);
+        this.dialogueBranchClient.callAuthValidate(this.clientState.user.authToken);
     }
 
     // Make a call to the Web Service for service info.
@@ -73,7 +76,7 @@ function customLoginSuccess(data) {
     if('user' in data && 'token' in data) {
         var formRemember = document.getElementById("login-form-remember-box").checked;
         this.logger.info("User '"+data.user+"' with role '"+data.role+"' successfully logged in, and received the following token: "+data.token);
-        loggedInUser = new User(data.user,data.role,data.authToken);
+        loggedInUser = new User(data.user,data.role,data.token);
         this.clientState.user = loggedInUser;
         this.clientState.loggedIn = true;
         
@@ -227,4 +230,19 @@ function getCookie(cname) {
         }
     }
     return "";
+}
+
+function customAuthValidateSuccess(data) {
+    if(data == true) {
+        this.clientState.loggedIn = true;
+    
+    // There is an invalid authToken in cookie, delete all info and assume user logged out
+    } else {
+        this.clientState.loggedIn = false;
+        this.clientState.user = null;
+        deleteCookie('user.name');
+        deleteCookie('user.authToken');
+        deleteCookie('user.role');
+    }
+    updateUIState();
 }

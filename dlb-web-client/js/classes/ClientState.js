@@ -79,8 +79,9 @@ class ClientState {
 
         // All variables are non-empty / non-null
         if(cookieUserName && cookieUserRole && cookieUserAuthToken) {
-            user = new User(cookieUserName, cookieUserRole, cookieUserAuthToken);
+            var user = new User(cookieUserName, cookieUserRole, cookieUserAuthToken);
             this._user = user;
+            this._loggedIn = true;
         }
     }
 

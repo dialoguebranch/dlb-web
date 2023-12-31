@@ -9,7 +9,6 @@ class DialogueBranchClient {
 
     constructor(baseUrl) {
         this._baseUrl = baseUrl;
-        console.log("DLB-CLIENT: Created DialogueBranchClient for baseUrl '" + baseUrl + "'.");
     }
 
     // ---------------------------------------
@@ -22,6 +21,10 @@ class DialogueBranchClient {
 
     get baseUrl() {
         return this._baseUrl;
+    }
+
+    get user() {
+        return this._user;
     }
 
     // ------------------------------------------
@@ -135,6 +138,9 @@ class DialogueBranchClient {
     }
 
     loginSuccess(data) {
+        if('user' in data && 'token' in data) {    
+            this._user = new User(data.user,data.role,data.token);
+        }
         customLoginSuccess(data);
     }
 
@@ -149,24 +155,37 @@ class DialogueBranchClient {
     /**
      * Performs a call to the /auth/validate end-point. 
      */
-    callAuthValidate() {
-        const infoUrl = 'http://localhost:8080/dlb-web-service/v1/auth/validate';
+    callAuthValidate(tokenToValidate) {
+        var url = this._baseUrl + "/auth/validate";
 
-        fetch(infoUrl, {
+        fetch(url, {
             method: "POST",
             headers: {
-                'X-Auth-Token': this._authToken,
+                'X-Auth-Token': tokenToValidate,
                 Accept: "application/json, text/plain, */*",
                 "Content-Type": "application/json",
             }
         })
         .then((response) => response.json())
         .then((data) => { 
-            authValidateSuccess(data);
+            this.authValidateSuccess(data);
         })
         .catch((err) => {
-            authValidateError(err);
+            this.authValidateError(err);
         });
+    }
+
+    authValidateSuccess(data) {
+        console.log("DLB-Client: calling auth validate success.");
+        console.log(data);
+        if(data == true) {
+            console.log("validated!");
+        }
+        customAuthValidateSuccess(data);
+    }
+
+    authValidateError(err) {
+        console.log("DLB-Client: calling auth validate error.");
     }
 
 }
