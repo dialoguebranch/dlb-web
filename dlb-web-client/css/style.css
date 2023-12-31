@@ -37,15 +37,6 @@ body {
 
 /* Menu Bar */
 
-#menu-bar-list-dialogues {
-    font-family: var(--font-family-sans);
-	background-color: var(--color-orange-dark);
-	color: white;
-	padding: 12px 30px;
-	border: none;
-	border-radius: 10px;
-	cursor: pointer;
-}
 
 /* Login Form */
 
@@ -99,8 +90,8 @@ td.login-table-labels {
     background-color: rgb(156, 141, 141);
 }
 
-#toggle-debug-console {
-    font-family: var(--font-family-sans);
+.orange-button {
+	font-family: var(--font-family-sans);
 	background-color: var(--color-orange-dark);
 	color: white;
 	padding: 12px 60px;

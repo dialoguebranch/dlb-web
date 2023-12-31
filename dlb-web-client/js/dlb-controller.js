@@ -5,11 +5,19 @@
 window.onload = function() {
 
     document.getElementById("login-button").addEventListener("click", (e)=> {
-        loginEventHandler(e);
+        actionLogin(e);
     });
 
     document.getElementById("toggle-debug-console").addEventListener("click", (e)=> {
-        toggleDebugConsole();
+        actionToggleDebugConsole();
+    });
+
+    document.getElementById("menu-bar-logout").addEventListener("click", (e)=> {
+        actionLogout();
+    });
+
+    document.getElementById("menu-bar-list-dialogues").addEventListener("click", (e)=> {
+        actionListDialogues();
     });
 
     // Initialize the logger
@@ -50,7 +58,7 @@ function infoError(data) {
 
 // ---------- Login ----------
 
-function loginEventHandler(event) {
+function actionLogin(event) {
     event.preventDefault();
 
     // Remove any possible previous error indications
@@ -80,9 +88,7 @@ function loginSuccess(data) {
             this.logger.info("Stored user info in cookie: user.name '"+getCookie('user.name')+"', user.role '"+getCookie('user.role')+"', user.authToken '"+getCookie('user.authToken')+"'.");
         }
         
-        document.getElementById("login-form").style.display = 'none';
         updateUIState();
-
    
     // Any other result indicates some type of error
     } else {
@@ -132,8 +138,10 @@ function updateUIState() {
 
     if(this.clientState.loggedIn) {
         document.getElementById("menu-bar").style.display = 'block';
+        document.getElementById("login-form").style.display = 'none';
     } else {
         document.getElementById("menu-bar").style.display = 'none';
+        document.getElementById("login-form").style.display = 'block';
     }
 }
 
@@ -145,7 +153,7 @@ function updateUIState() {
  * around. Store the new state in the ClientState.
  * @param {*} event 
  */
-function toggleDebugConsole() {
+function actionToggleDebugConsole() {
     if(this.clientState.debugConsoleVisible) {
         setDebugConsoleVisibility(false);
         this.clientState.debugConsoleVisible = false;
@@ -172,6 +180,24 @@ function setDebugConsoleVisibility(visible) {
     }
 }
 
+// ---------- Logout ----------
+
+function actionLogout() {
+    this.logger.info("Logging out user.");
+    deleteCookie('user.name');
+    deleteCookie('user.authToken');
+    deleteCookie('user.role');
+
+    this.clientState.user = null;
+    this.clientState.loggedIn = false;
+    updateUIState();
+}
+
+// ---------- List Dialogues ----------
+function actionListDialogues() {
+
+}
+
 // -----------------------------------------------------------
 // -------------------- Utility Functions --------------------
 // -----------------------------------------------------------
@@ -183,6 +209,10 @@ function setCookie(cname, cvalue, exdays) {
     d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
     let expires = "expires="+d.toUTCString();
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+function deleteCookie(cname) {
+    setCookie(cname,"",0);
 }
   
 function getCookie(cname) {
