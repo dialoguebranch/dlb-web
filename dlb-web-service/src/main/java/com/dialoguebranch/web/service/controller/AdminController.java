@@ -1,0 +1,129 @@
+/*
+ *
+ *                   Copyright (c) 2023 Fruit Tree Labs (www.fruittreelabs.com)
+ *
+ *
+ *     This material is part of the DialogueBranch Platform, and is covered by the MIT License
+ *                                        as outlined below.
+ *
+ *                                            ----------
+ *
+ * Copyright (c) 2023 Fruit Tree Labs (www.fruittreelabs.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+package com.dialoguebranch.web.service.controller;
+
+import com.dialoguebranch.model.FileDescriptor;
+import com.dialoguebranch.model.FileType;
+import com.dialoguebranch.model.protocol.NullableResponse;
+import com.dialoguebranch.web.service.Application;
+import com.dialoguebranch.web.service.ProtocolVersion;
+import com.dialoguebranch.web.service.QueryRunner;
+import com.dialoguebranch.web.service.UserCredentials;
+import com.dialoguebranch.web.service.controller.schema.DialogueListPayload;
+import com.dialoguebranch.web.service.exception.ErrorCode;
+import com.dialoguebranch.web.service.exception.UnauthorizedException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import nl.rrd.utils.AppComponents;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Controller for the /admin/... end-points of the DialogueBranch Web Service.
+ *
+ * @author Harm op den Akker (Fruit Tree Labs)
+ */
+@RestController
+@SecurityRequirement(name = "X-Auth-Token")
+@RequestMapping(value = {"/v{version}/admin", "/admin"})
+@Tag(name = "6. Admin", description = "End-points for administrative control of the Dialogue " +
+        "Branch Web Service.")
+public class AdminController {
+
+    @Autowired
+    Application application;
+
+    private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
+
+    // -------------------------------------------------------- //
+    // ---------- END-POINT: "/admin/list-dialogues" ---------- //
+    // -------------------------------------------------------- //
+
+    @Operation(
+        summary = "Retrieve a list of all available dialogues",
+        description = "...")
+    @RequestMapping(value="/list-dialogues", method= RequestMethod.GET)
+    public NullableResponse<DialogueListPayload> listDialogues(
+        HttpServletRequest request,
+        HttpServletResponse response,
+
+        @Parameter(hidden = true, description = "API Version to use, e.g. '1'")
+        @PathVariable(value = "version")
+        String version
+    ) throws Exception {
+
+        // If no versionName is provided, or versionName is empty, assume the latest version
+        if (version == null || version.isEmpty()) {
+            version = ProtocolVersion.getLatestVersion().versionName();
+        }
+
+        // Log this call to the service log
+        String logInfo = "GET /v" + version + "/admin/list-dialogues";
+        logger.info(logInfo);
+
+        UserCredentials userCredentials = QueryRunner.validateToken(request,application);
+        if(userCredentials.getRole().equals(UserCredentials.USER_ROLE_ADMIN)) {
+            return doListDialogues();
+        } else {
+            throw new UnauthorizedException(ErrorCode.INSUFFICIENT_PRIVILEGES,
+                    "This user does not have the rights to access this function.");
+        }
+    }
+
+    /**
+     * Processes a call to the /admin/list-dialogues end-point.
+     *
+     */
+    private NullableResponse<DialogueListPayload> doListDialogues() {
+        List<FileDescriptor> files = application.getApplicationManager().getAvailableDialogues();
+
+        List<String> scriptNames = new ArrayList<>();
+
+        for(FileDescriptor fileDescriptor : files) {
+            if(fileDescriptor.getFileType().equals(FileType.SCRIPT)) {
+                scriptNames.add(fileDescriptor.getDialogueName());
+            }
+        }
+
+        DialogueListPayload payload = new DialogueListPayload(scriptNames.toArray(new String[0]));
+        return new NullableResponse<>(payload);
+    }
+
+}

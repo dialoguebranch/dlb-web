@@ -35,6 +35,7 @@ window.onload = function() {
 
     // If user info was loaded from Cookie, validate the authToken that was found
     if(this.clientState.user != null) {
+        this.dialogueBranchClient.user = this.clientState.user;
         this.dialogueBranchClient.callAuthValidate(this.clientState.user.authToken);
     }
 
@@ -140,6 +141,11 @@ function updateUIState() {
     if(this.clientState.loggedIn) {
         document.getElementById("menu-bar").style.display = 'block';
         document.getElementById("login-form").style.display = 'none';
+        if(this.clientState.user.role == "admin") {
+            document.getElementById("menu-bar-list-dialogues").style.display = "inline";
+        } else {
+            document.getElementById("menu-bar-list-dialogues").style.display = "none";
+        }
     } else {
         document.getElementById("menu-bar").style.display = 'none';
         document.getElementById("login-form").style.display = 'block';
@@ -191,13 +197,14 @@ function actionLogout() {
 
     this.clientState.user = null;
     this.clientState.loggedIn = false;
+    this.dialogueBranchClient.user = null;
     updateUIState();
 }
 
 // ---------- List Dialogues ----------
 
 function actionListDialogues() {
-
+    this.dialogueBranchClient.callListDialogues();
 }
 
 // -----------------------------------------------------------
@@ -240,6 +247,7 @@ function customAuthValidateSuccess(data) {
     } else {
         this.clientState.loggedIn = false;
         this.clientState.user = null;
+        this.dialogueBranchClient.user = null;
         deleteCookie('user.name');
         deleteCookie('user.authToken');
         deleteCookie('user.role');

@@ -30,7 +30,8 @@ package com.dialoguebranch.web.service.exception;
 /**
  * Possible error codes that may be returned by the DialogueBranch Web Service.
  * 
- * @author Dennis Hofs (RRD)
+ * @author Dennis Hofs (Roessingh Research and Development)
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 public class ErrorCode {
 	public static final String AUTH_TOKEN_NOT_FOUND = "AUTH_TOKEN_NOT_FOUND";
@@ -38,4 +39,5 @@ public class ErrorCode {
 	public static final String AUTH_TOKEN_EXPIRED = "AUTH_TOKEN_EXPIRED";
 	public static final String INVALID_INPUT = "INVALID_INPUT";
 	public static final String INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
+	public static final String INSUFFICIENT_PRIVILEGES = "INSUFFICIENT_PRIVILEGES";
 }

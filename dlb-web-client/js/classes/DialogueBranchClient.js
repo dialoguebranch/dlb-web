@@ -27,6 +27,10 @@ class DialogueBranchClient {
         return this._user;
     }
 
+    set user(user) {
+        this._user = user;
+    }
+
     // ------------------------------------------
     // ---------- End-Point: /info/all ----------
     // ------------------------------------------
@@ -186,6 +190,38 @@ class DialogueBranchClient {
 
     authValidateError(err) {
         console.log("DLB-Client: calling auth validate error.");
+    }
+
+    // ------------------------------------------------------
+    // ---------- End-Point: /admin/list-dialogues ----------
+    // ------------------------------------------------------
+
+    callListDialogues() {
+        var url = this._baseUrl + "/admin/list-dialogues";
+
+        fetch(url, {
+            method: "GET",
+            headers: {
+                'X-Auth-Token': this._user.authToken,
+                Accept: "application/json, text/plain, */*",
+                "Content-Type": "application/json",
+            }
+        })
+        .then((response) => response.json())
+        .then((data) => { 
+            this.listDialoguesSuccess(data);
+        })
+        .catch((err) => {
+            this.listDialoguesError(err);
+        });
+    }
+
+    listDialoguesSuccess(data) {
+        console.log(data);
+    }
+
+    listDialoguesError(err) {
+        console.log(err);
     }
 
 }

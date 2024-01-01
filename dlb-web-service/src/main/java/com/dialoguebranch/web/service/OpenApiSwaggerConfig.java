@@ -73,21 +73,24 @@ public class OpenApiSwaggerConfig {
 		openAPI.addServersItem(server);
 
 		openAPI.components(new Components().addSecuritySchemes("X-Auth-Token",
-				new SecurityScheme()
-						.name("X-Auth-Token")
-						.scheme("basic")
-						.type(SecurityScheme.Type.APIKEY)
-						.in(SecurityScheme.In.HEADER)
+			new SecurityScheme()
+				.name("X-Auth-Token")
+				.scheme("basic")
+				.type(SecurityScheme.Type.APIKEY)
+				.in(SecurityScheme.In.HEADER)
 
 		));
 
 		openAPI.info(
-				new Info()
-						.title("DialogueBranch Web Service API")
-						.description("The DialogueBranch Web Service API gives authorized clients the ability to start-, and sequentially execute DialogueBranch dialogues as well to access DialogueBranch Variable data.")
-						.version("v1.0.0")
-						.contact(new Contact().email("info@dialoguebranch.com").name("DialogueBranch Platform Support"))
-						.license(new License().name("MIT").url("https://opensource.org/licenses/MIT")));
+			new Info()
+				.title("DialogueBranch Web Service API")
+				.description("The DialogueBranch Web Service API gives authorized clients the " +
+						"ability to start-, and sequentially execute DialogueBranch dialogues as " +
+						"well to access DialogueBranch Variable data.")
+				.version("v1.0.0")
+				.contact(new Contact().email("info@dialoguebranch.com")
+						.name("DialogueBranch Platform Support"))
+				.license(new License().name("MIT").url("https://opensource.org/licenses/MIT")));
 
 		return openAPI;
 	}
@@ -99,7 +102,8 @@ public class OpenApiSwaggerConfig {
 					"/v{version}/variables/*",
 					"/v{version}/dialogue/*",
 					"/v{version}/auth/*",
-					"/v{version}/log/*")
+					"/v{version}/log/*",
+					"/v{version}/admin/*")
 			//.pathsToExclude("/v{version}/**") <-- This must be a bug, because it doesn't let /variables/ come through
 			.build();
 	}
