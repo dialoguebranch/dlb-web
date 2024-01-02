@@ -45,17 +45,9 @@ window.onload = function() {
     updateUIState();
 };
 
-// -----------------------------------------------------------
-// -------------------- DLB Client Access --------------------
-// -----------------------------------------------------------
-
-// ---------- Info ----------
-
-function customInfoSuccess() {
-    serverInfo = this.dialogueBranchClient.serverInfo;
-    this.logger.info("Connected to Dialogue Branch Web Service v"+serverInfo.serviceVersion+", using protocol version "+serverInfo.protocolVersion+" (build: '"+serverInfo.build+"' running for "+serverInfo.upTime+").");
-    updateUIState();
-}
+// ------------------------------------------------------
+// -------------------- User Actions --------------------
+// ------------------------------------------------------
 
 // ---------- Login ----------
 
@@ -71,6 +63,68 @@ function actionLogin(event) {
 
     this.dialogueBranchClient.callLogin(formUsername, formPassword, 0);
 }
+
+// ---------- Logout ----------
+
+function actionLogout() {
+    this.logger.info("Logging out user.");
+    deleteCookie('user.name');
+    deleteCookie('user.authToken');
+    deleteCookie('user.role');
+
+    this.clientState.user = null;
+    this.clientState.loggedIn = false;
+    this.dialogueBranchClient.user = null;
+    updateUIState();
+}
+
+// ---------- Toggle Debug Console ----------
+
+/**
+ * Toggle the visibility of the Debug Console. If it was visible before, make it invisible, and the other way
+ * around. Store the new state in the ClientState.
+ */
+function actionToggleDebugConsole() {
+    if(this.clientState.debugConsoleVisible) {
+        setDebugConsoleVisibility(false);
+        this.clientState.debugConsoleVisible = false;
+    } else {
+        setDebugConsoleVisibility(true);
+        this.clientState.debugConsoleVisible = true;
+    }
+}
+
+// ---------- List Dialogues ----------
+
+function actionListDialogues() {
+    this.dialogueBranchClient.callListDialogues();
+}
+
+// ---------- Start Dialogue ----------
+
+function actionStartDialogue(dialogueName) {
+    this.logger.info("Starting dialogue '" + dialogueName + "'.");
+
+    this.dialogueBranchClient.callStartDialogue(dialogueName,"en");
+}
+
+// ----------------------------------------------------------------------
+// -------------------- Handling DLB Client Response --------------------
+// ----------------------------------------------------------------------
+
+// ---------- Info ----------
+
+function customInfoSuccess() {
+    serverInfo = this.dialogueBranchClient.serverInfo;
+    this.logger.info("Connected to Dialogue Branch Web Service v"+serverInfo.serviceVersion+", using protocol version "+serverInfo.protocolVersion+" (build: '"+serverInfo.build+"' running for "+serverInfo.upTime+").");
+    updateUIState();
+}
+
+function customInfoError(err) {
+    this.logger.error("Requesting server info failed with the following result: "+err);
+}
+
+// ---------- Login ----------
 
 function customLoginSuccess(data) {
     // A successful login attempt results in a data containing a 'user', 'role', and 'token' value
@@ -109,9 +163,69 @@ function customLoginSuccess(data) {
     }
 }
 
-function customLoginError(data) {
-    console.log("loginError called with the following data: ");
-    console.log(data);
+function customLoginError(err) {
+    this.logger.error("Login failed with the following result: "+err);
+}
+
+// ---------- Validate Authentication ----------
+
+function customAuthValidateSuccess(data) {
+    if(data == true) {
+        this.clientState.loggedIn = true;
+    
+    // There is an invalid authToken in cookie, delete all info and assume user logged out
+    } else {
+        this.clientState.loggedIn = false;
+        this.clientState.user = null;
+        this.dialogueBranchClient.user = null;
+        deleteCookie('user.name');
+        deleteCookie('user.authToken');
+        deleteCookie('user.role');
+    }
+    updateUIState();
+}
+
+function customAuthValidateError(err) {
+    this.logger.error("Validating authentication token failed with the following result: "+err);
+}
+
+// ---------- List Dialogues ----------
+
+function customListDialoguesSuccess(data) {
+    if('dialogueNames' in data) {
+
+        var dialogueBrowserContentField = document.getElementById("dialogue-browser-content");
+
+        for(var i=0; i< data.dialogueNames.length; i++) {
+            dialogueBrowserContentField.innerHTML += "<br/>" 
+                + "<span class=\"dialogue-browser-entry\">" 
+                + "<a id=\"myLink\" title=\"Click to do something\" href=\"#\" onclick=\"actionStartDialogue('" 
+                + data.dialogueNames[i] 
+                + "');return false;\">" 
+                + data.dialogueNames[i] 
+                + "</a></span>";
+        }
+    }
+}
+
+function customListDialoguesError(err) {
+    this.logger.error("Retrieving dialogue list failed with the following result: "+err);
+}
+
+// ---------- Start Dialogue
+
+function customStartDialogueSuccess(data) {
+    if('dialogue' in data) {
+        console.log(data.dialogue);
+        console.log(data.node);
+        console.log(data.loggedDialogueId);
+        console.log(data.loggedInteractionIndex);
+        console.log(data.speaker);
+    }
+}
+
+function customStartDialogueError(err) {
+    this.logger.error("Starting dialogue failed with the following result: "+err);
 }
 
 // -----------------------------------------------------------------
@@ -155,20 +269,6 @@ function updateUIState() {
 
 // ---------- Debug Console ----------
 
-/**
- * Toggle the visibility of the Debug Console. If it was visible before, make it invisible, and the other way
- * around. Store the new state in the ClientState.
- * @param {*} event 
- */
-function actionToggleDebugConsole() {
-    if(this.clientState.debugConsoleVisible) {
-        setDebugConsoleVisibility(false);
-        this.clientState.debugConsoleVisible = false;
-    } else {
-        setDebugConsoleVisibility(true);
-        this.clientState.debugConsoleVisible = true;
-    }
-}
 
 /**
  * Sets the visibility of the Debug Console based on the given parameter 'visible'. If true, the Debug Console
@@ -185,26 +285,6 @@ function setDebugConsoleVisibility(visible) {
         document.getElementById("toggle-debug-console").style.bottom = '10px';
         document.getElementById("version-info").style.bottom = '10px';
     }
-}
-
-// ---------- Logout ----------
-
-function actionLogout() {
-    this.logger.info("Logging out user.");
-    deleteCookie('user.name');
-    deleteCookie('user.authToken');
-    deleteCookie('user.role');
-
-    this.clientState.user = null;
-    this.clientState.loggedIn = false;
-    this.dialogueBranchClient.user = null;
-    updateUIState();
-}
-
-// ---------- List Dialogues ----------
-
-function actionListDialogues() {
-    this.dialogueBranchClient.callListDialogues();
 }
 
 // -----------------------------------------------------------
@@ -237,20 +317,4 @@ function getCookie(cname) {
         }
     }
     return "";
-}
-
-function customAuthValidateSuccess(data) {
-    if(data == true) {
-        this.clientState.loggedIn = true;
-    
-    // There is an invalid authToken in cookie, delete all info and assume user logged out
-    } else {
-        this.clientState.loggedIn = false;
-        this.clientState.user = null;
-        this.dialogueBranchClient.user = null;
-        deleteCookie('user.name');
-        deleteCookie('user.authToken');
-        deleteCookie('user.role');
-    }
-    updateUIState();
 }

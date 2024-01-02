@@ -1,6 +1,6 @@
 :root {
-	--font-family-serif:'Roboto Slab',Avenir Next W02,system-ui,-apple-system,Segoe UI,Roboto;
-	--font-family-logo:'Natural Log';
+	--font-family-serif: 'Roboto Slab',Avenir Next W02,system-ui,-apple-system,Segoe UI,Roboto;
+	--font-family-logo: 'Natural Log';
 
     /* Definition of colors */
     --color-black: rgb(0,0,0);
@@ -99,4 +99,13 @@ td.login-table-labels {
 	border-radius: 10px;
 	cursor: pointer;
 	margin-top: 8px;
+}
+
+.medium-title {
+    font-weight: 400;
+}
+
+.dialogue-browser-entry {
+	font-size: 10px;
+	font-weight: 700;
 }
