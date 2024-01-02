@@ -57,7 +57,7 @@ import java.util.List;
 @SecurityRequirement(name = "X-Auth-Token")
 @RequestMapping(value = {"/v{version}/log", "/log"})
 @Tag(name = "4. Logging", description = "End-points for retrieving information about logged" +
-		" dialogues")
+		" dialogues.")
 public class LogController {
 
 	@Autowired
@@ -70,7 +70,7 @@ public class LogController {
 	// --------------------------------------------------- //
 
 	@Operation(
-		summary = "Retrieve all known logging information for a given session",
+		summary = "Retrieve all known logging information for a given session.",
 		description = "This method will retrieve all know logging information associated with " +
 				"the given sessionId")
 	@RequestMapping(value="/get-session", method= RequestMethod.GET)

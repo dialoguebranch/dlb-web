@@ -65,7 +65,7 @@ public class AuthController {
 	private static final Object AUTH_LOCK = new Object();
 	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
 
-	@Operation(summary = "Obtain an authentication token by logging in",
+	@Operation(summary = "Obtain an authentication token by logging in.",
 		description = "Log in to the service by providing a username, password and indicating " +
 			"the desired duration of the authentication token in minutes. If you want to obtain " +
 			"an authentication token that does not expire, either provide '0' or 'never' as the " +
@@ -165,7 +165,7 @@ public class AuthController {
 	}
 
 	@SecurityRequirement(name = "X-Auth-Token")
-	@Operation(summary = "Validate a given authentication token",
+	@Operation(summary = "Validate a given authentication token.",
 		description = "If your client application has a stored authentication token you may use" +
 			"this method to check whether or not that is a valid token. This method will either" +
 			"return 'true', or throw an Authentication error.")

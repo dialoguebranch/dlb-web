@@ -78,7 +78,7 @@ import java.util.UUID;
 @SecurityRequirement(name = "X-Auth-Token")
 @RequestMapping(value = {"/v{version}/dialogue", "/dialogue"})
 @Tag(name = "2. Dialogue", description = "End-points for starting and controlling the lifecycle " +
-		"of remotely executed dialogues")
+		"of remotely executed dialogues.")
 public class DialogueController {
 
 	@Autowired
@@ -92,7 +92,7 @@ public class DialogueController {
 
 	@Operation(
 		summary = "Start the step-by-step execution of the dialogue identified by the given " +
-				"parameters",
+				"parameters.",
 		description = "A client application that wants to start executing a dialogue should use " +
 			"this end-point to do so. The dialogueName (which is the dialogue's filename without " +
 			"it's .dlb extension and language are mandatory parameters. The 'userId' is an " +
@@ -230,7 +230,7 @@ public class DialogueController {
 	 * 		   {@code null}.
 	 */
 	@Operation(
-		summary = "Progresses a given dialogue from a given state with a given reply id",
+		summary = "Progresses a given dialogue from a given state with a given reply id.",
 		description = "The client application that wants to progress a previously started " +
 			"dialogue should use this end-point to do so. The loggedDialogueId identifies " +
 			"the ongoing dialogue (and will have been provided by a call to start-dialogue) " +
@@ -358,7 +358,7 @@ public class DialogueController {
 	// ----------------------------------------------------- //
 
 	@Operation(
-		summary = "Continue the latest ongoing dialogue with a given name",
+		summary = "Continue the latest ongoing dialogue with a given name.",
 		description = "Pick up the conversation by providing a dialogue name. If there is an " +
 			"ongoing dialogue with the given name (that is not finished or cancelled), this " +
 			"method will return the next step in that conversation. As with all methods that " +
@@ -471,7 +471,7 @@ public class DialogueController {
 
 	@Operation(
 		summary = "Cancels a dialogue that is currently in progress, terminating its execution " +
-				"state",
+				"state.",
 		description = "If a client application detects that a user has navigated away, or has " +
 			"deliberately requested to stop an ongoing dialogue through a user interface action, " +
 			"this end-point should be called so that the dialogue's state can be updated, " +
@@ -537,7 +537,7 @@ public class DialogueController {
 	// ------------------------------------------------- //
 
 	@Operation(
-		summary = "Go back to the previous step in an ongoing dialogue",
+		summary = "Go back to the previous step in an ongoing dialogue.",
 		description = "Use this end-point by providing a loggedDialogueId (specifying an ongoing " +
 			"dialogue) and the loggedInteractionIndex (identifying the current step in the " +
 			"dialogue). This end-point will return the previous dialogue step (based on the " +
@@ -639,7 +639,7 @@ public class DialogueController {
 	// -------------------------------------------------------- //
 
 	@Operation(
-		summary = "Get information about the latest ongoing dialogue for a given user",
+		summary = "Get information about the latest ongoing dialogue for a given user.",
 		description = "This end-point answers the question 'was there any unfinished business? " +
 			"and if so, how long ago?'. As a client application, you may want to call this " +
 			"end-point at the start of a session to see if there was an ongoing dialogue left " +

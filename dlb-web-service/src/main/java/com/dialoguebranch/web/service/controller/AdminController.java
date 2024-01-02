@@ -76,7 +76,7 @@ public class AdminController {
     // -------------------------------------------------------- //
 
     @Operation(
-        summary = "Retrieve a list of all available dialogues",
+        summary = "Retrieve a list of all available dialogues.",
         description = "...")
     @RequestMapping(value="/list-dialogues", method= RequestMethod.GET)
     public DialogueListPayload listDialogues(

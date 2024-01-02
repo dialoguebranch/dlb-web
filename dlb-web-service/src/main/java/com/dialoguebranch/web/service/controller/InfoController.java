@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 @Tag(name = "5. Information", description = "End-points that provide information about the " +
-		"running service")
+		"running service.")
 @RequestMapping(value = {"/v{version}/info", "/info"})
 public class InfoController {
 
@@ -54,7 +54,7 @@ public class InfoController {
 	@Autowired
 	Application application;
 
-	@Operation(summary = "Retrieve a set of metadata parameters about the running service",
+	@Operation(summary = "Retrieve a set of metadata parameters about the running service.",
 		description = "This end-point may be called without authentication and will return 4 " +
 			"variables that describe the current version of the service:" +
 			" <ul><li>build - Date & Time when the service was built</li>" +

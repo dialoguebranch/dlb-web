@@ -57,7 +57,8 @@ import java.util.*;
 @RestController
 @SecurityRequirement(name = "X-Auth-Token")
 @RequestMapping(value = {"/v{version}/variables", "/variables"})
-@Tag(name = "3. Variables", description = "End-points for retrieving or setting DialogueBranch Variables")
+@Tag(name = "3. Variables", description = "End-points for retrieving or setting DialogueBranch " +
+		"Variables.")
 public class VariablesController {
 
 	@Autowired
@@ -70,11 +71,12 @@ public class VariablesController {
 	// ----------------------------------------------------------- //
 
 	@Operation(
-		summary = "Retrieve all- or a subset of DialogueBranch variables for a given user",
-		description = "Use this end-point to get the latest known DialogueBranch Variables values for a " +
-			"given user (either the currently logged in user, or the one provided through the " +
-			"end-point). Either provide a list of variable names for which to retrieve its " +
-			"values, or leave this empty to retrieve all known DialogueBranch Variable data.")
+		summary = "Retrieve all- or a subset of DialogueBranch variables for a given user.",
+		description = "Use this end-point to get the latest known DialogueBranch Variables " +
+			"values for a given user (either the currently logged in user, or the one provided " +
+			"through the end-point). Either provide a list of variable names for which to " +
+			"retrieve its values, or leave this empty to retrieve all known DialogueBranch " +
+			"Variable data.")
 	@RequestMapping(value="/get-variables", method=RequestMethod.GET)
 	public Map<String,Object> getVariables(
 			HttpServletRequest request,
@@ -85,12 +87,12 @@ public class VariablesController {
 			String version,
 
 			@Parameter(description = "A space-separated list of DialogueBranch variable names, or leave " +
-					"empty to retrieve all known variables")
+				"empty to retrieve all known variables")
 			@RequestParam(value="variableNames", required=false)
 			String variableNames,
 
 			@Parameter(description = "The user for which to request DialogueBranch variable info (leave " +
-					"empty if executing for the currently authenticated user)")
+				"empty if executing for the currently authenticated user)")
 			@RequestParam(value="delegateUser", required=false)
 			String delegateUser) throws Exception {
 
@@ -170,7 +172,7 @@ public class VariablesController {
 	// ---------------------------------------------------------- //
 
 	@Operation(
-		summary = "Set the value of a single DialogueBranch Variable for a given user",
+		summary = "Set the value of a single DialogueBranch Variable for a given user.",
 		description = "Use this end-point to get set a DialogueBranch Variable to a specific value (or to " +
 				"remove the stored value by setting it to the empty string.")
 	@RequestMapping(value="/set-variable", method=RequestMethod.POST)
@@ -273,7 +275,7 @@ public class VariablesController {
 	// ----------------------------------------------------------- //
 
 	@Operation(
-		summary = "Set the value of one or multiple DialogueBranch Variable for a given user",
+		summary = "Set the value of one or multiple DialogueBranch Variable for a given user.",
 		description = "Use this end-point to get set one or many DialogueBranch Variables to their given " +
 				"values (or to remove the stored value by setting it to the empty string.")
 	@RequestMapping(value="/set-variables", method=RequestMethod.POST)
