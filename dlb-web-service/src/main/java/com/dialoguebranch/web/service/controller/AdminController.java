@@ -30,7 +30,6 @@ package com.dialoguebranch.web.service.controller;
 
 import com.dialoguebranch.model.FileDescriptor;
 import com.dialoguebranch.model.FileType;
-import com.dialoguebranch.model.protocol.NullableResponse;
 import com.dialoguebranch.web.service.Application;
 import com.dialoguebranch.web.service.ProtocolVersion;
 import com.dialoguebranch.web.service.QueryRunner;
@@ -64,7 +63,7 @@ import java.util.List;
 @SecurityRequirement(name = "X-Auth-Token")
 @RequestMapping(value = {"/v{version}/admin", "/admin"})
 @Tag(name = "6. Admin", description = "End-points for administrative control of the Dialogue " +
-        "Branch Web Service.")
+    "Branch Web Service.")
 public class AdminController {
 
     @Autowired
@@ -80,7 +79,7 @@ public class AdminController {
         summary = "Retrieve a list of all available dialogues",
         description = "...")
     @RequestMapping(value="/list-dialogues", method= RequestMethod.GET)
-    public NullableResponse<DialogueListPayload> listDialogues(
+    public DialogueListPayload listDialogues(
         HttpServletRequest request,
         HttpServletResponse response,
 
@@ -103,7 +102,7 @@ public class AdminController {
             return doListDialogues();
         } else {
             throw new UnauthorizedException(ErrorCode.INSUFFICIENT_PRIVILEGES,
-                    "This user does not have the rights to access this function.");
+                "This user does not have the rights to access this function.");
         }
     }
 
@@ -111,7 +110,7 @@ public class AdminController {
      * Processes a call to the /admin/list-dialogues end-point.
      *
      */
-    private NullableResponse<DialogueListPayload> doListDialogues() {
+    private DialogueListPayload doListDialogues() {
         List<FileDescriptor> files = application.getApplicationManager().getAvailableDialogues();
 
         List<String> scriptNames = new ArrayList<>();
@@ -122,8 +121,7 @@ public class AdminController {
             }
         }
 
-        DialogueListPayload payload = new DialogueListPayload(scriptNames.toArray(new String[0]));
-        return new NullableResponse<>(payload);
+        return new DialogueListPayload(scriptNames.toArray(new String[0]));
     }
 
 }
