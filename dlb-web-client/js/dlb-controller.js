@@ -216,11 +216,55 @@ function customListDialoguesError(err) {
 
 function customStartDialogueSuccess(data) {
     if('dialogue' in data) {
-        console.log(data.dialogue);
-        console.log(data.node);
-        console.log(data.loggedDialogueId);
-        console.log(data.loggedInteractionIndex);
-        console.log(data.speaker);
+
+        // Instantiate an empty DialogueStep
+        dialogueStep = DialogueStep.emptyInstance();
+
+        // Add the simple parameters
+        dialogueStep.dialogueName = data.dialogue;
+        dialogueStep.node = data.node;
+        dialogueStep.speaker = data.speaker;
+        dialogueStep.loggedDialogueId = data.loggedDialogueId;
+        dialogueStep.loggedInteractionIndex = data.loggedInteractionIndex;
+
+        // Add the statement (consisting of a list of segments)
+        statement = Statement.emptyInstance();
+        data.statement.segments.forEach(
+            (element) => {
+                segment = new Segment(element.segmentType,element.text);
+                statement.addSegment(segment);
+            }
+        );
+        dialogueStep.statement = statement;
+
+        // Add the replies
+        data.replies.forEach(
+            (element) => {
+                if(element.statement == null) {
+                    reply = AutoForwardReply.emptyInstance();
+                } else {
+                    reply = BasicReply.emptyInstance();
+                }
+                reply.replyId = element.replyId;
+                reply.endsDialogue = element.endsDialogue;
+                
+                if(reply instanceof BasicReply) {
+                    statement = Statement.emptyInstance();
+                    element.statement.segments.forEach(
+                        (segmentElement) => {
+                            segment = new Segment(segmentElement.segmentType,segmentElement.text);
+                            statement.addSegment(segment);
+                        }
+                    );
+                    reply.statement = statement;
+                }
+                reply.actions = element.actions; // TODO: Unfold 'actions' into Action-objects
+                dialogueStep.addReply(reply);
+            }
+        );
+
+        this.logger.debug(dialogueStep.toString());
+        renderDialogueStep(dialogueStep);
     }
 }
 
@@ -254,6 +298,7 @@ function updateUIState() {
 
     if(this.clientState.loggedIn) {
         document.getElementById("menu-bar").style.display = 'block';
+        document.getElementById("dialogue-container").style.display = 'block';
         document.getElementById("login-form").style.display = 'none';
         if(this.clientState.user.role == "admin") {
             document.getElementById("menu-bar-list-dialogues").style.display = "inline";
@@ -262,6 +307,7 @@ function updateUIState() {
         }
     } else {
         document.getElementById("menu-bar").style.display = 'none';
+        document.getElementById("dialogue-container").style.display = 'none';
         document.getElementById("login-form").style.display = 'block';
     }
 }
@@ -285,6 +331,55 @@ function setDebugConsoleVisibility(visible) {
         document.getElementById("toggle-debug-console").style.bottom = '10px';
         document.getElementById("version-info").style.bottom = '10px';
     }
+}
+
+// ---------- Dialogue Step Rendering ----------
+
+function renderDialogueStep(dialogueStep) {
+
+    var contentBlock = document.getElementById("interaction-tester-content");
+
+    // Create the container element for the Statement
+    const statementContainer = document.createElement("div");
+    statementContainer.classList.add("dialogue-step-statement-container");
+    contentBlock.appendChild(statementContainer);
+
+    // Add the speaker to the statement container
+    const speakerElement = document.createElement("div");
+    speakerElement.classList.add("dialogue-step-speaker");
+    speakerElement.innerHTML = dialogueStep.speaker + ":";
+    statementContainer.appendChild(speakerElement);
+
+    // Add the statement to the statement container
+    const statementElement = document.createElement("div");
+    statementElement.classList.add("dialogue-step-statement");
+    statementElement.innerHTML = dialogueStep.statement.fullStatement();
+    statementContainer.appendChild(statementElement);
+
+    // If there are any reply options
+    if(dialogueStep.replies.length > 0) {
+        const replyContainer = document.createElement("div");
+        replyContainer.classList.add("dialogue-step-reply-container");
+        contentBlock.appendChild(replyContainer);
+
+        dialogueStep.replies.forEach(
+            (reply) => {
+                if(reply instanceof AutoForwardReply) {
+                    const replyOptionElement = document.createElement("div");
+                    replyOptionElement.classList.add("dialogue-step-reply-autoforward");
+                    replyOptionElement.innerHTML = "AUTOFORWARD";
+                    replyContainer.appendChild(replyOptionElement);
+                } else {
+                    const replyOptionElement = document.createElement("div");
+                    replyOptionElement.classList.add("dialogue-step-reply-basic");
+                    replyOptionElement.innerHTML = reply.statement;
+                    replyContainer.appendChild(replyOptionElement);
+                }
+            }
+        );
+
+    }
+
 }
 
 // -----------------------------------------------------------

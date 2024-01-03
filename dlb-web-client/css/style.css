@@ -105,6 +105,14 @@ td.login-table-labels {
     font-weight: 400;
 }
 
+#dialogue-browser-content {
+	background-color: white;
+	padding-left: 10px;
+	margin: 5px;
+	border-color: black;
+    box-shadow: 0 0 1px black;
+}
+
 .dialogue-browser-entry {
 	font-size: 10px;
 	font-weight: 700;
