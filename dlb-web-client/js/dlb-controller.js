@@ -1,3 +1,31 @@
+/* @license
+ *
+ *                Copyright (c) 2023-2024 Fruit Tree Labs (www.fruittreelabs.com)
+ *
+ *
+ *     This material is part of the DialogueBranch Platform, and is covered by the MIT License
+ *                                        as outlined below.
+ *
+ *                                            ----------
+ *
+ * Copyright (c) 2023-2024 Fruit Tree Labs (www.fruittreelabs.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 /**
  * This anonymous function contains all the necessary "bindings" of UI to script, as well as any 
  * function calls that need to be executed after the page has finished loading.
@@ -105,6 +133,8 @@ function actionListDialogues() {
 function actionStartDialogue(dialogueName) {
     this.logger.info("Starting dialogue '" + dialogueName + "'.");
 
+    var contentBlock = document.getElementById("interaction-tester-content");
+    contentBlock.innerHTML = "";
     this.dialogueBranchClient.callStartDialogue(dialogueName,"en");
 }
 
@@ -197,9 +227,9 @@ function customListDialoguesSuccess(data) {
         var dialogueBrowserContentField = document.getElementById("dialogue-browser-content");
 
         for(var i=0; i< data.dialogueNames.length; i++) {
-            dialogueBrowserContentField.innerHTML += "<br/>" 
-                + "<span class=\"dialogue-browser-entry\">" 
-                + "<a id=\"myLink\" title=\"Click to do something\" href=\"#\" onclick=\"actionStartDialogue('" 
+            if(i != 0) dialogueBrowserContentField.innerHTML += "<br/>";
+            dialogueBrowserContentField.innerHTML += "<span class=\"dialogue-browser-entry\">" 
+                + "<a id=\"myLink\" title=\"Click to do start Dialogue\" href=\"#\" onclick=\"actionStartDialogue('" 
                 + data.dialogueNames[i] 
                 + "');return false;\">" 
                 + data.dialogueNames[i] 
@@ -308,13 +338,14 @@ function updateUIState() {
     } else {
         document.getElementById("menu-bar").style.display = 'none';
         document.getElementById("dialogue-container").style.display = 'none';
+        document.getElementById("dialogue-browser-content").innerHTML = "";
+        document.getElementById("interaction-tester-content").innerHTML = "";
+        document.getElementById("variable-browser-content").innerHTML = "";
         document.getElementById("login-form").style.display = 'block';
     }
 }
 
-
 // ---------- Debug Console ----------
-
 
 /**
  * Sets the visibility of the Debug Console based on the given parameter 'visible'. If true, the Debug Console

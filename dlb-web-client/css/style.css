@@ -108,6 +108,7 @@ td.login-table-labels {
 #dialogue-browser-content {
 	background-color: white;
 	padding-left: 10px;
+	height: 45vh;
 	margin: 5px;
 	border-color: black;
     box-shadow: 0 0 1px black;
