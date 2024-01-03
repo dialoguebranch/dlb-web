@@ -36,14 +36,24 @@
 
     <div id="body-container">
 
-        <div id="dlb-logo"></div>
+        <div id="navbar">
+            <a href="/index.php"><img class="navbar-logo" src="/img/dlb-square.png"></a>
+            <label for="hamburger">&#9776;</label>
+            <input type="checkbox" id="hamburger"/>
+            <ul>
+                <li><a class="navbar-link" href="https://www.dialoguebranch.com/docs/dialogue-branch/dev/index.html" target="_blank">Documentation</a></li>
+                <li><a id="menu-bar-logout" class="navbar-link" href="#">Logout</a></li>
+            </ul>
+        </div>
 
-        <div id="client-text">Web Client Test Application</div>
+        <div id="dlb-splash-logo"></div>
 
-        <div id="menu-bar">
+        <div id="dlb-splash-text">Web Client Test Application</div>
+
+        <!--<div id="menu-bar">
             <button type="button" class="orange-button" id="menu-bar-logout">Logout</button>
             <button type="button" class="orange-button" id="menu-bar-list-dialogues">List Dialogues</button>
-        </div>
+        </div>-->
 
         <div id="dialogue-container">
 

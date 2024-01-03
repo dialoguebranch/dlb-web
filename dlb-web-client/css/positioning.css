@@ -7,9 +7,10 @@ body {
     width: 100%;
     height: 100%;
     margin-left: 0px;
+    margin-top: var(--val-menu-bar-height);
 }
 
-#dlb-logo {
+#dlb-splash-logo {
     position: static;
 	top: 100px;
 	margin: auto;
@@ -20,7 +21,7 @@ body {
 	background-size: cover;
 }
 
-#client-text {
+#dlb-splash-text {
     position: relative;
     margin: auto;
     margin-top: 10px;
@@ -38,6 +39,7 @@ body {
     height: 40px;
     text-align: center;
     display: block;
+    background-color: aqua;
 }
 
 #menu-bar-list-dialogues {
@@ -161,3 +163,75 @@ textarea#debug-textarea {
     width: auto;
     margin-right: 10px;
 }
+
+/****************************************/
+/********** The Navigation Bar **********/
+/****************************************/
+
+#navbar {
+    background-color: var(--color-menu-bar);
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    height: var(--val-menu-bar-height);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  }
+  
+  .navbar-link {
+    float: right;
+    display: block;
+    font-size: 1.2em;
+    color: var(--color-menu-text);
+    background-color: var(--color-menu-item);
+    text-align: center;
+    padding-top: 27px;
+    padding-bottom: 27px;
+    padding-left: 16px;
+    padding-right: 16px;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .navbar-link:hover {
+    background: var(--color-menu-item-highlight);
+    color: var(--color-menu-text-highlight);
+  }
+  
+  .navbar-logo {
+    float: left;
+    width: auto;
+    height: 60px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 20px;
+  }
+  
+  #navbar label, #hamburger {
+    display: none;
+    user-select: none;
+    -ms-user-select: none;
+    float: right;
+  }
+  
+  #navbar ul {
+    float: right;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  #navbar ul li {
+      display: inline-block;
+      box-sizing: border-box;
+      margin: 0px 0;
+  }
+  
+  /* To make sure anchor links scroll to the right position (taking navbar into account)*/
+  a.anchor {
+    display: block;
+    position: relative;
+    top: -120px;
+    visibility: hidden;
+  }

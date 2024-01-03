@@ -44,9 +44,9 @@ window.onload = function() {
         actionLogout();
     });
 
-    document.getElementById("menu-bar-list-dialogues").addEventListener("click", (e)=> {
-        actionListDialogues();
-    });
+    //document.getElementById("menu-bar-list-dialogues").addEventListener("click", (e)=> {
+    //    actionListDialogues();
+    //});
 
     // Initialize the logger
     this.logger = new Logger();
@@ -327,20 +327,24 @@ function updateUIState() {
     setDebugConsoleVisibility(this.clientState.debugConsoleVisible);
 
     if(this.clientState.loggedIn) {
-        document.getElementById("menu-bar").style.display = 'block';
+        document.getElementById("navbar").style.display = 'block';
         document.getElementById("dialogue-container").style.display = 'block';
         document.getElementById("login-form").style.display = 'none';
+        document.getElementById("dlb-splash-logo").style.display = 'none';
+        document.getElementById("dlb-splash-text").style.display = 'none';
         if(this.clientState.user.role == "admin") {
             document.getElementById("menu-bar-list-dialogues").style.display = "inline";
         } else {
             document.getElementById("menu-bar-list-dialogues").style.display = "none";
         }
     } else {
-        document.getElementById("menu-bar").style.display = 'none';
+        document.getElementById("navbar").style.display = 'none';
         document.getElementById("dialogue-container").style.display = 'none';
         document.getElementById("dialogue-browser-content").innerHTML = "";
         document.getElementById("interaction-tester-content").innerHTML = "";
         document.getElementById("variable-browser-content").innerHTML = "";
+        document.getElementById("dlb-splash-logo").style.display = 'block';
+        document.getElementById("dlb-splash-text").style.display = 'block';
         document.getElementById("login-form").style.display = 'block';
     }
 }
