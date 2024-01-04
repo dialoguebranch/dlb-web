@@ -26,21 +26,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * A BasicReply is an implementation of the Reply class and represents the most basic of reply
+ * options that allows the user to 'say something' in reply to an Agent statement in a dialogue
+ * step.
+ *
+ * @extends Reply
+ * @author Harm op den Akker (Fruit Tree Labs)
+ */
 class BasicReply extends Reply {
 
+    /**
+     * Creates an instance of a BasicReply with the given parameters.
+     * 
+     * @param {number} replyId The identifier of this reply option that is unique within this dialogue step.
+     * @param {boolean} endsDialogue Whether or not selecting this reply will end the dialogue.
+     * @param {Array} actions A list of Actions that should be executed when this reply is chosen.
+     * @param {String} statement The statement that the user 'utters' when selecting this Reply.
+     */
     constructor(replyId, endsDialogue, actions, statement) {
         super(replyId, endsDialogue, actions);
         this._statement = statement;
     }
 
+    /**
+     * Returns a new instance of a BasicReply objects that is 'empty'. The object is instantiated
+     * with null values and an empty list of actions.
+     * @returns a new, empty instance of a BasicReply.
+     */
     static emptyInstance() {
         return new BasicReply(null, null, new Array(), null);
     }
 
+    /**
+     * Sets the statement that the user makes in reply to the agent when selecting this reply.
+     * @param {String} statement The statement that the user makes in reply to the agent when selecting this reply.
+     */
     set statement(statement) {
         this._statement = statement;
     }
 
+    /**
+     * Returns the statement that the user makes in reply to the agent when selecting this reply.
+     * @returns the statement that the user makes in reply to the agent when selecting this reply.
+     */
     get statement() {
         return this._statement;
     }
