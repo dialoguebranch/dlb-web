@@ -187,11 +187,49 @@ textarea#debug-textarea {
 
 /* Dialogue Step Rendering */
 
+.dialogue-step-statement-container {
+    display: flex;
+}
+
 .dialogue-step-speaker {
-    float: left;
-    width: auto;
+    flex: 1;
+    text-align: right;
+    margin-right: 20px;
+}
+
+.dialogue-step-statement {
+    flex: 4;
+    margin-bottom: 20px;
+}
+
+.dialogue-step-reply-container {
+    position: relative;
+    width: 100%;
+}
+
+.dialogue-step-reply-option-container {
+    display: flex;
+    color: rgb(151, 0, 0);
+    font-weight: 600;
+}
+
+.dialogue-step-reply-option-container:hover {
+    color: rgb(215, 31, 31);
+    cursor: pointer;
+}
+
+.dialogue-step-reply-number {
+    flex: 1;
+    text-align: right;
     margin-right: 10px;
 }
+
+.dialogue-step-reply-basic {
+    flex: 8;
+}
+
+
+
 
 /****************************************/
 /********** The Navigation Bar **********/

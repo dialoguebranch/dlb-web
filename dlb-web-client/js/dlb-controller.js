@@ -139,6 +139,10 @@ function actionStartDialogue(dialogueName) {
     this.dialogueBranchClient.callStartDialogue(dialogueName,"en");
 }
 
+function actionSelectReply(replyNumber) {
+    this.logger.info("Selected reply number "+replyNumber);
+}
+
 // ----------------------------------------------------------------------
 // -------------------- Handling DLB Client Response --------------------
 // ----------------------------------------------------------------------
@@ -404,20 +408,37 @@ function renderDialogueStep(dialogueStep) {
         replyContainer.classList.add("dialogue-step-reply-container");
         contentBlock.appendChild(replyContainer);
 
+        var replyNumber = 1;
+
         dialogueStep.replies.forEach(
             (reply) => {
+
+                const replyOptionContainer = document.createElement("div");
+                replyOptionContainer.classList.add("dialogue-step-reply-option-container");
+                replyContainer.appendChild(replyOptionContainer);
+                
+                const replyOptionNumberElement = document.createElement("div");
+                replyOptionNumberElement.classList.add("dialogue-step-reply-number");
+                replyOptionNumberElement.innerHTML = replyNumber + ": - ";
+                replyOptionContainer.appendChild(replyOptionNumberElement);
+
                 if(reply instanceof AutoForwardReply) {
                     const replyOptionElement = document.createElement("div");
                     replyOptionElement.classList.add("dialogue-step-reply-autoforward");
                     replyOptionElement.innerHTML = "AUTOFORWARD";
-                    replyContainer.appendChild(replyOptionElement);
+                    replyOptionContainer.appendChild(replyOptionElement);
                 } else {
                     const replyOptionElement = document.createElement("div");
                     replyOptionElement.classList.add("dialogue-step-reply-basic");
                     replyOptionElement.innerHTML = reply.statement;
-                    replyContainer.appendChild(replyOptionElement);
+                    replyOptionElement.addEventListener("click", (e)=> {
+                        actionSelectReply(replyNumber);
+                    });
+                    replyOptionContainer.appendChild(replyOptionElement);
                 }
+                replyNumber++;
             }
+            
         );
 
     }

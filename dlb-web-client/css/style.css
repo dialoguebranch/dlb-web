@@ -131,3 +131,9 @@ td.login-table-labels {
 	font-size: 10px;
 	font-weight: 700;
 }
+
+/* Dialogue Step Rendering */
+
+.dialogue-step-speaker {
+    font-weight: 600;
+}
