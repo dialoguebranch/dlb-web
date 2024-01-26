@@ -103,22 +103,39 @@ td.login-table-submit {
 #dialogue-browser-container {
     float: left;
     width: 20%;
-    background: grey;
-    height: 50vh;
+    height: 500px;
 }
 
 #interaction-tester-container {
     float: left;
     width: 60%;
-    background: orange;
-    height: 50vh;
+    height: 500px;
 }
 
 #variable-browser-container {
     float: left;
     width: 20%;
-    background: red;
-    height: 50vh;
+    height: 500px;
+}
+
+.box-title {
+    padding-left: 10px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    height: 30px;
+    line-height: 30px;
+}
+
+.box-content {
+	background-color: white;
+	padding-left: 10px;
+	height: 470px;
+	margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+	border-color: black;
+    box-shadow: 0 0 1px black;
 }
 
 /* Debug Console */
