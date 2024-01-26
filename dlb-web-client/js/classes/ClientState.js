@@ -31,37 +31,56 @@
  * It should be passed a reference to a custom Logger object so that it may
  * log its actions to the client's custom debug console.
  *
- * Author: Harm op den Akker (Fruit Tree Labs)
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 class ClientState {
 
+    // ------------------------------------
+    // ---------- Constructor(s) ----------
+    // ------------------------------------
+
+    /**
+     * Creates an instance of a ClientState object to keep track of the state of the web client app.
+     * Log information is passed through the provided Logger instance.
+     * @param {Logger} logger A Logger instance that may be used to log information.
+     */
     constructor(logger) {
         this._logger = logger;
     }
 
-    // ----- loggedIn
+    // ---------------------------------------
+    // ---------- Getters & Setters ----------
+    // ---------------------------------------
 
     /**
-     * @param {boolean} loggedIn 
+     * Sets whether or not a user is currently logged in to the client app.
+     * @param {boolean} loggedIn whether or not a user is currently logged in to the client app.
      */
     set loggedIn(loggedIn) {
         this._loggedIn = loggedIn;
         this._logger.debug("ClientState updated: loggedIn = "+loggedIn);
     }
 
+    /**
+     * Returns whether or not a user is currently logged in to the client app.
+     * @returns whether or not a user is currently logged in to the client app.
+     */
     get loggedIn() {
         return this._loggedIn;
     }
 
-    // ----- User
-
     /**
-     * @param {User} user
+     * Returns the User object, representing the user information of a logged in user.
+     * @param {User} user the User object, representing the user information of a logged in user.
      */
     set user(user) {
         this._user = user;   
     }
 
+    /**
+     * Returns the User object, representing the user information of a logged in user.
+     * @returns the User object, representing the user information of a logged in user.
+     */
     get user() {
         return this._user;
     }
