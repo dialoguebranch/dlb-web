@@ -106,6 +106,23 @@ td.login-table-labels {
 	margin-top: 8px;
 }
 
+.circle-button-small {
+	background-color: #04AA6D; /* Green */
+	border: none;
+	color: white;	
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 16px;
+	cursor: pointer;
+	border-radius: 50%;
+}
+
+.button-refresh-dialogue-list-disabled {
+    background-color: #787878;
+	cursor: not-allowed;
+}
+
 .medium-title {
     font-weight: 400;
 }

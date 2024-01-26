@@ -44,9 +44,9 @@ window.onload = function() {
         actionLogout();
     });
 
-    //document.getElementById("menu-bar-list-dialogues").addEventListener("click", (e)=> {
-    //    actionListDialogues();
-    //});
+    document.getElementById("button-refresh-dialogue-list").addEventListener("click", (e)=> {
+        actionListDialogues();
+    });
 
     // Initialize the logger
     this.logger = new Logger();
@@ -332,10 +332,13 @@ function updateUIState() {
         document.getElementById("login-form").style.display = 'none';
         document.getElementById("dlb-splash-logo").style.display = 'none';
         document.getElementById("dlb-splash-text").style.display = 'none';
+        var dialogueListButton = document.getElementById("button-refresh-dialogue-list");
         if(this.clientState.user.role == "admin") {
-            document.getElementById("menu-bar-list-dialogues").style.display = "inline";
+            dialogueListButton.classList.remove("button-refresh-dialogue-list-disabled");
+            dialogueListButton.setAttribute('title',"Refresh the list of available dialogues.");
         } else {
-            document.getElementById("menu-bar-list-dialogues").style.display = "none";
+            dialogueListButton.classList.add("button-refresh-dialogue-list-disabled");
+            dialogueListButton.setAttribute('title',"Retrieving a dialogue list is only available for 'admin' users.");
         }
     } else {
         document.getElementById("navbar").style.display = 'none';

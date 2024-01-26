@@ -30,6 +30,8 @@
             loadJavaScript('dlb-controller');
         </script>
 
+        <script src="https://kit.fontawesome.com/3a329c4440.js" crossorigin="anonymous"></script>
+
     </head>
 
 <body>
@@ -38,6 +40,7 @@
 
         <div id="navbar">
             <a href="/index.php"><img class="navbar-logo" src="/img/dlb-square.png"></a>
+            <span id="version-info">Some version info here.</span>
             <label for="hamburger">&#9776;</label>
             <input type="checkbox" id="hamburger"/>
             <ul>
@@ -50,29 +53,33 @@
 
         <div id="dlb-splash-text">Web Client Test Application</div>
 
-        <!--<div id="menu-bar">
-            <button type="button" class="orange-button" id="menu-bar-logout">Logout</button>
-            <button type="button" class="orange-button" id="menu-bar-list-dialogues">List Dialogues</button>
-        </div>-->
-
         <div id="dialogue-container">
 
             <div id="dialogue-browser-container">
-                <div id="dialogue-browser-title" class="medium-title box-title">Dialogue Browser</div>
+                <div class="dialogue-container-title-box">
+                    <div id="dialogue-browser-title" class="medium-title box-title">Dialogue Browser</div>
+                    <button id="button-refresh-dialogue-list" class="circle-button-small button-refresh-dialogue-list-disabled" title="Refresh the list of available dialogues."><i class="fa-solid fa-arrows-rotate"></i></button>
+                </div>
                 <div id="dialogue-browser-content" class="box-content">
 
                 </div>
             </div>
 
             <div id="interaction-tester-container">
-                <div id="interaction-tester-title" class="medium-title box-title">Interaction Tester</div>
+                <div class="dialogue-container-title-box">
+                    <div id="interaction-tester-title" class="medium-title box-title">Interaction Tester</div>
+                </div>
+               
                 <div id="interaction-tester-content" class="box-content">
 
                 </div>
             </div>
 
             <div id="variable-browser-container">
-                <div id="variable-browser-title" class="medium-title box-title">Variable Browser</div>
+                <div class="dialogue-container-title-box">
+                    <div id="variable-browser-title" class="medium-title box-title">Variable Browser</div>
+                </div>
+                
                 <div id="variable-browser-content" class="box-content">
                 
                 </div>
@@ -116,8 +123,6 @@
                         
             </form>
         </div> <!-- End login-form -->
-
-        <span id="version-info">Some version info here.</span>
         
         <button type="button" class="orange-button" id="toggle-debug-console">Toggle Debug</button>
 
