@@ -125,6 +125,7 @@ function actionToggleDebugConsole() {
 // ---------- List Dialogues ----------
 
 function actionListDialogues() {
+    this.logger.info("Refreshing the Dialogue Browser.");
     this.dialogueBranchClient.callListDialogues();
 }
 
@@ -222,9 +223,12 @@ function customAuthValidateError(err) {
 // ---------- List Dialogues ----------
 
 function customListDialoguesSuccess(data) {
-    if('dialogueNames' in data) {
+    var dialogueBrowserContentField = document.getElementById("dialogue-browser-content");
 
-        var dialogueBrowserContentField = document.getElementById("dialogue-browser-content");
+    // Empty the content field before populating
+    dialogueBrowserContentField.innerHTML = "";
+    
+    if('dialogueNames' in data) {
 
         for(var i=0; i< data.dialogueNames.length; i++) {
             if(i != 0) dialogueBrowserContentField.innerHTML += "<br/>";
@@ -335,7 +339,7 @@ function updateUIState() {
         var dialogueListButton = document.getElementById("button-refresh-dialogue-list");
         if(this.clientState.user.role == "admin") {
             dialogueListButton.classList.remove("button-refresh-dialogue-list-disabled");
-            dialogueListButton.setAttribute('title',"Refresh the list of available dialogues.");
+            dialogueListButton.setAttribute('title',"Refresh the content of the Dialogue Browser.");
         } else {
             dialogueListButton.classList.add("button-refresh-dialogue-list-disabled");
             dialogueListButton.setAttribute('title',"Retrieving a dialogue list is only available for 'admin' users.");
