@@ -139,8 +139,9 @@ function actionStartDialogue(dialogueName) {
     this.dialogueBranchClient.callStartDialogue(dialogueName,"en");
 }
 
-function actionSelectReply(replyNumber) {
+function actionSelectReply(replyNumber, reply) {
     this.logger.info("Selected reply number "+replyNumber);
+    this.logger.info("Which boils down to this reply: "+reply);
 }
 
 // ----------------------------------------------------------------------
@@ -408,7 +409,7 @@ function renderDialogueStep(dialogueStep) {
         replyContainer.classList.add("dialogue-step-reply-container");
         contentBlock.appendChild(replyContainer);
 
-        var replyNumber = 1;
+        let replyNumber = 1;
 
         dialogueStep.replies.forEach(
             (reply) => {
@@ -431,9 +432,7 @@ function renderDialogueStep(dialogueStep) {
                     const replyOptionElement = document.createElement("div");
                     replyOptionElement.classList.add("dialogue-step-reply-basic");
                     replyOptionElement.innerHTML = reply.statement;
-                    replyOptionElement.addEventListener("click", (e)=> {
-                        actionSelectReply(replyNumber);
-                    });
+                    replyOptionElement.addEventListener("click", actionSelectReply.bind(this, replyNumber, reply), false);
                     replyOptionContainer.appendChild(replyOptionElement);
                 }
                 replyNumber++;
