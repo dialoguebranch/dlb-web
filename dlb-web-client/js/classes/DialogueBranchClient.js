@@ -170,9 +170,9 @@ class DialogueBranchClient {
     // ---------- 2. Dialogue: End-points for starting and controlling the lifecycle of remotely executed dialogues. ----------
     // ------------------------------------------------------------------------------------------------------------------------
 
-    // ---------------------------------------------------------
-    // ---------- End-Point: /dialogue/start-dialogue ----------
-    // ---------------------------------------------------------
+    // ------------------------------------------------
+    // ---------- End-Point: /dialogue/start ----------
+    // ------------------------------------------------
 
     callStartDialogue(dialogueName, language) {
         var url = this._baseUrl + "/dialogue/start";
@@ -204,6 +204,45 @@ class DialogueBranchClient {
     }
 
     startDialogueError(err) {
+        console.log(err)
+    }
+
+    // ---------------------------------------------------
+    // ---------- End-Point: /dialogue/progress ----------
+    // ---------------------------------------------------
+
+    callProgressDialogue(loggedDialogueId, loggedInteractionIndex, replyId) {
+        var url = this._baseUrl + "/dialogue/progress";
+
+        url += "?loggedDialogueId="+loggedDialogueId;
+        url += "&loggedInteractionIndex="+loggedInteractionIndex;
+        url += "&replyId="+replyId;
+
+        console.log("callProgressDialogue: "+url);
+
+        fetch(url, {
+            method: "POST",
+            headers: {
+                'X-Auth-Token': this._user.authToken,
+                Accept: "application/json, text/plain, */*",
+                "Content-Type": "application/json",
+            }
+        })
+        .then((response) => response.json())
+        .then((data) => { 
+            this.progressDialogueSuccess(data);
+        })
+        .catch((err) => {
+            this.progressDialogueError(err);
+        });
+
+    }
+
+    progressDialogueSuccess(data) {
+        customProgressDialogueSuccess(data);
+    }
+
+    progressDialogueError(err) {
         console.log(err)
     }
 

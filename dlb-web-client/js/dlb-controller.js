@@ -139,9 +139,13 @@ function actionStartDialogue(dialogueName) {
     this.dialogueBranchClient.callStartDialogue(dialogueName,"en");
 }
 
-function actionSelectReply(replyNumber, reply) {
+function actionSelectReply(replyNumber, reply, dialogueStep) {
     this.logger.info("Selected reply number "+replyNumber);
     this.logger.info("Which boils down to this reply: "+reply);
+
+    this.logger.info("replyId: "+reply.replyId);
+
+    this.dialogueBranchClient.callProgressDialogue(dialogueStep.loggedDialogueId, dialogueStep.loggedInteractionIndex, reply.replyId);
 }
 
 // ----------------------------------------------------------------------
@@ -256,59 +260,84 @@ function customListDialoguesError(err) {
 function customStartDialogueSuccess(data) {
     if('dialogue' in data) {
 
-        // Instantiate an empty DialogueStep
-        dialogueStep = DialogueStep.emptyInstance();
-
-        // Add the simple parameters
-        dialogueStep.dialogueName = data.dialogue;
-        dialogueStep.node = data.node;
-        dialogueStep.speaker = data.speaker;
-        dialogueStep.loggedDialogueId = data.loggedDialogueId;
-        dialogueStep.loggedInteractionIndex = data.loggedInteractionIndex;
-
-        // Add the statement (consisting of a list of segments)
-        statement = Statement.emptyInstance();
-        data.statement.segments.forEach(
-            (element) => {
-                segment = new Segment(element.segmentType,element.text);
-                statement.addSegment(segment);
-            }
-        );
-        dialogueStep.statement = statement;
-
-        // Add the replies
-        data.replies.forEach(
-            (element) => {
-                if(element.statement == null) {
-                    reply = AutoForwardReply.emptyInstance();
-                } else {
-                    reply = BasicReply.emptyInstance();
-                }
-                reply.replyId = element.replyId;
-                reply.endsDialogue = element.endsDialogue;
-                
-                if(reply instanceof BasicReply) {
-                    statement = Statement.emptyInstance();
-                    element.statement.segments.forEach(
-                        (segmentElement) => {
-                            segment = new Segment(segmentElement.segmentType,segmentElement.text);
-                            statement.addSegment(segment);
-                        }
-                    );
-                    reply.statement = statement;
-                }
-                reply.actions = element.actions; // TODO: Unfold 'actions' into Action-objects
-                dialogueStep.addReply(reply);
-            }
-        );
+        dialogueStep = createDialogueStepObject(data);
 
         this.logger.debug(dialogueStep.toString());
         renderDialogueStep(dialogueStep);
     }
 }
 
+function createDialogueStepObject(data) {
+     // Instantiate an empty DialogueStep
+     dialogueStep = DialogueStep.emptyInstance();
+
+     // Add the simple parameters
+     dialogueStep.dialogueName = data.dialogue;
+     dialogueStep.node = data.node;
+     dialogueStep.speaker = data.speaker;
+     dialogueStep.loggedDialogueId = data.loggedDialogueId;
+     dialogueStep.loggedInteractionIndex = data.loggedInteractionIndex;
+
+     // Add the statement (consisting of a list of segments)
+     statement = Statement.emptyInstance();
+     data.statement.segments.forEach(
+         (element) => {
+             segment = new Segment(element.segmentType,element.text);
+             statement.addSegment(segment);
+         }
+     );
+     dialogueStep.statement = statement;
+
+     // Add the replies
+     data.replies.forEach(
+         (element) => {
+             if(element.statement == null) {
+                 reply = AutoForwardReply.emptyInstance();
+             } else {
+                 reply = BasicReply.emptyInstance();
+             }
+             reply.replyId = element.replyId;
+             reply.endsDialogue = element.endsDialogue;
+             
+             if(reply instanceof BasicReply) {
+                 statement = Statement.emptyInstance();
+                 element.statement.segments.forEach(
+                     (segmentElement) => {
+                         segment = new Segment(segmentElement.segmentType,segmentElement.text);
+                         statement.addSegment(segment);
+                     }
+                 );
+                 reply.statement = statement;
+             }
+             reply.actions = element.actions; // TODO: Unfold 'actions' into Action-objects
+             dialogueStep.addReply(reply);
+         }
+     );
+
+     return dialogueStep;
+}
+
 function customStartDialogueError(err) {
     this.logger.error("Starting dialogue failed with the following result: "+err);
+}
+
+// ---------- Progress Dialogue
+
+function customProgressDialogueSuccess(data) {
+    logger.debug("Progressing dialogue.");
+    console.log(data);
+    if('value' in data) {
+
+        if('dialogue' in data.value) {
+
+            logger.debug("Yes there is some 'dialogue' in this data.");
+
+            dialogueStep = createDialogueStepObject(data.value);
+
+            this.logger.debug(dialogueStep.toString());
+            renderDialogueStep(dialogueStep);
+        }
+    }
 }
 
 // -----------------------------------------------------------------
@@ -432,7 +461,7 @@ function renderDialogueStep(dialogueStep) {
                     const replyOptionElement = document.createElement("div");
                     replyOptionElement.classList.add("dialogue-step-reply-basic");
                     replyOptionElement.innerHTML = reply.statement;
-                    replyOptionElement.addEventListener("click", actionSelectReply.bind(this, replyNumber, reply), false);
+                    replyOptionElement.addEventListener("click", actionSelectReply.bind(this, replyNumber, reply, dialogueStep), false);
                     replyOptionContainer.appendChild(replyOptionElement);
                 }
                 replyNumber++;
