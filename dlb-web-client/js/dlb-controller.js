@@ -326,11 +326,21 @@ function customStartDialogueError(err) {
 // ---------- Progress Dialogue
 
 function customProgressDialogueSuccess(data) {
+    console.log("customProgressDialogueSuccess");
+    console.log(data);
     if('value' in data) {
 
-        if('dialogue' in data.value) {
+        // The response is empty, so the dialogue is over.
+        if(data.value == null) {
+            renderDialogueStep(null);
+        // There is dialogue, so render the next step.
+        } else if('dialogue' in data.value) {
             dialogueStep = createDialogueStepObject(data.value);
             renderDialogueStep(dialogueStep);
+
+        // Else, something is wrong.
+        } else {
+            this.logger.error("The Web Service returned an unexpected response when progressing the dialogue.");
         }
     }
 }
@@ -424,92 +434,122 @@ async function renderDialogueStep(dialogueStep) {
     }
 
     var contentBlock = document.getElementById("interaction-tester-content");
-
+    
     // Create the container element for the Statement
     const statementContainer = document.createElement("div");
     statementContainer.classList.add("dialogue-step-statement-container");
     contentBlock.appendChild(statementContainer);
 
-    // Add the speaker to the statement container
-    const speakerElement = document.createElement("div");
-    speakerElement.classList.add("dialogue-step-speaker");
-    speakerElement.innerHTML = dialogueStep.speaker + ":";
-    statementContainer.appendChild(speakerElement);
+    if(dialogueStep == null) {
+        statementContainer.innerHTML = "The dialogue is over.";
+        
+        // Create a filler element that fills the "rest" of the scrollable area, to allow a proper
+        // scrolling to the top (this element will be removed when rendering the next dialogue step)
+        const fillerElement = document.createElement("div");
+        fillerElement.setAttribute("id","temp-dialogue-filler");
+        fillerElement.classList.add("dialogue-step-filler-element");
+        contentBlock.appendChild(fillerElement);
 
-    // Add the statement to the statement container
-    const statementElement = document.createElement("div");
-    statementElement.classList.add("dialogue-step-statement");
-    statementElement.innerHTML = dialogueStep.statement.fullStatement();
-    statementContainer.appendChild(statementElement);
+        var contentBlockHeight = contentBlock.getBoundingClientRect().height;
+        var statementContainerHeight = statementContainer.getBoundingClientRect().height;
+        
+        // Set the calculated height of the temporary filler element
+        fillerElement.style.height = ((contentBlockHeight - statementContainerHeight) + "px");
+        
+        // Scroll to the top of scrollable element
+        contentBlock.scrollTop = fillerElement.offsetTop;
+    } else {
+        // Add the speaker to the statement container
+        const speakerElement = document.createElement("div");
+        speakerElement.classList.add("dialogue-step-speaker");
+        speakerElement.innerHTML = dialogueStep.speaker + ":";
+        statementContainer.appendChild(speakerElement);
 
-    // If there are any reply options
-    const replyContainer = document.createElement("div");
-    replyContainer.classList.add("dialogue-step-reply-container");
-    if(dialogueStep.replies.length > 0) { 
-        contentBlock.appendChild(replyContainer);
+        // Add the statement to the statement container
+        const statementElement = document.createElement("div");
+        statementElement.classList.add("dialogue-step-statement");
+        statementElement.innerHTML = dialogueStep.statement.fullStatement();
+        statementContainer.appendChild(statementElement);
 
-        let replyNumber = 1;
+        // If there are any reply options
+        const replyContainer = document.createElement("div");
+        replyContainer.classList.add("dialogue-step-reply-container");
+        if(dialogueStep.replies.length > 0) { 
+            contentBlock.appendChild(replyContainer);
 
-        dialogueStep.replies.forEach(
-            (reply) => {
+            let replyNumber = 1;
 
-                const replyOptionContainer = document.createElement("div");
-                replyOptionContainer.classList.add("dialogue-step-reply-option-container");
-                replyContainer.appendChild(replyOptionContainer);
+            dialogueStep.replies.forEach(
+                (reply) => {
 
-                if(reply instanceof AutoForwardReply) {
-                    const autoForwardReplyButton = document.createElement("button");
-                    autoForwardReplyButton.classList.add("dialogue-step-reply-autoforward");
-                    autoForwardReplyButton.classList.add("reply-option-with-listener");
-                    autoForwardReplyButton.innerHTML = "CONTINUE";
-                    autoForwardReplyButton.addEventListener("click", actionSelectReply.bind(this, replyNumber, reply, dialogueStep), false);
-                    replyOptionContainer.appendChild(autoForwardReplyButton);
-                    this._dialogueReplyElements.push(autoForwardReplyButton);
-                } else {
+                    const replyOptionContainer = document.createElement("div");
+                    replyOptionContainer.classList.add("dialogue-step-reply-option-container");
+                    replyContainer.appendChild(replyOptionContainer);
 
-                    const replyOptionNumberElement = document.createElement("div");
-                    replyOptionNumberElement.classList.add("dialogue-step-reply-number");
-                    replyOptionNumberElement.innerHTML = replyNumber + ": - ";
-                    replyOptionContainer.appendChild(replyOptionNumberElement);
+                    if(reply instanceof AutoForwardReply) {
+                        const autoForwardReplyButton = document.createElement("button");
+                        autoForwardReplyButton.classList.add("dialogue-step-reply-autoforward");
+                        autoForwardReplyButton.classList.add("reply-option-with-listener");
+                        if(reply.endsDialogue) {
+                            autoForwardReplyButton.innerHTML = "<i class='fa-solid fa-ban'></i> END DIALOGUE";
+                        } else {
+                            autoForwardReplyButton.innerHTML = "CONTINUE";
+                        }
+                        autoForwardReplyButton.addEventListener("click", actionSelectReply.bind(this, replyNumber, reply, dialogueStep), false);
+                        replyOptionContainer.appendChild(autoForwardReplyButton);
+                        this._dialogueReplyElements.push(autoForwardReplyButton);
+                    } else {
+                        const replyOptionNumberElement = document.createElement("div");
+                        replyOptionNumberElement.classList.add("dialogue-step-reply-number");
+                        replyOptionNumberElement.innerHTML = replyNumber + ": - ";
+                        replyOptionContainer.appendChild(replyOptionNumberElement);
 
-                    const replyOptionElement = document.createElement("div");
-                    replyOptionElement.classList.add("dialogue-step-reply-basic");
-                    replyOptionElement.classList.add("reply-option-with-listener");
-                    replyOptionElement.innerHTML = reply.statement;
-                    replyOptionElement.addEventListener("click", actionSelectReply.bind(this, replyNumber, reply, dialogueStep), false);
-                    replyOptionContainer.appendChild(replyOptionElement);
-                    this._dialogueReplyElements.push(replyOptionElement);
+                        const replyOptionElement = document.createElement("div");
+                        replyOptionElement.classList.add("dialogue-step-reply-basic");
+                        replyOptionElement.classList.add("reply-option-with-listener");
+                        if(reply.endsDialogue) {
+                            replyOptionElement.innerHTML = "<i class='fa-solid fa-ban'></i> " + reply.statement;
+                        } else {
+                            replyOptionElement.innerHTML = reply.statement;
+                        }
+                        replyOptionElement.addEventListener("click", actionSelectReply.bind(this, replyNumber, reply, dialogueStep), false);
+                        replyOptionContainer.appendChild(replyOptionElement);
+                        this._dialogueReplyElements.push(replyOptionElement);
+                        
+                    }
+                    replyNumber++;
                 }
-                replyNumber++;
-            }
-            
-        );
+                
+            );
+        }
+        // Create a spacer element between different dialogue steps (this one stays, so there 
+        // will always be some space between different dialogue steps).
+        const spacerElement = document.createElement("div");
+        spacerElement.classList.add("dialogue-step-spacer-element");
+        contentBlock.appendChild(spacerElement);
 
+        // Create a filler element that fills the "rest" of the scrollable area, to allow a proper
+        // scrolling to the top (this element will be removed when rendering the next dialogue step)
+        const fillerElement = document.createElement("div");
+        fillerElement.setAttribute("id","temp-dialogue-filler");
+        fillerElement.classList.add("dialogue-step-filler-element");
+        contentBlock.appendChild(fillerElement);
+
+        var contentBlockHeight = contentBlock.getBoundingClientRect().height;
+        var statementContainerHeight = statementContainer.getBoundingClientRect().height;
+        var replyContainerHeight = replyContainer.getBoundingClientRect().height;
+        var spacerElementHeight = spacerElement.getBoundingClientRect().height;
+        
+        // Set the calculated height of the temporary filler element
+        fillerElement.style.height = ((contentBlockHeight - statementContainerHeight - replyContainerHeight - spacerElementHeight) + "px");
+        
+        // Scroll to the top of scrollable element
+        contentBlock.scrollTop = fillerElement.offsetTop;
     }
 
-    // Create a spacer element between different dialogue steps (this one stays, so there 
-    // will always be some space between different dialogue steps).
-    const spacerElement = document.createElement("div");
-    spacerElement.classList.add("dialogue-step-spacer-element");
-    contentBlock.appendChild(spacerElement);
-
-    // Create a filler element that fills the "rest" of the scrollable area, to allow a proper
-    // scrolling to the top (this element will be removed when rendering the next dialogue step)
-    const fillerElement = document.createElement("div");
-    fillerElement.setAttribute("id","temp-dialogue-filler");
-    fillerElement.classList.add("dialogue-step-filler-element");
-    contentBlock.appendChild(fillerElement);
-
-    var contentBlockHeight = contentBlock.getBoundingClientRect().height;
-    var statementContainerHeight = statementContainer.getBoundingClientRect().height;
-    var replyContainerHeight = replyContainer.getBoundingClientRect().height;
-    var spacerElementHeight = spacerElement.getBoundingClientRect().height;
     
-    // Set the calculated height of the temporary filler element
-    fillerElement.style.height = ((contentBlockHeight - statementContainerHeight - replyContainerHeight - spacerElementHeight) + "px");
     
-    // Scroll to the top of scrollable element
-    contentBlock.scrollTop = fillerElement.offsetTop;
+    
 }
 
 // -----------------------------------------------------------
