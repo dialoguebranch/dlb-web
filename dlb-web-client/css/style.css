@@ -137,3 +137,16 @@ td.login-table-labels {
 .dialogue-step-speaker {
     font-weight: 600;
 }
+
+.dialogue-step-reply-autoforward {
+	font-family: var(--font-family-sans);
+	background-color: var(--color-orange-dark);
+	font-size: 14px;
+	color: white;
+	padding: 12px 60px;
+	border: none;
+	border-radius: 10px;
+	cursor: pointer;
+	margin-top: 8px;
+	margin: auto;
+}

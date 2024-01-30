@@ -32,6 +32,8 @@
  */
 window.onload = function() {
 
+    this._dialogueReplyElements = new Array();
+
     document.getElementById("login-button").addEventListener("click", (e)=> {
         actionLogin(e);
     });
@@ -324,17 +326,10 @@ function customStartDialogueError(err) {
 // ---------- Progress Dialogue
 
 function customProgressDialogueSuccess(data) {
-    logger.debug("Progressing dialogue.");
-    console.log(data);
     if('value' in data) {
 
         if('dialogue' in data.value) {
-
-            logger.debug("Yes there is some 'dialogue' in this data.");
-
             dialogueStep = createDialogueStepObject(data.value);
-
-            this.logger.debug(dialogueStep.toString());
             renderDialogueStep(dialogueStep);
         }
     }
@@ -411,11 +406,22 @@ function setDebugConsoleVisibility(visible) {
 
 // ---------- Dialogue Step Rendering ----------
 
-function renderDialogueStep(dialogueStep) {
+async function renderDialogueStep(dialogueStep) {
 
     // Remove the previous temporary filler element
     const element = document.getElementById("temp-dialogue-filler");
     if(element != null) element.remove();
+
+    // Remove previous click event listeners
+    if(this._dialogueReplyElements.length > 0) {
+        for(i=0; i<this._dialogueReplyElements.length; i++) {
+            // Replace the node with a clone, which removes all (bound) event listeners
+            this._dialogueReplyElements[i].replaceWith(this._dialogueReplyElements[i].cloneNode(true));
+            this._dialogueReplyElements[i].classList.remove("reply-option-with-listener");
+        }
+        // Finally, empty the set of dialogueReplyElements
+        this._dialogueReplyElements = new Array();
+    }
 
     var contentBlock = document.getElementById("interaction-tester-content");
 
@@ -450,23 +456,29 @@ function renderDialogueStep(dialogueStep) {
                 const replyOptionContainer = document.createElement("div");
                 replyOptionContainer.classList.add("dialogue-step-reply-option-container");
                 replyContainer.appendChild(replyOptionContainer);
-                
-                const replyOptionNumberElement = document.createElement("div");
-                replyOptionNumberElement.classList.add("dialogue-step-reply-number");
-                replyOptionNumberElement.innerHTML = replyNumber + ": - ";
-                replyOptionContainer.appendChild(replyOptionNumberElement);
 
                 if(reply instanceof AutoForwardReply) {
-                    const replyOptionElement = document.createElement("div");
-                    replyOptionElement.classList.add("dialogue-step-reply-autoforward");
-                    replyOptionElement.innerHTML = "AUTOFORWARD";
-                    replyOptionContainer.appendChild(replyOptionElement);
+                    const autoForwardReplyButton = document.createElement("button");
+                    autoForwardReplyButton.classList.add("dialogue-step-reply-autoforward");
+                    autoForwardReplyButton.classList.add("reply-option-with-listener");
+                    autoForwardReplyButton.innerHTML = "CONTINUE";
+                    autoForwardReplyButton.addEventListener("click", actionSelectReply.bind(this, replyNumber, reply, dialogueStep), false);
+                    replyOptionContainer.appendChild(autoForwardReplyButton);
+                    this._dialogueReplyElements.push(autoForwardReplyButton);
                 } else {
+
+                    const replyOptionNumberElement = document.createElement("div");
+                    replyOptionNumberElement.classList.add("dialogue-step-reply-number");
+                    replyOptionNumberElement.innerHTML = replyNumber + ": - ";
+                    replyOptionContainer.appendChild(replyOptionNumberElement);
+
                     const replyOptionElement = document.createElement("div");
                     replyOptionElement.classList.add("dialogue-step-reply-basic");
+                    replyOptionElement.classList.add("reply-option-with-listener");
                     replyOptionElement.innerHTML = reply.statement;
                     replyOptionElement.addEventListener("click", actionSelectReply.bind(this, replyNumber, reply, dialogueStep), false);
                     replyOptionContainer.appendChild(replyOptionElement);
+                    this._dialogueReplyElements.push(replyOptionElement);
                 }
                 replyNumber++;
             }
@@ -475,12 +487,14 @@ function renderDialogueStep(dialogueStep) {
 
     }
 
-    // Create a spacer element between different dialogue steps
+    // Create a spacer element between different dialogue steps (this one stays, so there 
+    // will always be some space between different dialogue steps).
     const spacerElement = document.createElement("div");
     spacerElement.classList.add("dialogue-step-spacer-element");
     contentBlock.appendChild(spacerElement);
 
-    // Create a filler element so that the last statement may be scrolled to the top
+    // Create a filler element that fills the "rest" of the scrollable area, to allow a proper
+    // scrolling to the top (this element will be removed when rendering the next dialogue step)
     const fillerElement = document.createElement("div");
     fillerElement.setAttribute("id","temp-dialogue-filler");
     fillerElement.classList.add("dialogue-step-filler-element");
@@ -491,16 +505,10 @@ function renderDialogueStep(dialogueStep) {
     var replyContainerHeight = replyContainer.getBoundingClientRect().height;
     var spacerElementHeight = spacerElement.getBoundingClientRect().height;
     
-
-    console.log("statementContainer.getBoundingClientRect().height: "+statementContainerHeight);
-    console.log("replyContainer.getBoundingClientRect().height: "+replyContainerHeight);
-    console.log("contentBlock.getBoundingClientRect().height: "+contentBlockHeight);
-    
+    // Set the calculated height of the temporary filler element
     fillerElement.style.height = ((contentBlockHeight - statementContainerHeight - replyContainerHeight - spacerElementHeight) + "px");
-
-    //statementContainer.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
-    //statementContainer.scrollIntoView();
-    //contentBlock.scrollTop = statementContainer.offsetTop;
+    
+    // Scroll to the top of scrollable element
     contentBlock.scrollTop = fillerElement.offsetTop;
 }
 
