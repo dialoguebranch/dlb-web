@@ -130,7 +130,7 @@ td.login-table-submit {
     float: left;
 }
 
-.box-content {
+.box-content-scrollable {
 	background-color: white;
 	padding-left: 10px;
 	height: 470px;
@@ -140,6 +140,16 @@ td.login-table-submit {
     margin-bottom: 0px;
 	border-color: black;
     box-shadow: 0 0 1px black;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.dialogue-step-spacer-element {
+    height: 24px;
+}
+
+.dialogue-step-filler-element {
+    height: 50px;
 }
 
 #button-refresh-dialogue-list {

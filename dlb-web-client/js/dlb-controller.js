@@ -413,6 +413,10 @@ function setDebugConsoleVisibility(visible) {
 
 function renderDialogueStep(dialogueStep) {
 
+    // Remove the previous temporary filler element
+    const element = document.getElementById("temp-dialogue-filler");
+    if(element != null) element.remove();
+
     var contentBlock = document.getElementById("interaction-tester-content");
 
     // Create the container element for the Statement
@@ -433,9 +437,9 @@ function renderDialogueStep(dialogueStep) {
     statementContainer.appendChild(statementElement);
 
     // If there are any reply options
-    if(dialogueStep.replies.length > 0) {
-        const replyContainer = document.createElement("div");
-        replyContainer.classList.add("dialogue-step-reply-container");
+    const replyContainer = document.createElement("div");
+    replyContainer.classList.add("dialogue-step-reply-container");
+    if(dialogueStep.replies.length > 0) { 
         contentBlock.appendChild(replyContainer);
 
         let replyNumber = 1;
@@ -471,6 +475,33 @@ function renderDialogueStep(dialogueStep) {
 
     }
 
+    // Create a spacer element between different dialogue steps
+    const spacerElement = document.createElement("div");
+    spacerElement.classList.add("dialogue-step-spacer-element");
+    contentBlock.appendChild(spacerElement);
+
+    // Create a filler element so that the last statement may be scrolled to the top
+    const fillerElement = document.createElement("div");
+    fillerElement.setAttribute("id","temp-dialogue-filler");
+    fillerElement.classList.add("dialogue-step-filler-element");
+    contentBlock.appendChild(fillerElement);
+
+    var contentBlockHeight = contentBlock.getBoundingClientRect().height;
+    var statementContainerHeight = statementContainer.getBoundingClientRect().height;
+    var replyContainerHeight = replyContainer.getBoundingClientRect().height;
+    var spacerElementHeight = spacerElement.getBoundingClientRect().height;
+    
+
+    console.log("statementContainer.getBoundingClientRect().height: "+statementContainerHeight);
+    console.log("replyContainer.getBoundingClientRect().height: "+replyContainerHeight);
+    console.log("contentBlock.getBoundingClientRect().height: "+contentBlockHeight);
+    
+    fillerElement.style.height = ((contentBlockHeight - statementContainerHeight - replyContainerHeight - spacerElementHeight) + "px");
+
+    //statementContainer.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+    //statementContainer.scrollIntoView();
+    //contentBlock.scrollTop = statementContainer.offsetTop;
+    contentBlock.scrollTop = fillerElement.offsetTop;
 }
 
 // -----------------------------------------------------------
