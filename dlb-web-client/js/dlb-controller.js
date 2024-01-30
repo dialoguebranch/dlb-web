@@ -477,9 +477,9 @@ async function renderDialogueStep(dialogueStep) {
         // If there are any reply options
         const replyContainer = document.createElement("div");
         replyContainer.classList.add("dialogue-step-reply-container");
+        contentBlock.appendChild(replyContainer);
         if(dialogueStep.replies.length > 0) { 
-            contentBlock.appendChild(replyContainer);
-
+            
             let replyNumber = 1;
 
             dialogueStep.replies.forEach(
@@ -524,6 +524,10 @@ async function renderDialogueStep(dialogueStep) {
                 }
                 
             );
+        } else {
+            // In case there are no reply options, add the "Dialogue over" message
+            replyContainer.innerHTML = "The dialogue is over.";
+
         }
         // Create a spacer element between different dialogue steps (this one stays, so there 
         // will always be some space between different dialogue steps).
