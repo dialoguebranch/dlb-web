@@ -147,6 +147,9 @@ function actionSelectReply(replyNumber, reply, dialogueStep) {
 
     this.logger.info("replyId: "+reply.replyId);
 
+    this.logger.info("The text of the selected reply was: "+this._dialogueReplyElements[replyNumber-1].innerHTML);
+    this._dialogueReplyElements[replyNumber-1].classList.add("user-selected-reply-option");
+
     this.dialogueBranchClient.callProgressDialogue(dialogueStep.loggedDialogueId, dialogueStep.loggedInteractionIndex, reply.replyId);
 }
 

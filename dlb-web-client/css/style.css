@@ -150,3 +150,7 @@ td.login-table-labels {
 	margin-top: 8px;
 	margin: auto;
 }
+
+.user-selected-reply-option {
+	color: grey;
+}
