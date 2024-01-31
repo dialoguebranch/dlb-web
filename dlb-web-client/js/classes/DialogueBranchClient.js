@@ -166,7 +166,7 @@ class DialogueBranchClient {
         customAuthValidateError(err);
     }
 
-     // -----------------------------------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------------
     // ---------- 2. Dialogue: End-points for starting and controlling the lifecycle of remotely executed dialogues. ----------
     // ------------------------------------------------------------------------------------------------------------------------
 
@@ -243,6 +243,80 @@ class DialogueBranchClient {
     }
 
     progressDialogueError(err) {
+        console.log(err)
+    }
+
+     // -------------------------------------------------------------------------------------------------
+    // ---------- 3. Variables: End-points for retrieving or setting DialogueBranch Variables. ----------
+    // --------------------------------------------------------------------------------------------------
+
+    // ---------------------------------------------------------
+    // ---------- End-Point: /variables/get-variables ----------
+    // ---------------------------------------------------------
+
+    callGetVariables() {
+        var url = this._baseUrl + "/variables/get-variables";
+
+        fetch(url, {
+            method: "GET",
+            headers: {
+                'X-Auth-Token': this._user.authToken,
+                Accept: "application/json, text/plain, */*",
+                "Content-Type": "application/json",
+            }
+        })
+        .then((response) => response.json())
+        .then((data) => { 
+            this.getVariablesSuccess(data);
+        })
+        .catch((err) => {
+            this.getVariablesError(err);
+        });
+
+    }
+
+    getVariablesSuccess(data) {
+        customGetVariablesSuccess(data);
+    }
+
+    getVariablesError(err) {
+        console.log(err)
+    }
+
+    // --------------------------------------------------------
+    // ---------- End-Point: /variables/set-variable ----------
+    // --------------------------------------------------------
+
+    callSetVariable(variableName, variableValue) {
+        var url = this._baseUrl + "/variables/set-variable";
+
+        url += "?name="+variableName;
+        if(variableValue != null) url += "&value="+variableValue;
+        url += "&timeZone="+this._timeZone;
+
+        fetch(url, {
+            method: "POST",
+            headers: {
+                'X-Auth-Token': this._user.authToken,
+                Accept: "application/json, text/plain, */*",
+                "Content-Type": "application/json",
+            }
+        })
+        .then((response) => response.json())
+        .then((data) => { 
+            this.setVariableSuccess(data);
+        })
+        .catch((err) => {
+            this.setVariableError(err);
+        });
+
+    }
+
+    setVariableSuccess(data) {
+        customSetVariableSuccess(data);
+    }
+
+    setVariableError(err) {
         console.log(err)
     }
 

@@ -154,3 +154,10 @@ td.login-table-labels {
 .user-selected-reply-option {
 	color: grey;
 }
+
+.icon-button-small {
+	width: 10px;
+	height: 20px;
+	color: grey;
+	padding: 0px;
+}

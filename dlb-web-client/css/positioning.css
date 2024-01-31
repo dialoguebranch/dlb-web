@@ -159,6 +159,13 @@ td.login-table-submit {
     margin-right: 5px;
 }
 
+#button-refresh-variable-list {
+    float: right;
+    width: 30px;
+    height: 30px;
+    margin-right: 5px;
+}
+
 
 /* Debug Console */
 
@@ -236,6 +243,32 @@ textarea#debug-textarea {
 
 .dialogue-step-reply-basic {
     flex: 8;
+}
+
+/* Variable Browser */
+
+#variable-browser-content {
+    
+}
+
+.variable-entry-container {
+    display:grid;
+    grid-template-columns: 30px 2fr 1fr;
+    grid-template-rows: auto;
+    grid-gap:4px;
+    height: 20px;
+}
+
+.variable-entry-name {
+    background-color: red;
+}
+
+.variable-entry-value {
+    background-color: blue;
+}
+
+.variable-delete-icon {
+    background-color: grey;
 }
 
 
