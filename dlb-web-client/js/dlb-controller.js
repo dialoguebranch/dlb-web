@@ -56,7 +56,7 @@ window.onload = function() {
 
     // Initialize the logger
     this.logger = new Logger();
-    this.logger.logLevel = LOG_LEVEL_DEBUG;
+    this.logger.logLevel = dialogueBranchConfig.logLevel;
     this.logger.info("Initialized Logger with log level '" 
         + dialogueBranchConfig.logLevel 
         + "' ('" 

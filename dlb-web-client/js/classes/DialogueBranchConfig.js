@@ -27,6 +27,6 @@
  */
 
 var dialogueBranchConfig = {
-    logLevel: LOG_LEVEL_DEBUG,
+    logLevel: LOG_LEVEL_INFO,
     baseUrl: 'http://localhost:8080/dlb-web-service/v1'
 };
