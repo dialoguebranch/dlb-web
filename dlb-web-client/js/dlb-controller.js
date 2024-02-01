@@ -177,7 +177,6 @@ function customListDialoguesError(err) {
 // ----------------------------------------------------------
 
 function actionListVariables() {
-    this.logger.info("Refreshing the contents of the Variable List.");
     this.dialogueBranchClient.callGetVariables();
 }
 
@@ -236,14 +235,8 @@ function actionStartDialogue(dialogueName) {
 }
 
 function actionSelectReply(replyNumber, reply, dialogueStep) {
-    this.logger.info("Selected reply number "+replyNumber);
-    this.logger.info("Which boils down to this reply: "+reply);
-
-    this.logger.info("replyId: "+reply.replyId);
-
-    this.logger.info("The text of the selected reply was: "+this._dialogueReplyElements[replyNumber-1].innerHTML);
+    // Add a class to the selected reply option, so it can be visualised in the dialogue history which options were chosen
     this._dialogueReplyElements[replyNumber-1].classList.add("user-selected-reply-option");
-
     this.dialogueBranchClient.callProgressDialogue(dialogueStep.loggedDialogueId, dialogueStep.loggedInteractionIndex, reply.replyId);
 }
 
