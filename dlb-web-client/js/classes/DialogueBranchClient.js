@@ -306,6 +306,8 @@ class DialogueBranchClient {
         if(variableValue != null) url += "&value="+variableValue;
         url += "&timeZone="+this._timeZone;
 
+        console.log("Calling /variables/set-variable/ :"+url);
+
         fetch(url, {
             method: "POST",
             headers: {
@@ -314,9 +316,14 @@ class DialogueBranchClient {
                 "Content-Type": "application/json",
             }
         })
-        .then((response) => response.json())
-        .then((data) => { 
-            this.setVariableSuccess(data);
+        .then((response) => {
+            if(response.ok) {
+                return;
+            }
+            return Promise.reject(response);
+        })
+        .then(() => { 
+            this.setVariableSuccess();
         })
         .catch((err) => {
             this.setVariableError(err);
@@ -324,11 +331,13 @@ class DialogueBranchClient {
 
     }
 
-    setVariableSuccess(data) {
-        customSetVariableSuccess(data);
+    setVariableSuccess() {
+        console.log("setVariableSuccess");
+        customSetVariableSuccess();
     }
 
     setVariableError(err) {
+        console.log("setVariableError");
         console.log(err)
     }
 

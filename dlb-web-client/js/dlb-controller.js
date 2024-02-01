@@ -172,11 +172,57 @@ function customListDialoguesError(err) {
     this.logger.error("Retrieving dialogue list failed with the following result: "+err);
 }
 
-// ---------- List Variables ----------
+// ----------------------------------------------------------
+// -------------------- Variable Browser --------------------
+// ----------------------------------------------------------
 
 function actionListVariables() {
     this.logger.info("Refreshing the contents of the Variable List.");
     this.dialogueBranchClient.callGetVariables();
+}
+
+function customGetVariablesSuccess(data) {
+    var variableBrowserContentField = document.getElementById("variable-browser-content");
+
+    // Empty the content field before populating
+    variableBrowserContentField.innerHTML = "";
+
+    for (let key in data) {
+
+        const variableEntryElement = document.createElement("div");
+        variableEntryElement.classList.add("variable-browser-entry");
+        variableBrowserContentField.appendChild(variableEntryElement);
+
+        var variableButtonsBox = document.createElement("div");
+        variableButtonsBox.classList.add("variable-buttons-box");
+        variableEntryElement.appendChild(variableButtonsBox);
+        
+        const variableDeleteIcon = document.createElement("button");
+        variableDeleteIcon.classList.add("variable-delete-icon");
+        variableDeleteIcon.innerHTML = "<i class='fa-solid fa-trash'></i>";
+        variableDeleteIcon.addEventListener("click", actionDeleteVariable.bind(this, key), false);
+        variableButtonsBox.appendChild(variableDeleteIcon);
+
+        const variableNameElement = document.createElement("div");
+        variableNameElement.classList.add("variable-entry-name");
+        variableNameElement.innerHTML = key;
+        variableEntryElement.appendChild(variableNameElement);
+
+        const variableValueElement = document.createElement("div");
+        variableValueElement.classList.add("variable-entry-value");
+        variableValueElement.innerHTML = data[key];
+        variableEntryElement.appendChild(variableValueElement);
+    }
+}
+
+function actionDeleteVariable(variableName) {
+    this.logger.info("Starting to delete variable: "+variableName);
+    this.dialogueBranchClient.callSetVariable(variableName,null);
+}
+
+function customSetVariableSuccess() {
+    this.logger.debug("Custom Set Variable Success()");
+    this.actionListVariables();
 }
 
 // ---------- Start Dialogue ----------
@@ -199,11 +245,6 @@ function actionSelectReply(replyNumber, reply, dialogueStep) {
     this._dialogueReplyElements[replyNumber-1].classList.add("user-selected-reply-option");
 
     this.dialogueBranchClient.callProgressDialogue(dialogueStep.loggedDialogueId, dialogueStep.loggedInteractionIndex, reply.replyId);
-}
-
-function actionDeleteVariable(variableName) {
-    this.logger.info("Starting to delete variable: "+variableName);
-    this.dialogueBranchClient.callSetVariable(variableName,null);
 }
 
 // ----------------------------------------------------------------------
@@ -285,44 +326,6 @@ function customAuthValidateSuccess(data) {
 
 function customAuthValidateError(err) {
     this.logger.error("Validating authentication token failed with the following result: "+err);
-}
-
-// ---------- List Dialogues ----------
-
-
-
-// ---------- List Variables
-
-function customGetVariablesSuccess(data) {
-    var variableBrowserContentField = document.getElementById("variable-browser-content");
-
-    // Empty the content field before populating
-    variableBrowserContentField.innerHTML = "";
-
-    for (let key in data) {
-        const variableEntryElement = document.createElement("div");
-        variableEntryElement.classList.add("variable-entry-container");
-        
-        const variableDeleteIcon = document.createElement("button");
-        variableDeleteIcon.classList.add("icon-button-small");
-        variableDeleteIcon.classList.add("variable-delete-icon");
-        variableDeleteIcon.innerHTML = "<i class='fa-solid fa-trash'></i>";
-        variableDeleteIcon.addEventListener("click", actionDeleteVariable.bind(this, key), false);
-        variableEntryElement.appendChild(variableDeleteIcon);
-
-        const variableNameElement = document.createElement("div");
-        variableNameElement.classList.add("variable-entry-name");
-        variableNameElement.innerHTML = key;
-        variableEntryElement.appendChild(variableNameElement);
-
-        const variableValueElement = document.createElement("div");
-        variableValueElement.classList.add("variable-entry-value");
-        variableValueElement.innerHTML = data[key];
-        variableEntryElement.appendChild(variableValueElement);
-        
-        variableBrowserContentField.appendChild(variableEntryElement);
-    }
-
 }
 
 // ---------- Start Dialogue

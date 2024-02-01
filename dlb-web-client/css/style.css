@@ -12,6 +12,7 @@
     --color-orange-dark: rgb(153,102,0);
     --color-orange-medium: rgb(179, 141, 83);
     --color-orange-light: rgb(246, 203, 139);
+	--color-red-dark: rgb(101, 10, 10);
     
     /* Definition of color elements */
     --color-background: var(--color-grey-light);
@@ -128,18 +129,14 @@ td.login-table-labels {
     font-weight: 400;
 }
 
-/* -------------------------------------- */
-/* ---------- Dialogue Browser ---------- */
-/* -------------------------------------- */
+/* ---------------------------------------------------------- */
+/* -------------------- Dialogue Browser -------------------- */
+/* ---------------------------------------------------------- */
 
 #dialogue-browser-container {
     float: left;
     width: 20%;
     height: 488px;
-}
-
-#dialogue-browser-content {
-
 }
 
 .dialogue-browser-entry {
@@ -167,6 +164,64 @@ td.login-table-labels {
 	padding-top: 10px;
 }
 
+/* ---------------------------------------------------------- */
+/* -------------------- Variable Browser -------------------- */
+/* ---------------------------------------------------------- */
+
+#variable-browser-container {
+    float: left;
+    width: 20%;
+    height: 500px;
+}
+
+#button-refresh-variable-list {
+    float: right;
+    width: 30px;
+    height: 30px;
+    margin-right: 5px;
+}
+
+.variable-browser-entry {
+    background-color: var(--color-grey-lighter);
+	margin-top: 4px;
+	margin-left: 4px;
+	margin-right: 4px;
+	padding-top: 4px;
+	padding-bottom: 4px;
+	padding-left: 4px;
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--color-orange-darker);
+	display: flex;
+}
+
+.variable-buttons-box {
+	flex: 1;
+}
+
+.variable-entry-name {
+    flex: 4
+}
+
+.variable-entry-value {
+    flex: 4;
+}
+
+.variable-delete-icon {
+	width: 20px;
+	height: 20px;
+	padding: 0px;
+	background-color: var(--color-red-dark);
+	border: none;
+	color: white;	
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 10px;
+	cursor: pointer;
+	border-radius: 50%;
+}
+
 /* Dialogue Step Rendering */
 
 .dialogue-step-speaker {
@@ -190,9 +245,3 @@ td.login-table-labels {
 	color: grey;
 }
 
-.icon-button-small {
-	width: 10px;
-	height: 20px;
-	color: grey;
-	padding: 0px;
-}
