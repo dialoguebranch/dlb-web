@@ -98,12 +98,6 @@ td.login-table-submit {
     top: 100px;
 }
 
-#dialogue-browser-container {
-    float: left;
-    width: 20%;
-    height: 500px;
-}
-
 #interaction-tester-container {
     float: left;
     width: 60%;
@@ -132,7 +126,6 @@ td.login-table-submit {
 
 .box-content-scrollable {
 	background-color: white;
-	padding-left: 10px;
 	height: 470px;
 	margin-left: 5px;
     margin-right: 5px;

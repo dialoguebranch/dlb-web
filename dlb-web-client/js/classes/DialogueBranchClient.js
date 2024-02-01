@@ -26,8 +26,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/** 
+ * The following constants may be used throughout the web app for logging purposes.
+ */
 const LOG_LEVEL_INFO = 0;
 const LOG_LEVEL_DEBUG = 1;
+const LOG_LEVEL_NAMES = [
+    "INFO",
+    "DEBUG"
+];
 
 class DialogueBranchClient {
 
@@ -35,8 +42,9 @@ class DialogueBranchClient {
     // ---------- Constructor(s) ----------
     // ------------------------------------
 
-    constructor(baseUrl) {
+    constructor(baseUrl, logger) {
         this._baseUrl = baseUrl;
+        this._logger = logger;
         this._timeZone = new Intl.DateTimeFormat().resolvedOptions().timeZone;
     }
 
@@ -62,6 +70,10 @@ class DialogueBranchClient {
 
     set user(user) {
         this._user = user;
+    }
+
+    get logger() {
+        return this._logger;
     }
 
     // -----------------------------------------------------------------------------
@@ -417,8 +429,20 @@ class DialogueBranchClient {
     }
 
     listDialoguesSuccess(data) {
-        console.log(data);
-        customListDialoguesSuccess(data);
+
+        if(data == null) {
+            // A null response is unexpected, but should not break the client
+            this.logger.warn("DBC: Call to /admin/list-dialogues returned null response.");
+            customListDialoguesSuccess(new Array());
+        } else {
+            if('dialogueNames' in data) {
+                customListDialoguesSuccess(data.dialogueNames);
+            } else {
+                // Data without dialogueNames is unexpected, but should not break the client
+                this.logger.warn("DBC: Call to /admin/list-dialogues returned unexpected response.");
+                customListDialoguesSuccess(new Array());
+            }
+        }
     }
 
     listDialoguesError(err) {

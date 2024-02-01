@@ -47,7 +47,7 @@ window.onload = function() {
     });
 
     document.getElementById("button-refresh-dialogue-list").addEventListener("click", (e)=> {
-        actionListDialogues();
+        actionRefreshDialogueBrowser();
     });
 
     document.getElementById("button-refresh-variable-list").addEventListener("click", (e)=> {
@@ -57,10 +57,15 @@ window.onload = function() {
     // Initialize the logger
     this.logger = new Logger();
     this.logger.logLevel = LOG_LEVEL_DEBUG;
-    this.logger.info("Initialized Logger with log level '" + dialogueBranchConfig.logLevel + "'.");
+    this.logger.info("Initialized Logger with log level '" 
+        + dialogueBranchConfig.logLevel 
+        + "' ('" 
+        + LOG_LEVEL_NAMES[dialogueBranchConfig.logLevel] 
+        + "').");
 
-    this.dialogueBranchClient = new DialogueBranchClient(dialogueBranchConfig.baseUrl);
-    this.logger.info("Initalized DialogueBranchClient for base url '"+ dialogueBranchConfig.baseUrl + "'.");
+    // Initialize the DialogueBranchClient object, used for communication to the Dialogue Branch Web Service
+    this.dialogueBranchClient = new DialogueBranchClient(dialogueBranchConfig.baseUrl, this.logger);
+    this.logger.info("Initalized DialogueBranchClient with a connection to Web Service at '"+ dialogueBranchConfig.baseUrl + "'.");
 
     // Initialize the ClientState object and take actions
     this.clientState = new ClientState(this.logger);
@@ -101,7 +106,7 @@ function actionLogin(event) {
 // ---------- Logout ----------
 
 function actionLogout() {
-    this.logger.info("Logging out user.");
+    this.logger.info("Logging out user '" + this.clientState.user.name + "'.");
     deleteCookie('user.name');
     deleteCookie('user.authToken');
     deleteCookie('user.role');
@@ -128,17 +133,49 @@ function actionToggleDebugConsole() {
     }
 }
 
-// ---------- List Dialogues ----------
+// ----------------------------------------------------------
+// -------------------- Dialogue Browser --------------------
+// ----------------------------------------------------------
 
-function actionListDialogues() {
-    this.logger.info("Refreshing the Dialogue Browser.");
+function actionRefreshDialogueBrowser() {
     this.dialogueBranchClient.callListDialogues();
+}
+
+function customListDialoguesSuccess(dialogueNames) {
+    var dialogueBrowserContentField = document.getElementById("dialogue-browser-content");
+
+    // Empty the content field before populating
+    dialogueBrowserContentField.innerHTML = "";
+
+    // If the list of dialogueNames is empty, present a warning message
+    if(dialogueNames.length == 0) {
+        var dialogueBrowserEmptyElement = document.createElement("div");
+        dialogueBrowserEmptyElement.classList.add("dialogue-browser-empty-warning");
+        dialogueBrowserEmptyElement.innerHTML = "No dialogues available. Please make sure that the Dialogue Branch Web Service you are connected to has access to dialogue script resources.";
+        dialogueBrowserContentField.appendChild(dialogueBrowserEmptyElement);
+    } else {
+        for(var i=0; i< dialogueNames.length; i++) {
+
+            var dialogueBrowserEntry = document.createElement("div");
+            dialogueBrowserEntry.classList.add("dialogue-browser-entry");
+            dialogueBrowserEntry.innerHTML = "<i class='fa-solid fa-circle-play'></i> " + dialogueNames[i];
+
+            dialogueBrowserEntry.addEventListener("click", actionStartDialogue.bind(this, dialogueNames[i]), false);
+            dialogueBrowserContentField.appendChild(dialogueBrowserEntry);
+        }
+    }
+
+    this.logger.info("Updated the contents of the Dialogue Browser, showing "+dialogueNames.length+" available dialogues.");
+}
+
+function customListDialoguesError(err) {
+    this.logger.error("Retrieving dialogue list failed with the following result: "+err);
 }
 
 // ---------- List Variables ----------
 
 function actionListVariables() {
-    this.logger.info("Refreshing the Variable List.");
+    this.logger.info("Refreshing the contents of the Variable List.");
     this.dialogueBranchClient.callGetVariables();
 }
 
@@ -252,29 +289,7 @@ function customAuthValidateError(err) {
 
 // ---------- List Dialogues ----------
 
-function customListDialoguesSuccess(data) {
-    var dialogueBrowserContentField = document.getElementById("dialogue-browser-content");
 
-    // Empty the content field before populating
-    dialogueBrowserContentField.innerHTML = "";
-    
-    if('dialogueNames' in data) {
-
-        for(var i=0; i< data.dialogueNames.length; i++) {
-            if(i != 0) dialogueBrowserContentField.innerHTML += "<br/>";
-            dialogueBrowserContentField.innerHTML += "<span class=\"dialogue-browser-entry\">" 
-                + "<a id=\"myLink\" title=\"Click to do start Dialogue\" href=\"#\" onclick=\"actionStartDialogue('" 
-                + data.dialogueNames[i] 
-                + "');return false;\">" 
-                + data.dialogueNames[i] 
-                + "</a></span>";
-        }
-    }
-}
-
-function customListDialoguesError(err) {
-    this.logger.error("Retrieving dialogue list failed with the following result: "+err);
-}
 
 // ---------- List Variables
 
@@ -604,9 +619,6 @@ async function renderDialogueStep(dialogueStep) {
         contentBlock.scrollTop = fillerElement.offsetTop;
     }
 
-    
-    
-    
 }
 
 // -----------------------------------------------------------

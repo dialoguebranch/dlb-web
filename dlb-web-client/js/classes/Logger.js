@@ -41,6 +41,11 @@ class Logger {
         this.scrollToBottom();
     }
 
+    warn(line) {
+        this._logArea.value += "\n" + "WARNING: " + line;
+        this.scrollToBottom();
+    }
+
     error(line) {
         this._logArea.value += "\n" + "ERROR: " + line;
         this.scrollToBottom();

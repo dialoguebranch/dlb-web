@@ -58,7 +58,6 @@ class ClientState {
      */
     set loggedIn(loggedIn) {
         this._loggedIn = loggedIn;
-        this._logger.debug("ClientState updated: loggedIn = "+loggedIn);
     }
 
     /**
@@ -106,7 +105,6 @@ class ClientState {
     set debugConsoleVisible(debugConsoleVisible) {
         this._debugConsoleVisible = debugConsoleVisible;
         setCookie('state.debugConsoleVisible', this._debugConsoleVisible, 365);
-        this._logger.debug("ClientState updated: debugConsoleVisible = " + debugConsoleVisible);
     }
 
     get debugConsoleVisible() {

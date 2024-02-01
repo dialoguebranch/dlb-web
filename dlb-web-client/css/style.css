@@ -4,7 +4,8 @@
 
     /* Definition of colors */
     --color-black: rgb(0,0,0);
-    --color-light-grey: rgb(200,200,200);
+    --color-grey-light: rgb(200,200,200);
+	--color-grey-lighter: rgb(240,240,240);
     --color-darken: rgba(0,0,0,0.5);
     --color-brighten: rgba(255,255,255,0.5);
     --color-orange-darker: rgb(119, 81, 24);
@@ -13,7 +14,7 @@
     --color-orange-light: rgb(246, 203, 139);
     
     /* Definition of color elements */
-    --color-background: var(--color-light-grey);
+    --color-background: var(--color-grey-light);
     --color-box: var(--color-orange-darker);
     --color-lines: var(--color-orange-dark);
     --color-lines-highlight: var(--color-orange-light);
@@ -127,9 +128,43 @@ td.login-table-labels {
     font-weight: 400;
 }
 
+/* -------------------------------------- */
+/* ---------- Dialogue Browser ---------- */
+/* -------------------------------------- */
+
+#dialogue-browser-container {
+    float: left;
+    width: 20%;
+    height: 488px;
+}
+
+#dialogue-browser-content {
+
+}
+
 .dialogue-browser-entry {
-	font-size: 10px;
+	background-color: var(--color-grey-lighter);
+	margin-top: 4px;
+	margin-left: 4px;
+	margin-right: 4px;
+	padding-top: 4px;
+	padding-bottom: 4px;
+	padding-left: 4px;
+	font-size: 12px;
 	font-weight: 700;
+	color: var(--color-orange-darker);
+}
+
+.dialogue-browser-entry:hover {
+	color: var(--color-orange-dark);
+	cursor: pointer;
+}
+
+.dialogue-browser-empty-warning {
+	font-size: 12px;
+	font-weight: 600;
+	font-style: italic;
+	padding-top: 10px;
 }
 
 /* Dialogue Step Rendering */
