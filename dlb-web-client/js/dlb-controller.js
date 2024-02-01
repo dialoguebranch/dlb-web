@@ -454,6 +454,14 @@ function updateUIState() {
             dialogueListButton.classList.add("button-refresh-dialogue-list-disabled");
             dialogueListButton.setAttribute('title',"Retrieving a dialogue list is only available for 'admin' users.");
         }
+
+        // Refresh the Dialogue List
+        if(this.clientState.user.role == 'admin')
+        this.actionRefreshDialogueBrowser();
+
+        // Refresh the Variable Browser
+        this.actionListVariables();
+
     } else {
         document.getElementById("navbar").style.display = 'none';
         document.getElementById("dialogue-container").style.display = 'none';
@@ -620,6 +628,9 @@ async function renderDialogueStep(dialogueStep) {
         
         // Scroll to the top of scrollable element
         contentBlock.scrollTop = fillerElement.offsetTop;
+
+        // Refresh the Variable Browser
+        this.actionListVariables();
     }
 
 }
