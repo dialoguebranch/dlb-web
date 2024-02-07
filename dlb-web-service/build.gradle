@@ -9,7 +9,7 @@ plugins {
 }
 
 group = 'com.dialoguebranch'
-version = '1.1.0' // run updateVersion after changing this property
+version = '1.2.0' // run updateVersion after changing this property
 
 repositories {
 	mavenCentral()
