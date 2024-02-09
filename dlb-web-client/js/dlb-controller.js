@@ -326,6 +326,9 @@ function customAuthValidateError(err) {
 function customStartDialogueSuccess(data) {
     if('dialogue' in data) {
 
+        var titleElement = document.getElementById("interaction-tester-title");
+        titleElement.innerHTML = "Interaction Tester <i>(" + data.dialogue + ".dlb)</i>";
+
         dialogueStep = createDialogueStepObject(data);
 
         this.logger.debug(dialogueStep.toString());
