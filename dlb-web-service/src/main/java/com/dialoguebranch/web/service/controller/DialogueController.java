@@ -701,7 +701,7 @@ public class DialogueController {
 				.getActiveUserService(userId);
 
 		ServerLoggedDialogue latestOngoingDialogue =
-				userService.getLoggedDialogueStore().findLatestOngoingDialogue(userId);
+				userService.getLoggedDialogueStore().findLatestOngoingDialogue();
 
 		if(latestOngoingDialogue != null) {
 			String dialogueName = latestOngoingDialogue.getDialogueName();

@@ -40,10 +40,7 @@ import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * A {@link LoggedDialogueStore} is a class that acts as the storage for {@link ServerLoggedDialogue}
@@ -52,11 +49,10 @@ import java.util.List;
  * <p>A {@link LoggedDialogueStore} does not maintain any data in-memory, but immediately stores
  * any changes made to the configured storage mechanism.</p>
  *
- * @author Harm op den Akker
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 public class LoggedDialogueStore {
 
-	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
 	private final Configuration config = Configuration.getInstance();
 	private final UserService userService;
 	private final String userId;
@@ -64,9 +60,9 @@ public class LoggedDialogueStore {
 	private static final Object LOCK = new Object();
 	private ServerLoggedDialogue latestStoredServerLoggedDialogue = null;
 
-	// ------------------------------------ //
-	// ---------- Constructor(s) ---------- //
-	// ------------------------------------ //
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
 
 	/**
 	 * Creates an instance of a {@link LoggedDialogueStore} for the user identified by the given
@@ -79,7 +75,8 @@ public class LoggedDialogueStore {
 	 * @throws IOException in case of an error instantiating the log folder.
 	 */
 	public LoggedDialogueStore(String userId, UserService userService) throws IOException {
-		logger.info("Initializing LoggedDialogueStore for user '" + userId + "'.");
+        Logger logger = AppComponents.getLogger(getClass().getSimpleName());
+        logger.info("Initializing LoggedDialogueStore for user '" + userId + "'.");
 
 		this.userService = userService;
 		this.userId = userId;
@@ -116,9 +113,10 @@ public class LoggedDialogueStore {
 						logger.error("Error populating local dialogue log folder from Azure Data " +
 							"Lake. It is possible that dialogue log information that is " +
 							"available on the Azure Data Lake should have been synchronised to " +
-							"the local DialogueBranch Web Service storage, but something went wrong in " +
-							"doing so. This does not warrant interrupting the current request, " +
-							"so operation has continued as if no log information was available.");
+							"the local DialogueBranch Web Service storage, but something went " +
+							"wrong in doing so. This does not warrant interrupting the current " +
+							"request, so operation has continued as if no log information was " +
+							"available.");
 					}
 				}
 			} else {
@@ -137,14 +135,14 @@ public class LoggedDialogueStore {
 		return readLatestDialogueWithConditions(false,null,id);
 	}
 
-	public ServerLoggedDialogue findLatestOngoingDialogue(String dialogueName)
-			throws DatabaseException, IOException {
-		return readLatestDialogueWithConditions(true,dialogueName,null);
-	}
-
 	public ServerLoggedDialogue findLatestOngoingDialogue()
 			throws IOException, DatabaseException {
 		return readLatestDialogueWithConditions(true, null, null);
+	}
+
+	public ServerLoggedDialogue findLatestOngoingDialogue(String dialogueName)
+			throws DatabaseException, IOException {
+		return readLatestDialogueWithConditions(true,dialogueName,null);
 	}
 
 	public void setDialogueCancelled(ServerLoggedDialogue serverLoggedDialogue)
@@ -286,29 +284,29 @@ public class LoggedDialogueStore {
 	}
 
 	/**
-	 * Dig through the given {@code user}'s log files, and look for the latest
-	 * {@link ServerLoggedDialogue} that matches the conditions provided. This method will look through
-	 * all the user's dialogue log files in order (newest to oldest), and return the first
-	 * occurrence of a {@link ServerLoggedDialogue} that matches all conditions.
+	 * Dig through the given {@code user}'s log files, and look for the latest {@link
+	 * ServerLoggedDialogue} that matches the conditions provided. This method will look through all
+	 * the user's dialogue log files in order (newest to oldest), and return the first occurrence
+	 * of a {@link ServerLoggedDialogue} that matches all conditions.
 	 *
-	 * <p>If {@code mustBeOngoing} is {@code true} this method will only return a
-	 * {@link ServerLoggedDialogue} for which the #isCancelled and #isCompleted parameters are both false.
+	 * <p>If {@code mustBeOngoing} is {@code true} this method will only return a {@link
+	 * ServerLoggedDialogue} for which the #isCancelled and #isCompleted parameters are both false.
 	 * Otherwise, these parameters are ignored.</p>
 	 *
-	 * <p>If a {@code dialogueName} is provided, the returned {@link ServerLoggedDialogue} must have this
-	 * given dialogue name. If {@code null} is provided, the condition is ignored.</p>
+	 * <p>If a {@code dialogueName} is provided, the returned {@link ServerLoggedDialogue} must have
+	 * this given dialogue name. If {@code null} is provided, the condition is ignored.</p>
 	 *
-	 * <p>If a {@code id} is provided, the returned {@link ServerLoggedDialogue} must have this id. If
-	 * {@code null} is provided, the condition is ignored.</p>
+	 * <p>If a {@code id} is provided, the returned {@link ServerLoggedDialogue} must have this id.
+	 * If {@code null} is provided, the condition is ignored.</p>
 	 *
-	 * <p>Finally, if no {@link ServerLoggedDialogue} is found that matches all given conditions, this
-	 * method will return {@code null}.</p>
+	 * <p>Finally, if no {@link ServerLoggedDialogue} is found that matches all given conditions,
+	 * this method will return {@code null}.</p>
 	 *
 	 * @param mustBeOngoing true if this method should only look for "ongoing" dialogues.
 	 * @param dialogueName an optional dialogue name to look for (or {@code null}).
 	 * @param id an optional id to look for (or {@code null}).
-	 * @return the {@link ServerLoggedDialogue} that matches the conditions, or {@code null} if none can
-	 *         be found.
+	 * @return the {@link ServerLoggedDialogue} that matches the conditions, or {@code null} if none
+	 *         can be found.
 	 * @throws DatabaseException in case of an error reading from the dialogue log files.
 	 * @throws IOException in case of an error reading from the dialogue log files.
 	 */
@@ -345,9 +343,10 @@ public class LoggedDialogueStore {
 		}
 
 		if(userLogFiles == null) throw new DatabaseException("Error retrieving file listing " +
-				"from dialogue log directory for user '" + userId + "'.");
+			"from dialogue log directory for user '" + userId + "'.");
 
-		Arrays.sort(userLogFiles);
+		// Go through all files in reverse order (newest first)
+		Arrays.sort(userLogFiles, Collections.reverseOrder());
 
 		for(File f : userLogFiles) {
 			List<ServerLoggedDialogue> serverLoggedDialogues = readSessionFile(f);

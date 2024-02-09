@@ -87,7 +87,7 @@ public class OpenApiSwaggerConfig {
 				.description("The DialogueBranch Web Service API gives authorized clients the " +
 						"ability to start-, and sequentially execute DialogueBranch dialogues as " +
 						"well to access DialogueBranch Variable data.")
-				.version("v1.0.0")
+				.version("v1.2.4")
 				.contact(new Contact().email("info@dialoguebranch.com")
 						.name("DialogueBranch Platform Support"))
 				.license(new License().name("MIT").url("https://opensource.org/licenses/MIT")));

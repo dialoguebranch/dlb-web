@@ -9,11 +9,10 @@ plugins {
 }
 
 group = 'com.dialoguebranch'
-version = '1.2.3' // run updateVersion after changing this property
+version = '1.2.4' // run updateVersion after changing this property
 
 repositories {
 	mavenCentral()
-	mavenLocal()
 }
 
 base {

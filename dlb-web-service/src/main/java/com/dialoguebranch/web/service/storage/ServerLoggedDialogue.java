@@ -96,8 +96,8 @@ public class ServerLoggedDialogue implements com.dialoguebranch.model.LoggedDial
 	}
 
 	/**
-	 * Sets an optional custom logging identifier that may be used to cross-reference DialogueBranch Web
-	 * Service dialogue logs for a session with logs from an external system.
+	 * Sets an optional custom logging identifier that may be used to cross-reference Dialogue
+	 * Branch Web Service dialogue logs for a session with logs from an external system.
 	 * @param sessionId an optional custom logging identifier.
 	 */
 	public void setSessionId(String sessionId) {
@@ -213,5 +213,15 @@ public class ServerLoggedDialogue implements com.dialoguebranch.model.LoggedDial
 		else {
 			return interactionList.get(interactionList.size()-1).getTimestamp();
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "ServerLoggedDialogue[" +
+			"id='" + id + '\'' +
+			", sessionId='" + sessionId + '\'' +
+			", user='" + user + '\'' +
+			", dialogueName='" + dialogueName + '\'' +
+			']';
 	}
 }
