@@ -37,7 +37,8 @@ import java.io.Serial;
  * with {@link ResponseStatus ResponseStatus}. They are handled by
  * {@link ErrorController ErrorController}.
  * 
- * @author Dennis Hofs (RRD)
+ * @author Dennis Hofs (Roessingh Research and Development)
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 public abstract class HttpException extends Exception {
 
@@ -46,10 +47,14 @@ public abstract class HttpException extends Exception {
 	
 	private final HttpError error;
 
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
 	/**
 	 * Constructs a new HTTP exception with default error code 0.
 	 * 
-	 * @param message the error message
+	 * @param message the error message.
 	 */
 	public HttpException(String message) {
 		super(message);
@@ -77,6 +82,10 @@ public abstract class HttpException extends Exception {
 		this.error = error;
 	}
 
+	// ----------------------------------------------------------- //
+	// -------------------- Getters & Setters -------------------- //
+	// ----------------------------------------------------------- //
+
 	/**
 	 * Returns the error details.
 	 * 
@@ -85,11 +94,14 @@ public abstract class HttpException extends Exception {
 	public HttpError getError() {
 		return error;
 	}
+
+	// ------------------------------------------------------- //
+	// -------------------- Other Methods -------------------- //
+	// ------------------------------------------------------- //
 	
 	/**
-	 * Returns the HTTP exception for the specified HTTP status code.
-	 * Unsupported status codes will be mapped to an {@link
-	 * InternalServerErrorException InternalServerErrorException}.
+	 * Returns the HTTP exception for the specified HTTP status code. Unsupported status codes will
+	 * be mapped to an {@link InternalServerErrorException}.
 	 * 
 	 * @param statusCode the HTTP status code
 	 * @param error the error details
@@ -111,4 +123,5 @@ public abstract class HttpException extends Exception {
 					new InternalServerErrorException(error);
 		};
 	}
+
 }

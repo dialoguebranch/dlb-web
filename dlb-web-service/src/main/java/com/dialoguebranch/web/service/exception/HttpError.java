@@ -34,46 +34,55 @@ import nl.rrd.utils.json.JsonObject;
 
 /**
  * An HTTP error can be included as a JSON string in the content of an HTTP error response. It has
- * an optional error code. The core error codes are defined as constants in
- * {@link ErrorCode ErrorCode}.
+ * an optional error code. The core error codes are defined as constants in {@link ErrorCode}.
  * 
- * @author Dennis Hofs (RRD)
+ * @author Dennis Hofs (Roessingh Research and Development)
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 public class HttpError extends JsonObject {
+
 	private String code = null;
 	private String message = "";
 	private List<HttpFieldError> fieldErrors = new ArrayList<>();
 
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
 	/**
 	 * Constructs a new empty error.
 	 */
-	public HttpError() {
-	}
+	public HttpError() { }
 	
 	/**
-	 * Constructs a new error without an error code.
+	 * Constructs a new error without an error code, but with a given {@code message}..
 	 * 
-	 * @param message the error message
+	 * @param message the error message describing the cause of this exception.
 	 */
 	public HttpError(String message) {
 		this.message = message;
 	}
 	
 	/**
-	 * Constructs a new error.
+	 * Creates an instance of a {@link HttpError} with a given error {@code code} and {@code
+	 * message}.
 	 * 
-	 * @param code the error code or null
-	 * @param message the error message
+	 * @param code the error code or {@code null}.
+	 * @param message the error message describing the cause of this exception.
 	 */
 	public HttpError(String code, String message) {
 		this.code = code;
 		this.message = message;
 	}
 
+	// ----------------------------------------------------------- //
+	// -------------------- Getters & Setters -------------------- //
+	// ----------------------------------------------------------- //
+
 	/**
 	 * Returns the error code.
 	 * 
-	 * @return the error code or null
+	 * @return the error code or {@code null}.
 	 */
 	public String getCode() {
 		return code;
@@ -106,6 +115,10 @@ public class HttpError extends JsonObject {
 		this.message = message;
 	}
 
+	// ------------------------------------------------------- //
+	// -------------------- Other Methods -------------------- //
+	// ------------------------------------------------------- //
+
 	/**
 	 * Returns errors for fields where invalid user input was provided.
 	 * 
@@ -132,4 +145,5 @@ public class HttpError extends JsonObject {
 	public void addFieldError(HttpFieldError error) {
 		fieldErrors.add(error);
 	}
+
 }

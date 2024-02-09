@@ -59,7 +59,7 @@ import java.util.List;
  * individual user's of the DialogueBranch Web Service, as well as other application wide objects.
  *
  * @author Harm op den Akker (Fruit Tree Labs)
- * @author Tessa Beinema
+ * @author Tessa Beinema (University of Twente)
  */
 public class ApplicationManager {
 

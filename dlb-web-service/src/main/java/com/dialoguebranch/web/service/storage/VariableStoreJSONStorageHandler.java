@@ -47,13 +47,13 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * A {@link VariableStoreJSONStorageHandler} can manage reading and writing
- * {@link VariableStore}s to and from JSON file representations.
- * You can instantiate an instance of a {@link VariableStoreJSONStorageHandler} by providing a
- * root dataDirectory. The storage handler will assume/create a single {username}.json file for
- * every DialogueBranch User that will contain a JSON representation of the DialogueBranch Variable Store.
+ * A {@link VariableStoreJSONStorageHandler} can manage reading and writing {@link VariableStore}s
+ * to and from JSON file representations. You can instantiate an instance of a {@link
+ * VariableStoreJSONStorageHandler} by providing a root dataDirectory. The storage handler will
+ * assume/create a single {username}.json file for every Dialogue Branch User that will contain a
+ * JSON representation of the Dialogue Branch Variable Store.
  *
- * @author Harm op den Akker
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 public class VariableStoreJSONStorageHandler implements VariableStoreStorageHandler {
 
@@ -117,4 +117,5 @@ public class VariableStoreJSONStorageHandler implements VariableStoreStorageHand
                     e.getMessage(), e);
         }
     }
+
 }

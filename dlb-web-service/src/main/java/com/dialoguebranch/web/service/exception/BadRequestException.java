@@ -56,6 +56,10 @@ public class BadRequestException extends HttpException {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
 	/**
 	 * Creates an instance of a {@link BadRequestException} with the simple message "Bad Request".
 	 */
@@ -92,6 +96,10 @@ public class BadRequestException extends HttpException {
 	public BadRequestException(HttpError error) {
 		super(error);
 	}
+
+	// ------------------------------------------------------- //
+	// -------------------- Other Methods -------------------- //
+	// ------------------------------------------------------- //
 
 	/**
 	 * Generate a {@link BadRequestException} by adding the {@link HttpFieldError}s of the given
@@ -185,4 +193,5 @@ public class BadRequestException extends HttpException {
 		}
 		return new BadRequestException(error);
 	}
+
 }

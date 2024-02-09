@@ -43,8 +43,9 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * A {@link LoggedDialogueStore} is a class that acts as the storage for {@link ServerLoggedDialogue}
- * objects, used in the execution of dialogues by the DialogueBranch Web Service.
+ * A {@link LoggedDialogueStore} is a class that acts as the storage for {@link
+ * ServerLoggedDialogue} objects, used in the execution of dialogues by the Dialogue Branch Web
+ * Service.
  *
  * <p>A {@link LoggedDialogueStore} does not maintain any data in-memory, but immediately stores
  * any changes made to the configured storage mechanism.</p>
@@ -191,7 +192,9 @@ public class LoggedDialogueStore {
 		return false;
 	}
 
-	public List<ServerLoggedDialogue> readSession(String sessionId) throws DatabaseException, IOException {
+	public List<ServerLoggedDialogue> readSession(String sessionId)
+			throws DatabaseException, IOException {
+
 		File[] userLogFiles;
 
 		synchronized (LOCK) {
@@ -259,7 +262,8 @@ public class LoggedDialogueStore {
 	 * Provide the complete list of all LoggedDialogues that are part of the same session as the
 	 * given serverLoggedDialogue, including itself.
 	 *
-	 * @param serverLoggedDialogue the {@link ServerLoggedDialogue} for which to retrieve all of his friends.
+	 * @param serverLoggedDialogue the {@link ServerLoggedDialogue} for which to retrieve all of
+	 *                             his friends.
 	 * @return a List of ServerLoggedDialogue objects that form the complete session that the given
 	 *         {@code serverLoggedDialogue} is part of, including itself
 	 * @throws DatabaseException in case of an error reading from the dialogue log files.
@@ -267,6 +271,7 @@ public class LoggedDialogueStore {
 	 */
 	private List<ServerLoggedDialogue> readSessionWith(ServerLoggedDialogue serverLoggedDialogue)
 			throws DatabaseException, IOException {
+
 		// Read all logged dialogues in this session from file
 		List<ServerLoggedDialogue> dialogues = readSession(serverLoggedDialogue.getSessionId(),
 				serverLoggedDialogue.getSessionStartTime());

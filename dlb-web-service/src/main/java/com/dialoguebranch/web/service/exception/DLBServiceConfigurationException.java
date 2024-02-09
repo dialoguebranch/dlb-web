@@ -29,15 +29,38 @@ package com.dialoguebranch.web.service.exception;
 
 import java.io.Serial;
 
+/**
+ * This exception is thrown when any part of the Dialogue Branch Web Service application could not
+ * be initialized due to an incorrectly defined configuration parameter.
+ *
+ * @author Harm op den Akker (Fruit Tree Labs)
+ */
 public class DLBServiceConfigurationException extends Exception {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
+	/**
+	 * Creates an instance of a {@link DLBServiceConfigurationException} with the given {@code
+	 * message}.
+	 *
+	 * @param message the error message to describe the exception.
+	 */
 	public DLBServiceConfigurationException(String message) {
 		super(message);
 	}
 
+	/**
+	 * Creates an instance of a {@link DLBServiceConfigurationException} with the given {@code
+	 * message} and {@link Throwable} cause.
+	 *
+	 * @param message the error message to describe the exception.
+	 * @param cause the nested exception that caused this {@link DLBServiceConfigurationException}.
+	 */
 	public DLBServiceConfigurationException(String message, Throwable cause) {
 		super(message, cause);
 	}

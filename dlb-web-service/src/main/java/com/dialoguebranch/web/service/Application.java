@@ -54,8 +54,8 @@ import java.time.Instant;
 /**
  * The main entry point for the DialogueBranch Web Service as a Spring Boot Application.
  *
- * @author Dennis Hofs
- * @author Harm op den Akker
+ * @author Dennis Hofs (Roessingh Research and Development)
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 
 @SpringBootApplication
@@ -112,7 +112,8 @@ ApplicationListener<ApplicationEvent> {
 			applicationManager = new ApplicationManager(
 					new ResourceFileLoader("dialogues"));
 		} catch(DLBServiceConfigurationException e) {
-			logger.error("Unable to initialize DialogueBranch Web Service due to configuration errors.");
+			logger.error("Unable to initialize DialogueBranch Web Service " +
+					"due to configuration errors.");
 			System.exit(1);
 		}
 	}
@@ -152,14 +153,18 @@ ApplicationListener<ApplicationEvent> {
 			logger.info("=== Spring Version: "+ SpringVersion.getVersion());
 			logger.info("=== JDK Version: "+System.getProperty("java.version"));
 			logger.info("=== Java Version: "+ JavaVersion.getJavaVersion().toString());
-			logger.info("=== External Variable Service Enabled: "+config.getExternalVariableServiceEnabled());
+			logger.info("=== External Variable Service Enabled: "
+					+ config.getExternalVariableServiceEnabled());
 			if(config.getExternalVariableServiceEnabled()) {
-				logger.info("=== External Variable Service URL: "+config.getExternalVariableServiceURL());
-				logger.info("=== External Variable Service API Version: "+config.getExternalVariableServiceAPIVersion());
+				logger.info("=== External Variable Service URL: "
+						+ config.getExternalVariableServiceURL());
+				logger.info("=== External Variable Service API Version: "
+						+ config.getExternalVariableServiceAPIVersion());
 			}
 			logger.info("=== Azure Data Lake Storage Enabled: "+config.getAzureDataLakeEnabled());
 			if(config.getAzureDataLakeEnabled()) {
-				logger.info("=== TODO: Add other Azure Parameters."); //TODO: Output relevant Azure config on startup
+				//TODO: Output relevant Azure config on startup
+				logger.info("=== TODO: Add other Azure Parameters.");
 			}
 			logger.info("===================================================");
 		}

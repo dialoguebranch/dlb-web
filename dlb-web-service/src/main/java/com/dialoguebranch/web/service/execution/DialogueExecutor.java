@@ -47,11 +47,11 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A {@link DialogueExecutor} holds a set of functions for executing DialogueBranch Dialogue for a given
- * {@link UserService}.
+ * A {@link DialogueExecutor} holds a set of functions for executing Dialogue Branch Dialogue for a
+ * given {@link UserService}.
  * 
- * @author Tessa Beinema
- * @author Harm op den Akker
+ * @author Tessa Beinema (University of Twente)
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 public class DialogueExecutor {
 
@@ -89,16 +89,16 @@ public class DialogueExecutor {
 	 * @throws ExecutionException if the request is invalid.
 	 */
 	public ExecuteNodeResult startDialogue(FileDescriptor dialogueDescription,
-                                           Dialogue dialogueDefinition, String nodeId, String sessionId,
-                                           long sessionStartTime)
+										   Dialogue dialogueDefinition, String nodeId,
+										   String sessionId, long sessionStartTime)
 			throws DatabaseException, IOException, ExecutionException {
 
 		ActiveDialogue dialogue = new ActiveDialogue(dialogueDescription,
 				dialogueDefinition);
 		dialogue.setVariableStore(userService.getVariableStore());
 
-		// Collects all the DialogueBranch Variables needed to execute this file and update from an external
-		// variable service (if enabled).
+		// Collects all the Dialogue Branch Variables needed to execute this file and update from an
+		// external variable service (if enabled).
 		Set<String> variablesNeeded = dialogueDefinition.getVariablesNeeded();
 		logger.info("Dialogue '" + dialogue.getDialogueDefinition().getDialogueName() +
 				"' uses the following set of DialogueBranch Variables: "+variablesNeeded);
@@ -106,7 +106,8 @@ public class DialogueExecutor {
 			userService.updateVariablesFromExternalService(variablesNeeded);
 
 		// The timestamp of this "start dialogue" trigger will be passed on and used for logging
-		ZonedDateTime eventTime = DateTimeUtils.nowMs(userService.getDialogueBranchUser().getTimeZone());
+		ZonedDateTime eventTime = DateTimeUtils.nowMs(
+				userService.getDialogueBranchUser().getTimeZone());
 
 		Node startNode;
 		try {
@@ -115,14 +116,15 @@ public class DialogueExecutor {
 			throw new RuntimeException("Expression evaluation error: " + e.getMessage(), e);
 		}
 
-		ServerLoggedDialogue serverLoggedDialogue = new ServerLoggedDialogue(userService.getDialogueBranchUser().getId(),
+		ServerLoggedDialogue serverLoggedDialogue = new ServerLoggedDialogue(
+				userService.getDialogueBranchUser().getId(),
 				eventTime, sessionId, sessionStartTime);
 		serverLoggedDialogue.setDialogueName(dialogueDefinition.getDialogueName());
 		serverLoggedDialogue.setLanguage(dialogueDescription.getLanguage());
 		updateLoggedDialogue(startNode, serverLoggedDialogue, -1);
 		userService.getLoggedDialogueStore().saveToSession(serverLoggedDialogue);
-		return new ExecuteNodeResult(dialogueDefinition, startNode,
-				serverLoggedDialogue, serverLoggedDialogue.getInteractionList().size() - 1);
+		return new ExecuteNodeResult(dialogueDefinition, startNode, serverLoggedDialogue,
+				serverLoggedDialogue.getInteractionList().size() - 1);
 	}
 	
 	/**
@@ -162,7 +164,8 @@ public class DialogueExecutor {
 		// Update the serverLoggedDialogue with this interaction
 		serverLoggedDialogue.getInteractionList().add(new LoggedInteraction(
 				System.currentTimeMillis(), MessageSource.USER, "USER",
-				serverLoggedDialogue.getDialogueName(), dialogue.getCurrentNode().getTitle(), state.getLoggedInteractionIndex(),
+				serverLoggedDialogue.getDialogueName(), dialogue.getCurrentNode().getTitle(),
+				state.getLoggedInteractionIndex(),
 				userStatement, replyId));
 
 		int userActionIndex = serverLoggedDialogue.getInteractionList().size() - 1;

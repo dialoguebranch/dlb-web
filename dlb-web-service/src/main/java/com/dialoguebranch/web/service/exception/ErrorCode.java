@@ -28,7 +28,7 @@
 package com.dialoguebranch.web.service.exception;
 
 /**
- * Possible error codes that may be returned by the DialogueBranch Web Service.
+ * Possible error codes that may be returned by the Dialogue Branch Web Service.
  * 
  * @author Dennis Hofs (Roessingh Research and Development)
  * @author Harm op den Akker (Fruit Tree Labs)
