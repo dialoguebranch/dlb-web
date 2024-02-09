@@ -59,13 +59,14 @@ import jakarta.servlet.http.HttpServletResponse;
  * contain sensitive information, are hidden for the client.</li>
  * </ul></p>
  * 
- * @author Dennis Hofs (RRD)
- * @author Harm op den Akker
+ * @author Dennis Hofs (Roessingh Research and Development)
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 
 @Hidden
 @RestController
 public class ErrorController implements org.springframework.boot.web.servlet.error.ErrorController {
+
 	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
 
 	@RequestMapping("/error")
@@ -114,6 +115,10 @@ public class ErrorController implements org.springframework.boot.web.servlet.err
 		}
 	}
 
+	/**
+	 * Returns the error path for this Dialogue Branch Web Service.
+	 * @return the error path for this Dialogue Branch Web Service.
+	 */
 	public String getErrorPath() {
 		return "/error";
 	}

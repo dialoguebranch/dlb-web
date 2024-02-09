@@ -36,7 +36,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * {@link DialogueController} /dialogue/get-ongoing
  * end-point.
  *
- * @author Harm op den Akker
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 public class OngoingDialoguePayload {
 

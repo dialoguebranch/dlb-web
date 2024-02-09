@@ -35,7 +35,7 @@ import nl.rrd.utils.json.JsonObject;
  * A {@link DialogueListPayload} object contains a list of dialogue names that is somehow provided
  * by the web service.
  *
- * @author Harm op den Akker
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 public class DialogueListPayload extends JsonObject {
 
@@ -47,8 +47,17 @@ public class DialogueListPayload extends JsonObject {
     // -------------------- Constructor(s) --------------------
     // --------------------------------------------------------
 
+    /**
+     * Creates an empty instance of a {@link DialogueListPayload} object.
+     */
     public DialogueListPayload() { }
 
+    /**
+     * Creates an instance of a {@link DialogueListPayload} object with a given array of {@code
+     * dialogueNames}.
+     *
+     * @param dialogueNames an array of dialogue names as a {@code String[]}.
+     */
     public DialogueListPayload(String[] dialogueNames) {
         this.dialogueNames = dialogueNames;
     }
@@ -57,11 +66,20 @@ public class DialogueListPayload extends JsonObject {
     // -------------------- Getters & Setters --------------------
     // -----------------------------------------------------------
 
+    /**
+     * Returns an array of dialogue names in this {@link DialogueListPayload}.
+     * @return an array of dialogue names in this {@link DialogueListPayload}.
+     */
     public String[] getDialogueNames() {
         return dialogueNames;
     }
 
+    /**
+     * Sets the array of dialogue names in this {@link DialogueListPayload}.
+     * @param dialogueNames the array of dialogue names in this {@link DialogueListPayload}.
+     */
     public void setDialogueNames(String[] dialogueNames) {
         this.dialogueNames = dialogueNames;
     }
+
 }

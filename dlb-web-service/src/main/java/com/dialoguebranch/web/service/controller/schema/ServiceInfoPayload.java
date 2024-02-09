@@ -30,10 +30,10 @@ package com.dialoguebranch.web.service.controller.schema;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * A {@code ServiceInfo} object may be used to consolidate certain metadata
- * about this DialogueBranch Web Service instance.
+ * A {@code ServiceInfo} object may be used to consolidate certain metadata about this Dialogue
+ * Branch Web Service instance.
  *
- * @author Harm op den Akker
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 public class ServiceInfoPayload {
 
@@ -66,6 +66,7 @@ public class ServiceInfoPayload {
 	 * Creates an instance of a {@link ServiceInfoPayload} with a given {@code build}, {@code
 	 * protocolVersion}, and {@code serviceVersion} {@link String}s that provide information about
 	 * the currently running Dialogue Branch External Variable Service.
+	 *
 	 * @param build the date and time when this service was built as a {@link String}.
 	 * @param protocolVersion the latest supported API protocol version as a {@link String}.
 	 * @param serviceVersion the software version of the service as a {@link String}.

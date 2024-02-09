@@ -40,27 +40,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The {@link ControllerFunctions} class offers a set of public, static methods
- * that can be used by the service's various REST controllers.
+ * The {@link ControllerFunctions} class offers a set of public, static methods that can be used by
+ * the service's various REST controllers.
+ *
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 public class ControllerFunctions {
-
-	// -------------------------------------- //
-	// ---------- Helper Functions ---------- //
-	// -------------------------------------- //
 
 	/**
 	 * Parses a given String into a {@link ZoneId} time zone object. The given {@code timeZone}
 	 * String should be formatted according to the rules defined in {@link ZoneId#of(String)}}.
 	 * When given an empty string, or {@code null}, this method returns the default time zone as
 	 * given by {@link ZoneId#systemDefault()}.
- 	 * @param timeZone a String representation of a time zone.
+ 	 *
+	 * @param timeZone a String representation of a time zone.
 	 * @return the time zone as a {@link ZoneId}
 	 * @throws BadRequestException in case of a wrongly formatted {@code timeZone} string.
 	 */
 	public static ZoneId parseTimeZone(String timeZone) throws BadRequestException {
 
-		if (timeZone == null || timeZone.length() == 0) {
+		if (timeZone == null || timeZone.isEmpty()) {
 			return ZoneId.systemDefault();
 		}
 
@@ -72,12 +71,10 @@ public class ControllerFunctions {
 			result = ZoneId.of(timeZone);
 		} catch (ZoneRulesException zoneRulesException) {
 			errors.add(new HttpFieldError("timeZone",
-					"Invalid value for field \"timeZone\": "
-							+ timeZone + " (zone not recognized)."));
+		"Invalid value for field \"timeZone\": " + timeZone + " (zone not recognized)."));
 		} catch(DateTimeException dateTimeException) {
 			errors.add(new HttpFieldError("timeZone",
-					"Invalid value for field \"timeZone\": "
-							+ timeZone + " (format incorrect)."));
+		"Invalid value for field \"timeZone\": " + timeZone + " (format incorrect)."));
 		}
 
 		if(!errors.isEmpty()) {
@@ -91,14 +88,19 @@ public class ControllerFunctions {
 	/**
 	 * Generates a {@link HttpException} with a valid HTTP Status Code from the given
 	 * {@link ExecutionException}.
-	 * @param exception the {@link ExecutionException} that should be "wrapped" into an
-	 * 					{@link HttpException}.
+	 *
+	 * @param exception the {@link ExecutionException} that should be "wrapped" into an {@link
+	 *                  HttpException}.
 	 * @return the {@link HttpException} object representing the error including a valid status
 	 * 		   code.
 	 */
 	public static HttpException createHttpException(ExecutionException exception) {
 		return switch (exception.getType()) {
-			case AGENT_NOT_FOUND, DIALOGUE_NOT_FOUND, NODE_NOT_FOUND, REPLY_NOT_FOUND, NO_ACTIVE_DIALOGUE ->
+			case AGENT_NOT_FOUND,
+				DIALOGUE_NOT_FOUND,
+				NODE_NOT_FOUND,
+				REPLY_NOT_FOUND,
+				NO_ACTIVE_DIALOGUE ->
 					new NotFoundException(exception.getMessage());
 			default ->
 					throw new RuntimeException("Unexpected ExecutionException: " +

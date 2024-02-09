@@ -33,14 +33,18 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.view.RedirectView;
 
+/**
+ * Controller for the Swagger User Interface at /swagger-ui.
+ *
+ * @author Harm op den Akker (Fruit Tree Labs)
+ */
 @Configuration
 @Controller
 public class SwaggerController {
 
 	@RequestMapping("/")
 	public RedirectView redirectRoot() {
-		return new RedirectView(ServiceContext.getBaseUrl() +
-				"/swagger-ui.html");
+		return new RedirectView(ServiceContext.getBaseUrl() + "/swagger-ui.html");
 	}
 
 }

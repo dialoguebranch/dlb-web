@@ -54,6 +54,12 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+/**
+ * Controller for the /variables/... end-points of the Dialogue Branch Web Service.
+ *
+ * @author Dennis Hofs (Roessingh Research and Development)
+ * @author Harm op den Akker (Fruit Tree Labs)
+ */
 @RestController
 @SecurityRequirement(name = "X-Auth-Token")
 @RequestMapping(value = {"/v{version}/variables", "/variables"})
@@ -66,9 +72,9 @@ public class VariablesController {
 
 	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
 
-	// ----------------------------------------------------------- //
-	// ---------- END-POINT: "/variables/get-variables" ---------- //
-	// ----------------------------------------------------------- //
+	// ------------------------------------------------------------------------------- //
+	// -------------------- END-POINT: "/variables/get-variables" -------------------- //
+	// ------------------------------------------------------------------------------- //
 
 	@Operation(
 		summary = "Retrieve all- or a subset of DialogueBranch variables for a given user.",
@@ -79,22 +85,22 @@ public class VariablesController {
 			"Variable data.")
 	@RequestMapping(value="/get-variables", method=RequestMethod.GET)
 	public Map<String,Object> getVariables(
-			HttpServletRequest request,
-			HttpServletResponse response,
+		HttpServletRequest request,
+		HttpServletResponse response,
 
-			@Parameter(hidden = true, description = "API Version to use, e.g. '1'")
-			@PathVariable(value = "version")
-			String version,
+		@Parameter(hidden = true, description = "API Version to use, e.g. '1'")
+		@PathVariable(value = "version")
+		String version,
 
-			@Parameter(description = "A space-separated list of DialogueBranch variable names, or leave " +
-				"empty to retrieve all known variables")
-			@RequestParam(value="variableNames", required=false)
-			String variableNames,
+		@Parameter(description = "A space-separated list of DialogueBranch variable names, or " +
+			"leave empty to retrieve all known variables")
+		@RequestParam(value="variableNames", required=false)
+		String variableNames,
 
-			@Parameter(description = "The user for which to request DialogueBranch variable info (leave " +
-				"empty if executing for the currently authenticated user)")
-			@RequestParam(value="delegateUser", required=false)
-			String delegateUser) throws Exception {
+		@Parameter(description = "The user for which to request DialogueBranch variable info " +
+			"(leave empty if executing for the currently authenticated user)")
+		@RequestParam(value="delegateUser", required=false)
+		String delegateUser) throws Exception {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
 		if (version == null || version.isEmpty()) {
@@ -103,7 +109,8 @@ public class VariablesController {
 
 		// Log this call to the service log
 		String logInfo = "GET /v" + version + "/variables/get-variables?names=" + variableNames;
-		if(!(delegateUser == null) && (!delegateUser.isEmpty())) logInfo += "&delegateUser="+delegateUser;
+		if(!(delegateUser == null) && (!delegateUser.isEmpty()))
+			logInfo += "&delegateUser="+delegateUser;
 		logger.info(logInfo);
 
 		// Make sure the passed on String is not null
@@ -121,10 +128,10 @@ public class VariablesController {
 	}
 
 	/**
-	 * For the given {@code userId} returns a mapping from names to value of DialogueBranch Variables for
-	 * those variables provided in the given {@code variableNames} string. The {@code variableNames}
-	 * string should be a 'space-separated' list of valid DialogueBranch Variable names (e.g. "variable1
-	 * variable_two variable-three").
+	 * For the given {@code userId} returns a mapping from names to value of Dialogue Branch
+	 * Variables for those variables provided in the given {@code variableNames} string. The {@code
+	 * variableNames} string should be a 'space-separated' list of valid DialogueBranch Variable
+	 * names (e.g. "variable1 variable_two variable-three").
 	 *
 	 * @param userId the DialogueBranch user for which to retrieve variable data.
 	 * @param variableNames a space-separated list of variable names, or the empty string
@@ -167,14 +174,14 @@ public class VariablesController {
 		return result;
 	}
 
-	// ---------------------------------------------------------- //
-	// ---------- END-POINT: "/variables/set-variable" ---------- //
-	// ---------------------------------------------------------- //
+	// ------------------------------------------------------------------------------ //
+	// -------------------- END-POINT: "/variables/set-variable" -------------------- //
+	// ------------------------------------------------------------------------------ //
 
 	@Operation(
-		summary = "Set the value of a single DialogueBranch Variable for a given user.",
-		description = "Use this end-point to get set a DialogueBranch Variable to a specific value (or to " +
-				"remove the stored value by setting it to the empty string.")
+		summary = "Set the value of a single Dialogue Branch Variable for a given user.",
+		description = "Use this end-point to get set a Dialogue Branch Variable to a specific " +
+			"value (or to remove the stored value by setting it to the empty string.")
 	@RequestMapping(value="/set-variable", method=RequestMethod.POST)
 	public void setVariable(
 		HttpServletRequest request,
@@ -184,22 +191,22 @@ public class VariablesController {
 		@PathVariable(value = "version")
 		String version,
 
-		@Parameter(description = "The name of the DialogueBranch Variable to set")
+		@Parameter(description = "The name of the Dialogue Branch Variable to set")
 		@RequestParam(value="name")
 		String name,
 
-		@Parameter(description = "The value for the DialogueBranch Variable (or leave empty to erase the " +
-				"DialogueBranch variable)")
+		@Parameter(description = "The value for the Dialogue Branch Variable (or leave empty to " +
+			"erase the Dialogue Branch variable)")
 		@RequestParam(value="value", required=false)
 		String value,
 
-		@Parameter(description = "The user for which to set the DialogueBranch variable (leave empty if " +
-				"setting for the currently authenticated user)")
+		@Parameter(description = "The user for which to set the Dialogue Branch variable (leave " +
+			"empty if setting for the currently authenticated user)")
 		@RequestParam(value="delegateUser",required=false,defaultValue="")
 		String delegateUser,
 
-		@Parameter(description = "The current time zone of the DialogueBranch user (as IANA, e.g. " +
-				"'Europe/Lisbon')")
+		@Parameter(description = "The current time zone of the DialogueBranch user (as IANA, " +
+			"e.g. 'Europe/Lisbon')")
 		@RequestParam(value="timeZone")
 		String timeZone
 	) throws Exception {
@@ -229,12 +236,12 @@ public class VariablesController {
 	}
 
 	/**
-	 * Sets a DialogueBranch Variable defined by the given {@code name} to the given {@code value} for the
-	 * specified {@code userId} in the given {@code timeZone}.
+	 * Sets a DialogueBranch Variable defined by the given {@code name} to the given {@code value}
+	 * for the specified {@code userId} in the given {@code timeZone}.
 	 * @param userId the {@link String} identifier of the user for whom to set the variable.
 	 * @param name the name of the DialogueBranch Variable
-	 * @param value the value for the DialogueBranch Variable (or {@code null} in case the variable should be
-	 *              reset).
+	 * @param value the value for the DialogueBranch Variable (or {@code null} in case the variable
+	 *              should be reset).
 	 * @return {@code null}
 	 * @throws Exception in case of an invalid variable name, invalid timezone, or an error
 	 * 					 accessing the variable store.
@@ -259,8 +266,9 @@ public class VariablesController {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy - HH:mm:ss Z");
 
 		if(value == null) {
-			logger.info("Received request to remove DialogueBranch Variable '" + name + "' at eventTime '" +
-					eventTime.format(formatter) + "' in time zone '" + timeZoneString + "'");
+			logger.info("Received request to remove Dialogue Branch Variable '" + name + "' at " +
+				"eventTime '" + eventTime.format(formatter) + "' in time zone '"
+				+ timeZoneString + "'");
 			userService.getVariableStore().removeByName(name,true,
 					eventTime, VariableStoreChange.Source.WEB_SERVICE);
 		} else {
@@ -270,14 +278,14 @@ public class VariablesController {
 		return null;
 	}
 
-	// ----------------------------------------------------------- //
-	// ---------- END-POINT: "/variables/set-variables" ---------- //
-	// ----------------------------------------------------------- //
+	// ------------------------------------------------------------------------------- //
+	// -------------------- END-POINT: "/variables/set-variables" -------------------- //
+	// ------------------------------------------------------------------------------- //
 
 	@Operation(
 		summary = "Set the value of one or multiple DialogueBranch Variable for a given user.",
-		description = "Use this end-point to get set one or many DialogueBranch Variables to their given " +
-				"values (or to remove the stored value by setting it to the empty string.")
+		description = "Use this end-point to get set one or many DialogueBranch Variables to " +
+			"their given values (or to remove the stored value by setting it to the empty string.")
 	@RequestMapping(value="/set-variables", method=RequestMethod.POST)
 	public void setVariables(
 			HttpServletRequest request,
@@ -287,13 +295,13 @@ public class VariablesController {
 			@PathVariable(value = "version")
 			String version,
 
-			@Parameter(description = "The user for which to set the DialogueBranch variables (leave empty " +
-					"if setting for the currently authenticated user)")
+			@Parameter(description = "The user for which to set the DialogueBranch variables " +
+				"(leave empty if setting for the currently authenticated user)")
 			@RequestParam(value="delegateUser",required=false)
 			String delegateUser,
 
-			@Parameter(description = "The current time zone of the DialogueBranch user (as IANA, e.g. " +
-					"'Europe/Lisbon')")
+			@Parameter(description = "The current time zone of the DialogueBranch user (as IANA, " +
+				"e.g. 'Europe/Lisbon')")
 			@RequestParam(value="timeZone")
 			String timeZone,
 
@@ -308,11 +316,13 @@ public class VariablesController {
 
 		// Log this call to the service log
 		String logInfo = "POST /v" + version + "/variables/set-variables";
-		if(!(delegateUser == null) && (!delegateUser.isEmpty())) logInfo += "?delegateUser="+delegateUser;
+		if(!(delegateUser == null) && (!delegateUser.isEmpty()))
+			logInfo += "?delegateUser=" + delegateUser;
 		logger.info(logInfo);
 
 		if(delegateUser == null || delegateUser.isEmpty()) {
-			QueryRunner.runQuery((protocolVersion, user) -> doSetVariables(user, variables, timeZone),
+			QueryRunner.runQuery((protocolVersion, user) ->
+							doSetVariables(user, variables, timeZone),
 				version, request, response, delegateUser, application);
 		} else {
 			QueryRunner.runQuery((protocolVersion, user) ->

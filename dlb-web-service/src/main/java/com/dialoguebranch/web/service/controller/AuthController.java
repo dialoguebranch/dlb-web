@@ -55,14 +55,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Controller for the /auth/... end-points of the Dialogue Branch Web Service.
+ *
+ * @author Harm op den Akker (Fruit Tree Labs)
+ * @author Dennis Hofs (Roessingh Research and Development)
+ */
 @RestController
 @RequestMapping(value = {"/v{version}/auth", "/auth"})
 @Tag(name = "1. Authentication", description = "End-points related to Authentication.")
 public class AuthController {
+
 	@Autowired
 	Application application;
 
 	private static final Object AUTH_LOCK = new Object();
+
 	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
 
 	@Operation(summary = "Obtain an authentication token by logging in.",

@@ -55,7 +55,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Controller for the /admin/... end-points of the DialogueBranch Web Service.
+ * Controller for the /admin/... end-points of the Dialogue Branch Web Service.
  *
  * @author Harm op den Akker (Fruit Tree Labs)
  */
@@ -71,13 +71,14 @@ public class AdminController {
 
     private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
 
-    // -------------------------------------------------------- //
-    // ---------- END-POINT: "/admin/list-dialogues" ---------- //
-    // -------------------------------------------------------- //
+    // ---------------------------------------------------------------------------- //
+    // -------------------- END-POINT: "/admin/list-dialogues" -------------------- //
+    // ---------------------------------------------------------------------------- //
 
     @Operation(
-        summary = "Retrieve a list of all available dialogues.",
-        description = "...")
+        summary = "Retrieve a list of all available dialogues in the Web Service.",
+        description = "This method returns a JSON object encapsulating a list of all dialogue " +
+            "names that are hosted by the running instance of this Dialogue Branch Web Service")
     @RequestMapping(value="/list-dialogues", method= RequestMethod.GET)
     public DialogueListPayload listDialogues(
         HttpServletRequest request,
@@ -107,8 +108,11 @@ public class AdminController {
     }
 
     /**
-     * Processes a call to the /admin/list-dialogues end-point.
+     * Processes a call to the /admin/list-dialogues end-point. Constructs and returns a {@link
+     * DialogueListPayload} object, encapsulating the names of all dialogue scripts currently loaded
+     * by this Dialogue Branch Web Service.
      *
+     * @return a {@link DialogueListPayload} containing a list of all dialogue names.
      */
     private DialogueListPayload doListDialogues() {
         List<FileDescriptor> files = application.getApplicationManager().getAvailableDialogues();

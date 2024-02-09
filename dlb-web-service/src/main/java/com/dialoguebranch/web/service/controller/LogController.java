@@ -48,8 +48,8 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Controller for the /log/... end-points of the DialogueBranch Web Service. These end-points provide external
- * access to logged dialogue information.
+ * Controller for the /log/... end-points of the Dialogue Branch Web Service. These end-points
+ * provide external access to logged dialogue information.
  *
  * @author Harm op den Akker (Fruit Tree Labs)
 */
@@ -65,9 +65,9 @@ public class LogController {
 
 	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
 
-	// --------------------------------------------------- //
-	// ---------- END-POINT: "/log/get-session" ---------- //
-	// --------------------------------------------------- //
+	// ----------------------------------------------------------------------- //
+	// -------------------- END-POINT: "/log/get-session" -------------------- //
+	// ----------------------------------------------------------------------- //
 
 	@Operation(
 		summary = "Retrieve all known logging information for a given session.",
@@ -98,7 +98,8 @@ public class LogController {
 
 		// Log this call to the service log
 		String logInfo = "GET /v" + version + "/log/get-session?sessionId=" + sessionId;
-		if(delegateUser != null && !delegateUser.isEmpty()) logInfo += "&delegateUser=" + delegateUser;
+		if(delegateUser != null && !delegateUser.isEmpty())
+			logInfo += "&delegateUser=" + delegateUser;
 		logger.info(logInfo);
 
 		if(delegateUser == null || delegateUser.isEmpty()) {
@@ -119,9 +120,9 @@ public class LogController {
 		return userService.getDialogueSessionLog(sessionId);
 	}
 
-	// ------------------------------------------------- //
-	// ---------- END-POINT: "/log/verify-id" ---------- //
-	// ------------------------------------------------- //
+	// --------------------------------------------------------------------- //
+	// -------------------- END-POINT: "/log/verify-id" -------------------- //
+	// --------------------------------------------------------------------- //
 
 	@Operation(
 		summary = "Verify whether a dialogue session identifier is already in use for a given " +
@@ -156,7 +157,8 @@ public class LogController {
 
 		// Log this call to the service log
 		String logInfo = "GET /v" + version + "/log/verify-id?sessionId=" + sessionId;
-		if(delegateUser != null && !delegateUser.isEmpty()) logInfo += "&delegateUser=" + delegateUser;
+		if(delegateUser != null && !delegateUser.isEmpty())
+			logInfo += "&delegateUser=" + delegateUser;
 		logger.info(logInfo);
 
 		if(delegateUser == null || delegateUser.isEmpty()) {

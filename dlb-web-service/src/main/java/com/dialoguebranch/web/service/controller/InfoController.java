@@ -43,16 +43,25 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Controller for the /info/... end-points of the Dialogue Branch Web Service.
+ *
+ * @author Harm op den Akker (Fruit Tree Labs)
+ */
 @RestController
 @Tag(name = "5. Information", description = "End-points that provide information about the " +
 		"running service.")
 @RequestMapping(value = {"/v{version}/info", "/info"})
 public class InfoController {
 
-	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
-
 	@Autowired
 	Application application;
+
+	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
+
+	// ---------------------------------------------------------------- //
+	// -------------------- END-POINT: "/info/all" -------------------- //
+	// ---------------------------------------------------------------- //
 
 	@Operation(summary = "Retrieve a set of metadata parameters about the running service.",
 		description = "This end-point may be called without authentication and will return 4 " +

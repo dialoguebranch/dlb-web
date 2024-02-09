@@ -44,9 +44,8 @@ import java.io.IOException;
 
 /**
  * A {@link LoginParametersPayload} object models the information that is sent in the request body
- * of a call to the /auth/login end-point as handled by the
- * {@link AuthController}, which can be serialized /
- * deserialized to the following JSON Format:
+ * of a call to the /auth/login end-point as handled by the {@link AuthController}, which can be
+ * serialized / deserialized to the following JSON Format:
  *
  * <pre>
  * {
@@ -59,7 +58,7 @@ import java.io.IOException;
  * indicating the expiration time in minutes, or it can be the string "never" which means (similar
  * to an expiration time of 0 minutes) that the token will not expire.
  *
- * @author Harm op den Akker
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 public class LoginParametersPayload extends JsonObject {
 
@@ -87,11 +86,11 @@ public class LoginParametersPayload extends JsonObject {
 
 	/**
 	 * Creates an instance of a {@link LoginParametersPayload} with the given {@code user}, {@code
-	 * password}, and {@code tokenExpiration}.
+	 * password}, and {@code tokenExpiration} value.
 	 * @param user the user who is trying to perform a login.
 	 * @param password the password provided by the user performing a login.
-	 * @param tokenExpiration the time in minutes after which the token should expire, or
-	 *                        {@code null}.
+	 * @param tokenExpiration the time in minutes after which the token should expire, or {@code
+	 *                        null}.
 	 */
 	public LoginParametersPayload(String user, String password, Integer tokenExpiration) {
 		this.user = user;
@@ -136,8 +135,8 @@ public class LoginParametersPayload extends JsonObject {
 	}
 
 	/**
-	 * Returns the time (in minutes) after which the auth token should expire. When set to
-	 * {@code null} this means that the token should never expire.
+	 * Returns the time (in minutes) after which the auth token should expire. When set to {@code
+	 * null} this means that the token should never expire.
 	 * @return the time (in minutes) after which the auth token should expire.
 	 */
 	@JsonSerialize(using = TokenExpirationSerializer.class)
@@ -176,8 +175,8 @@ public class LoginParametersPayload extends JsonObject {
 	}
 
 	/**
-	 * Inner class used to convert the {@code tokenExpiration} from JSON string format, as either
-	 * a number, or the String "never". The number 0 will be treated as never. Any other string
+	 * Inner class used to convert the {@code tokenExpiration} from JSON string format, as either a
+	 * number, or the String "never". The number 0 will be treated as never. Any other string
 	 * besides "never" will generate an error.
 	 */
 	public static class TokenExpirationDeserializer extends
@@ -198,4 +197,5 @@ public class LoginParametersPayload extends JsonObject {
 			}
 		}
 	}
+
 }
