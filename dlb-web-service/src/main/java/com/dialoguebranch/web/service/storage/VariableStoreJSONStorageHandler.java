@@ -114,8 +114,7 @@ public class VariableStoreJSONStorageHandler implements VariableStoreStorageHand
     }
 
     @Override
-    public void onChange(VariableStore variableStore,
-                         List<VariableStoreChange> changes) {
+    public void onChange(VariableStore variableStore, List<VariableStoreChange> changes) {
         try {
             write(variableStore);
         } catch(IOException e) {
