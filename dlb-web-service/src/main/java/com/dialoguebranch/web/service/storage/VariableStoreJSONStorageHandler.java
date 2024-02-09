@@ -57,11 +57,17 @@ import java.util.List;
  */
 public class VariableStoreJSONStorageHandler implements VariableStoreStorageHandler {
 
-    private String dataDirectory;
+    private final String dataDirectory;
     private static final Object LOCK = new Object();
     private final Logger logger =
             AppComponents.getLogger(ClassUtils.getUserClass(getClass()).getSimpleName());
 
+    /**
+     * Creates an instance of a {@link VariableStoreJSONStorageHandler} that can read and write
+     * {@link VariableStore}s to and from the given {@code dataDirectory} in a JSON format.
+     *
+     * @param dataDirectory a string description of the directory where to read and write from.
+     */
     public VariableStoreJSONStorageHandler(String dataDirectory) {
         this.dataDirectory = dataDirectory;
     }
@@ -78,7 +84,7 @@ public class VariableStoreJSONStorageHandler implements VariableStoreStorageHand
 
             try {
                 Variable[] variables = mapper.readValue(dataFile,
-                        new TypeReference<Variable[]>() {});
+                        new TypeReference<>() {});
                 return new VariableStore(user, variables);
             } catch (JsonProcessingException ex) {
                 throw new ParseException(
@@ -113,8 +119,7 @@ public class VariableStoreJSONStorageHandler implements VariableStoreStorageHand
         try {
             write(variableStore);
         } catch(IOException e) {
-            logger.error("Failed to write variable store changes: " +
-                    e.getMessage(), e);
+            logger.error("Failed to write variable store changes: " + e.getMessage(), e);
         }
     }
 

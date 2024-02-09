@@ -44,7 +44,8 @@ public abstract class HttpException extends Exception {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
-	
+
+	/** The {@link HttpError} to embed within this {@link HttpException}. */
 	private final HttpError error;
 
 	// -------------------------------------------------------- //

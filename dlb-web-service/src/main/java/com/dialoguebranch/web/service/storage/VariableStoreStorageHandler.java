@@ -34,10 +34,29 @@ import nl.rrd.utils.exception.ParseException;
 
 import java.io.IOException;
 
+/**
+ * Interface for classes that can read and write a {@link VariableStore}.
+ *
+ * @author Harm op den Akker (Fruit Tree Labs)
+ */
 public interface VariableStoreStorageHandler extends VariableStoreOnChangeListener {
 
+    /**
+     * Reads a {@link VariableStore} from whatever medium the implementing class is using.
+     *
+     * @param user the {@link User} that the {@link VariableStore} belongs to.
+     * @return the {@link VariableStore} object.
+     * @throws IOException in case of a read/write (or other I/O) error.
+     * @throws ParseException in case the contents of the variable store could not be understood.
+     */
     VariableStore read(User user) throws IOException, ParseException;
 
+    /**
+     * Write a given {@link VariableStore} to whatever medium the implementing class is using.
+     *
+     * @param variableStore the {@link VariableStore} to write.
+     * @throws IOException in case of any I/O error with the medium used.
+     */
     void write(VariableStore variableStore) throws IOException;
 
 }
