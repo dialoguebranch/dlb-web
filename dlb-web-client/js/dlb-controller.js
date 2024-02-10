@@ -133,6 +133,21 @@ function actionToggleDebugConsole() {
     }
 }
 
+// ------------------------------------------------------------
+// -------------------- Interaction Tester --------------------
+// ------------------------------------------------------------
+
+function actionCancelDialogue(loggedDialogueId) {
+    this.logger.info("Cancelling the current dialogue with loggedDialogueId: '"+loggedDialogueId+"'.");
+    this.dialogueBranchClient.callCancelDialogue(loggedDialogueId);
+}
+
+function customCancelDialogueSuccess() {
+    this.logger.info("Custom Cancel Dialogue Success!");
+
+    renderDialogueStep(null, "Dialogue Cancelled");
+}
+
 // ----------------------------------------------------------
 // -------------------- Dialogue Browser --------------------
 // ----------------------------------------------------------
@@ -326,12 +341,20 @@ function customAuthValidateError(err) {
 function customStartDialogueSuccess(data) {
     if('dialogue' in data) {
 
+        // Add the name of the newly started dialogue to the "Interaction Tester" title field
         var titleElement = document.getElementById("interaction-tester-title");
         titleElement.innerHTML = "Interaction Tester <i>(" + data.dialogue + ".dlb)</i>";
 
+        // Enable the "cancel dialogue" button
+        var cancelButton = document.getElementById("button-cancel-dialogue");
+        cancelButton.addEventListener("click", actionCancelDialogue.bind(this, data.loggedDialogueId), false);
+        cancelButton.setAttribute('title',"Cancel the current ongoing dialogue.");
+        cancelButton.classList.remove("button-cancel-dialogue-disabled");
+        
+        // Create a DialogueStep object from the received data
         dialogueStep = createDialogueStepObject(data);
 
-        this.logger.debug(dialogueStep.toString());
+        // Render the newly created DialogueStep in the UI
         renderDialogueStep(dialogueStep);
     }
 }
@@ -491,7 +514,14 @@ function setDebugConsoleVisibility(visible) {
 
 // ---------- Dialogue Step Rendering ----------
 
-async function renderDialogueStep(dialogueStep) {
+/**
+ * Render a step in the dialogue given the information provided in the given dialogueStep object, or
+ * render a "Dialogue Finished" statement if the given dialogueStep is null.
+ *
+ * @param {DialogueStep} dialogueStep the {@link DialogueStep} object to render, or null
+ * @param {String} nullMessage the message explaining why dialogueStep is null.
+ */
+async function renderDialogueStep(dialogueStep, nullMessage) {
 
     // Remove the previous temporary filler element
     const element = document.getElementById("temp-dialogue-filler");
@@ -516,7 +546,22 @@ async function renderDialogueStep(dialogueStep) {
     contentBlock.appendChild(statementContainer);
 
     if(dialogueStep == null) {
-        statementContainer.innerHTML = "The dialogue is over.";
+        
+        // Create and show a message why the dialogue has ended
+        var dialogueOverElement = document.createElement("div");
+        dialogueOverElement.classList.add("dialogue-finished-statement");
+        if(nullMessage != null) {
+            dialogueOverElement.innerHTML = nullMessage;
+        } else {
+            dialogueOverElement.innerHTML = "Dialogue Finished";
+        }
+        statementContainer.appendChild(dialogueOverElement);
+
+        // Disable the "cancel dialogue" button
+        var cancelButton = document.getElementById("button-cancel-dialogue");
+        cancelButton.classList.add("button-cancel-dialogue-disabled");
+        cancelButton.setAttribute('title',"You can cancel a dialogue when there is a dialogue in progress.");
+        cancelButton.replaceWith(cancelButton.cloneNode(true));
         
         // Create a filler element that fills the "rest" of the scrollable area, to allow a proper
         // scrolling to the top (this element will be removed when rendering the next dialogue step)

@@ -258,7 +258,49 @@ class DialogueBranchClient {
         console.log(err)
     }
 
-     // -------------------------------------------------------------------------------------------------
+    // -------------------------------------------------
+    // ---------- End-Point: /dialogue/cancel ----------
+    // -------------------------------------------------
+
+    callCancelDialogue(loggedDialogueId) {
+        var url = this._baseUrl + "/dialogue/cancel";
+
+        url += "?loggedDialogueId="+loggedDialogueId;
+
+        console.log("callCancelDialogue: "+url);
+
+        fetch(url, {
+            method: "POST",
+            headers: {
+                'X-Auth-Token': this._user.authToken,
+                Accept: "application/json, text/plain, */*",
+                "Content-Type": "application/json",
+            }
+        })
+        .then((response) => {
+            if(response.ok) {
+                return;
+            }
+            return Promise.reject(response);
+        })
+        .then(() => { 
+            this.cancelDialogueSuccess();
+        })
+        .catch((err) => {
+            this.cancelDialogueError(err);
+        });
+
+    }
+
+    cancelDialogueSuccess() {
+        customCancelDialogueSuccess();
+    }
+
+    cancelDialogueError(err) {
+        console.log(err)
+    }
+
+    // -------------------------------------------------------------------------------------------------
     // ---------- 3. Variables: End-points for retrieving or setting DialogueBranch Variables. ----------
     // --------------------------------------------------------------------------------------------------
 
