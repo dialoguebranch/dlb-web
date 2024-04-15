@@ -49,6 +49,7 @@ export class DialogueBranchClient {
         this._baseUrl = baseUrl;
         this._logger = logger;
         this.dialogueBranchController = dialogueBranchController;
+        // eslint-disable-next-line no-undef
         this._timeZone = new Intl.DateTimeFormat().resolvedOptions().timeZone;
     }
 
