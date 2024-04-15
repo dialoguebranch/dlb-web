@@ -26,7 +26,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class ServerInfo {
+export class ServerInfo {
 
     constructor(serviceVersion, protocolVersion, build, upTime) {
         this._serviceVersion = serviceVersion;

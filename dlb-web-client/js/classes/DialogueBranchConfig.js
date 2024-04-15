@@ -26,7 +26,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-var dialogueBranchConfig = {
-    logLevel: LOG_LEVEL_INFO,
-    baseUrl: 'http://localhost:8080/dlb-web-service/v1'
-};
+export class DialogueBranchConfig {
+
+    constructor(logLevel, baseUrl) {
+        this._logLevel = logLevel;
+        this._baseUrl = baseUrl;
+    }
+
+    get logLevel() {
+        return this._logLevel;
+    }
+
+    get baseUrl() {
+        return this._baseUrl;
+    }
+
+}

@@ -26,6 +26,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import {Reply} from './Reply.js';
+
 /**
  * A BasicReply is an implementation of the Reply class and represents the most basic of reply
  * options that allows the user to 'say something' in reply to an Agent statement in a dialogue
@@ -34,7 +36,7 @@
  * @extends Reply
  * @author Harm op den Akker (Fruit Tree Labs)
  */
-class BasicReply extends Reply {
+export class BasicReply extends Reply {
 
     /**
      * Creates an instance of a BasicReply with the given parameters.

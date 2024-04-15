@@ -26,7 +26,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class User {
+export class User {
 
     constructor(name, role, authToken) {
         this._name = name;
@@ -45,5 +45,17 @@ class User {
     get authToken() {
         return this._authToken;
     }
+
+    /**
+     * Returns a human readable String representation of this User object.
+     * @returns a human readable String representation of this User object.
+     */
+   toString() {
+       var result = "";
+       result += "\n{name: " + this._name;
+       result += "\nrole: " + this._role;
+       result += "\nauthToken: " + this._authToken +"}";
+       return result;
+   }
 
 }

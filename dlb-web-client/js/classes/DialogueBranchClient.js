@@ -26,25 +26,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import {ServerInfo} from './ServerInfo.js';
+import {User} from './User.js';
+
 /** 
  * The following constants may be used throughout the web app for logging purposes.
  */
-const LOG_LEVEL_INFO = 0;
-const LOG_LEVEL_DEBUG = 1;
-const LOG_LEVEL_NAMES = [
+export const LOG_LEVEL_INFO = 0;
+export const LOG_LEVEL_DEBUG = 1;
+export const LOG_LEVEL_NAMES = [
     "INFO",
     "DEBUG"
 ];
 
-class DialogueBranchClient {
+export class DialogueBranchClient {
 
     // ------------------------------------
     // ---------- Constructor(s) ----------
     // ------------------------------------
 
-    constructor(baseUrl, logger) {
+    constructor(baseUrl, logger, dialogueBranchController) {
         this._baseUrl = baseUrl;
         this._logger = logger;
+        this.dialogueBranchController = dialogueBranchController;
         this._timeZone = new Intl.DateTimeFormat().resolvedOptions().timeZone;
     }
 
@@ -130,11 +134,11 @@ class DialogueBranchClient {
         if('user' in data && 'token' in data) {    
             this._user = new User(data.user,data.role,data.token);
         }
-        customLoginSuccess(data);
+        this.dialogueBranchController.customLoginSuccess(data);
     }
 
     loginError(err) {
-        customLoginError(err);
+        this.dialogueBranchController.customLoginError(err);
     }
 
     // -----------------------------------------------
@@ -170,12 +174,12 @@ class DialogueBranchClient {
         if(data == true) {
             console.log("validated!");
         }
-        customAuthValidateSuccess(data);
+        this.dialogueBranchController.customAuthValidateSuccess(data);
     }
 
     authValidateError(err) {
         console.log("DLB-Client: calling auth validate error.");
-        customAuthValidateError(err);
+        this.dialogueBranchController.customAuthValidateError(err);
     }
 
     // -----------------------------------------------------------------------------------------------------------------------
@@ -212,11 +216,12 @@ class DialogueBranchClient {
 
     startDialogueSuccess(data) {
         console.log(data);
-        customStartDialogueSuccess(data);
+        this.dialogueBranchController.customStartDialogueSuccess(data);
     }
 
     startDialogueError(err) {
         console.log(err)
+        this.dialogueBranchController.customStartDialogueError(err);
     }
 
     // ---------------------------------------------------
@@ -251,7 +256,7 @@ class DialogueBranchClient {
     }
 
     progressDialogueSuccess(data) {
-        customProgressDialogueSuccess(data);
+        this.dialogueBranchController.customProgressDialogueSuccess(data);
     }
 
     progressDialogueError(err) {
@@ -293,7 +298,7 @@ class DialogueBranchClient {
     }
 
     cancelDialogueSuccess() {
-        customCancelDialogueSuccess();
+        this.dialogueBranchController.customCancelDialogueSuccess();
     }
 
     cancelDialogueError(err) {
@@ -330,7 +335,7 @@ class DialogueBranchClient {
     }
 
     getVariablesSuccess(data) {
-        customGetVariablesSuccess(data);
+        this.dialogueBranchController.customGetVariablesSuccess(data);
     }
 
     getVariablesError(err) {
@@ -375,7 +380,7 @@ class DialogueBranchClient {
 
     setVariableSuccess() {
         console.log("setVariableSuccess");
-        customSetVariableSuccess();
+        this.dialogueBranchController.customSetVariableSuccess();
     }
 
     setVariableError(err) {
@@ -443,12 +448,12 @@ class DialogueBranchClient {
         if('build' in data) {
             this._serverInfo = new ServerInfo(data.serviceVersion, data.protocolVersion, data.build, data.upTime);
         }
-        customInfoSuccess(data);
+        this.dialogueBranchController.customInfoSuccess(data);
     }
 
     infoError(err) {
         console.log("DLB-CLIENT: Handling error after call to /info/all end-point.");
-        customInfoError(err);
+        this.dialogueBranchController.customInfoError(err);
     }
 
      // --------------------------------------------------------------------------------------------------------
@@ -484,21 +489,21 @@ class DialogueBranchClient {
         if(data == null) {
             // A null response is unexpected, but should not break the client
             this.logger.warn("DBC: Call to /admin/list-dialogues returned null response.");
-            customListDialoguesSuccess(new Array());
+            this.dialogueBranchController.customListDialoguesSuccess(new Array());
         } else {
             if('dialogueNames' in data) {
-                customListDialoguesSuccess(data.dialogueNames);
+                this.dialogueBranchController.customListDialoguesSuccess(data.dialogueNames);
             } else {
                 // Data without dialogueNames is unexpected, but should not break the client
                 this.logger.warn("DBC: Call to /admin/list-dialogues returned unexpected response.");
-                customListDialoguesSuccess(new Array());
+                this.dialogueBranchController.customListDialoguesSuccess(new Array());
             }
         }
     }
 
     listDialoguesError(err) {
         console.log(err);
-        customListDialoguesError(err);
+        this.dialogueBranchController.customListDialoguesError(err);
     }
 
 }

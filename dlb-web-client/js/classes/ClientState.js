@@ -26,6 +26,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import {User} from './User.js';
+import {DocumentFunctions} from './DocumentFunctions.js';
+
 /**
  * A ClientState object models the state of the Dialogue Branch Web Client.
  * It should be passed a reference to a custom Logger object so that it may
@@ -33,7 +36,7 @@
  *
  * @author Harm op den Akker (Fruit Tree Labs)
  */
-class ClientState {
+export class ClientState {
 
     // ------------------------------------
     // ---------- Constructor(s) ----------
@@ -104,7 +107,7 @@ class ClientState {
      */
     set debugConsoleVisible(debugConsoleVisible) {
         this._debugConsoleVisible = debugConsoleVisible;
-        setCookie('state.debugConsoleVisible', this._debugConsoleVisible, 365);
+        DocumentFunctions.setCookie('state.debugConsoleVisible', this._debugConsoleVisible, 365);
     }
 
     get debugConsoleVisible() {
@@ -114,13 +117,13 @@ class ClientState {
     // ----- Initialize from Cookie
 
     loadFromCookie() {
-        var cookieValue = getCookie('state.debugConsoleVisible');
+        var cookieValue = DocumentFunctions.getCookie('state.debugConsoleVisible');
         if(cookieValue == "true") this._debugConsoleVisible = true;
         else this._debugConsoleVisible = false;
 
-        var cookieUserName = getCookie('user.name');
-        var cookieUserRole = getCookie('user.role');
-        var cookieUserAuthToken = getCookie('user.authToken');
+        var cookieUserName = DocumentFunctions.getCookie('user.name');
+        var cookieUserRole = DocumentFunctions.getCookie('user.role');
+        var cookieUserAuthToken = DocumentFunctions.getCookie('user.authToken');
 
         // All variables are non-empty / non-null
         if(cookieUserName && cookieUserRole && cookieUserAuthToken) {

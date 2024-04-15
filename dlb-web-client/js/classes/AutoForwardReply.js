@@ -26,6 +26,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import {Reply} from './Reply.js';
+
 /**
  * An AutoForwardReply is a {@link Reply} option without a specific statement. An AutoForwardReply can be
  * interpreted in different ways by Dialogue Branch clients. For example, when a dialogue step only
@@ -40,7 +42,7 @@
  * @extends Reply
  * @author Harm op den Akker (Fruit Tree Labs)
  */
-class AutoForwardReply extends Reply {
+export class AutoForwardReply extends Reply {
 
     // ------------------------------------
     // ---------- Constructor(s) ----------

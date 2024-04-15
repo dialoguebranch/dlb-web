@@ -26,7 +26,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class Logger {
+import {LOG_LEVEL_DEBUG} from './DialogueBranchClient.js';
+
+export class Logger {
 
     constructor() {
         this._logArea = document.getElementById("debug-textarea");

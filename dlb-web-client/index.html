@@ -5,7 +5,7 @@
 
         <script type="text/javascript">
             // Updating the clientVersion will force re-loading all css and javascript includes (avoiding caching issues)
-            var clientVersion = '0.1.1';
+            var clientVersion = '0.1.2';
             document.write('<link rel="stylesheet" type="text/css" href="css/fonts.css?v=' + clientVersion + '" />');
             document.write('<link rel="stylesheet" type="text/css" href="css/style.css?v=' + clientVersion + '" />');
             document.write('<link rel="stylesheet" type="text/css" href="css/positioning.css?v=' + clientVersion + '" />');
@@ -15,19 +15,13 @@
                 document.write('<s' + 'cript src="js/' + name + '.js?v=' + clientVersion + '"></s' + 'cript>');
             }
 
-            loadJavaScript('classes/User');
-            loadJavaScript('classes/ClientState');
-            loadJavaScript('classes/Logger');
-            loadJavaScript('classes/ServerInfo');
-            loadJavaScript('classes/DialogueBranchClient');
-            loadJavaScript('classes/DialogueBranchConfig');
-            loadJavaScript('classes/DialogueStep');
-            loadJavaScript('classes/Reply');
-            loadJavaScript('classes/BasicReply');
-            loadJavaScript('classes/AutoForwardReply');
-            loadJavaScript('classes/Segment');
-            loadJavaScript('classes/Statement');
-            loadJavaScript('dlb-controller');
+            function loadJavaScriptModule(name) {
+                document.write('<s' + 'cript type="module" src="js/' + name + '.js?v=' + clientVersion + '"></s' + 'cript>');
+            }
+
+            loadJavaScriptModule('classes/include');
+            loadJavaScriptModule('WebClientController');
+            loadJavaScriptModule('dlb-controller');
         </script>
 
         <script src="https://kit.fontawesome.com/3a329c4440.js" crossorigin="anonymous"></script>

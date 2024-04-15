@@ -34,7 +34,7 @@
  *
  * @author Harm op den Akker (Fruit Tree Labs)
  */
-class Reply {
+export class Reply {
 
     // ------------------------------------
     // ---------- Constructor(s) ----------
