@@ -26,20 +26,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {DialogueBranchController} from './classes/DialogueBranchController.js';
+import {AbstractController} from './classes/AbstractController.js';
 import {DialogueBranchConfig} from './classes/DialogueBranchConfig.js';
-import {DialogueBranchClient, LOG_LEVEL_NAMES} from './classes/DialogueBranchClient.js';
+import {DialogueBranchClient, LOG_LEVEL_NAMES, LOG_LEVEL_INFO} from './classes/DialogueBranchClient.js';
 import {DialogueStep} from './classes/DialogueStep.js';
 import {ClientState} from './classes/ClientState.js';
 import {Logger} from './classes/Logger.js';
-import {User} from './classes/User.js';
 import {DocumentFunctions} from './classes/DocumentFunctions.js';
 import {Statement} from './classes/Statement.js';
 import {Segment} from './classes/Segment.js';
 import {AutoForwardReply} from './classes/AutoForwardReply.js';
 import {BasicReply} from './classes/BasicReply.js';
 
-export class WebClientController extends DialogueBranchController {
+export class WebClientController extends AbstractController {
 
     constructor() {
         super();
@@ -48,7 +47,7 @@ export class WebClientController extends DialogueBranchController {
 
         // Initialize the logger
         this.logger = new Logger();
-        this.dialogueBranchConfig = new DialogueBranchConfig(0,'http://localhost:8080/dlb-web-service/v1');
+        this.dialogueBranchConfig = new DialogueBranchConfig(1,'http://localhost:8080/dlb-web-service/v1');
         this.logger.logLevel = this.dialogueBranchConfig.logLevel;
         this.logger.info("Initialized Logger with log level '" 
             + this.dialogueBranchConfig.logLevel 
@@ -272,53 +271,49 @@ export class WebClientController extends DialogueBranchController {
 
     // ---------- Login ----------
 
-    customLoginSuccess(data) {
-        // A successful login attempt results in a data containing a 'user', 'role', and 'token' value
-        if('user' in data && 'token' in data) {
-            var formRemember = document.getElementById("login-form-remember-box").checked;
-            this.logger.info("User '"+data.user+"' with role '"+data.role+"' successfully logged in, and received the following token: "+data.token);
-            var loggedInUser = new User(data.user,data.role,data.token);
-            this.clientState.user = loggedInUser;
-            this.clientState.loggedIn = true;
+    handleLoginSuccess(user) {
+        var formRemember = document.getElementById("login-form-remember-box").checked;
+        this.clientState.user = user;
+        this.clientState.loggedIn = true;
             
-            if(formRemember) {
-                DocumentFunctions.setCookie('user.name',data.user,365);
-                DocumentFunctions.setCookie('user.authToken',data.token,365);
-                DocumentFunctions.setCookie('user.role',data.role,365);
+        if(formRemember) {
+            DocumentFunctions.setCookie('user.name',this.clientState.user.name,365);
+            DocumentFunctions.setCookie('user.authToken',this.clientState.user.authToken,365);
+            DocumentFunctions.setCookie('user.role',this.clientState.user.role,365);
 
-                this.logger.info(
-                    "Stored user info in cookie: user.name '" + 
-                    DocumentFunctions.getCookie('user.name') + 
-                    "', user.role '" + 
-                    DocumentFunctions.getCookie('user.role') + 
-                    "', user.authToken '" + 
-                    DocumentFunctions.getCookie('user.authToken') + 
-                    "'."
-                );
-            }
-            
-            this.updateUIState();
-    
-        // Any other result indicates some type of error
-        } else {
-            this.logger.info("Login attempt failed with errorcode '"+data.code+"' and message '"+data.message+"'.");
-            console.log("Login attempt failed with errorcode '"+data.code+"' and message '"+data.message+"'.");
+            this.logger.debug(
+                "Stored user info in cookie: user.name '" + 
+                DocumentFunctions.getCookie('user.name') + 
+                "', user.role '" + 
+                DocumentFunctions.getCookie('user.role') + 
+                "', user.authToken '" + 
+                DocumentFunctions.getCookie('user.authToken') + 
+                "'."
+            );
+        }
+        this.logger.info("User '"+this.clientState.user.name+"' successfully logged in with role '"+this.clientState.user.role+"'.");
+        this.updateUIState();
+    }
 
-            if(data.code == "INVALID_CREDENTIALS") {
-                document.getElementById("login-form-password-field").classList.add("login-form-error-class");
-                document.getElementById("login-form-username-field").classList.add("login-form-error-class");
-            } else if (data.code == "INVALID_INPUT") {
-                const errorMessage = JSON.parse(data.message);
-                for(let i=0; i<errorMessage.length; i++) {
-                    if(errorMessage[i].field == "user") document.getElementById("login-form-username-field").classList.add("login-form-error-class");
-                    if(errorMessage[i].field == "password") document.getElementById("login-form-password-field").classList.add("login-form-error-class");
-                }
+    handleLoginError(httpStatusCode, errorCode, errorMessage, fieldErrors) {
+        if(errorCode == "INVALID_CREDENTIALS") {
+            document.getElementById("login-form-password-field").classList.add("login-form-error-class");
+            document.getElementById("login-form-username-field").classList.add("login-form-error-class");
+        } else if (errorCode == "INVALID_INPUT") {
+            for(let i=0; i<fieldErrors.length; i++) {
+                if(fieldErrors[i].field == "user") document.getElementById("login-form-username-field").classList.add("login-form-error-class");
+                if(fieldErrors[i].field == "password") document.getElementById("login-form-password-field").classList.add("login-form-error-class");
             }
         }
     }
 
-    customLoginError(err) {
-        this.logger.error("Login failed with the following result: "+err);
+    /**
+     * Only logs the given error message when debug logging is disabled.
+     * @param {*} err 
+     */
+    handleLoginException(err) {
+        if(this.dialogueBranchConfig.logLevel == LOG_LEVEL_INFO) 
+            this.logger.error("WebClientController: Login failed with the following result: "+err);
     }
 
     // ---------- Validate Authentication ----------

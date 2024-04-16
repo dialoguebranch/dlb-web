@@ -121,25 +121,35 @@ export class DialogueBranchClient {
                 tokenExpiration: tokenExpiration
             }),
         })
-        .then((response) => response.json())
-        .then((data) => { 
-            this.loginSuccess(data);
+        .then((response) => {
+            if(response.ok) {
+                return response.json();
+            }
+            return Promise.reject(response);
         })
-        .catch((err) => {
-            this.loginError(err);
+        .then((data) => {
+            this._user = new User(data.user,data.role,data.token);
+            this.logger.debug("DialogueBranchClient: Handling successful login attempt for user '" + this._user.name + 
+                "' with role '" + this._user.role + "' and authToken '" + this._user.authToken + "'.");
+            this.dialogueBranchController.handleLoginSuccess(this._user);
+        })
+        .catch((response) => {
+            if(response.status == 400 || response.status == 401) {
+                response.json().then((data) => {
+                    this.logger.debug(
+                        "DialogueBranchClient: Handling failed login attempt (HTTP Status: '" + response.status 
+                        + "') with errorcode '" + data.code + "' and message '" + data.message + "', and fieldErrors: " 
+                        + JSON.stringify(data.fieldErrors));
+                    this.dialogueBranchController.handleLoginError(response.status, data.code, data.message, data.fieldErrors);
+                })
+            } else {
+                this.logger.debug(
+                    "DialogueBranchClient: Handling failed login attempt (HTTP Status: '" + response.status 
+                    + "'). An unknown error has occured.");
+                this.dialogueBranchController.handleLoginError(response.status, "UNKNOWN_ERROR", "An unknown error has occured.",null);
+            }
         });
 
-    }
-
-    loginSuccess(data) {
-        if('user' in data && 'token' in data) {    
-            this._user = new User(data.user,data.role,data.token);
-        }
-        this.dialogueBranchController.customLoginSuccess(data);
-    }
-
-    loginError(err) {
-        this.dialogueBranchController.customLoginError(err);
     }
 
     // -----------------------------------------------
