@@ -125,31 +125,31 @@ public class AuthController {
 		List<HttpFieldError> fieldErrors = new ArrayList<>();
 		if (user == null || user.isEmpty()) {
 			fieldErrors.add(new HttpFieldError("user",
-					"Parameter \"user\" not defined"));
+					"Parameter 'user' not defined."));
 		}
 		if (password == null || password.isEmpty()) {
 			fieldErrors.add(new HttpFieldError("password",
-					"Parameter \"password\" not defined"));
+					"Parameter 'password' not defined."));
 		}
 		if (tokenExpiration != null && tokenExpiration <= 0) {
 			fieldErrors.add(new HttpFieldError("tokenExpiration",
-					"Parameter \"tokenExpiration\" must be greater than 0 or \"never\""));
+					"Parameter 'tokenExpiration' must be greater than 0 or 'never'."));
 		}
 		if (!fieldErrors.isEmpty()) {
 			logger.info("Failed login attempt: " + fieldErrors);
-			throw BadRequestException.withInvalidInput(fieldErrors);
+			throw BadRequestException.withMessageAndInvalidInput(
+					"One or more login parameters were not correctly provided.",
+					fieldErrors);
 		}
 		UserCredentials userCredentials = UserFile.findUser(user);
 		String invalidError = "Username or password is invalid";
 		if (userCredentials == null) {
 			logger.info("Failed login attempt for user {}: user unknown.", user);
-			throw new UnauthorizedException(ErrorCode.INVALID_CREDENTIALS,
-					invalidError);
+			throw new UnauthorizedException(ErrorCode.INVALID_CREDENTIALS, invalidError);
 		}
 		if (!userCredentials.getPassword().equals(password)) {
 			logger.info("Failed login attempt for user {}: invalid credentials.", user);
-			throw new UnauthorizedException(ErrorCode.INVALID_CREDENTIALS,
-					invalidError);
+			throw new UnauthorizedException(ErrorCode.INVALID_CREDENTIALS, invalidError);
 		}
 		logger.info("User {} logged in.", userCredentials.getUsername());
 
@@ -162,8 +162,7 @@ public class AuthController {
 					loginParametersPayload.getTokenExpiration()).toInstant());
 		}
 
-		AuthDetails details = new AuthDetails(user, Date.from(now.toInstant()),
-				expiration);
+		AuthDetails details = new AuthDetails(user, Date.from(now.toInstant()), expiration);
 		String token = AuthToken.createToken(details);
 
 		return new LoginResultPayload(
