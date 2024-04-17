@@ -76,16 +76,40 @@ export class AbstractController {
      * @param {String} message a human-readable message indicating the success/failure.
      */
     handleAuthValidate(valid, message) {
-        throw new Error("Method 'handleAuthValidateSuccess()' must be implemented by a subclass.");
+        throw new Error("Method 'handleAuthValidate()' must be implemented by a subclass.");
     }
 
-
+    /**
+     * Called after a successful call to the /dialogue/start end-point.
+     * @param {DialogueStep} dialogueStep - the new dialogue step to be rendered.
+     */
     handleStartDialogue(dialogueStep) {
-
+        throw new Error("Method 'handleStartDialogue()' must be implemented by a subclass.");
     }
-    handleStartDialogueError(errorMessage) { }
+    
+    /**
+     * Called after a failed call to the /dialogue/start end-point.
+     * @param {String} errorMessage a human-readable error message indicating the cause of the error.
+     */
+    handleStartDialogueError(errorMessage) { 
+        throw new Error("Method 'handleStartDialogueError()' must be implemented by a subclass.");
+    }
 
-    handleProgressDialogue(dialogueContinues, dialogueStep) { }
-    handleProgressDialogueError(errorMessage) { }
+    /**
+     * Called after a successful call to the /dialogue/progress end-point.
+     * @param {Boolean} dialogueContinues - whether or not the dialogue continues (true / false)
+     * @param {DialogueStep} dialogueStep - if the dialogue continues, contains the next DialogueStep object to render.
+     */
+    handleProgressDialogue(dialogueContinues, dialogueStep) { 
+        throw new Error("Method 'handleProgressDialogue()' must be implemented by a subclass.");
+    }
+
+    /**
+     * Called after a failed call to the /dialogue/progress end-point.
+     * @param {String} errorMessage a human-readable error message indicating the cause of the error.
+     */
+    handleProgressDialogueError(errorMessage) { 
+        throw new Error("Method 'handleProgressDialogueError()' must be implemented by a subclass.");
+    }
 
 }

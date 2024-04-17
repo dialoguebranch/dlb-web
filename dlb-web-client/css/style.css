@@ -264,6 +264,7 @@ td.login-table-labels {
 	cursor: pointer;
 	margin-top: 8px;
 	margin: auto;
+	cursor: default;
 }
 
 /* Normal reply options that were chosen by the user */
@@ -274,6 +275,14 @@ div.user-selected-reply-option {
 /* Button reply options (e.g. 'Continue') that were chosen by the user */
 button.user-selected-reply-option {
 	background-color: var(--color-orange-medium);
+}
+
+.reply-option-with-listener {
+    cursor: pointer;
+}
+
+div.reply-option-with-listener:hover {
+    color: rgb(215, 31, 31);
 }
 
 .dialogue-finished-statement {

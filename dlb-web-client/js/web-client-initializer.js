@@ -26,7 +26,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {WebClientController} from './WebClientController.js';
+import { WebClientController } from './WebClientController.js';
 
 /**
  * This anonymous function contains all the necessary "bindings" of UI to script, as well as any 

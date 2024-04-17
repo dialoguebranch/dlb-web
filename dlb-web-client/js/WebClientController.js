@@ -26,14 +26,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {AbstractController} from './classes/AbstractController.js';
-import {DialogueBranchConfig} from './classes/DialogueBranchConfig.js';
-import {DialogueBranchClient} from './classes/DialogueBranchClient.js';
-import {ClientState} from './classes/ClientState.js';
-import {TextAreaLogger} from './classes/TextAreaLogger.js';
+import { ClientState } from './classes/ClientState.js';
+import { TextAreaLogger } from './classes/TextAreaLogger.js';
 import { LOG_LEVEL_NAMES } from './classes/AbstractLogger.js';
-import {DocumentFunctions} from './classes/DocumentFunctions.js';
-import {AutoForwardReply} from './classes/AutoForwardReply.js';
+import { AutoForwardReply } from './classes/AutoForwardReply.js';
+import { DocumentFunctions } from './classes/DocumentFunctions.js';
+import { AbstractController } from './classes/AbstractController.js';
+import { DialogueBranchConfig } from './classes/DialogueBranchConfig.js';
+import { DialogueBranchClient } from './classes/DialogueBranchClient.js';
 
 export class WebClientController extends AbstractController {
 
@@ -46,31 +46,31 @@ export class WebClientController extends AbstractController {
         this._dialogueReplyNumbers = new Array();
 
         // Initialize the Configuration and Logger objects
-        this.dialogueBranchConfig = new DialogueBranchConfig(1,'http://localhost:8080/dlb-web-service/v1');
-        this.logger = new TextAreaLogger(this.dialogueBranchConfig.logLevel, document.getElementById("debug-textarea"));
-        this.logger.info(this._LOGTAG,"Initialized Logger with log level '" 
-            + this.dialogueBranchConfig.logLevel 
+        this._dialogueBranchConfig = new DialogueBranchConfig(1,'http://localhost:8080/dlb-web-service/v1');
+        this._logger = new TextAreaLogger(this._dialogueBranchConfig.logLevel, document.getElementById("debug-textarea"));
+        this._logger.info(this._LOGTAG,"Initialized Logger with log level '" 
+            + this._dialogueBranchConfig.logLevel 
             + "' ('" 
-            + LOG_LEVEL_NAMES[this.dialogueBranchConfig.logLevel] 
+            + LOG_LEVEL_NAMES[this._dialogueBranchConfig.logLevel] 
             + "').");
 
         // Initialize the DialogueBranchClient object, used for communication to the Dialogue Branch Web Service
-        this.dialogueBranchClient = new DialogueBranchClient(this.dialogueBranchConfig.baseUrl, this.logger, this);
-        this.logger.info(this._LOGTAG,"Initalized DialogueBranchClient directed to the Web Service at '"+ this.dialogueBranchConfig.baseUrl + "'.");
+        this._dialogueBranchClient = new DialogueBranchClient(this._dialogueBranchConfig.baseUrl, this._logger, this);
+        this._logger.info(this._LOGTAG,"Initalized DialogueBranchClient directed to the Web Service at '"+ this._dialogueBranchConfig.baseUrl + "'.");
 
         // Initialize the ClientState object and take actions
-        this.clientState = new ClientState(this.logger);
-        this.clientState.loadFromCookie();
+        this._clientState = new ClientState(this._logger);
+        this._clientState.loadFromCookie();
 
         // If user info was loaded from Cookie, validate the authToken that was found
-        if(this.clientState.user != null) {
-            this.logger.info(this._LOGTAG, "Existing user info found in cookie - username: " + this.clientState.user.name + ", role: " + this.clientState.user.role);
-            this.dialogueBranchClient.user = this.clientState.user;
-            this.dialogueBranchClient.callAuthValidate(this.clientState.user.authToken);
+        if(this._clientState.user != null) {
+            this._logger.info(this._LOGTAG, "Existing user info found in cookie - username: " + this._clientState.user.name + ", role: " + this._clientState.user.role);
+            this._dialogueBranchClient.user = this._clientState.user;
+            this._dialogueBranchClient.callAuthValidate(this._clientState.user.authToken);
         }
         
         // Make a call to the Web Service for service info.
-        this.dialogueBranchClient.callInfo();
+        this._dialogueBranchClient.callInfo();
 
         // Update the UI State
         this.updateUIState();
@@ -92,7 +92,7 @@ export class WebClientController extends AbstractController {
         var formUsername = document.getElementById("login-form-username-field").value;
         var formPassword = document.getElementById("login-form-password-field").value;
 
-        this.dialogueBranchClient.callLogin(formUsername, formPassword, 0);
+        this._dialogueBranchClient.callLogin(formUsername, formPassword, 0);
     }
 
     // ---------- Logout ----------
@@ -100,14 +100,14 @@ export class WebClientController extends AbstractController {
     actionLogout(event) {
         event.preventDefault();
 
-        this.logger.info(this._LOGTAG,"Logging out user '" + this.clientState.user.name + "'.");
+        this._logger.info(this._LOGTAG,"Logging out user '" + this._clientState.user.name + "'.");
         DocumentFunctions.deleteCookie('user.name');
         DocumentFunctions.deleteCookie('user.authToken');
         DocumentFunctions.deleteCookie('user.role');
 
-        this.clientState.user = null;
-        this.clientState.loggedIn = false;
-        this.dialogueBranchClient.user = null;
+        this._clientState.user = null;
+        this._clientState.loggedIn = false;
+        this._dialogueBranchClient.user = null;
         this.updateUIState();
     }
 
@@ -120,12 +120,12 @@ export class WebClientController extends AbstractController {
     actionToggleDebugConsole(event) {
         event.preventDefault();
 
-        if(this.clientState.debugConsoleVisible) {
+        if(this._clientState.debugConsoleVisible) {
             this.setDebugConsoleVisibility(false);
-            this.clientState.debugConsoleVisible = false;
+            this._clientState.debugConsoleVisible = false;
         } else {
             this.setDebugConsoleVisibility(true);
-            this.clientState.debugConsoleVisible = true;
+            this._clientState.debugConsoleVisible = true;
         }
     }
 
@@ -134,12 +134,12 @@ export class WebClientController extends AbstractController {
     // ------------------------------------------------------------
 
     actionCancelDialogue(loggedDialogueId) {
-        this.logger.info(this._LOGTAG,"Cancelling the current dialogue with loggedDialogueId: '"+loggedDialogueId+"'.");
-        this.dialogueBranchClient.callCancelDialogue(loggedDialogueId);
+        this._logger.info(this._LOGTAG,"Cancelling the current dialogue with loggedDialogueId: '"+loggedDialogueId+"'.");
+        this._dialogueBranchClient.callCancelDialogue(loggedDialogueId);
     }
 
     customCancelDialogueSuccess() {
-        this.logger.info(this._LOGTAG,"Custom Cancel Dialogue Success!");
+        this._logger.info(this._LOGTAG,"Custom Cancel Dialogue Success!");
 
         this.renderDialogueStep(null, "Dialogue Cancelled");
     }
@@ -150,7 +150,7 @@ export class WebClientController extends AbstractController {
 
     actionRefreshDialogueBrowser(event) {
         if(event != null) event.preventDefault();
-        this.dialogueBranchClient.callListDialogues();
+        this._dialogueBranchClient.callListDialogues();
     }
 
     customListDialoguesSuccess(dialogueNames) {
@@ -177,11 +177,11 @@ export class WebClientController extends AbstractController {
             }
         }
 
-        this.logger.info(this._LOGTAG,"Updated the contents of the Dialogue Browser, showing "+dialogueNames.length+" available dialogues.");
+        this._logger.info(this._LOGTAG,"Updated the contents of the Dialogue Browser, showing "+dialogueNames.length+" available dialogues.");
     }
 
     customListDialoguesError(err) {
-        this.logger.error(this._LOGTAG,"Retrieving dialogue list failed with the following result: "+err);
+        this._logger.error(this._LOGTAG,"Retrieving dialogue list failed with the following result: "+err);
     }
 
     // ----------------------------------------------------------
@@ -190,7 +190,7 @@ export class WebClientController extends AbstractController {
 
     actionListVariables(event) {
         if(event != null) event.preventDefault();
-        this.dialogueBranchClient.callGetVariables();
+        this._dialogueBranchClient.callGetVariables();
     }
 
     customGetVariablesSuccess(data) {
@@ -228,30 +228,30 @@ export class WebClientController extends AbstractController {
     }
 
     actionDeleteVariable(variableName) {
-        this.logger.info(this._LOGTAG,"Starting to delete variable: "+variableName);
-        this.dialogueBranchClient.callSetVariable(variableName,null);
+        this._logger.info(this._LOGTAG,"Starting to delete variable: "+variableName);
+        this._dialogueBranchClient.callSetVariable(variableName,null);
     }
 
     customSetVariableSuccess() {
-        this.logger.debug(this._LOGTAG,"Custom Set Variable Success()");
+        this._logger.debug(this._LOGTAG,"Custom Set Variable Success()");
         this.actionListVariables();
     }
 
     // ---------- Start Dialogue ----------
 
     actionStartDialogue(dialogueName) {
-        this.logger.info(this._LOGTAG, "Starting dialogue '" + dialogueName + "'.");
+        this._logger.info(this._LOGTAG, "Starting dialogue '" + dialogueName + "'.");
 
         var contentBlock = document.getElementById("interaction-tester-content");
         contentBlock.innerHTML = "";
-        this.dialogueBranchClient.callStartDialogue(dialogueName,"en");
+        this._dialogueBranchClient.callStartDialogue(dialogueName,"en");
     }
 
     actionSelectReply(replyNumber, reply, dialogueStep) {
         // Add a class to the selected reply option, so it can be visualised in the dialogue history which options were chosen
         this._dialogueReplyElements[replyNumber-1].classList.add("user-selected-reply-option");
         this._dialogueReplyNumbers[replyNumber-1].classList.add("user-selected-reply-option");
-        this.dialogueBranchClient.callProgressDialogue(dialogueStep.loggedDialogueId, dialogueStep.loggedInteractionIndex, reply.replyId);
+        this._dialogueBranchClient.callProgressDialogue(dialogueStep.loggedDialogueId, dialogueStep.loggedInteractionIndex, reply.replyId);
     }
 
     // ----------------------------------------------------------------------
@@ -261,28 +261,28 @@ export class WebClientController extends AbstractController {
     // ---------- Info ----------
 
     customInfoSuccess() {
-        var serverInfo = this.dialogueBranchClient.serverInfo;
-        this.logger.info(this._LOGTAG,"Connected to Dialogue Branch Web Service v"+serverInfo.serviceVersion+", using protocol version "+serverInfo.protocolVersion+" (build: '"+serverInfo.build+"' running for "+serverInfo.upTime+").");
+        var serverInfo = this._dialogueBranchClient.serverInfo;
+        this._logger.info(this._LOGTAG,"Connected to Dialogue Branch Web Service v"+serverInfo.serviceVersion+", using protocol version "+serverInfo.protocolVersion+" (build: '"+serverInfo.build+"' running for "+serverInfo.upTime+").");
         this.updateUIState();
     }
 
     customInfoError(err) {
-        this.logger.error(this._LOGTAG,"Requesting server info failed with the following result: "+err);
+        this._logger.error(this._LOGTAG,"Requesting server info failed with the following result: "+err);
     }
 
     // ---------- Login ----------
 
     handleLoginSuccess(user) {
         var formRemember = document.getElementById("login-form-remember-box").checked;
-        this.clientState.user = user;
-        this.clientState.loggedIn = true;
+        this._clientState.user = user;
+        this._clientState.loggedIn = true;
             
         if(formRemember) {
-            DocumentFunctions.setCookie('user.name',this.clientState.user.name,365);
-            DocumentFunctions.setCookie('user.authToken',this.clientState.user.authToken,365);
-            DocumentFunctions.setCookie('user.role',this.clientState.user.role,365);
+            DocumentFunctions.setCookie('user.name',this._clientState.user.name,365);
+            DocumentFunctions.setCookie('user.authToken',this._clientState.user.authToken,365);
+            DocumentFunctions.setCookie('user.role',this._clientState.user.role,365);
 
-            this.logger.debug(this._LOGTAG,
+            this._logger.debug(this._LOGTAG,
                 "Stored user info in cookie: user.name '" + 
                 DocumentFunctions.getCookie('user.name') + 
                 "', user.role '" + 
@@ -292,7 +292,7 @@ export class WebClientController extends AbstractController {
                 "'."
             );
         }
-        this.logger.info(this._LOGTAG,"User '"+this.clientState.user.name+"' successfully logged in with role '"+this.clientState.user.role+"'.");
+        this._logger.info(this._LOGTAG,"User '"+this._clientState.user.name+"' successfully logged in with role '"+this._clientState.user.role+"'.");
         this.updateUIState();
     }
 
@@ -314,14 +314,14 @@ export class WebClientController extends AbstractController {
         
         // All is well, mark user as logged in and proceed
         if(valid == true) {
-            this.clientState.loggedIn = true;
+            this._clientState.loggedIn = true;
         
         // There is an invalid authToken in cookie, delete all info and assume user is logged out
         } else {
-            this.logger.warn(this._LOGTAG,"Unable to validate stored authentication token: '" + message + "'. Requiring new login.");
-            this.clientState.loggedIn = false;
-            this.clientState.user = null;
-            this.dialogueBranchClient.user = null;
+            this._logger.warn(this._LOGTAG,"Unable to validate stored authentication token: '" + message + "'. Requiring new login.");
+            this._clientState.loggedIn = false;
+            this._clientState.user = null;
+            this._dialogueBranchClient.user = null;
             DocumentFunctions.deleteCookie('user.name');
             DocumentFunctions.deleteCookie('user.authToken');
             DocumentFunctions.deleteCookie('user.role');
@@ -349,7 +349,7 @@ export class WebClientController extends AbstractController {
     }
 
     handleStartDialogueError(errorMessage) {
-        this.logger.error(this._LOGTAG,"Starting dialogue failed with the following result: "+errorMessage);
+        this._logger.error(this._LOGTAG,"Starting dialogue failed with the following result: "+errorMessage);
     }
 
     // ---------- Progress Dialogue
@@ -363,7 +363,7 @@ export class WebClientController extends AbstractController {
     }
 
     handleProgressDialogueError(errorMessage) {
-        this.logger.error(this._LOGTAG,errorMessage);
+        this._logger.error(this._LOGTAG,errorMessage);
     }
 
     // -----------------------------------------------------------------
@@ -376,11 +376,11 @@ export class WebClientController extends AbstractController {
 
         var versionInfoBox = document.getElementById("version-info");
 
-        if(this.dialogueBranchClient.serverInfo != null) {
-            var serverInfo = this.dialogueBranchClient.serverInfo;
+        if(this._dialogueBranchClient.serverInfo != null) {
+            var serverInfo = this._dialogueBranchClient.serverInfo;
             versionInfoBox.innerHTML = "Connected to Dialogue Branch Web Service v" + serverInfo.serviceVersion;
-            if(this.clientState.loggedIn) {
-                versionInfoBox.innerHTML += " as user '" + this.clientState.user.name + "'.";
+            if(this._clientState.loggedIn) {
+                versionInfoBox.innerHTML += " as user '" + this._clientState.user.name + "'.";
             } else {
                 versionInfoBox.innerHTML += ".";
             }
@@ -388,16 +388,16 @@ export class WebClientController extends AbstractController {
             document.getElementById("version-info").innerHTML = "Not connected.";
         }
 
-        this.setDebugConsoleVisibility(this.clientState.debugConsoleVisible);
+        this.setDebugConsoleVisibility(this._clientState.debugConsoleVisible);
 
-        if(this.clientState.loggedIn) {
+        if(this._clientState.loggedIn) {
             document.getElementById("navbar").style.display = 'block';
             document.getElementById("dialogue-container").style.display = 'block';
             document.getElementById("login-form").style.display = 'none';
             document.getElementById("dlb-splash-logo").style.display = 'none';
             document.getElementById("dlb-splash-text").style.display = 'none';
             var dialogueListButton = document.getElementById("button-refresh-dialogue-list");
-            if(this.clientState.user.role == "admin") {
+            if(this._clientState.user.role == "admin") {
                 dialogueListButton.classList.remove("button-refresh-dialogue-list-disabled");
                 dialogueListButton.setAttribute('title',"Refresh the content of the Dialogue Browser.");
             } else {
@@ -406,7 +406,7 @@ export class WebClientController extends AbstractController {
             }
 
             // Refresh the Dialogue List
-            if(this.clientState.user.role == 'admin')
+            if(this._clientState.user.role == 'admin')
             this.actionRefreshDialogueBrowser(null);
 
             // Refresh the Variable Browser
@@ -462,8 +462,8 @@ export class WebClientController extends AbstractController {
         if(this._dialogueReplyElements.length > 0) {
             for(var i=0; i<this._dialogueReplyElements.length; i++) {
                 // Replace the node with a clone, which removes all (bound) event listeners
-                this._dialogueReplyElements[i].replaceWith(this._dialogueReplyElements[i].cloneNode(true));
                 this._dialogueReplyElements[i].classList.remove("reply-option-with-listener");
+                this._dialogueReplyElements[i].replaceWith(this._dialogueReplyElements[i].cloneNode(true));
             }
             // Finally, empty the set of dialogueReplyElements
             this._dialogueReplyElements = new Array();

@@ -205,11 +205,6 @@ textarea#debug-textarea {
     font-weight: 600;
 }
 
-.dialogue-step-reply-option-container:hover {
-    color: rgb(215, 31, 31);
-    cursor: pointer;
-}
-
 .dialogue-step-reply-number {
     flex: 1;
     text-align: right;

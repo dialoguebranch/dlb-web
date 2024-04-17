@@ -26,7 +26,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {Reply} from './Reply.js';
+import { Reply } from './Reply.js';
 
 /**
  * A BasicReply is an implementation of the Reply class and represents the most basic of reply

@@ -26,7 +26,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {AbstractLogger} from './AbstractLogger.js';
+import { AbstractLogger } from './AbstractLogger.js';
 
 export class TextAreaLogger extends AbstractLogger {
 
