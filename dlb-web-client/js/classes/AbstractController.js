@@ -80,4 +80,12 @@ export class AbstractController {
     }
 
 
+    handleStartDialogue(dialogueStep) {
+
+    }
+    handleStartDialogueError(errorMessage) { }
+
+    handleProgressDialogue(dialogueContinues, dialogueStep) { }
+    handleProgressDialogueError(errorMessage) { }
+
 }

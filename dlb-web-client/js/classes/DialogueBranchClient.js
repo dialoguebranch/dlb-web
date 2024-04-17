@@ -26,8 +26,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {ServerInfo} from './ServerInfo.js';
-import {User} from './User.js';
+import { User } from './User.js';
+import { Segment } from './Segment.js';
+import { Statement } from './Statement.js';
+import { ServerInfo } from './ServerInfo.js';
+import { BasicReply } from './BasicReply.js';
+import { DialogueStep } from './DialogueStep.js';
+import { AutoForwardReply } from './AutoForwardReply.js';
 
 export class DialogueBranchClient {
 
@@ -35,11 +40,11 @@ export class DialogueBranchClient {
     // ---------- Constructor(s) ----------
     // ------------------------------------
 
-    constructor(baseUrl, logger, dialogueBranchController) {
-        this.LOGTAG = "DialogueBranchClient";
+    constructor(baseUrl, logger, clientController) {
+        this._LOGTAG = "DialogueBranchClient";
         this._baseUrl = baseUrl;
         this._logger = logger;
-        this.dialogueBranchController = dialogueBranchController;
+        this._clientController = clientController;
         // eslint-disable-next-line no-undef
         this._timeZone = new Intl.DateTimeFormat().resolvedOptions().timeZone;
     }
@@ -120,24 +125,24 @@ export class DialogueBranchClient {
         })
         .then((data) => {
             this._user = new User(data.user,data.role,data.token);
-            this.logger.debug(this.LOGTAG,"Handling successful login attempt for user '" + this._user.name + 
+            this.logger.debug(this._LOGTAG,"Handling successful login attempt for user '" + this._user.name + 
                 "' with role '" + this._user.role + "' and authToken '" + this._user.authToken + "'.");
-            this.dialogueBranchController.handleLoginSuccess(this._user);
+            this._clientController.handleLoginSuccess(this._user);
         })
         .catch((response) => {
             if(response.status == 400 || response.status == 401) {
                 response.json().then((data) => {
-                    this.logger.debug(this.LOGTAG,
+                    this.logger.debug(this._LOGTAG,
                         "Handling failed login attempt (HTTP Status: '" + response.status 
                         + "') with errorcode '" + data.code + "' and message '" + data.message + "', and fieldErrors: " 
                         + JSON.stringify(data.fieldErrors));
-                    this.dialogueBranchController.handleLoginError(response.status, data.code, data.message, data.fieldErrors);
+                    this._clientController.handleLoginError(response.status, data.code, data.message, data.fieldErrors);
                 })
             } else {
-                this.logger.debug(this.LOGTAG,
+                this.logger.debug(this._LOGTAG,
                     "Handling failed login attempt (HTTP Status: '" + response.status 
                     + "'). An unknown error has occured.");
-                this.dialogueBranchController.handleLoginError(response.status, "UNKNOWN_ERROR", "An unknown error has occured.",null);
+                this._clientController.handleLoginError(response.status, "UNKNOWN_ERROR", "An unknown error has occured.",null);
             }
         });
 
@@ -170,18 +175,18 @@ export class DialogueBranchClient {
         })
         .then((data) => {
             if(data == true) {
-                this.logger.debug(this.LOGTAG,"AuthToken validated successfully.");
-                this.dialogueBranchController.handleAuthValidate(true, "Success.");
+                this.logger.debug(this._LOGTAG,"AuthToken validated successfully.");
+                this._clientController.handleAuthValidate(true, "Success.");
             } else {
                 var errorMessage = "An unknown error occured while verifying the validity of the auth token.";
-                this.logger.debug(this.LOGTAG,errorMessage);
-                this.dialogueBranchController.handleAuthValidate(false, errorMessage);
+                this.logger.debug(this._LOGTAG,errorMessage);
+                this._clientController.handleAuthValidate(false, errorMessage);
             }
         })
         .catch((response) => {
             var errorMessage = "Failed to validate Auth Token (HTTP Status: '" + response.status + "').";
-            this.logger.debug(this.LOGTAG,errorMessage);
-            this.dialogueBranchController.handleAuthValidate(false,errorMessage);
+            this.logger.debug(this._LOGTAG,errorMessage);
+            this._clientController.handleAuthValidate(false,errorMessage);
         });
     }
 
@@ -210,21 +215,23 @@ export class DialogueBranchClient {
         })
         .then((response) => response.json())
         .then((data) => { 
-            this.startDialogueSuccess(data);
+            if('dialogue' in data) {
+                // Create a DialogueStep object from the received data
+                var dialogueStep = this.createDialogueStepObject(data);
+
+                // Let the controller handle it
+                this._clientController.handleStartDialogue(dialogueStep);
+            } else {
+                var errorMessage = "No data received when starting dialogue.";
+                this.logger.error(this._LOGTAG,errorMessage);
+                this._clientController.handleStartDialogueError(errorMessage);
+            }
         })
         .catch((err) => {
-            this.startDialogueError(err);
+            var errorMessage = "An unexpected error occured when starting a dialogue: "+err;
+            this.logger.error(this._LOGTAG,errorMessage);
+            this._clientController.handleStartDialogueError(errorMessage);
         });
-    }
-
-    startDialogueSuccess(data) {
-        console.log(data);
-        this.dialogueBranchController.customStartDialogueSuccess(data);
-    }
-
-    startDialogueError(err) {
-        console.log(err)
-        this.dialogueBranchController.customStartDialogueError(err);
     }
 
     // ---------------------------------------------------
@@ -238,8 +245,6 @@ export class DialogueBranchClient {
         url += "&loggedInteractionIndex="+loggedInteractionIndex;
         url += "&replyId="+replyId;
 
-        console.log("callProgressDialogue: "+url);
-
         fetch(url, {
             method: "POST",
             headers: {
@@ -250,20 +255,31 @@ export class DialogueBranchClient {
         })
         .then((response) => response.json())
         .then((data) => { 
-            this.progressDialogueSuccess(data);
+            if('value' in data) {
+
+                // The response is empty, so the dialogue is over.
+                if(data.value == null) {
+                    this._clientController.handleProgressDialogue(false,null);
+                
+                // There is dialogue, so render the next step.
+                } else if('dialogue' in data.value) {
+                    var dialogueStep = this.createDialogueStepObject(data.value);
+                    this._clientController.handleProgressDialogue(true, dialogueStep);
+    
+                // Else, something is wrong.
+                } else {
+                    var errorMessage = "The Web Service returned an unexpected response when progressing the dialogue.";
+                    this.logger.error(this._LOGTAG,errorMessage);
+                    this._clientController.handleProgressDialogueError(errorMessage);
+                }
+            }
         })
         .catch((err) => {
-            this.progressDialogueError(err);
+            var errorMessage = "The Web Service returned an unexpected response when progressing the dialogue: "+err;
+            this.logger.error(this._LOGTAG,errorMessage);
+            this._clientController.handleProgressDialogueError(errorMessage);
         });
 
-    }
-
-    progressDialogueSuccess(data) {
-        this.dialogueBranchController.customProgressDialogueSuccess(data);
-    }
-
-    progressDialogueError(err) {
-        console.log(err)
     }
 
     // -------------------------------------------------
@@ -301,11 +317,65 @@ export class DialogueBranchClient {
     }
 
     cancelDialogueSuccess() {
-        this.dialogueBranchController.customCancelDialogueSuccess();
+        this._clientController.customCancelDialogueSuccess();
     }
 
     cancelDialogueError(err) {
         console.log(err)
+    }
+
+    // ----------------------------------------------------------
+    // ---------- Helper functions related to Dialogue ----------
+    // ----------------------------------------------------------
+
+    createDialogueStepObject(data) {
+        // Instantiate an empty DialogueStep
+        var dialogueStep = DialogueStep.emptyInstance();
+
+        // Add the simple parameters
+        dialogueStep.dialogueName = data.dialogue;
+        dialogueStep.node = data.node;
+        dialogueStep.speaker = data.speaker;
+        dialogueStep.loggedDialogueId = data.loggedDialogueId;
+        dialogueStep.loggedInteractionIndex = data.loggedInteractionIndex;
+
+        // Add the statement (consisting of a list of segments)
+        var statement = Statement.emptyInstance();
+        data.statement.segments.forEach(
+            (element) => {
+                var segment = new Segment(element.segmentType,element.text);
+                statement.addSegment(segment);
+            }
+        );
+        dialogueStep.statement = statement;
+
+        // Add the replies
+        data.replies.forEach(
+            (element) => {
+                var reply = null;
+                if(element.statement == null) {
+                    reply = AutoForwardReply.emptyInstance();
+                } else {
+                    reply = BasicReply.emptyInstance();
+                }
+                reply.replyId = element.replyId;
+                reply.endsDialogue = element.endsDialogue;
+                
+                if(reply instanceof BasicReply) {
+                    statement = Statement.emptyInstance();
+                    element.statement.segments.forEach(
+                        (segmentElement) => {
+                            var segment = new Segment(segmentElement.segmentType,segmentElement.text);
+                            statement.addSegment(segment);
+                        }
+                    );
+                    reply.statement = statement;
+                }
+                reply.actions = element.actions; // TODO: Unfold 'actions' into Action-objects
+                dialogueStep.addReply(reply);
+            }
+        );
+        return dialogueStep;
     }
 
     // -------------------------------------------------------------------------------------------------
@@ -338,7 +408,7 @@ export class DialogueBranchClient {
     }
 
     getVariablesSuccess(data) {
-        this.dialogueBranchController.customGetVariablesSuccess(data);
+        this._clientController.customGetVariablesSuccess(data);
     }
 
     getVariablesError(err) {
@@ -383,7 +453,7 @@ export class DialogueBranchClient {
 
     setVariableSuccess() {
         console.log("setVariableSuccess");
-        this.dialogueBranchController.customSetVariableSuccess();
+        this._clientController.customSetVariableSuccess();
     }
 
     setVariableError(err) {
@@ -451,12 +521,12 @@ export class DialogueBranchClient {
         if('build' in data) {
             this._serverInfo = new ServerInfo(data.serviceVersion, data.protocolVersion, data.build, data.upTime);
         }
-        this.dialogueBranchController.customInfoSuccess(data);
+        this._clientController.customInfoSuccess(data);
     }
 
     infoError(err) {
         console.log("DLB-CLIENT: Handling error after call to /info/all end-point.");
-        this.dialogueBranchController.customInfoError(err);
+        this._clientController.customInfoError(err);
     }
 
      // --------------------------------------------------------------------------------------------------------
@@ -491,22 +561,22 @@ export class DialogueBranchClient {
 
         if(data == null) {
             // A null response is unexpected, but should not break the client
-            this.logger.warn(this.LOGTAG,"Call to /admin/list-dialogues returned null response.");
-            this.dialogueBranchController.customListDialoguesSuccess(new Array());
+            this.logger.warn(this._LOGTAG,"Call to /admin/list-dialogues returned null response.");
+            this._clientController.customListDialoguesSuccess(new Array());
         } else {
             if('dialogueNames' in data) {
-                this.dialogueBranchController.customListDialoguesSuccess(data.dialogueNames);
+                this._clientController.customListDialoguesSuccess(data.dialogueNames);
             } else {
                 // Data without dialogueNames is unexpected, but should not break the client
-                this.logger.warn(this.LOGTAG,"Call to /admin/list-dialogues returned unexpected response.");
-                this.dialogueBranchController.customListDialoguesSuccess(new Array());
+                this.logger.warn(this._LOGTAG,"Call to /admin/list-dialogues returned unexpected response.");
+                this._clientController.customListDialoguesSuccess(new Array());
             }
         }
     }
 
     listDialoguesError(err) {
         console.log(err);
-        this.dialogueBranchController.customListDialoguesError(err);
+        this._clientController.customListDialoguesError(err);
     }
 
 }

@@ -266,8 +266,14 @@ td.login-table-labels {
 	margin: auto;
 }
 
-.user-selected-reply-option {
+/* Normal reply options that were chosen by the user */
+div.user-selected-reply-option {
 	color: grey;
+}
+
+/* Button reply options (e.g. 'Continue') that were chosen by the user */
+button.user-selected-reply-option {
+	background-color: var(--color-orange-medium);
 }
 
 .dialogue-finished-statement {

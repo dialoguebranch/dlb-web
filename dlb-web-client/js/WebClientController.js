@@ -29,15 +29,11 @@
 import {AbstractController} from './classes/AbstractController.js';
 import {DialogueBranchConfig} from './classes/DialogueBranchConfig.js';
 import {DialogueBranchClient} from './classes/DialogueBranchClient.js';
-import {DialogueStep} from './classes/DialogueStep.js';
 import {ClientState} from './classes/ClientState.js';
 import {TextAreaLogger} from './classes/TextAreaLogger.js';
 import { LOG_LEVEL_NAMES } from './classes/AbstractLogger.js';
 import {DocumentFunctions} from './classes/DocumentFunctions.js';
-import {Statement} from './classes/Statement.js';
-import {Segment} from './classes/Segment.js';
 import {AutoForwardReply} from './classes/AutoForwardReply.js';
-import {BasicReply} from './classes/BasicReply.js';
 
 export class WebClientController extends AbstractController {
 
@@ -47,6 +43,7 @@ export class WebClientController extends AbstractController {
         this._LOGTAG = "WebClientController";
 
         this._dialogueReplyElements = new Array();
+        this._dialogueReplyNumbers = new Array();
 
         // Initialize the Configuration and Logger objects
         this.dialogueBranchConfig = new DialogueBranchConfig(1,'http://localhost:8080/dlb-web-service/v1');
@@ -243,7 +240,7 @@ export class WebClientController extends AbstractController {
     // ---------- Start Dialogue ----------
 
     actionStartDialogue(dialogueName) {
-        this.logger.info("Starting dialogue '" + dialogueName + "'.");
+        this.logger.info(this._LOGTAG, "Starting dialogue '" + dialogueName + "'.");
 
         var contentBlock = document.getElementById("interaction-tester-content");
         contentBlock.innerHTML = "";
@@ -253,6 +250,7 @@ export class WebClientController extends AbstractController {
     actionSelectReply(replyNumber, reply, dialogueStep) {
         // Add a class to the selected reply option, so it can be visualised in the dialogue history which options were chosen
         this._dialogueReplyElements[replyNumber-1].classList.add("user-selected-reply-option");
+        this._dialogueReplyNumbers[replyNumber-1].classList.add("user-selected-reply-option");
         this.dialogueBranchClient.callProgressDialogue(dialogueStep.loggedDialogueId, dialogueStep.loggedInteractionIndex, reply.replyId);
     }
 
@@ -335,102 +333,37 @@ export class WebClientController extends AbstractController {
     
     // ---------- Start Dialogue
 
-    customStartDialogueSuccess(data) {
-        if('dialogue' in data) {
+    handleStartDialogue(dialogueStep) {
+        // Add the name of the newly started dialogue to the "Interaction Tester" title field
+        var titleElement = document.getElementById("interaction-tester-title");
+        titleElement.innerHTML = "Interaction Tester <i>(" + dialogueStep.dialogueName + ".dlb)</i>";
 
-            // Add the name of the newly started dialogue to the "Interaction Tester" title field
-            var titleElement = document.getElementById("interaction-tester-title");
-            titleElement.innerHTML = "Interaction Tester <i>(" + data.dialogue + ".dlb)</i>";
+        // Enable the "cancel dialogue" button
+        var cancelButton = document.getElementById("button-cancel-dialogue");
+        cancelButton.addEventListener("click", this.actionCancelDialogue.bind(this, dialogueStep.loggedDialogueId), false);
+        cancelButton.setAttribute('title',"Cancel the current ongoing dialogue.");
+        cancelButton.classList.remove("button-cancel-dialogue-disabled");
 
-            // Enable the "cancel dialogue" button
-            var cancelButton = document.getElementById("button-cancel-dialogue");
-            cancelButton.addEventListener("click", this.actionCancelDialogue.bind(this, data.loggedDialogueId), false);
-            cancelButton.setAttribute('title',"Cancel the current ongoing dialogue.");
-            cancelButton.classList.remove("button-cancel-dialogue-disabled");
-            
-            // Create a DialogueStep object from the received data
-            var dialogueStep = this.createDialogueStepObject(data);
-
-            // Render the newly created DialogueStep in the UI
-            this.renderDialogueStep(dialogueStep);
-        }
+        // Render the newly created DialogueStep in the UI
+        this.renderDialogueStep(dialogueStep);
     }
 
-    createDialogueStepObject(data) {
-        // Instantiate an empty DialogueStep
-        var dialogueStep = DialogueStep.emptyInstance();
-
-        // Add the simple parameters
-        dialogueStep.dialogueName = data.dialogue;
-        dialogueStep.node = data.node;
-        dialogueStep.speaker = data.speaker;
-        dialogueStep.loggedDialogueId = data.loggedDialogueId;
-        dialogueStep.loggedInteractionIndex = data.loggedInteractionIndex;
-
-        // Add the statement (consisting of a list of segments)
-        var statement = Statement.emptyInstance();
-        data.statement.segments.forEach(
-            (element) => {
-                var segment = new Segment(element.segmentType,element.text);
-                statement.addSegment(segment);
-            }
-        );
-        dialogueStep.statement = statement;
-
-        // Add the replies
-        data.replies.forEach(
-            (element) => {
-                var reply = null;
-                if(element.statement == null) {
-                    reply = AutoForwardReply.emptyInstance();
-                } else {
-                    reply = BasicReply.emptyInstance();
-                }
-                reply.replyId = element.replyId;
-                reply.endsDialogue = element.endsDialogue;
-                
-                if(reply instanceof BasicReply) {
-                    statement = Statement.emptyInstance();
-                    element.statement.segments.forEach(
-                        (segmentElement) => {
-                            var segment = new Segment(segmentElement.segmentType,segmentElement.text);
-                            statement.addSegment(segment);
-                        }
-                    );
-                    reply.statement = statement;
-                }
-                reply.actions = element.actions; // TODO: Unfold 'actions' into Action-objects
-                dialogueStep.addReply(reply);
-            }
-        );
-
-        return dialogueStep;
-    }
-
-    customStartDialogueError(err) {
-        this.logger.error(this._LOGTAG,"Starting dialogue failed with the following result: "+err);
+    handleStartDialogueError(errorMessage) {
+        this.logger.error(this._LOGTAG,"Starting dialogue failed with the following result: "+errorMessage);
     }
 
     // ---------- Progress Dialogue
 
-    customProgressDialogueSuccess(data) {
-        console.log("customProgressDialogueSuccess");
-        console.log(data);
-        if('value' in data) {
-
-            // The response is empty, so the dialogue is over.
-            if(data.value == null) {
-                this.renderDialogueStep(null);
-            // There is dialogue, so render the next step.
-            } else if('dialogue' in data.value) {
-                var dialogueStep = this.createDialogueStepObject(data.value);
-                this.renderDialogueStep(dialogueStep);
-
-            // Else, something is wrong.
-            } else {
-                this.logger.error(this._LOGTAG,"The Web Service returned an unexpected response when progressing the dialogue.");
-            }
+    handleProgressDialogue(dialogueContinues, dialogueStep) {
+        if(dialogueContinues) {
+            this.renderDialogueStep(dialogueStep);
+        } else {
+            this.renderDialogueStep(null);
         }
+    }
+
+    handleProgressDialogueError(errorMessage) {
+        this.logger.error(this._LOGTAG,errorMessage);
     }
 
     // -----------------------------------------------------------------
@@ -534,6 +467,7 @@ export class WebClientController extends AbstractController {
             }
             // Finally, empty the set of dialogueReplyElements
             this._dialogueReplyElements = new Array();
+            this._dialogueReplyNumbers = new Array();
         }
 
         var contentBlock = document.getElementById("interaction-tester-content");
@@ -616,6 +550,8 @@ export class WebClientController extends AbstractController {
                             autoForwardReplyButton.addEventListener("click", this.actionSelectReply.bind(this, replyNumber, reply, dialogueStep), false);
                             replyOptionContainer.appendChild(autoForwardReplyButton);
                             this._dialogueReplyElements.push(autoForwardReplyButton);
+                            // Add an empty element to the list, so that adding the 'user-selected-reply' class won't break.
+                            this._dialogueReplyNumbers.push(document.createElement("div"));
                         } else {
                             const replyOptionNumberElement = document.createElement("div");
                             replyOptionNumberElement.classList.add("dialogue-step-reply-number");
@@ -633,7 +569,7 @@ export class WebClientController extends AbstractController {
                             replyOptionElement.addEventListener("click", this.actionSelectReply.bind(this, replyNumber, reply, dialogueStep), false);
                             replyOptionContainer.appendChild(replyOptionElement);
                             this._dialogueReplyElements.push(replyOptionElement);
-                            
+                            this._dialogueReplyNumbers.push(replyOptionNumberElement);
                         }
                         replyNumber++;
                     }
