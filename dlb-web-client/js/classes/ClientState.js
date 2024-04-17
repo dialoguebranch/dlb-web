@@ -129,7 +129,7 @@ export class ClientState {
         if(cookieUserName && cookieUserRole && cookieUserAuthToken) {
             var user = new User(cookieUserName, cookieUserRole, cookieUserAuthToken);
             this._user = user;
-            this._loggedIn = true;
+            // this._loggedIn = true - Actually, this needs to be verified first.
         }
     }
 

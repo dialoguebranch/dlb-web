@@ -28,10 +28,11 @@
 
 import {AbstractController} from './classes/AbstractController.js';
 import {DialogueBranchConfig} from './classes/DialogueBranchConfig.js';
-import {DialogueBranchClient, LOG_LEVEL_NAMES, LOG_LEVEL_INFO} from './classes/DialogueBranchClient.js';
+import {DialogueBranchClient} from './classes/DialogueBranchClient.js';
 import {DialogueStep} from './classes/DialogueStep.js';
 import {ClientState} from './classes/ClientState.js';
-import {Logger} from './classes/Logger.js';
+import {TextAreaLogger} from './classes/TextAreaLogger.js';
+import { LOG_LEVEL_NAMES } from './classes/AbstractLogger.js';
 import {DocumentFunctions} from './classes/DocumentFunctions.js';
 import {Statement} from './classes/Statement.js';
 import {Segment} from './classes/Segment.js';
@@ -43,13 +44,14 @@ export class WebClientController extends AbstractController {
     constructor() {
         super();
 
+        this._LOGTAG = "WebClientController";
+
         this._dialogueReplyElements = new Array();
 
-        // Initialize the logger
-        this.logger = new Logger();
+        // Initialize the Configuration and Logger objects
         this.dialogueBranchConfig = new DialogueBranchConfig(1,'http://localhost:8080/dlb-web-service/v1');
-        this.logger.logLevel = this.dialogueBranchConfig.logLevel;
-        this.logger.info("Initialized Logger with log level '" 
+        this.logger = new TextAreaLogger(this.dialogueBranchConfig.logLevel, document.getElementById("debug-textarea"));
+        this.logger.info(this._LOGTAG,"Initialized Logger with log level '" 
             + this.dialogueBranchConfig.logLevel 
             + "' ('" 
             + LOG_LEVEL_NAMES[this.dialogueBranchConfig.logLevel] 
@@ -57,22 +59,23 @@ export class WebClientController extends AbstractController {
 
         // Initialize the DialogueBranchClient object, used for communication to the Dialogue Branch Web Service
         this.dialogueBranchClient = new DialogueBranchClient(this.dialogueBranchConfig.baseUrl, this.logger, this);
-        this.logger.info("Initalized DialogueBranchClient with a connection to Web Service at '"+ this.dialogueBranchConfig.baseUrl + "'.");
+        this.logger.info(this._LOGTAG,"Initalized DialogueBranchClient directed to the Web Service at '"+ this.dialogueBranchConfig.baseUrl + "'.");
 
         // Initialize the ClientState object and take actions
         this.clientState = new ClientState(this.logger);
         this.clientState.loadFromCookie();
-        console.log(this.clientState);
 
         // If user info was loaded from Cookie, validate the authToken that was found
         if(this.clientState.user != null) {
+            this.logger.info(this._LOGTAG, "Existing user info found in cookie - username: " + this.clientState.user.name + ", role: " + this.clientState.user.role);
             this.dialogueBranchClient.user = this.clientState.user;
             this.dialogueBranchClient.callAuthValidate(this.clientState.user.authToken);
         }
-
+        
         // Make a call to the Web Service for service info.
         this.dialogueBranchClient.callInfo();
 
+        // Update the UI State
         this.updateUIState();
     }
     
@@ -100,7 +103,7 @@ export class WebClientController extends AbstractController {
     actionLogout(event) {
         event.preventDefault();
 
-        this.logger.info("Logging out user '" + this.clientState.user.name + "'.");
+        this.logger.info(this._LOGTAG,"Logging out user '" + this.clientState.user.name + "'.");
         DocumentFunctions.deleteCookie('user.name');
         DocumentFunctions.deleteCookie('user.authToken');
         DocumentFunctions.deleteCookie('user.role');
@@ -134,12 +137,12 @@ export class WebClientController extends AbstractController {
     // ------------------------------------------------------------
 
     actionCancelDialogue(loggedDialogueId) {
-        this.logger.info("Cancelling the current dialogue with loggedDialogueId: '"+loggedDialogueId+"'.");
+        this.logger.info(this._LOGTAG,"Cancelling the current dialogue with loggedDialogueId: '"+loggedDialogueId+"'.");
         this.dialogueBranchClient.callCancelDialogue(loggedDialogueId);
     }
 
     customCancelDialogueSuccess() {
-        this.logger.info("Custom Cancel Dialogue Success!");
+        this.logger.info(this._LOGTAG,"Custom Cancel Dialogue Success!");
 
         this.renderDialogueStep(null, "Dialogue Cancelled");
     }
@@ -177,11 +180,11 @@ export class WebClientController extends AbstractController {
             }
         }
 
-        this.logger.info("Updated the contents of the Dialogue Browser, showing "+dialogueNames.length+" available dialogues.");
+        this.logger.info(this._LOGTAG,"Updated the contents of the Dialogue Browser, showing "+dialogueNames.length+" available dialogues.");
     }
 
     customListDialoguesError(err) {
-        this.logger.error("Retrieving dialogue list failed with the following result: "+err);
+        this.logger.error(this._LOGTAG,"Retrieving dialogue list failed with the following result: "+err);
     }
 
     // ----------------------------------------------------------
@@ -228,12 +231,12 @@ export class WebClientController extends AbstractController {
     }
 
     actionDeleteVariable(variableName) {
-        this.logger.info("Starting to delete variable: "+variableName);
+        this.logger.info(this._LOGTAG,"Starting to delete variable: "+variableName);
         this.dialogueBranchClient.callSetVariable(variableName,null);
     }
 
     customSetVariableSuccess() {
-        this.logger.debug("Custom Set Variable Success()");
+        this.logger.debug(this._LOGTAG,"Custom Set Variable Success()");
         this.actionListVariables();
     }
 
@@ -261,12 +264,12 @@ export class WebClientController extends AbstractController {
 
     customInfoSuccess() {
         var serverInfo = this.dialogueBranchClient.serverInfo;
-        this.logger.info("Connected to Dialogue Branch Web Service v"+serverInfo.serviceVersion+", using protocol version "+serverInfo.protocolVersion+" (build: '"+serverInfo.build+"' running for "+serverInfo.upTime+").");
+        this.logger.info(this._LOGTAG,"Connected to Dialogue Branch Web Service v"+serverInfo.serviceVersion+", using protocol version "+serverInfo.protocolVersion+" (build: '"+serverInfo.build+"' running for "+serverInfo.upTime+").");
         this.updateUIState();
     }
 
     customInfoError(err) {
-        this.logger.error("Requesting server info failed with the following result: "+err);
+        this.logger.error(this._LOGTAG,"Requesting server info failed with the following result: "+err);
     }
 
     // ---------- Login ----------
@@ -281,7 +284,7 @@ export class WebClientController extends AbstractController {
             DocumentFunctions.setCookie('user.authToken',this.clientState.user.authToken,365);
             DocumentFunctions.setCookie('user.role',this.clientState.user.role,365);
 
-            this.logger.debug(
+            this.logger.debug(this._LOGTAG,
                 "Stored user info in cookie: user.name '" + 
                 DocumentFunctions.getCookie('user.name') + 
                 "', user.role '" + 
@@ -291,7 +294,7 @@ export class WebClientController extends AbstractController {
                 "'."
             );
         }
-        this.logger.info("User '"+this.clientState.user.name+"' successfully logged in with role '"+this.clientState.user.role+"'.");
+        this.logger.info(this._LOGTAG,"User '"+this.clientState.user.name+"' successfully logged in with role '"+this.clientState.user.role+"'.");
         this.updateUIState();
     }
 
@@ -307,23 +310,17 @@ export class WebClientController extends AbstractController {
         }
     }
 
-    /**
-     * Only logs the given error message when debug logging is disabled.
-     * @param {*} err 
-     */
-    handleLoginException(err) {
-        if(this.dialogueBranchConfig.logLevel == LOG_LEVEL_INFO) 
-            this.logger.error("WebClientController: Login failed with the following result: "+err);
-    }
-
     // ---------- Validate Authentication ----------
 
-    customAuthValidateSuccess(data) {
-        if(data == true) {
+    handleAuthValidate(valid, message) {
+        
+        // All is well, mark user as logged in and proceed
+        if(valid == true) {
             this.clientState.loggedIn = true;
         
-        // There is an invalid authToken in cookie, delete all info and assume user logged out
+        // There is an invalid authToken in cookie, delete all info and assume user is logged out
         } else {
+            this.logger.warn(this._LOGTAG,"Unable to validate stored authentication token: '" + message + "'. Requiring new login.");
             this.clientState.loggedIn = false;
             this.clientState.user = null;
             this.dialogueBranchClient.user = null;
@@ -331,13 +328,11 @@ export class WebClientController extends AbstractController {
             DocumentFunctions.deleteCookie('user.authToken');
             DocumentFunctions.deleteCookie('user.role');
         }
+
+        // Finally, update the User Interface State
         this.updateUIState();
     }
-
-    customAuthValidateError(err) {
-        this.logger.error("Validating authentication token failed with the following result: "+err);
-    }
-
+    
     // ---------- Start Dialogue
 
     customStartDialogueSuccess(data) {
@@ -413,7 +408,7 @@ export class WebClientController extends AbstractController {
     }
 
     customStartDialogueError(err) {
-        this.logger.error("Starting dialogue failed with the following result: "+err);
+        this.logger.error(this._LOGTAG,"Starting dialogue failed with the following result: "+err);
     }
 
     // ---------- Progress Dialogue
@@ -433,7 +428,7 @@ export class WebClientController extends AbstractController {
 
             // Else, something is wrong.
             } else {
-                this.logger.error("The Web Service returned an unexpected response when progressing the dialogue.");
+                this.logger.error(this._LOGTAG,"The Web Service returned an unexpected response when progressing the dialogue.");
             }
         }
     }

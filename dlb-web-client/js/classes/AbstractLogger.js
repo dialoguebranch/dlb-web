@@ -28,16 +28,49 @@
 
 /* eslint-disable no-unused-vars */
 
-import {AutoForwardReply} from './AutoForwardReply.js';
-import {BasicReply} from './BasicReply.js';
-import {ClientState} from './ClientState.js';
-import {Reply} from './Reply.js';
+/** 
+ * The following constants may be used throughout the web app for logging purposes.
+ */
+export const LOG_LEVEL_INFO = 0;
+export const LOG_LEVEL_DEBUG = 1;
+export const LOG_LEVEL_NAMES = [
+    "INFO",
+    "DEBUG"
+];
 
-import {DialogueBranchClient} from './DialogueBranchClient.js';
-import {DialogueBranchConfig} from './DialogueBranchConfig.js';
-import {DialogueStep} from './DialogueStep.js';
+export class AbstractLogger {
 
-import {Segment} from './Segment.js';
-import {ServerInfo} from './ServerInfo.js';
-import {Statement} from './Statement.js';
-import {User} from './User.js';
+    constructor(logLevel) {
+        if (this.constructor == AbstractLogger) {
+            throw new Error("Abstract class AbstractLogger can not be instantiated.");
+        }
+        this._logLevel = logLevel;
+    }
+
+    set logLevel(logLevel) {
+        this._logLevel = logLevel;
+    }
+
+    info(logtag, message) {
+        this.writeLogEntry("INFO",logtag,message);
+    }
+
+    warn(logtag, message) {
+        this.writeLogEntry("WARN",logtag,message);
+    }
+
+    error(logtag, message) {
+        this.writeLogEntry("ERROR",logtag,message);
+    }
+
+    debug(logtag, message) {
+        if(this._logLevel >= LOG_LEVEL_DEBUG) {
+            this.writeLogEntry("DEBUG",logtag,message);
+        }
+    }
+
+    writeLogEntry(level, logtag, message) {
+        throw new Error("Method 'writeLogEntry' must be implemented by a subclass.");
+    }
+
+}

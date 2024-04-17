@@ -50,24 +50,33 @@ export class AbstractController {
 
     /**
      * Called after a successful call to the /auth/login end-point by the DialogueBranchClient.
+     * @param {User} user a User object containing the information of the logged in user.
      */
     handleLoginSuccess(user) {
-        throw new Error("Method 'customLoginSuccess()' must be implemented by a subclass.");
+        throw new Error("Method 'handleLoginSuccess()' must be implemented by a subclass.");
     }
     
     /**
      * Called after a failed call to the /auth/login end-point by the DialogueBranchClient.
+     * @param {*} httpStatusCode the HTTP Status Code (e.g. '400').
+     * @param {*} errorCode the error code as provided by the Dialogue Branch Web Service (e.g.
+     * 'INVALID_CREDENTIALS').
+     * @param {*} errorMessage the (human-readable) error message provided by the Web Service.
+     * @param {*} fieldErrors an optional list of 'field errors' identifying which login fields were
+     * problematic.
      */
-    handleLoginError(err) {
-        throw new Error("Method 'customLoginSuccess()' must be implemented by a subclass.");
+    handleLoginError(httpStatusCode, errorCode, errorMessage, fieldErrors) {
+        throw new Error("Method 'handleLoginError()' must be implemented by a subclass.");
     }
 
-    customAuthValidateSuccess(data) {
-
-    }
-
-    customAuthValidateError(err) {
-
+    /**
+     * Called after a successful call to the /auth/validate end-point. Indicates that the provided
+     * auth token is indeed valid.
+     * @param {Boolean} valid true if the token was validated, false otherwise.
+     * @param {String} message a human-readable message indicating the success/failure.
+     */
+    handleAuthValidate(valid, message) {
+        throw new Error("Method 'handleAuthValidateSuccess()' must be implemented by a subclass.");
     }
 
 

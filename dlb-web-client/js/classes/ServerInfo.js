@@ -39,7 +39,6 @@ export class ServerInfo {
 
     set serviceVersion(serviceVersion) {
         this._serviceVersion = serviceVersion;
-        this._logger.debug("ClientState updated: serviceVersion = " + serviceVersion);
     }
 
     get serviceVersion() {
@@ -50,7 +49,6 @@ export class ServerInfo {
 
     set protocolVersion(protocolVersion) {
         this._protocolVersion = protocolVersion;
-        this._logger.debug("ClientState updated: protocolVersion = " + protocolVersion);
     }
 
     get protocolVersion() {
@@ -61,7 +59,6 @@ export class ServerInfo {
 
     set build(build) {
         this._build = build;
-        this._logger.debug("ClientState updated: build = " + build);
     }
 
     get build() {
@@ -72,7 +69,6 @@ export class ServerInfo {
 
     set upTime(upTime) {
         this._upTime = upTime;
-        this._logger.debug("ClientState updated: upTime = " + upTime);
     }
 
     get upTime() {

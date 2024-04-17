@@ -26,42 +26,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {LOG_LEVEL_DEBUG} from './DialogueBranchClient.js';
+import {AbstractLogger} from './AbstractLogger.js';
 
-export class Logger {
+export class TextAreaLogger extends AbstractLogger {
 
-    constructor() {
-        this._logArea = document.getElementById("debug-textarea");
+    constructor(logLevel, textArea) { 
+        super(logLevel);
+        this._textArea = textArea;
     }
 
-    set logLevel(logLevel) {
-        this._logLevel = logLevel;
+    get textArea() {
+        return this.textArea;
     }
 
-    info(line) {
-        this._logArea.value += "\n" + "INFO: " + line;
-        this.scrollToBottom();
+    set textArea(textArea) {
+        this._textArea = textArea;
     }
 
-    warn(line) {
-        this._logArea.value += "\n" + "WARNING: " + line;
-        this.scrollToBottom();
-    }
-
-    error(line) {
-        this._logArea.value += "\n" + "ERROR: " + line;
-        this.scrollToBottom();
-    }
-
-    debug(line) {
-        if(this._logLevel >= LOG_LEVEL_DEBUG) {
-            this._logArea.value += "\n" + "DEBUG: " + line;
-            this.scrollToBottom();
-        }
-    }
-
-    scrollToBottom() {
-        this._logArea.scrollTop = this._logArea.scrollHeight;
+    writeLogEntry(level, logtag, message) {
+        this._textArea.value += "\n" + "[" + logtag + " - " + level + "] " + message;
+        this._textArea.scrollTop = this._textArea.scrollHeight;
     }
 
 }

@@ -29,16 +29,6 @@
 import {ServerInfo} from './ServerInfo.js';
 import {User} from './User.js';
 
-/** 
- * The following constants may be used throughout the web app for logging purposes.
- */
-export const LOG_LEVEL_INFO = 0;
-export const LOG_LEVEL_DEBUG = 1;
-export const LOG_LEVEL_NAMES = [
-    "INFO",
-    "DEBUG"
-];
-
 export class DialogueBranchClient {
 
     // ------------------------------------
@@ -46,6 +36,7 @@ export class DialogueBranchClient {
     // ------------------------------------
 
     constructor(baseUrl, logger, dialogueBranchController) {
+        this.LOGTAG = "DialogueBranchClient";
         this._baseUrl = baseUrl;
         this._logger = logger;
         this.dialogueBranchController = dialogueBranchController;
@@ -129,22 +120,22 @@ export class DialogueBranchClient {
         })
         .then((data) => {
             this._user = new User(data.user,data.role,data.token);
-            this.logger.debug("DialogueBranchClient: Handling successful login attempt for user '" + this._user.name + 
+            this.logger.debug(this.LOGTAG,"Handling successful login attempt for user '" + this._user.name + 
                 "' with role '" + this._user.role + "' and authToken '" + this._user.authToken + "'.");
             this.dialogueBranchController.handleLoginSuccess(this._user);
         })
         .catch((response) => {
             if(response.status == 400 || response.status == 401) {
                 response.json().then((data) => {
-                    this.logger.debug(
-                        "DialogueBranchClient: Handling failed login attempt (HTTP Status: '" + response.status 
+                    this.logger.debug(this.LOGTAG,
+                        "Handling failed login attempt (HTTP Status: '" + response.status 
                         + "') with errorcode '" + data.code + "' and message '" + data.message + "', and fieldErrors: " 
                         + JSON.stringify(data.fieldErrors));
                     this.dialogueBranchController.handleLoginError(response.status, data.code, data.message, data.fieldErrors);
                 })
             } else {
-                this.logger.debug(
-                    "DialogueBranchClient: Handling failed login attempt (HTTP Status: '" + response.status 
+                this.logger.debug(this.LOGTAG,
+                    "Handling failed login attempt (HTTP Status: '" + response.status 
                     + "'). An unknown error has occured.");
                 this.dialogueBranchController.handleLoginError(response.status, "UNKNOWN_ERROR", "An unknown error has occured.",null);
             }
@@ -170,27 +161,28 @@ export class DialogueBranchClient {
                 "Content-Type": "application/json",
             }
         })
-        .then((response) => response.json())
-        .then((data) => { 
-            this.authValidateSuccess(data);
+
+        .then((response) => {
+            if(response.ok) {
+                return response.json();
+            }
+            return Promise.reject(response);
         })
-        .catch((err) => {
-            this.authValidateError(err);
+        .then((data) => {
+            if(data == true) {
+                this.logger.debug(this.LOGTAG,"AuthToken validated successfully.");
+                this.dialogueBranchController.handleAuthValidate(true, "Success.");
+            } else {
+                var errorMessage = "An unknown error occured while verifying the validity of the auth token.";
+                this.logger.debug(this.LOGTAG,errorMessage);
+                this.dialogueBranchController.handleAuthValidate(false, errorMessage);
+            }
+        })
+        .catch((response) => {
+            var errorMessage = "Failed to validate Auth Token (HTTP Status: '" + response.status + "').";
+            this.logger.debug(this.LOGTAG,errorMessage);
+            this.dialogueBranchController.handleAuthValidate(false,errorMessage);
         });
-    }
-
-    authValidateSuccess(data) {
-        console.log("DLB-Client: calling auth validate success.");
-        console.log(data);
-        if(data == true) {
-            console.log("validated!");
-        }
-        this.dialogueBranchController.customAuthValidateSuccess(data);
-    }
-
-    authValidateError(err) {
-        console.log("DLB-Client: calling auth validate error.");
-        this.dialogueBranchController.customAuthValidateError(err);
     }
 
     // -----------------------------------------------------------------------------------------------------------------------
@@ -499,14 +491,14 @@ export class DialogueBranchClient {
 
         if(data == null) {
             // A null response is unexpected, but should not break the client
-            this.logger.warn("DBC: Call to /admin/list-dialogues returned null response.");
+            this.logger.warn(this.LOGTAG,"Call to /admin/list-dialogues returned null response.");
             this.dialogueBranchController.customListDialoguesSuccess(new Array());
         } else {
             if('dialogueNames' in data) {
                 this.dialogueBranchController.customListDialoguesSuccess(data.dialogueNames);
             } else {
                 // Data without dialogueNames is unexpected, but should not break the client
-                this.logger.warn("DBC: Call to /admin/list-dialogues returned unexpected response.");
+                this.logger.warn(this.LOGTAG,"Call to /admin/list-dialogues returned unexpected response.");
                 this.dialogueBranchController.customListDialoguesSuccess(new Array());
             }
         }
