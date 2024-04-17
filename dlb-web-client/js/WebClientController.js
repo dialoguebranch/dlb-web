@@ -37,6 +37,10 @@ import { DialogueBranchClient } from './classes/DialogueBranchClient.js';
 
 export class WebClientController extends AbstractController {
 
+    // ------------------------------------
+    // ---------- Constructor(s) ----------
+    // ------------------------------------
+
     constructor() {
         super();
 
@@ -138,10 +142,14 @@ export class WebClientController extends AbstractController {
         this._dialogueBranchClient.callCancelDialogue(loggedDialogueId);
     }
 
-    customCancelDialogueSuccess() {
+    handleCancelDialogue() {
         this._logger.info(this._LOGTAG,"Custom Cancel Dialogue Success!");
 
         this.renderDialogueStep(null, "Dialogue Cancelled");
+    }
+
+    handleCancelDialogueError(errorMessage) {
+        this._logger.error(this._LOGTAG,"Cancelling dialogue failed with the following result: "+errorMessage);
     }
 
     // ----------------------------------------------------------

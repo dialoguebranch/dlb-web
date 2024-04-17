@@ -28,6 +28,10 @@
 
 export class ServerInfo {
 
+    // ---------------------------------------
+    // ---------- Constructor(s) -------------
+    // ---------------------------------------
+
     constructor(serviceVersion, protocolVersion, build, upTime) {
         this._serviceVersion = serviceVersion;
         this._protocolVersion = protocolVersion;
@@ -35,7 +39,9 @@ export class ServerInfo {
         this._upTime = upTime;
     }
 
-    // ----- serviceVersion
+    // ---------------------------------------
+    // ---------- Getters & Setters ----------
+    // ---------------------------------------
 
     set serviceVersion(serviceVersion) {
         this._serviceVersion = serviceVersion;
@@ -45,8 +51,6 @@ export class ServerInfo {
         return this._serviceVersion;
     }
 
-    // ----- protocolVersion
-
     set protocolVersion(protocolVersion) {
         this._protocolVersion = protocolVersion;
     }
@@ -55,8 +59,6 @@ export class ServerInfo {
         return this._protocolVersion;
     }
 
-    // ----- build
-
     set build(build) {
         this._build = build;
     }
@@ -64,8 +66,6 @@ export class ServerInfo {
     get build() {
         return this._build;
     }
-
-    // ----- upTime
 
     set upTime(upTime) {
         this._upTime = upTime;

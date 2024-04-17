@@ -28,17 +28,33 @@
 
 export class DialogueBranchConfig {
 
+    // ------------------------------------
+    // ---------- Constructor(s) ----------
+    // ------------------------------------
+
     constructor(logLevel, baseUrl) {
         this._logLevel = logLevel;
         this._baseUrl = baseUrl;
     }
 
+    // ---------------------------------------
+    // ---------- Getters & Setters ----------
+    // ---------------------------------------
+
     get logLevel() {
         return this._logLevel;
     }
 
+    set logLevel(logLevel) {
+        this._logLevel = logLevel;
+    }
+
     get baseUrl() {
         return this._baseUrl;
+    }
+
+    set baseUrl(baseUrl) {
+        this._baseUrl = baseUrl;
     }
 
 }

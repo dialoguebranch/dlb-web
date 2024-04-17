@@ -40,6 +40,10 @@ export const LOG_LEVEL_NAMES = [
 
 export class AbstractLogger {
 
+    // ------------------------------------
+    // ---------- Constructor(s) ----------
+    // ------------------------------------
+
     constructor(logLevel) {
         if (this.constructor == AbstractLogger) {
             throw new Error("Abstract class AbstractLogger can not be instantiated.");
@@ -47,9 +51,25 @@ export class AbstractLogger {
         this._logLevel = logLevel;
     }
 
+    // ---------------------------------------
+    // ---------- Getters & Setters ----------
+    // ---------------------------------------
+
+    /**
+     * Sets the level at which log messages should be displayed.
+     * @param {number} logLevel the log level.
+     */
     set logLevel(logLevel) {
         this._logLevel = logLevel;
     }
+
+    get logLevel() {
+        return this._logLevel;
+    }
+
+    // -----------------------------------
+    // ---------- Other Methods ----------
+    // -----------------------------------
 
     info(logtag, message) {
         this.writeLogEntry("INFO",logtag,message);
@@ -68,6 +88,10 @@ export class AbstractLogger {
             this.writeLogEntry("DEBUG",logtag,message);
         }
     }
+
+    // --------------------------------------
+    // ---------- Abstract Methods ----------
+    // --------------------------------------
 
     writeLogEntry(level, logtag, message) {
         throw new Error("Method 'writeLogEntry' must be implemented by a subclass.");

@@ -28,11 +28,19 @@
 
 export class User {
 
+    // ---------------------------------------
+    // ---------- Constructor(s) -------------
+    // ---------------------------------------
+
     constructor(name, role, authToken) {
         this._name = name;
         this._role = role;
         this._authToken = authToken;
     }
+
+    // ---------------------------------------
+    // ---------- Getters & Setters ----------
+    // ---------------------------------------
 
     get name() {
         return this._name;
@@ -45,6 +53,10 @@ export class User {
     get authToken() {
         return this._authToken;
     }
+
+    // -----------------------------------
+    // ---------- Other Methods ----------
+    // -----------------------------------
 
     /**
      * Returns a human readable String representation of this User object.

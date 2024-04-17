@@ -68,5 +68,4 @@ export class AutoForwardReply extends Reply {
         return new AutoForwardReply(null, null, new Array());
     }
 
-
 }

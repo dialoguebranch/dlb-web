@@ -30,10 +30,18 @@ import { AbstractLogger } from './AbstractLogger.js';
 
 export class TextAreaLogger extends AbstractLogger {
 
+    // ---------------------------------------
+    // ---------- Constructor(s) -------------
+    // ---------------------------------------
+
     constructor(logLevel, textArea) { 
         super(logLevel);
         this._textArea = textArea;
     }
+
+    // ---------------------------------------
+    // ---------- Getters & Setters ----------
+    // ---------------------------------------
 
     get textArea() {
         return this.textArea;
@@ -42,6 +50,10 @@ export class TextAreaLogger extends AbstractLogger {
     set textArea(textArea) {
         this._textArea = textArea;
     }
+
+    // ---------------------------------------
+    // ---------- Other Methods ----------
+    // ---------------------------------------
 
     writeLogEntry(level, logtag, message) {
         this._textArea.value += "\n" + "[" + logtag + " - " + level + "] " + message;

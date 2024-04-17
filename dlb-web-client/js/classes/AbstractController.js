@@ -39,6 +39,10 @@
  */
 export class AbstractController {
 
+    // ------------------------------------
+    // ---------- Constructor(s) ----------
+    // ------------------------------------
+
     /**
      * This constructor should not be used, as AbstractController is an "abstract" class.
      */
@@ -47,6 +51,10 @@ export class AbstractController {
             throw new Error("Abstract class AbstractController can not be instantiated.");
         }
     }
+
+    // --------------------------------------
+    // ---------- Abstract Methods ----------
+    // --------------------------------------
 
     /**
      * Called after a successful call to the /auth/login end-point by the DialogueBranchClient.
@@ -110,6 +118,21 @@ export class AbstractController {
      */
     handleProgressDialogueError(errorMessage) { 
         throw new Error("Method 'handleProgressDialogueError()' must be implemented by a subclass.");
+    }
+
+    /**
+     * Called after a successful call to the /dialogue/cancel end-point.
+     */
+    handleCancelDialogue() {
+
+    }
+
+    /**
+     * Called after a failed call to the /dialogue/cancel end-point.
+     * @param {String} errorMessage a human-readable error message indicating the cause of the error.
+     */
+    handleCancelDialogueError(errorMessage) {
+
     }
 
 }

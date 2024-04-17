@@ -38,6 +38,10 @@ import { Reply } from './Reply.js';
  */
 export class BasicReply extends Reply {
 
+    // ------------------------------------
+    // ---------- Constructor(s) ----------
+    // ------------------------------------
+
     /**
      * Creates an instance of a BasicReply with the given parameters.
      * 
@@ -59,6 +63,10 @@ export class BasicReply extends Reply {
     static emptyInstance() {
         return new BasicReply(null, null, new Array(), null);
     }
+
+    // ---------------------------------------
+    // ---------- Getters & Setters ----------
+    // ---------------------------------------
 
     /**
      * Sets the statement that the user makes in reply to the agent when selecting this reply.

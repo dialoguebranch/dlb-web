@@ -308,20 +308,14 @@ export class DialogueBranchClient {
             return Promise.reject(response);
         })
         .then(() => { 
-            this.cancelDialogueSuccess();
+            this._clientController.handleCancelDialogue();
         })
         .catch((err) => {
-            this.cancelDialogueError(err);
+            var errorMessage = "The Web Service returned an unexpected response when cancelling the dialogue: "+err;
+            this.logger.error(this._LOGTAG,errorMessage);
+            this._clientController.handleCancelDialogueError(errorMessage);
         });
 
-    }
-
-    cancelDialogueSuccess() {
-        this._clientController.customCancelDialogueSuccess();
-    }
-
-    cancelDialogueError(err) {
-        console.log(err)
     }
 
     // ----------------------------------------------------------

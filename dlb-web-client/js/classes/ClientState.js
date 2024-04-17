@@ -114,7 +114,9 @@ export class ClientState {
         return this._debugConsoleVisible;
     }
 
-    // ----- Initialize from Cookie
+    // -----------------------------------
+    // ---------- Other Methods ----------
+    // -----------------------------------
 
     loadFromCookie() {
         var cookieValue = DocumentFunctions.getCookie('state.debugConsoleVisible');
@@ -129,7 +131,6 @@ export class ClientState {
         if(cookieUserName && cookieUserRole && cookieUserAuthToken) {
             var user = new User(cookieUserName, cookieUserRole, cookieUserAuthToken);
             this._user = user;
-            // this._loggedIn = true - Actually, this needs to be verified first.
         }
     }
 
