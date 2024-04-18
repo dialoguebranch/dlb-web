@@ -35,30 +35,51 @@ import java.io.Serial;
 
 /**
  * This exception results in an HTTP response with status 401 Unauthorized. The exception message
- * (default "Unauthorized") will be written to the response.
- * It is handled by the {@link ErrorController ErrorController}.
- * 
- * @author Dennis Hofs (RRD)
+ * (default "Unauthorized") will be written to the response. It is handled by the {@link
+ * ErrorController}.
+ *
+ * @author Dennis Hofs (Roessingh Research and Development)
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 @ResponseStatus(value=HttpStatus.UNAUTHORIZED)
 public class UnauthorizedException extends HttpException {
-
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Creates an instance of an {@link UnauthorizedException} with error message "Unauthorized".
+	 */
 	public UnauthorizedException() {
 		super("Unauthorized");
 	}
 
+	/**
+	 * Creates an instance of an {@link UnauthorizedException} with the given {@code message}.
+	 *
+	 * @param message the error message.
+	 */
 	public UnauthorizedException(String message) {
 		super(message);
 	}
-	
+
+	/**
+	 * Creates an instance of an {@link UnauthorizedException} with the given {@code code} and
+	 * {@code message}.
+	 *
+	 * @param code the error code.
+	 * @param message the error message.
+	 */
 	public UnauthorizedException(String code, String message) {
 		super(code, message);
 	}
-	
+
+	/**
+	 * Creates an instance of an {@link UnauthorizedException} with the given {@code error}.
+	 *
+	 * @param error the {@link HttpError} to encapsulate in this {@link UnauthorizedException}.
+	 */
 	public UnauthorizedException(HttpError error) {
 		super(error);
 	}
+
 }

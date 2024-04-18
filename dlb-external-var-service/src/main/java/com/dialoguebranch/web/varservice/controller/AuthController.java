@@ -131,13 +131,13 @@ public class AuthController {
 			throw new UnauthorizedException(ErrorCode.INVALID_CREDENTIALS,
 					invalidError);
 		}
-		if (!credentials.getPassword().equals(password)) {
+		if (!credentials.password().equals(password)) {
 			logger.info("Failed login attempt for user {}: invalid credentials",
 					user);
 			throw new UnauthorizedException(ErrorCode.INVALID_CREDENTIALS,
 					invalidError);
 		}
-		logger.info("User {} logged in", credentials.getUsername());
+		logger.info("User {} logged in", credentials.username());
 
 		Date expiration = null;
 
@@ -152,7 +152,7 @@ public class AuthController {
 				expiration);
 		String token = AuthToken.createToken(details);
 
-		return new LoginResultPayload(credentials.getUsername(), token);
+		return new LoginResultPayload(credentials.username(), token);
 	}
 
 	private void validateForbiddenQueryParams(HttpServletRequest request,

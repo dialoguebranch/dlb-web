@@ -70,18 +70,51 @@ import java.util.Random;
 	 description = "End-points for retrieving variables from- and sending to the service")
 public class VariablesController {
 
+	/**
+	 * Instances of this class are constructed through Spring.
+	 */
+	public VariablesController() { }
+
 	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
 
 	// -----------------------------------------------------------------------
 	// -------------------- END-POINT: "retrieve-updates" --------------------
 	// -----------------------------------------------------------------------
 
+	/**
+	 * Retrieve updates for a given list of DialogueBranch Variables. The use case for this
+	 * end-point is as follows. Before executing a DialogueBranch Dialogue, you (or e.g. the
+	 * DialogueBranch Web Service) may gather a list of all the DialogueBranch Variables used in its
+	 * execution. Before starting the execution, you may call this end-point with the list of
+	 * DialogueBranch Variables in order to verify that you have the latest values for all
+	 * variables. In return, you will receive a list - which is a subset of the list you provided -
+	 * that contains all DialogueBranch Variables for which an updated value is available. You are
+	 * basically asking: 'Hey, I have this list of DialogueBranch Variables for this user, is this
+	 * up-to-date?'.
+	 *
+	 * <p>You must pass along the current timezone of the user (client) so that certain time
+	 * sensitive variables may be correctly set according to the timezone of the user</p>
+	 *
+	 * <p>In this dummy implementation, for every variable that you include in the request list
+	 * there is a 50% chance that it will be returned in the response list with the same value as
+	 * provided in the request, and the lastUpdated time set to the current UTC time in epoch
+	 * seconds.</p>
+	 *
+	 * @param request the {@link HttpServletRequest} that generated the request.
+	 * @param response the {@link HttpServletResponse} that generated the request.
+	 * @param version the API Version to use, e.g. '1'.
+	 * @param userId the userId of the DialogueBranch user.
+	 * @param timeZone the current time zone of the DialogueBranch user (e.g. "Europe/Lisbon").
+	 * @param dlbVariables the List of DialogueBranch Variables for which to check for updates.
+	 * @return A list of {@link DLBVariablePayload}s representing all updated variables.
+	 * @throws Exception in case of a network or service error.
+	 */
 	@Operation(summary = "Retrieve updates for a given list of DialogueBranch Variables",
 		description = "The use case for this end-point is as follows. Before executing a " +
 			"DialogueBranch Dialogue, you (or e.g. the DialogueBranch Web Service) may gather a " +
 			"list of all the DialogueBranch Variables used in its execution. Before starting the " +
 			"execution, you may call this end-point with the list of DialogueBranch Variables in " +
-			"order to verify that you have the latest values for all variables. In return you " +
+			"order to verify that you have the latest values for all variables. In return, you " +
 			"will receive a list - which is a subset of the list you provided - that contains " +
 			"all DialogueBranch Variables for which an updated value is available. You are " +
 			"basically asking: 'Hey, I have this list of DialogueBranch Variables for this user, " +
@@ -216,6 +249,26 @@ public class VariablesController {
 	// -------------------- END-POINT: "notify-updated" --------------------
 	// ---------------------------------------------------------------------
 
+	/**
+	 * Inform that the given list of DialogueBranch Variables have been updated. With this end-point
+	 * you can inform this DialogueBranch External Variable Service that a list of DialogueBranch
+	 * Variables have been updated (e.g. during dialogue execution) for a particular user.
+	 *
+	 * <p>You must pass along the current timezone of the user (client) so that certain time
+	 * sensitive variables may be correctly set according to the timezone of the user.</p>
+	 *
+	 * <p>In this dummy implementation, the service will do nothing with your provided variables,
+	 * and the end-point will simply return a status 200 (OK).</p>
+	 *
+	 * @param request the {@link HttpServletRequest} that generated the request.
+	 * @param response the {@link HttpServletResponse} that generated the request.
+	 * @param version the API Version to use, e.g. '1'.
+	 * @param userId the userId of the DialogueBranch user.
+	 * @param timeZone the current time zone of the DialogueBranch user (e.g. "Europe/Lisbon").
+	 * @param dlbVariables the List of DialogueBranch Variables for which to check for updates.
+	 * @return A status code of 200 (OK).
+	 * @throws Exception in case of a network or service error.
+	 */
 	@Operation(summary = "Inform that the given list of DialogueBranch Variables have been updated",
 		description = "With this end-point you can inform this DialogueBranch External Variable " +
 			"Service that a list of DialogueBranch Variables have been updated (e.g. during " +
@@ -309,6 +362,25 @@ public class VariablesController {
 	// -------------------- END-POINT: "notify-cleared" --------------------
 	// ---------------------------------------------------------------------
 
+	/**
+	 * Inform that the DialogueBranch Variable store has been completed cleared. With this end-point
+	 * you can inform this DialogueBranch External Variable Service that a full clear of the
+	 * DialogueBranch Variable Store has occurred for a particular user.
+	 *
+	 * <p>You must pass along the current timezone of the user (client) so that the clearing of the
+	 * database event may be correctly time logged.</p>
+	 *
+	 * <p>In this dummy implementation, the service will do nothing and will simply return a status
+	 * 200 (OK).</p>
+	 *
+	 * @param request the {@link HttpServletRequest} that generated the request.
+	 * @param response the {@link HttpServletResponse} that generated the request.
+	 * @param version the API Version to use, e.g. '1'.
+	 * @param userId the userId of the DialogueBranch user.
+	 * @param timeZone the current time zone of the DialogueBranch user (e.g. "Europe/Lisbon").
+	 * @return A status code of 200 (OK).
+	 * @throws Exception in case of a network or service error.
+	 */
 	@Operation(summary = "Inform that the DialogueBranch Variable store has been completed cleared",
 		description = "With this end-point you can inform this DialogueBranch External Variable " +
 			"Service that a full clear of the DialogueBranch Variable Store has occurred for a " +

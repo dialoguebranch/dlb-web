@@ -39,8 +39,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  */
 public abstract class HttpException extends Exception {
 	private static final long serialVersionUID = 1L;
-	
-	private HttpError error;
+
+	/** The HttpError encapsulated by this HttpException */
+	private final HttpError error;
 
 	/**
 	 * Constructs a new HTTP exception with default error code 0.

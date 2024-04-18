@@ -39,8 +39,26 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A {@link UserFile} objects represents the contents of the users.xml file that contains the
+ * credentials for valid users of the service.
+ *
+ * @author Harm op den Akker (Fruit Tree Labs)
+ */
 public class UserFile {
 
+	/**
+	 * This class may be used in a static way.
+	 */
+	public UserFile() { }
+
+	/**
+	 * Retrieve the {@link UserCredentials} matching the given {@code username}.
+	 *
+	 * @param username the username of the user for whom to search.
+	 * @return the {@link UserCredentials} object matching the user, or {@code null} if none is
+	 * 		   found.
+	 */
 	public static UserCredentials findUser(String username) {
 		List<UserCredentials> users;
 		try {
@@ -57,24 +75,32 @@ public class UserFile {
 		return null;
 	}
 
-	public static List<UserCredentials> read() throws ParseException,
-			IOException {
+	/**
+	 * Read the full list of configured users and return it as a {@link List} of {@link
+	 * UserCredentials} objects.
+	 *
+	 * @return the full list of existing users for this service.
+	 * @throws ParseException in case of an error parsing the users.xml file.
+	 * @throws IOException in case of an error in parsing the users.xml file.
+	 */
+	public static List<UserCredentials> read() throws ParseException, IOException {
 		Configuration config = Configuration.getInstance();
 		File dataDir = new File(config.get(Configuration.DATA_DIR));
 		File usersFile = new File(dataDir, "users.xml");
-		SimpleSAXParser<List<UserCredentials>> parser = new SimpleSAXParser<>(
-				new XMLHandler());
+		SimpleSAXParser<List<UserCredentials>> parser = new SimpleSAXParser<>(new XMLHandler());
 		return parser.parse(usersFile);
 	}
 
-	private static class XMLHandler extends
-			AbstractSimpleSAXHandler<List<UserCredentials>> {
+	/**
+	 * Implementation of an {@link AbstractSimpleSAXHandler} for parsing users.xml files.
+	 */
+	private static class XMLHandler extends AbstractSimpleSAXHandler<List<UserCredentials>> {
 		private final List<UserCredentials> users = new ArrayList<>();
 
 		@Override
 		public void startElement(String name, Attributes attributes, List<String> parents)
 				throws ParseException {
-			if (parents.size() == 0) {
+			if (parents.isEmpty()) {
 				if (!name.equals("users")) {
 					throw new ParseException("Expected element \"users\", found: " + name);
 				}
@@ -88,11 +114,11 @@ public class UserFile {
 
 		private void startUser(Attributes attributes) throws ParseException {
 			String username = readAttribute(attributes, "username").trim();
-			if (username.length() == 0) {
+			if (username.isEmpty()) {
 				throw new ParseException("Empty value in attribute \"username\"");
 			}
 			String password = readAttribute(attributes, "password");
-			if (password.length() == 0) {
+			if (password.isEmpty()) {
 				throw new ParseException("Empty value in attribute \"password\"");
 			}
 			String role;
@@ -114,16 +140,15 @@ public class UserFile {
 		}
 
 		@Override
-		public void endElement(String name, List<String> parents) {
-		}
+		public void endElement(String name, List<String> parents) { }
 
 		@Override
-		public void characters(String ch, List<String> parents) {
-		}
+		public void characters(String ch, List<String> parents) { }
 
 		@Override
 		public List<UserCredentials> getObject() {
 			return users;
 		}
 	}
+
 }

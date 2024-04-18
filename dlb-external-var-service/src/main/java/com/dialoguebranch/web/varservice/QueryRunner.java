@@ -42,13 +42,20 @@ import jakarta.servlet.http.HttpServletResponse;
  * @author Dennis Hofs (Roessingh Research and Development)
  */
 public class QueryRunner {
+
+	/**
+	 * This class is used in a static context.
+	 */
+	public QueryRunner() { }
+
 	/**
 	 * Runs a query on the authentication database. If the HTTP request is
 	 * specified, it will validate the authentication token. If there is no
 	 * token in the request, or the token is empty or invalid, it throws an
 	 * HttpException with 401 Unauthorized. If the request is null, it will not
 	 * validate anything. This can be used for a login or signup.
-	 * 
+	 *
+	 * @param <T> the type of the query to be executed
 	 * @param query the query
 	 * @param versionName the protocol version name (see {@link ProtocolVersion
 	 * ProtocolVersion})
@@ -80,9 +87,9 @@ public class QueryRunner {
 			// OR If the request was made for a specific dlbUserId that happens to be "this"
 			//   (authenticated) user
 			// OR If "this" user is an admin
-			if(dlbUserId.equals("")
+			if(dlbUserId.isEmpty()
 				|| (dlbUserId.equals(user)) //
-				|| UserFile.findUser(user).getRole().equals(UserCredentials.USER_ROLE_ADMIN)) {
+				|| UserFile.findUser(user).role().equals(UserCredentials.USER_ROLE_ADMIN)) {
 				return query.runQuery(version, user);
 			} else {
 				throw new UnauthorizedException("Attempting to run query for dlbUserId '" +
@@ -103,10 +110,9 @@ public class QueryRunner {
 	}
 
 	/**
-	 * Validates the authentication token in the specified HTTP request. If no
-	 * token is specified, or the token is empty or invalid, it will throw an
-	 * HttpException with 401 Unauthorized. Otherwise, it will return the username
-	 * for the authenticated user.
+	 * Validates the authentication token in the specified HTTP request. If no token is specified,
+	 * or the token is empty or invalid, it will throw an HttpException with 401 Unauthorized.
+	 * Otherwise, it will return the username for the authenticated user.
 	 * 
 	 * @param request the HTTP request
 	 * @return the authenticated user
@@ -124,9 +130,9 @@ public class QueryRunner {
 	}
 	
 	/**
-	 * Validates a token from request header X-Auth-Token. If it's empty or
-	 * invalid, it will throw an HttpException with 401 Unauthorized. Otherwise
-	 * it will return the user object for the authenticated user.
+	 * Validates a token from request header X-Auth-Token. If it's empty or invalid, it will throw
+	 * an HttpException with 401 Unauthorized. Otherwise, it will return the user object for the
+	 * authenticated user.
 	 * 
 	 * @param token the authentication token (not null)
 	 * @return the authenticated user
@@ -137,7 +143,7 @@ public class QueryRunner {
 			throws UnauthorizedException, DatabaseException {
 		Logger logger = AppComponents.getLogger(
 				QueryRunner.class.getSimpleName());
-		if (token.trim().length() == 0) {
+		if (token.trim().isEmpty()) {
 			logger.info("Invalid authentication token: token empty");
 			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_INVALID,
 					"Authentication token invalid");
@@ -167,6 +173,6 @@ public class QueryRunner {
 			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_EXPIRED,
 					"Authentication token expired");
 		}
-		return user.getUsername();
+		return user.username();
 	}
 }

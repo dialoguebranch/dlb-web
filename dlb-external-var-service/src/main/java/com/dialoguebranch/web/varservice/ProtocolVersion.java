@@ -32,29 +32,52 @@ package com.dialoguebranch.web.varservice;
  * the {protocol_version} is defined by the last available item in this {@code enum}.
  */
 public enum ProtocolVersion {
+
+	/** Definition of Protocol Version V1 as a String */
 	V1("1");
-	
+
+	/** The protocol version as a String */
 	private final String versionName;
-	
+
+	/**
+	 * Creates an instance of a ProtocolVersion with the given {@code versionName}.
+	 * @param versionName the version as a string.
+	 */
 	ProtocolVersion(String versionName) {
 		this.versionName = versionName;
 	}
-	
+
+	/**
+	 * Returns the version name.
+	 * @return the version name.
+	 */
 	public String versionName() {
 		return versionName;
 	}
-	
+
+	/**
+	 * Creates an instance of a ProtocolVersion for a given (valid) versionName. If the versionName
+	 * is not recognized, this method will throw an exception.
+	 *
+	 * @param versionName the name of the version.
+	 * @return the corresponding {@link ProtocolVersion} object.
+	 * @throws IllegalArgumentException in case the versionName is not recognized.
+	 */
 	public static ProtocolVersion forVersionName(String versionName)
 			throws IllegalArgumentException {
 		for (ProtocolVersion value : ProtocolVersion.values()) {
 			if (value.versionName.equals(versionName))
 				return value;
 		}
-		throw new IllegalArgumentException("Version not found: " +
-				versionName);
+		throw new IllegalArgumentException("Version not found: " + versionName);
 	}
 
+	/**
+	 * Returns the latest known protocol version as a {@link ProtocolVersion} object.
+	 * @return the latest known protocol version as a {@link ProtocolVersion} object.
+	 */
 	public static ProtocolVersion getLatestVersion() {
 		return ProtocolVersion.values()[ProtocolVersion.values().length-1];
 	}
+
 }

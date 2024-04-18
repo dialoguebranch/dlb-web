@@ -39,8 +39,26 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A {@link UserFile} objects represents the contents of the users.xml file that contains the
+ * credentials for valid users of the service.
+ *
+ * @author Harm op den Akker (Fruit Tree Labs)
+ */
 public class UserFile {
 
+	/**
+	 * This class may be used in a static way.
+	 */
+	public UserFile() { }
+
+	/**
+	 * Retrieve the {@link UserCredentials} matching the given {@code username}.
+	 *
+	 * @param username the username of the user for whom to search.
+	 * @return the {@link UserCredentials} object matching the user, or {@code null} if none is
+	 * 		   found.
+	 */
 	public static UserCredentials findUser(String username) {
 		List<UserCredentials> users;
 		try {
@@ -51,57 +69,61 @@ public class UserFile {
 		}
 		String lower = username.toLowerCase();
 		for (UserCredentials user : users) {
-			if (user.getUsername().toLowerCase().equals(lower))
+			if (user.username().toLowerCase().equals(lower))
 				return user;
 		}
 		return null;
 	}
 
-	private static List<UserCredentials> read() throws ParseException,
-			IOException {
+	/**
+	 * Read the full list of configured users and return it as a {@link List} of {@link
+	 * UserCredentials} objects.
+	 *
+	 * @return the full list of existing users for this service.
+	 * @throws ParseException in case of an error parsing the users.xml file.
+	 * @throws IOException in case of an error in parsing the users.xml file.
+	 */
+	private static List<UserCredentials> read() throws ParseException, IOException {
 		Configuration config = Configuration.getInstance();
 		File dataDir = new File(config.get(Configuration.DATA_DIR));
 		File usersFile = new File(dataDir, "users.xml");
-		SimpleSAXParser<List<UserCredentials>> parser = new SimpleSAXParser<>(
-				new XMLHandler());
+		SimpleSAXParser<List<UserCredentials>> parser = new SimpleSAXParser<>(new XMLHandler());
 		return parser.parse(usersFile);
 	}
 
-	private static class XMLHandler extends
-			AbstractSimpleSAXHandler<List<UserCredentials>> {
-		private List<UserCredentials> users = new ArrayList<>();
+	/**
+	 * Implementation of an {@link AbstractSimpleSAXHandler} for parsing users.xml files.
+	 */
+	private static class XMLHandler extends AbstractSimpleSAXHandler<List<UserCredentials>> {
+		private final List<UserCredentials> users = new ArrayList<>();
 
 		@Override
-		public void startElement(String name, Attributes atts,
+		public void startElement(String name, Attributes attributes,
 				List<String> parents) throws ParseException {
-			if (parents.size() == 0) {
+			if (parents.isEmpty()) {
 				if (!name.equals("users")) {
-					throw new ParseException(
-							"Expected element \"users\", found: " + name);
+					throw new ParseException("Expected element \"users\", found: " + name);
 				}
 			} else if (parents.size() == 1) {
 				if (!name.equals("user")) {
-					throw new ParseException(
-							"Expected element \"user\", found: " + name);
+					throw new ParseException("Expected element \"user\", found: " + name);
 				}
-				startUser(atts);
+				startUser(attributes);
 			}
 		}
 
-		private void startUser(Attributes atts) throws ParseException {
-			String username = readAttribute(atts, "username").trim();
-			if (username.length() == 0) {
-				throw new ParseException(
-						"Empty value in attribute \"username\"");
+		private void startUser(Attributes attributes) throws ParseException {
+			String username = readAttribute(attributes, "username").trim();
+			if (username.isEmpty()) {
+				throw new ParseException("Empty value in attribute \"username\"");
 			}
-			String password = readAttribute(atts, "password");
-			if (password.length() == 0) {
-				throw new ParseException(
-						"Empty value in attribute \"password\"");
+			String password = readAttribute(attributes, "password");
+			if (password.isEmpty()) {
+				throw new ParseException("Empty value in attribute \"password\"");
 			}
 			String role;
 			try {
-				role = readAttribute(atts, "role");
+				role = readAttribute(attributes, "role");
 
 				if (!(role.equalsIgnoreCase(UserCredentials.USER_ROLE_USER) ||
 						role.equalsIgnoreCase(UserCredentials.USER_ROLE_ADMIN))) {
@@ -118,18 +140,15 @@ public class UserFile {
 		}
 
 		@Override
-		public void endElement(String name, List<String> parents)
-				throws ParseException {
-		}
+		public void endElement(String name, List<String> parents) { }
 
 		@Override
-		public void characters(String ch, List<String> parents)
-				throws ParseException {
-		}
+		public void characters(String ch, List<String> parents) { }
 
 		@Override
 		public List<UserCredentials> getObject() {
 			return users;
 		}
 	}
+
 }

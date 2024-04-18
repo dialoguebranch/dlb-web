@@ -30,8 +30,8 @@ package com.dialoguebranch.web.varservice.controller.schema;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * A {@link DLBVariablePayload} represents a DialogueBranch Variable that is returned as the result of an
- * api-call to the web service.
+ * A {@link DLBVariablePayload} represents a DialogueBranch Variable that is returned as the result
+ * of an api-call to the web service.
  *
  * @author Harm op den Akker (Fruit Tree Labs)
  */

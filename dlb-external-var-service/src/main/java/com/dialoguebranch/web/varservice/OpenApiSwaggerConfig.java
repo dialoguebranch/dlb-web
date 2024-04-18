@@ -49,6 +49,8 @@ import java.util.Map;
 /**
  * A collection of various Beans used to configure various aspects of the OpenAPI 3.0 documentation
  * and the automatically generated Swagger pages.
+ *
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 @Configuration
 @OpenAPIDefinition
@@ -59,6 +61,7 @@ public class OpenApiSwaggerConfig {
 
 	/**
 	 * Automatic configuration of various OpenAPI parameters.
+	 *
 	 * @return an {@link OpenAPI} object.
 	 */
 	@Bean
@@ -106,6 +109,10 @@ public class OpenApiSwaggerConfig {
 		return openAPI;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	@Bean
 	public GroupedOpenApi withoutVersioning() {
 		return GroupedOpenApi.builder().group("API End-Points without Versioning")

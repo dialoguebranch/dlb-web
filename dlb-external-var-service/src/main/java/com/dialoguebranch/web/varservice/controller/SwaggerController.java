@@ -32,9 +32,24 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.view.RedirectView;
 
+/**
+ * Controller class that ensures users visiting the root of the web service are properly redirected
+ * to the Swagger UI.
+ *
+ * @author Harm op den Akker (Fruit Tree Labs).
+ */
 @Controller
 public class SwaggerController {
 
+	/**
+	 * Instances of this class are managed by Spring.
+	 */
+	public SwaggerController() { }
+
+	/**
+	 * Ensures that a user visiting the root of the web service is redirected to the Swagger UI.
+	 * @return the {@link RedirectView} pointing to the Swagger UI index.
+	 */
 	@RequestMapping("/")
 	public RedirectView redirectRoot() {
 		return new RedirectView(ServiceContext.getBaseUrl() +

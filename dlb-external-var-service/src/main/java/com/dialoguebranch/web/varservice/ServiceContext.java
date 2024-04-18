@@ -31,7 +31,19 @@ import nl.rrd.utils.AppComponents;
 import nl.rrd.utils.exception.ParseException;
 import nl.rrd.utils.http.HttpURL;
 
+/**
+ * A collection of static methods that provide information about the running context of this
+ * service.
+ *
+ * @author Harm op den Akker (Fruit Tree Labs)
+ */
 public class ServiceContext {
+
+	/**
+	 * This class is used in a static context.
+	 */
+	public ServiceContext() { }
+
 	/**
 	 * Returns the base URL.
 	 * 
@@ -53,8 +65,7 @@ public class ServiceContext {
 		try {
 			httpUrl = HttpURL.parse(url);
 		} catch (ParseException ex) {
-			throw new RuntimeException(
-					"Invalid base URL: " + url + ": " + ex.getMessage(), ex);
+			throw new RuntimeException("Invalid base URL: " + url + ": " + ex.getMessage(), ex);
 		}
 		return httpUrl.getPath();
 	}
@@ -68,4 +79,5 @@ public class ServiceContext {
 		ProtocolVersion[] versions = ProtocolVersion.values();
 		return versions[versions.length - 1].versionName();
 	}
+
 }
