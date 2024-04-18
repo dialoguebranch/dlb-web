@@ -41,12 +41,16 @@ public class AuthDetails {
 	private final Date issuedAt;
 	private final Date expiration;
 
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
 	/**
 	 * Constructs a new instance.
 	 * 
 	 * @param subject the username of the authenticated user
-	 * @param issuedAt the date/time when the JWT token was issued, with
-	 * precision of seconds. Any milliseconds are discarded.
+	 * @param issuedAt the date/time when the JWT token was issued, with precision of seconds.
+	 *                 Any milliseconds are discarded.
 	 * @param expiration the date/time when the JWT token expires, with
 	 * precision of seconds. Any milliseconds are discarded.
 	 */
@@ -61,6 +65,10 @@ public class AuthDetails {
 			this.expiration = new Date(seconds * 1000);
 		}
 	}
+
+	// ----------------------------------------------------------- //
+	// -------------------- Getters & Setters -------------------- //
+	// ----------------------------------------------------------- //
 
 	/**
 	 * Returns the username of the authenticated user.
@@ -91,4 +99,5 @@ public class AuthDetails {
 	public Date getExpiration() {
 		return expiration;
 	}
+
 }

@@ -41,10 +41,18 @@ import org.springframework.web.servlet.view.RedirectView;
 @Controller
 public class SwaggerController {
 
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
 	/**
 	 * Instances of this class are managed by Spring.
 	 */
 	public SwaggerController() { }
+
+	// ------------------------------------------------------- //
+	// -------------------- Other Methods -------------------- //
+	// ------------------------------------------------------- //
 
 	/**
 	 * Ensures that a user visiting the root of the web service is redirected to the Swagger UI.

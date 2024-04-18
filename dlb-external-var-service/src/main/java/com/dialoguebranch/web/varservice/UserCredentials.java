@@ -40,5 +40,4 @@ public record UserCredentials(String username, String password, String role) {
 	public static final String USER_ROLE_USER = "user";
 	public static final String USER_ROLE_ADMIN = "admin";
 
-
 }

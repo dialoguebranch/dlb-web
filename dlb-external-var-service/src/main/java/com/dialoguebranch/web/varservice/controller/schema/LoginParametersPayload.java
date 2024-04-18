@@ -76,9 +76,9 @@ public class LoginParametersPayload extends JsonObject {
 			example = "0")
 	private Integer tokenExpiration = 0;
 
-	// --------------------------------------------------------
-	// -------------------- Constructor(s) --------------------
-	// --------------------------------------------------------
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
 
 	/**
 	 * Creates an instance of an empty {@link LoginParametersPayload}.
@@ -99,9 +99,9 @@ public class LoginParametersPayload extends JsonObject {
 		this.tokenExpiration = tokenExpiration;
 	}
 
-	// -----------------------------------------------------------
-	// -------------------- Getters & Setters --------------------
-	// -----------------------------------------------------------
+	// ----------------------------------------------------------- //
+	// -------------------- Getters & Setters -------------------- //
+	// ----------------------------------------------------------- //
 
 	/**
 	 * Returns the user who is trying to perform a login.
@@ -155,9 +155,9 @@ public class LoginParametersPayload extends JsonObject {
 		this.tokenExpiration = tokenExpiration;
 	}
 
-	// -------------------------------------------------------------------------
-	// -------------------- Serialization / Deserialization --------------------
-	// -------------------------------------------------------------------------
+	// ------------------------------------------------------------------------- //
+	// -------------------- Serialization / Deserialization -------------------- //
+	// ------------------------------------------------------------------------- //
 
 	/**
 	 * Inner class used to convert the {@code tokenExpiration} to JSON string format, as either a
@@ -198,4 +198,5 @@ public class LoginParametersPayload extends JsonObject {
 			}
 		}
 	}
+
 }

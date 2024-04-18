@@ -54,9 +54,9 @@ public class DLBVariablePayload {
 			example = "Europe/Lisbon")
 	private String updatedTimeZone;
 
-	// --------------------------------------------------------
-	// -------------------- Constructor(s) --------------------
-	// --------------------------------------------------------
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
 
 	/**
 	 * Creates an instance of an empty {@link DLBVariablePayload} (this constructor is used for
@@ -81,9 +81,9 @@ public class DLBVariablePayload {
 		this.updatedTimeZone = updatedTimeZone;
 	}
 
-	// -----------------------------------------------------------
-	// -------------------- Getters & Setters --------------------
-	// -----------------------------------------------------------
+	// ----------------------------------------------------------- //
+	// -------------------- Getters & Setters -------------------- //
+	// ----------------------------------------------------------- //
 
 	/**
 	 * Returns the name of this {@link DLBVariablePayload}.
@@ -118,8 +118,10 @@ public class DLBVariablePayload {
 	}
 
 	/**
-	 * Returns the UTC timestamp in milliseconds of when this DialogueBranch Variable was last updated.
-	 * @return the UTC timestamp in milliseconds of when this DialogueBranch Variable was last updated.
+	 * Returns the UTC timestamp in milliseconds of when this DialogueBranch Variable was last
+	 * updated.
+	 * @return the UTC timestamp in milliseconds of when this DialogueBranch Variable was last
+	 *         updated.
 	 */
 	public Long getUpdatedTime() {
 		return updatedTime;
@@ -127,36 +129,36 @@ public class DLBVariablePayload {
 
 	/**
 	 * Sets the UTC timestamp in milliseconds of when this DialogueBranch Variable was last updated.
-	 * @param updatedTime the UTC timestamp in milliseconds of when this DialogueBranch Variable was last
-	 *                    updated.
+	 * @param updatedTime the UTC timestamp in milliseconds of when this DialogueBranch Variable was
+	 *                    last updated.
 	 */
 	public void setUpdatedTime(Long updatedTime) {
 		this.updatedTime = updatedTime;
 	}
 
 	/**
-	 * Returns the timezone (as IANA String, e.g. "Europe/Lisbon") in which the DialogueBranch variable was
-	 * last updated.
-	 * @return the timezone (as IANA String, e.g. "Europe/Lisbon") in which the DialogueBranch variable was
-	 *         last updated.
+	 * Returns the timezone (as IANA String, e.g. "Europe/Lisbon") in which the DialogueBranch
+	 * variable was last updated.
+	 * @return the timezone (as IANA String, e.g. "Europe/Lisbon") in which the DialogueBranch
+	 *         variable was last updated.
 	 */
 	public String getUpdatedTimeZone() {
 		return updatedTimeZone;
 	}
 
 	/**
-	 * Sets the timezone (as IANA String, e.g. "Europe/Lisbon") in which the DialogueBranch variable was
-	 * last updated.
-	 * @param updatedTimeZone the timezone (as IANA String, e.g. "Europe/Lisbon") in which the DialogueBranch
-	 *                        variable was last updated.
+	 * Sets the timezone (as IANA String, e.g. "Europe/Lisbon") in which the DialogueBranch variable
+	 * was last updated.
+	 * @param updatedTimeZone the timezone (as IANA String, e.g. "Europe/Lisbon") in which the
+	 *                        DialogueBranch variable was last updated.
 	 */
 	public void setUpdatedTimeZone(String updatedTimeZone) {
 		this.updatedTimeZone = updatedTimeZone;
 	}
 
-	// -------------------------------------------------------
-	// -------------------- Other Methods --------------------
-	// -------------------------------------------------------
+	// ------------------------------------------------------- //
+	// -------------------- Other Methods -------------------- //
+	// ------------------------------------------------------- //
 
 	@Override
 	public String toString() {
@@ -167,4 +169,5 @@ public class DLBVariablePayload {
 				", updatedTimeZone='" + updatedTimeZone + "'" +
 				'}';
 	}
+
 }

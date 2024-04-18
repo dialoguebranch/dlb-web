@@ -35,10 +35,11 @@ import java.io.Serial;
 
 /**
  * This exception results in a HTTP response with status 404 Not Found. The exception message
- * (default "Not Found") will be written to the response.
- * It is handled by the {@link ErrorController ErrorController}.
+ * (default "Not Found") will be written to the response. It is handled by the {@link
+ * ErrorController}.
  * 
- * @author Dennis Hofs (RRD)
+ * @author Dennis Hofs (Roessingh Research and Development)
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 @ResponseStatus(value=HttpStatus.NOT_FOUND)
 public class NotFoundException extends HttpException {
@@ -46,19 +47,41 @@ public class NotFoundException extends HttpException {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Creates an instance of a {@link NotFoundException} with the simple message "Not Found".
+	 */
 	public NotFoundException() {
 		super("Not Found");
 	}
 
+	/**
+	 * Creates an instance of a {@link NotFoundException} with the given {@code message}.
+	 *
+	 * @param message the message describing the cause of the exception.
+	 */
 	public NotFoundException(String message) {
 		super(message);
 	}
-	
+
+	/**
+	 * Creates an instance of a {@link NotFoundException} with the given {@code code} and {@code
+	 * message}.
+	 *
+	 * @param code the error code for the exception.
+	 * @param message the message describing the cause of the exception.
+	 */
 	public NotFoundException(String code, String message) {
 		super(code, message);
 	}
-	
+
+	/**
+	 * Creates an instance of a {@link NotFoundException} as a wrapper around the given {@link
+	 * HttpError}.
+	 *
+	 * @param error the {@link HttpError}.
+	 */
 	public NotFoundException(HttpError error) {
 		super(error);
 	}
+
 }

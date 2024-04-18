@@ -57,7 +57,11 @@ public class Configuration extends LinkedHashMap<String,String> {
 
 	private static final Object LOCK = new Object();
 	private static Configuration instance = null;
-	
+
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
 	/**
 	 * Returns the configuration. At startup of the service it should be
 	 * initialized with {@link #loadProperties(URL) loadProperties()}.
@@ -78,6 +82,10 @@ public class Configuration extends LinkedHashMap<String,String> {
 	 */
 	private Configuration() {
 	}
+
+	// ------------------------------------------------------- //
+	// -------------------- Other Methods -------------------- //
+	// ------------------------------------------------------- //
 
 	/**
 	 * Loads the resource service.properties or deployment.properties into this

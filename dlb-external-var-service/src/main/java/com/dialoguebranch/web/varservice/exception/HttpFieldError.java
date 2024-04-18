@@ -38,6 +38,10 @@ public class HttpFieldError extends JsonObject {
 	private String field = null;
 	private String message = null;
 
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
 	/**
 	 * Constructs a new empty field error.
 	 */
@@ -63,6 +67,10 @@ public class HttpFieldError extends JsonObject {
 		this.field = field;
 		this.message = message;
 	}
+
+	// ----------------------------------------------------------- //
+	// -------------------- Getters & Setters -------------------- //
+	// ----------------------------------------------------------- //
 
 	/**
 	 * Returns the field name.
@@ -99,4 +107,5 @@ public class HttpFieldError extends JsonObject {
 	public void setMessage(String message) {
 		this.message = message;
 	}
+
 }

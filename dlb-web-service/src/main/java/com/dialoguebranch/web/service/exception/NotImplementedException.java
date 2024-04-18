@@ -38,7 +38,8 @@ import java.io.Serial;
  * (default "Not Implemented") will be written to the response. It is handled by the
  * {@link ErrorController ErrorController}.
  * 
- * @author Dennis Hofs (RRD)
+ * @author Dennis Hofs (Roessingh Research and Development)
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 @ResponseStatus(value=HttpStatus.NOT_IMPLEMENTED)
 public class NotImplementedException extends HttpException {
@@ -46,19 +47,42 @@ public class NotImplementedException extends HttpException {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Creates an instance of a {@link NotImplementedException} with the simple message "Not
+	 * Implemented".
+	 */
 	public NotImplementedException() {
 		super("Not Implemented");
 	}
 
+	/**
+	 * Creates an instance of a {@link NotImplementedException} with the given {@code message}.
+	 *
+	 * @param message the message describing the cause of the exception.
+	 */
 	public NotImplementedException(String message) {
 		super(message);
 	}
-	
+
+	/**
+	 * Creates an instance of a {@link NotImplementedException} with the given {@code code} and
+	 * {@code message}.
+	 *
+	 * @param code the error code for the exception.
+	 * @param message the message describing the cause of the exception.
+	 */
 	public NotImplementedException(String code, String message) {
 		super(code, message);
 	}
-	
+
+	/**
+	 * Creates an instance of a {@link NotImplementedException} as a wrapper around the given {@link
+	 * HttpError}.
+	 *
+	 * @param error the {@link HttpError}.
+	 */
 	public NotImplementedException(HttpError error) {
 		super(error);
 	}
+
 }

@@ -46,6 +46,10 @@ public class UnauthorizedException extends HttpException {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
 	/**
 	 * Creates an instance of an {@link UnauthorizedException} with error message "Unauthorized".
 	 */

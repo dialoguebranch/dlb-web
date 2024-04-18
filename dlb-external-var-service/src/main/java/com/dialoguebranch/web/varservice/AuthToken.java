@@ -91,4 +91,5 @@ public class AuthToken {
 				Configuration.JWT_SECRET_KEY);
 		return Keys.hmacShaKeyFor(Base64.decodeBase64(base64Key));
 	}
+
 }

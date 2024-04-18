@@ -54,9 +54,9 @@ public class LoginResultPayload {
 			example = "See https://jwt.io/")
 	private String token;
 
-	// --------------------------------------------------------
-	// -------------------- Constructor(s) --------------------
-	// --------------------------------------------------------
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
 
 	/**
 	 * Creates an empty instance of a {@link LoginResultPayload}.
@@ -74,9 +74,9 @@ public class LoginResultPayload {
 		this.token = token;
 	}
 
-	// -------------------------------------------------------------
-	// -------------------- Getters and Setters --------------------
-	// -------------------------------------------------------------
+	// ------------------------------------------------------------- //
+	// -------------------- Getters and Setters -------------------- //
+	// ------------------------------------------------------------- //
 
 	/**
 	 * Returns the username of the user that performed a successful login.
@@ -109,4 +109,5 @@ public class LoginResultPayload {
 	public void setToken(String token) {
 		this.token = token;
 	}
+
 }

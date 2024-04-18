@@ -34,10 +34,23 @@ package com.dialoguebranch.web.service.exception;
  * @author Harm op den Akker (Fruit Tree Labs)
  */
 public class ErrorCode {
+
+	/** In case no authentication token was provided in the header of a request. */
 	public static final String AUTH_TOKEN_NOT_FOUND = "AUTH_TOKEN_NOT_FOUND";
+
+	/** In case the provided authentication token was not valid. */
 	public static final String AUTH_TOKEN_INVALID = "AUTH_TOKEN_INVALID";
+
+	/** In case the provided authentication token has expired. */
 	public static final String AUTH_TOKEN_EXPIRED = "AUTH_TOKEN_EXPIRED";
+
+	/** In case a required input parameter is missing, or an invalid value was provided. */
 	public static final String INVALID_INPUT = "INVALID_INPUT";
+
+	/** In case a wrong username/password combination is provided upon login. */
 	public static final String INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
+
+	/** In case the currently logged-in user is not allowed to perform the operation. */
 	public static final String INSUFFICIENT_PRIVILEGES = "INSUFFICIENT_PRIVILEGES";
+
 }

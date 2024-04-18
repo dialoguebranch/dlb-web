@@ -30,8 +30,8 @@ package com.dialoguebranch.web.varservice.controller.schema;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * A {@link ServiceInfoPayload} object may be used to consolidate certain metadata
- * about this DialogueBranch External Variable Service.
+ * A {@link ServiceInfoPayload} object may be used to consolidate certain metadata about this
+ * DialogueBranch External Variable Service.
  *
  * @author Harm op den Akker (Fruit Tree Labs)
  */
@@ -53,9 +53,9 @@ public class ServiceInfoPayload {
 			example = "1d 12h 34m")
 	private String upTime;
 
-	// --------------------------------------------------------
-	// -------------------- Constructor(s) --------------------
-	// --------------------------------------------------------
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
 
 	/**
 	 * Creates an instance of an empty {@link ServiceInfoPayload}.
@@ -79,9 +79,9 @@ public class ServiceInfoPayload {
 		this.upTime = upTime;
 	}
 
-	// -----------------------------------------------------------
-	// -------------------- Getters & Setters --------------------
-	// -----------------------------------------------------------
+	// ----------------------------------------------------------- //
+	// -------------------- Getters & Setters -------------------- //
+	// ----------------------------------------------------------- //
 
 	/**
 	 * Returns the date and time when this service was built as a {@link String}.
@@ -147,4 +147,5 @@ public class ServiceInfoPayload {
 	public void setUpTime(String upTime) {
 		this.upTime = upTime;
 	}
+
 }

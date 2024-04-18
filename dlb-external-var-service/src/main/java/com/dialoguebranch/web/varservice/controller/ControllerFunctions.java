@@ -44,9 +44,9 @@ import java.util.List;
  */
 public class ControllerFunctions {
 
-	// -------------------------------------- //
-	// ---------- Helper Functions ---------- //
-	// -------------------------------------- //
+	// ---------------------------------------------------------- //
+	// -------------------- Helper Functions -------------------- //
+	// ---------------------------------------------------------- //
 
 	/**
 	 * Parses a given String into a {@link ZoneId} time zone object. The given {@code timeZone}

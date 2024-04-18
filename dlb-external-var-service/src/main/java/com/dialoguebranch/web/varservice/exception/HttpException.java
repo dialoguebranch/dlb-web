@@ -43,6 +43,10 @@ public abstract class HttpException extends Exception {
 	/** The HttpError encapsulated by this HttpException */
 	private final HttpError error;
 
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
 	/**
 	 * Constructs a new HTTP exception with default error code 0.
 	 * 
@@ -74,6 +78,10 @@ public abstract class HttpException extends Exception {
 		this.error = error;
 	}
 
+	// ----------------------------------------------------------- //
+	// -------------------- Getters & Setters -------------------- //
+	// ----------------------------------------------------------- //
+
 	/**
 	 * Returns the error details.
 	 * 
@@ -82,6 +90,10 @@ public abstract class HttpException extends Exception {
 	public HttpError getError() {
 		return error;
 	}
+
+	// ------------------------------------------------------- //
+	// -------------------- Other Methods -------------------- //
+	// ------------------------------------------------------- //
 	
 	/**
 	 * Returns the HTTP exception for the specified HTTP status code.
@@ -108,4 +120,5 @@ public abstract class HttpException extends Exception {
 			return new InternalServerErrorException(error);
 		}
 	}
+
 }

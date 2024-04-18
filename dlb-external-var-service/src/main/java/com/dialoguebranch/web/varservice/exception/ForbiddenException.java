@@ -34,30 +34,56 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import java.io.Serial;
 
 /**
- * This exception results in a HTTP response with status 403 Forbidden. The
- * exception message (default "Forbidden") will be written to the response.
- * It is handled by the {@link ErrorController ErrorController}.
- * 
- * @author Dennis Hofs (RRD)
+ * This exception results in an HTTP response with status 403 Forbidden. The exception message
+ * (default "Forbidden") will be written to the response. It is handled by the {@link
+ * ErrorController}.
+ *
+ * @author Dennis Hofs (Roessingh Research and Development)
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 @ResponseStatus(value=HttpStatus.FORBIDDEN)
 public class ForbiddenException extends HttpException {
+
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
+	/**
+	 * Creates an instance of a {@link ForbiddenException} with the simple message "Forbidden".
+	 */
 	public ForbiddenException() {
 		super("Forbidden");
 	}
 
+	/**
+	 * Creates an instance of a {@link ForbiddenException} with the given {@code message}.
+	 *
+	 * @param message the error message to describe the exception.
+	 */
 	public ForbiddenException(String message) {
 		super(message);
 	}
-	
+
+	/**
+	 * Creates an instance of a {@link ForbiddenException} with the given {@code code} and {@code
+	 * message}.
+	 *
+	 * @param code the error code.
+	 * @param message the error message to describe the exception.
+	 */
 	public ForbiddenException(String code, String message) {
 		super(code, message);
 	}
-	
+
+	/**
+	 * Creates an instance of a {link ForbiddenException} with a given nested {@link HttpError}.
+	 * @param error the nested {@link HttpError} that caused this exception.
+	 */
 	public ForbiddenException(HttpError error) {
 		super(error);
 	}
+
 }

@@ -43,6 +43,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class InternalServerErrorException extends HttpException {
 	private static final long serialVersionUID = 1L;
 
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
 	public InternalServerErrorException() {
 		super("Internal Server Error");
 	}
@@ -58,4 +62,5 @@ public class InternalServerErrorException extends HttpException {
 	public InternalServerErrorException(HttpError error) {
 		super(error);
 	}
+
 }

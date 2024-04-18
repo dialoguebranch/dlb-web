@@ -110,7 +110,7 @@ public class OpenApiSwaggerConfig {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return
 	 */
 	@Bean

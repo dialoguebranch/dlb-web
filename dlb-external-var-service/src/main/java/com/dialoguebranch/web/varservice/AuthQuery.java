@@ -54,4 +54,5 @@ public interface AuthQuery<T> {
 	 */
 	T runQuery(ProtocolVersion version, String user)
 			throws HttpException, Exception;
+
 }

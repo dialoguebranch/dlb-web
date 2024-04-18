@@ -43,11 +43,14 @@ public class HttpError extends JsonObject {
 	private String message = "";
 	private List<HttpFieldError> fieldErrors = new ArrayList<>();
 
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
 	/**
-	 * Constructs a new empty error.
+	 * Constructs a new empty instance of a {@link HttpError}.
 	 */
-	public HttpError() {
-	}
+	public HttpError() { }
 	
 	/**
 	 * Constructs a new error without an error code.
@@ -68,6 +71,10 @@ public class HttpError extends JsonObject {
 		this.code = code;
 		this.message = message;
 	}
+
+	// ----------------------------------------------------------- //
+	// -------------------- Getters & Setters -------------------- //
+	// ----------------------------------------------------------- //
 
 	/**
 	 * Returns the error code.
@@ -123,6 +130,10 @@ public class HttpError extends JsonObject {
 		this.fieldErrors = fieldErrors;
 	}
 
+	// ------------------------------------------------------- //
+	// -------------------- Other Methods -------------------- //
+	// ------------------------------------------------------- //
+
 	/**
 	 * Adds an error for a field where invalid user input was provided.
 	 * 
@@ -131,4 +142,5 @@ public class HttpError extends JsonObject {
 	public void addFieldError(HttpFieldError error) {
 		fieldErrors.add(error);
 	}
+
 }

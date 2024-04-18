@@ -32,17 +32,36 @@ import java.io.Serial;
 /**
  * This exception is thrown when any database error occurs.
  *
- * @author Dennis Hofs (RRD)
+ * @author Dennis Hofs (Roessingh Research and Development)
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 public class DatabaseException extends Exception {
+
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
+	/**
+	 * Creates an instance of a {@link DatabaseException} with the given {@code message}.
+	 *
+	 * @param message the error message to describe the exception.
+	 */
 	public DatabaseException(String message) {
 		super(message);
 	}
 
+	/**
+	 * Creates an instance of a {@link DatabaseException} with the given {@code message} and {@link
+	 * Throwable} cause.
+	 *
+	 * @param message the error message to describe the exception.
+	 * @param cause the nested exception that caused this {@link DatabaseException}.
+	 */
 	public DatabaseException(String message, Throwable cause) {
 		super(message, cause);
 	}
+
 }

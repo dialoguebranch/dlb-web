@@ -70,12 +70,17 @@ import java.util.Random;
 	 description = "End-points for retrieving variables from- and sending to the service")
 public class VariablesController {
 
+	/** The logger used for logging (debug) info to log files. */
+	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
+
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
 	/**
 	 * Instances of this class are constructed through Spring.
 	 */
 	public VariablesController() { }
-
-	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
 
 	// -----------------------------------------------------------------------
 	// -------------------- END-POINT: "retrieve-updates" --------------------
