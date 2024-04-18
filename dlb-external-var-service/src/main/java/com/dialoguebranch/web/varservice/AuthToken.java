@@ -47,6 +47,12 @@ import java.security.Key;
  * @author Dennis Hofs (Roessingh Research and Development)
  */
 public class AuthToken {
+
+	/**
+	 * This class is used in a static context.
+	 */
+	public AuthToken() { }
+
 	/**
 	 * Creates the signed Base64 JWT token string for the specified
 	 * authentication details.
@@ -64,9 +70,8 @@ public class AuthToken {
 	}
 	
 	/**
-	 * Parses the specified signed Base64 JWT token string and returns the
-	 * authentication details. If the token can't be parsed, this method
-	 * throws an exception.
+	 * Parses the specified signed Base64 JWT token string and returns the authentication details.
+	 * If the token can't be parsed, this method throws an exception.
 	 * 
 	 * @param token the token
 	 * @return the authentication details
@@ -81,14 +86,13 @@ public class AuthToken {
 	}
 
 	/**
-	 * Gets the secret key by parsing the Base64 string in property
-	 * jwtSecretKey in the configuration.
+	 * Gets the secret key by parsing the Base64 string in property jwtSecretKey in the
+	 * configuration.
 	 * 
 	 * @return the secret key
 	 */
 	private static Key getSecretKey() {
-		String base64Key = Configuration.getInstance().get(
-				Configuration.JWT_SECRET_KEY);
+		String base64Key = Configuration.getInstance().get(Configuration.JWT_SECRET_KEY);
 		return Keys.hmacShaKeyFor(Base64.decodeBase64(base64Key));
 	}
 

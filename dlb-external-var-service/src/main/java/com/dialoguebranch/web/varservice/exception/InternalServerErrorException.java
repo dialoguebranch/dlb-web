@@ -31,34 +31,60 @@ import com.dialoguebranch.web.varservice.controller.ErrorController;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import java.io.Serial;
+
 /**
- * This exception results in a HTTP response with status 500 Internal Server
- * Error. The exception message (default "Internal Server Error") will be
- * written to the response. It is handled by the {@link ErrorController
- * ErrorController}.
+ * This exception results in a HTTP response with status 500 Internal Server Error. The exception
+ * message (default "Internal Server Error") will be written to the response. It is handled by the
+ * {@link ErrorController}.
  * 
  * @author Dennis Hofs (Roessingh Research and Development)
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 @ResponseStatus(value=HttpStatus.INTERNAL_SERVER_ERROR)
 public class InternalServerErrorException extends HttpException {
+
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	// -------------------------------------------------------- //
 	// -------------------- Constructor(s) -------------------- //
 	// -------------------------------------------------------- //
 
+	/**
+	 * Creates an instance of a {@link InternalServerErrorException} with the simple message
+	 * "Internal Server Error".
+	 */
 	public InternalServerErrorException() {
 		super("Internal Server Error");
 	}
 
+	/**
+	 * Creates an instance of a {@link InternalServerErrorException} with the given {@code message}.
+	 *
+	 * @param message the error message to describe the exception.
+	 */
 	public InternalServerErrorException(String message) {
 		super(message);
 	}
-	
+
+	/**
+	 * Creates an instance of a {@link InternalServerErrorException} with the given {@code code} and
+	 * {@code message}.
+	 *
+	 * @param code the error code.
+	 * @param message the error message to describe the exception.
+	 */
 	public InternalServerErrorException(String code, String message) {
 		super(code, message);
 	}
-	
+
+	/**
+	 * Creates an instance of a {@link InternalServerErrorException} with a given nested {@link
+	 * HttpError}.
+	 *
+	 * @param error the nested {@link HttpError} that caused this exception.
+	 */
 	public InternalServerErrorException(HttpError error) {
 		super(error);
 	}

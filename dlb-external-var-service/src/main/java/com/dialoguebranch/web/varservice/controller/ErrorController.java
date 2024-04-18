@@ -62,25 +62,40 @@ import jakarta.servlet.http.HttpServletResponse;
  * @author Dennis Hofs (RRD)
  * @author Harm op den Akker
  */
-
 @Hidden
 @RestController
 public class ErrorController implements org.springframework.boot.web.servlet.error.ErrorController {
+
 	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
 
-	@RequestMapping("/error")
-	public Object error(HttpServletRequest request,
-			HttpServletResponse response) throws Exception {
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
 
-		int statusCode = (Integer)request.getAttribute(
-				"jakarta.servlet.error.status_code");
+	/**
+	 * Instantiation of this class is handled through Spring.
+	 */
+	public ErrorController() { }
+
+	/**
+	 * Filters internal service errors and transforms them into an external error message that hides
+	 * potentially harmful information.
+	 *
+	 * @param request the {@link HttpServletRequest} object.
+	 * @param response the {@link HttpServletResponse} object.
+	 * @return an appropriate error message.
+	 * @throws Exception in case of any unexpected error.
+	 */
+	@RequestMapping("/error")
+	public Object error(HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+		int statusCode = (Integer)request.getAttribute("jakarta.servlet.error.status_code");
 		Object obj = request.getAttribute(
 				"org.springframework.web.servlet.DispatcherServlet.EXCEPTION");
 		Throwable exception = null;
 		if (obj instanceof Throwable)
 			exception = (Throwable)obj;
-		String message = (String)request.getAttribute(
-				"jakarta.servlet.error.message");
+		String message = (String)request.getAttribute("jakarta.servlet.error.message");
 		if (message == null)
 			message = "";
 		if (exception == null) {
@@ -88,8 +103,7 @@ public class ErrorController implements org.springframework.boot.web.servlet.err
 			response.setStatus(statusCode);
 			return "Unknown error";
 		}
-		ResponseStatus status = exception.getClass().getAnnotation(
-				ResponseStatus.class);
+		ResponseStatus status = exception.getClass().getAnnotation(ResponseStatus.class);
 		if (status != null && exception instanceof HttpException httpEx) {
             response.setStatus(status.value().value());
 			return httpEx.getError();
@@ -115,6 +129,11 @@ public class ErrorController implements org.springframework.boot.web.servlet.err
 		}
 	}
 
+	/**
+	 * Returns the error path for the web service.
+	 *
+	 * @return the error path for the web service.
+	 */
 	public String getErrorPath() {
 		return "/error";
 	}

@@ -30,6 +30,7 @@ package com.dialoguebranch.web.varservice;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.Serial;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
@@ -47,12 +48,23 @@ import nl.rrd.utils.AppComponent;
  */
 @AppComponent
 public class Configuration extends LinkedHashMap<String,String> {
+
+	@Serial
 	private static final long serialVersionUID = 1L;
 
+	/** Key name for the "version" parameter. */
 	public static final String VERSION = "version";
+
+	/** Key name for the "buildTime" parameter. */
 	public static final String BUILD_TIME = "buildTime";
+
+	/** Key name for the "baseUrl" parameter. */
 	public static final String BASE_URL = "baseUrl";
+
+	/** Key name for the "jwtSecretKey" parameter. */
 	public static final String JWT_SECRET_KEY = "jwtSecretKey";
+
+	/** Key name for the "dataDir" parameter. */
 	public static final String DATA_DIR = "dataDir";
 
 	private static final Object LOCK = new Object();

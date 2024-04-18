@@ -163,8 +163,13 @@ public class LoginParametersPayload extends JsonObject {
 	 * Inner class used to convert the {@code tokenExpiration} to JSON string format, as either a
 	 * number, or the String "never".
 	 */
-	public static class TokenExpirationSerializer extends
-			JsonSerializer<Integer> {
+	public static class TokenExpirationSerializer extends JsonSerializer<Integer> {
+
+		/**
+		 * Creates an instance of a {@link TokenExpirationSerializer}.
+		 */
+		public TokenExpirationSerializer() { }
+
 		@Override
 		public void serialize(Integer value, JsonGenerator gen,
 				SerializerProvider serializers) throws IOException {
@@ -180,8 +185,13 @@ public class LoginParametersPayload extends JsonObject {
 	 * a number, or the String "never". The number 0 will be treated as never. Any other string
 	 * besides "never" will generate an error.
 	 */
-	public static class TokenExpirationDeserializer extends
-			JsonDeserializer<Integer> {
+	public static class TokenExpirationDeserializer extends JsonDeserializer<Integer> {
+
+		/**
+		 * Creates an instance of a {@link TokenExpirationDeserializer}.
+		 */
+		public TokenExpirationDeserializer() { }
+
 		@Override
 		public Integer deserialize(JsonParser p, DeserializationContext context)
 				throws IOException {

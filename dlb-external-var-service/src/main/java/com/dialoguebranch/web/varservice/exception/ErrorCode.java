@@ -35,6 +35,11 @@ package com.dialoguebranch.web.varservice.exception;
  */
 public class ErrorCode {
 
+	/**
+	 * This class is used in a static context.
+	 */
+	public ErrorCode() { }
+
 	/** In case no authentication token was provided in the header of a request. */
 	public static final String AUTH_TOKEN_NOT_FOUND = "AUTH_TOKEN_NOT_FOUND";
 

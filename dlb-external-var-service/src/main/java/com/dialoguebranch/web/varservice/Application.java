@@ -117,6 +117,10 @@ ApplicationListener<ApplicationEvent> {
 		return builder.sources(Application.class);
 	}
 
+	/**
+	 * Run the application with the provided arguments.
+	 * @param args optional run arguments (non supported).
+	 */
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
 	}

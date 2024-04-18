@@ -27,6 +27,7 @@
 
 package com.dialoguebranch.web.varservice;
 
+import com.dialoguebranch.web.varservice.controller.schema.LoginParametersPayload;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -58,6 +59,19 @@ public class OpenApiSwaggerConfig {
 
 	private static final Object LOCK = new Object();
 	private static boolean customizedPaths = false;
+
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
+	/**
+	 * Instantiation of this class is handled through Spring.
+	 */
+	public OpenApiSwaggerConfig() { }
+
+	// -------------------------------------------------------- //
+	// -------------------- Other Methods --------------------- //
+	// -------------------------------------------------------- //
 
 	/**
 	 * Automatic configuration of various OpenAPI parameters.
@@ -110,8 +124,9 @@ public class OpenApiSwaggerConfig {
 	}
 
 	/**
-	 *
-	 * @return
+	 * Creates a set of end-points that excludes the end-points requiring a specific version number
+	 * for use in the Swagger UI.
+	 * @return a {@link GroupedOpenApi} that excludes all version-dependent end-points.
 	 */
 	@Bean
 	public GroupedOpenApi withoutVersioning() {
@@ -149,4 +164,5 @@ public class OpenApiSwaggerConfig {
 			}
 		}
 	}
+	
 }

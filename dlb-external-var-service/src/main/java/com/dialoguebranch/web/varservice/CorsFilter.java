@@ -39,16 +39,24 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.stereotype.Component;
 
+/**
+ * Spring component that handles the configuration of HTTP Headers, allowing Cross-Origin Requests.
+ *
+ * @author Harm op den Akker (Fruit Tree Labs)
+ */
 @Component
 public class CorsFilter implements Filter {
 
-	@Override
-	public void init(FilterConfig filterConfig) {
-	}
+	/**
+	 * Instantiation of this class is handled through Spring.
+	 */
+	public CorsFilter() { }
 
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response,
-			FilterChain chain)
+	public void init(FilterConfig filterConfig) { }
+
+	@Override
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 		HttpServletResponse httpResponse = (HttpServletResponse)response;
 		httpResponse.setHeader("Access-Control-Allow-Origin", "*");
@@ -60,6 +68,6 @@ public class CorsFilter implements Filter {
 	}
 
 	@Override
-	public void destroy() {
-	}
+	public void destroy() { }
+
 }

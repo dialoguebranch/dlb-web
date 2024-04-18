@@ -53,13 +53,46 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Controller for the /auth/... end-points of the Dialogue Branch External Variable Service.
+ *
+ * @author Harm op den Akker (Fruit Tree Labs)
+ * @author Dennis Hofs (Roessingh Research and Development)
+ */
 @RestController
 @RequestMapping(value = {"/v{version}/auth", "/auth"})
 @Tag(name = "1. Authentication", description = "End-points related to Authentication.")
 public class AuthController {
+
 	private static final Object AUTH_LOCK = new Object();
 	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
 
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
+	/**
+	 * Instances of this class are constructed through Spring.
+	 */
+	public AuthController() { }
+
+	// ------------------------------------------------------------------ //
+	// -------------------- END-POINT: "/auth/login" -------------------- //
+	// ------------------------------------------------------------------ //
+
+	/**
+	 * Obtain an authentication token by logging in. Log in to the service by providing a username,
+	 * password and indicating the desired duration of the authentication token in minutes. If you
+	 * want to obtain an authentication token that does not expire, either provide '0' or 'never'
+	 * as the value for '*tokenExpiration*'.
+	 *
+	 * @param request the {@link HttpServletRequest} that generated the call.
+	 * @param response the {@link HttpServletResponse} that generated the call.
+	 * @param version the API Version to use, e.g. '1'.
+	 * @param loginParametersPayload the JSON payload containing the login parameters.
+	 * @return a {@link LoginResultPayload} object after a successful login
+	 * @throws Exception in case of a network error or unsuccessful login attempt.
+	 */
 	@Operation(summary = "Obtain an authentication token by logging in",
 		description = "Log in to the service by providing a username, password and indicating " +
 			"the desired duration of the authentication token in minutes. If you want to obtain " +

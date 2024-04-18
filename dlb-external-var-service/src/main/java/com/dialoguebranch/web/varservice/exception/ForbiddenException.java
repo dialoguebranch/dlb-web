@@ -79,7 +79,8 @@ public class ForbiddenException extends HttpException {
 	}
 
 	/**
-	 * Creates an instance of a {link ForbiddenException} with a given nested {@link HttpError}.
+	 * Creates an instance of a {@link ForbiddenException} with a given nested {@link HttpError}.
+	 *
 	 * @param error the nested {@link HttpError} that caused this exception.
 	 */
 	public ForbiddenException(HttpError error) {

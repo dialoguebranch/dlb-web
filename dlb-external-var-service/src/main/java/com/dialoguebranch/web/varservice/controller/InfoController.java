@@ -43,6 +43,11 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Controller for the /info/... end-points of the Dialogue Branch External Variable Service.
+ *
+ * @author Harm op den Akker (Fruit Tree Labs)
+ */
 @RestController
 @RequestMapping(value = {"/v{version}/info", "/info"})
 @Tag(name = "3. Information",
@@ -54,14 +59,36 @@ public class InfoController {
 	@Autowired
 	Application application;
 
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
+	/**
+	 * Instances of this class are constructed through Spring.
+	 */
+	public InfoController() { }
+
+	/**
+	 * Retrieve a set of metadata parameters about the running service. This end-point may be called
+	 * without authentication and will return 4 parameters that describe the current version of the
+	 * service:
+	 *
+     * <ul>
+	 *     <li>build - Date &amp; Time when the service was built</li>
+	 * 		<li>protocolVersion - latest supported API Protocol version</li>
+	 * 		<li>serviceVersion - software version of the service</li>
+	 * 		<li>upTime - String representing how long the service has been running</li>
+	 * </ul>
+	 * @param version the API Version to use, e.g. '1'.
+	 * @return a {@link ServiceInfoPayload} object containing information on the running service.
+	 */
 	@Operation(summary = "Retrieve a set of metadata parameters about the running service",
-		description = "This end-point may be called without authentication and will return 3 " +
+		description = "This end-point may be called without authentication and will return 4 " +
 			"parameters that describe the current version of the service:" +
 			" <ul><li>build - Date & Time when the service was built</li>" +
 			" <li>protocolVersion - latest supported API Protocol version</li>" +
 			" <li>serviceVersion - software version of the service</li>" +
 			" <li>upTime - String representing how long the service has been running</li></ul>")
-
 	@GetMapping("/all")
 	public ServiceInfoPayload all(
 		@Parameter(hidden = true, description = "API Version to use, e.g. '1'")
