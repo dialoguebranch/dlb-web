@@ -42,7 +42,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * }
  * </pre>
  *
- * @author Harm op den Akker
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 public class LoginResultPayload {
 

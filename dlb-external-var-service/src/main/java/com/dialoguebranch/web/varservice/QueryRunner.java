@@ -39,7 +39,7 @@ import jakarta.servlet.http.HttpServletResponse;
 /**
  * This class can run queries. It can validate an authentication token.
  * 
- * @author Dennis Hofs (RRD)
+ * @author Dennis Hofs (Roessingh Research and Development)
  */
 public class QueryRunner {
 	/**

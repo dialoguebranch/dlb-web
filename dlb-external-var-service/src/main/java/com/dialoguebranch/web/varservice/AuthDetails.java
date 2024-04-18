@@ -34,7 +34,7 @@ import java.util.Date;
  * username of the authenticated user, the date/time when the JWT token was
  * issued, and the date/time when the JWT token expires.
  * 
- * @author Dennis Hofs (RRD)
+ * @author Dennis Hofs (Roessingh Research and Development)
  */
 public class AuthDetails {
 	private final String subject;

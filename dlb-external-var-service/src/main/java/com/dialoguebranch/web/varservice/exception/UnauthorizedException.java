@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * exception message (default "Unauthorized") will be written to the response.
  * It is handled by the {@link ErrorController ErrorController}.
  * 
- * @author Dennis Hofs (RRD)
+ * @author Dennis Hofs (Roessingh Research and Development)
  */
 @ResponseStatus(value=HttpStatus.UNAUTHORIZED)
 public class UnauthorizedException extends HttpException {

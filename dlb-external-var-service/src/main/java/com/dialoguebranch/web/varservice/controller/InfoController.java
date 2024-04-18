@@ -84,7 +84,7 @@ public class InfoController {
 		long hours = TimeUnit.MILLISECONDS.toHours(upTimeMillis);
 		upTimeMillis = upTimeMillis - (hours * 3600000);
 		long minutes = TimeUnit.MILLISECONDS.toMinutes(upTimeMillis);
-		String upTimeString = "" + days + "d " + hours + "h " + minutes + "m";
+		String upTimeString = days + "d " + hours + "h " + minutes + "m";
 
 		return new ServiceInfoPayload(
 				Configuration.getInstance().get(Configuration.BUILD_TIME),

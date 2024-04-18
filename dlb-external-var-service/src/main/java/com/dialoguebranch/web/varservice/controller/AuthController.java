@@ -107,11 +107,11 @@ public class AuthController {
 		Integer tokenExpiration = loginParametersPayload.getTokenExpiration();
 
 		List<HttpFieldError> fieldErrors = new ArrayList<>();
-		if (user == null || user.length() == 0) {
+		if (user == null || user.isEmpty()) {
 			fieldErrors.add(new HttpFieldError("user",
 					"Parameter \"user\" not defined"));
 		}
-		if (password == null || password.length() == 0) {
+		if (password == null || password.isEmpty()) {
 			fieldErrors.add(new HttpFieldError("password",
 					"Parameter \"password\" not defined"));
 		}

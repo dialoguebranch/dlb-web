@@ -44,7 +44,7 @@ import java.security.Key;
  * encodes an instance of {@link AuthDetails AuthDetails}, which defines the
  * user identity and token validity.
  * 
- * @author Dennis Hofs (RRD)
+ * @author Dennis Hofs (Roessingh Research and Development)
  */
 public class AuthToken {
 	/**

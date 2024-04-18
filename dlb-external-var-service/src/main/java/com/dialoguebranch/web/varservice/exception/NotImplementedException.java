@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * The exception message (default "Not Implemented") will be written to the
  * response. It is handled by the {@link ErrorController ErrorController}.
  * 
- * @author Dennis Hofs (RRD)
+ * @author Dennis Hofs (Roessingh Research and Development)
  */
 @ResponseStatus(value=HttpStatus.NOT_IMPLEMENTED)
 public class NotImplementedException extends HttpException {

@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * written to the response. It is handled by the {@link ErrorController
  * ErrorController}.
  * 
- * @author Dennis Hofs (RRD)
+ * @author Dennis Hofs (Roessingh Research and Development)
  */
 @ResponseStatus(value=HttpStatus.INTERNAL_SERVER_ERROR)
 public class InternalServerErrorException extends HttpException {

@@ -42,8 +42,8 @@ import nl.rrd.utils.AppComponent;
  * from resources service.properties and deployment.properties. Known property keys are defined
  * as constants in this class.
  * 
- * @author Dennis Hofs (RRD)
- * @author Harm op den Akker
+ * @author Dennis Hofs (Roessingh Research and Development)
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 @AppComponent
 public class Configuration extends LinkedHashMap<String,String> {

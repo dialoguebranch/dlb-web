@@ -33,29 +33,25 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * A {@link DLBVariablePayload} represents a DialogueBranch Variable that is returned as the result of an
  * api-call to the web service.
  *
- * @author Harm op den Akker
+ * @author Harm op den Akker (Fruit Tree Labs)
  */
 public class DLBVariablePayload {
 
 	@Schema(description = "Name of the DialogueBranch Variable",
-			example = "dialogueBranchVariableName",
-			required = true)
+			example = "dialogueBranchVariableName")
 	private String name;
 
 	@Schema(description = "Value of the DialogueBranch Variable",
-			example = "some value",
-			required = true)
+			example = "some value")
 	private Object value;
 
 	@Schema(description = "UTC Timestamp in milliseconds representing the moment the variable " +
 			"was last updated",
-			example = "1665571549000",
-			required = true)
+			example = "1665571549000")
 	private Long updatedTime;
 
 	@Schema(description = "The time zone in which the variable was last updated",
-			example = "Europe/Lisbon",
-			required = true)
+			example = "Europe/Lisbon")
 	private String updatedTimeZone;
 
 	// --------------------------------------------------------

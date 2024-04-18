@@ -58,11 +58,10 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Controller for the /variables/ -end-points of the DialogueBranch External Variable Service
- * Dummy.
+ * Controller for the /variables/ -end-points of the DialogueBranch External Variable Service Dummy.
  *
- * @author Harm op den Akker
- * @author Tessa Beinema
+ * @author Harm op den Akker (Fruit Tree Labs)
+ * @author Tessa Beinema (University of Twente)
  */
 @RestController
 @SecurityRequirement(name = "X-Auth-Token")
@@ -78,14 +77,15 @@ public class VariablesController {
 	// -----------------------------------------------------------------------
 
 	@Operation(summary = "Retrieve updates for a given list of DialogueBranch Variables",
-		description = "The use case for this end-point is as follows. Before executing a DialogueBranch " +
-			"Dialogue, you (or e.g. the DialogueBranch Web Service) may gather a list of all the DialogueBranch " +
-			"Variables used in its execution. Before starting the execution, you may call this " +
-			"end-point with the list of DialogueBranch Variables in order to verify that you have the " +
-			"latest values for all variables. In return you will receive a list - which is a " +
-			"subset of the list you provided - that contains all DialogueBranch Variables for which an " +
-			"updated value is available. You are basically asking: 'Hey, I have this list of " +
-			"DialogueBranch Variables for this user, is this up-to-date?'." +
+		description = "The use case for this end-point is as follows. Before executing a " +
+			"DialogueBranch Dialogue, you (or e.g. the DialogueBranch Web Service) may gather a " +
+			"list of all the DialogueBranch Variables used in its execution. Before starting the " +
+			"execution, you may call this end-point with the list of DialogueBranch Variables in " +
+			"order to verify that you have the latest values for all variables. In return you " +
+			"will receive a list - which is a subset of the list you provided - that contains " +
+			"all DialogueBranch Variables for which an updated value is available. You are " +
+			"basically asking: 'Hey, I have this list of DialogueBranch Variables for this user, " +
+			"is this up-to-date?'." +
 			"<br/><br/>You must pass along the current timezone of the user (client) so that " +
 			"certain time sensitive variables may be correctly set according to the timezone of " +
 			"the user." +
@@ -102,27 +102,27 @@ public class VariablesController {
 	@RequestMapping(value="/retrieve-updates", method= RequestMethod.POST, consumes={
 			MediaType.APPLICATION_JSON_VALUE })
 	public List<DLBVariablePayload> retrieveUpdates (
-			HttpServletRequest request,
-			HttpServletResponse response,
+		HttpServletRequest request,
+		HttpServletResponse response,
 
-			@Parameter(hidden = true, description = "API Version to use, e.g. '1'")
-			@PathVariable(value = "version")
-			String version,
+		@Parameter(hidden = true, description = "API Version to use, e.g. '1'")
+		@PathVariable(value = "version")
+		String version,
 
-			@Parameter(description = "The userId of the DialogueBranch user")
-			@RequestParam(value="userId")
-			String userId,
+		@Parameter(description = "The userId of the DialogueBranch user")
+		@RequestParam(value="userId")
+		String userId,
 
-			@Parameter(description = "The current time zone of the DialogueBranch user")
-			@RequestParam(value="timeZone")
-			String timeZone,
+		@Parameter(description = "The current time zone of the DialogueBranch user")
+		@RequestParam(value="timeZone")
+		String timeZone,
 
-			@Parameter(description = "List of DialogueBranch Variables for which to check for updates.",
-					required = true,
-					content = @Content(
-						array = @ArraySchema(
-							schema = @Schema(implementation = DLBVariablePayload.class))))
-			@RequestBody List<DLBVariablePayload> dlbVariables) throws Exception {
+		@Parameter(description = "List of DialogueBranch Variables for which to check for updates.",
+				required = true,
+				content = @Content(
+					array = @ArraySchema(
+						schema = @Schema(implementation = DLBVariablePayload.class))))
+		@RequestBody List<DLBVariablePayload> dlbVariables) throws Exception {
 
 		// If no explicit protocol version is provided, assume the latest version
 		if(version == null) version = ProtocolVersion.getLatestVersion().versionName();
@@ -134,8 +134,8 @@ public class VariablesController {
 			logger.info(dlbVariableResultParam.toString());
 		}
 
-		// Execute either for the provided userId or for the currently logged in user
-		if(userId.equals("")) {
+		// Execute either for the provided userId or for the currently logged-in user
+		if(userId.isEmpty()) {
 			return QueryRunner.runQuery(
 				(protocolVersion, user) -> executeRetrieveUpdates(user, timeZone, dlbVariables),
 				version, request, response, userId);
@@ -147,13 +147,14 @@ public class VariablesController {
 	}
 
 	/**
-	 * This method performs the "dummy" updating of the requested list of DialogueBranch Variables. For a
-	 * real-world implementation you should replace this method and make sure it does something
-	 * useful.
+	 * This method performs the "dummy" updating of the requested list of DialogueBranch Variables.
+	 * For a real-world implementation you should replace this method and make sure it does
+	 * something useful.
 	 *
-	 * In this dummy implementation, the method does the following. For every DialogueBranch Variable for
-	 * which an update is requested, there is a 50% chance that this variable will be included in
-	 * the result set with a lastUpdated timestamp of "now" (in the provided time zone of the user).
+	 * <p>In this dummy implementation, the method does the following. For every DialogueBranch
+	 * Variable for which an update is requested, there is a 50% chance that this variable will be
+	 * included in the result set with a lastUpdated timestamp of "now" (in the provided time zone
+	 * of the user), without changing its value.</p>
 	 *
 	 * @param userId the {@code String} identifier of the user who's variable updates are requested.
 	 * @param timeZone the time zone of the user as one of {@code TimeZone.getAvailableIDs()}
@@ -216,9 +217,9 @@ public class VariablesController {
 	// ---------------------------------------------------------------------
 
 	@Operation(summary = "Inform that the given list of DialogueBranch Variables have been updated",
-		description = "With this end-point you can inform this DialogueBranch External Variable Service " +
-			"that a list of DialogueBranch Variables have been updated (e.g. during dialogue execution) " +
-			"for a particular user." +
+		description = "With this end-point you can inform this DialogueBranch External Variable " +
+			"Service that a list of DialogueBranch Variables have been updated (e.g. during " +
+			"dialogue execution) for a particular user." +
 			"<br/><br/>You must pass along the current timezone of the user (client) so that " +
 			"certain time sensitive variables may be correctly set according to the timezone of " +
 			"the user." +
@@ -269,7 +270,7 @@ public class VariablesController {
 
 		// Execute either for the provided userId or for the currently logged-in user
 		// TODO: Not correct, an error should be thrown on an empty userId
-		if(userId.equals("")) {
+		if(userId.isEmpty()) {
 			return QueryRunner.runQuery(
 				(protocolVersion, user) -> executeNotifyUpdated(user, timeZone, dlbVariables),
 				version, request, response, userId);
@@ -309,31 +310,31 @@ public class VariablesController {
 	// ---------------------------------------------------------------------
 
 	@Operation(summary = "Inform that the DialogueBranch Variable store has been completed cleared",
-		description = "With this end-point you can inform this DialogueBranch External Variable Service " +
-			"that a full clear of the DialogueBranch Variable Store has occurred for a particular user" +
+		description = "With this end-point you can inform this DialogueBranch External Variable " +
+			"Service that a full clear of the DialogueBranch Variable Store has occurred for a " +
+			"particular user." +
 			"<br/><br/>You must pass along the current timezone of the user (client) so that " +
-			"certain time sensitive variables may be correctly set according to the timezone of " +
-			"the user." +
+			"the clearing of the database event may be correctly time logged." +
 			"<br/><br/>In this dummy implementation, the service will do nothing and will simply " +
 			"return a status 200 (OK).")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Successful operation") })
 	@RequestMapping(value="/notify-cleared", method= RequestMethod.POST)
 	public ResponseEntity<?> notifyCleared(
-			HttpServletRequest request,
-			HttpServletResponse response,
+		HttpServletRequest request,
+		HttpServletResponse response,
 
-			@Parameter(hidden = true, description = "API Version to use, e.g. '1'")
-			@PathVariable(value = "version")
-			String version,
+		@Parameter(hidden = true, description = "API Version to use, e.g. '1'")
+		@PathVariable(value = "version")
+		String version,
 
-			@Parameter(description = "The userId of the DialogueBranch user")
-			@RequestParam(value="userId")
-			String userId,
+		@Parameter(description = "The userId of the DialogueBranch user")
+		@RequestParam(value="userId")
+		String userId,
 
-			@Parameter(description = "The current time zone of the DialogueBranch user")
-			@RequestParam(value="timeZone")
-			String timeZone
+		@Parameter(description = "The current time zone of the DialogueBranch user")
+		@RequestParam(value="timeZone")
+		String timeZone
 	) throws Exception {
 
 		// If no explicit protocol version is provided, assume the latest version
@@ -345,7 +346,7 @@ public class VariablesController {
 
 		// Execute either for the provided userId or for the currently logged-in user
 		// TODO: Not correct, an error should be thrown on an empty userId
-		if(userId.equals("")) {
+		if(userId.isEmpty()) {
 			return QueryRunner.runQuery(
 					(protocolVersion, user) -> executeNotifyCleared(user, timeZone),
 					version, request, response, userId);
@@ -358,9 +359,10 @@ public class VariablesController {
 	}
 
 	/**
-	 * This method performs the Dummy implementation for receiving the notification that a DialogueBranch
-	 * Variable store has been completely cleared. As this is a dummy implementation and there is no
-	 * real external service, the implementation is simply to return "OK", without doing anything.
+	 * This method performs the Dummy implementation for receiving the notification that a
+	 * DialogueBranch Variable store has been completely cleared. As this is a dummy implementation
+	 * and there is no real external service, the implementation is simply to return "OK", without
+	 * doing anything.
 	 *
 	 * @param userId the {@code String} identifier of the user for whom variable updates are
 	 *               available.

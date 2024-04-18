@@ -59,7 +59,7 @@ public class ControllerFunctions {
 	 */
 	public static ZoneId parseTimeZone(String timeZone) throws BadRequestException {
 
-		if (timeZone == null || timeZone.length() == 0) {
+		if (timeZone == null || timeZone.isEmpty()) {
 			return ZoneId.systemDefault();
 		}
 

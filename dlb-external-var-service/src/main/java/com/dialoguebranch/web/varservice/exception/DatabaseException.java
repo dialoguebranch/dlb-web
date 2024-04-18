@@ -27,13 +27,16 @@
 
 package com.dialoguebranch.web.varservice.exception;
 
+import java.io.Serial;
+
 /**
  * This exception is thrown when any database error occurs.
  *
  * @author Dennis Hofs (RRD)
  */
 public class DatabaseException extends Exception {
-	private static final long serialVersionUID = 1205649302013465454L;
+	@Serial
+	private static final long serialVersionUID = 1L;
 
 	public DatabaseException(String message) {
 		super(message);
