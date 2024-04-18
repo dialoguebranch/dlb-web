@@ -427,8 +427,15 @@ public class UserService {
 						Object varValue = variable.getValue();
 						ZonedDateTime varUpdated = variable.getZonedUpdatedTime();
 
-						variableStore.setValue(varName, varValue, true, varUpdated,
-								VariableStoreChange.Source.EXTERNAL_VARIABLE_SERVICE);
+						if(varValue != null) {
+							variableStore.setValue(varName, varValue, true,
+									varUpdated,
+									VariableStoreChange.Source.EXTERNAL_VARIABLE_SERVICE);
+						// If a 'null' value is received, we delete the variable
+						} else {
+							variableStore.removeByName(varName, true, varUpdated,
+									VariableStoreChange.Source.EXTERNAL_VARIABLE_SERVICE);
+						}
 					}
 				}
 			}
