@@ -1,8 +1,4 @@
-buildscript {
-	repositories {
-		mavenCentral()
-	}
-}
+import org.gradle.api.JavaVersion
 
 plugins {
 	id 'war'
@@ -13,10 +9,22 @@ plugins {
 }
 
 group = 'com.dialoguebranch'
-version = '1.0.0' // run updateVersion after changing this property
-sourceCompatibility = 17
-targetCompatibility = 17
-archivesBaseName = 'dlb-external-var-service'
+version = '1.2.4' // run updateVersion after changing this property
+
+repositories {
+	mavenCentral()
+}
+
+base {
+	archivesName = "dlb-external-var-service"
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+	withJavadocJar()
+	withSourcesJar()
+}
 
 configurations {
 	providedRuntime
@@ -24,9 +32,9 @@ configurations {
 
 dependencies {
 
-	// RRDUtils is our own Open Source library of utility features
+	// RRDUtils is an Open Source library of utility features developed by RRD
 	// https://mvnrepository.com/artifact/nl.rrd/rrd-utils
-	implementation 'nl.rrd:rrd-utils:3.0.0'
+	implementation 'nl.rrd:rrd-utils:3.0.3'
 
 	// The Jackson Java8 Module is used to serialize/deserialize ZonedDateTime objects
 	// https://mvnrepository.com/artifact/com.fasterxml.jackson.module/jackson-modules-java8
@@ -152,8 +160,9 @@ gradle.taskGraph.whenReady {
 
 javadoc {
 	options {
-		links 'https://docs.oracle.com/javase/10/docs/api/'
+		links 'https://docs.oracle.com/en/java/javase/17/docs/api/'
 		addStringOption('Xdoclint:all,-html', '-quiet')
+		addStringOption('Xmaxwarns 1000', '-quiet')
 	}
 }
 
