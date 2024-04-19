@@ -127,10 +127,11 @@ public class VariablesController {
 			"<br/><br/>You must pass along the current timezone of the user (client) so that " +
 			"certain time sensitive variables may be correctly set according to the timezone of " +
 			"the user." +
-			"<br/><br/>In this dummy implementation, for every variable that you include in the " +
-			"request list there is a 50% chance that it will be returned in the response list, " +
-			"with the same value as provided in the request, and the lastUpdated time set to the " +
-			"current UTC time in epoch seconds.")
+			"<br/><br/>In this dummy implementation, two specific variables will always be " +
+			"updated: 'currentDate' and 'currentTime'. Furthermore, for every other variable " +
+			"that is included in the request list there is a 50% chance that it will be returned " +
+			"in the response list, with the same value as provided in the request, and the " +
+			"lastUpdated time set to the current UTC time in epoch seconds.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200",
 			description = "Successful operation",
@@ -168,9 +169,6 @@ public class VariablesController {
 		// Log this call to the service log
 		logger.info("POST /v"+version+"/variables/retrieve-updates?userId=" + userId +
 				"&timeZone=" + timeZone + " with the following variables:");
-		for(DLBVariablePayload dlbVariableResultParam : dlbVariables) {
-			logger.info(dlbVariableResultParam.toString());
-		}
 
 		// Execute either for the provided userId or for the currently logged-in user
 		if(userId.isEmpty()) {
@@ -189,21 +187,26 @@ public class VariablesController {
 	 * For a real-world implementation you should replace this method and make sure it does
 	 * something useful.
 	 *
-	 * <p>In this dummy implementation, the method does the following. For every DialogueBranch
-	 * Variable for which an update is requested, there is a 50% chance that this variable will be
-	 * included in the result set with a lastUpdated timestamp of "now" (in the provided time zone
-	 * of the user), without changing its value.</p>
+	 * <p>In this dummy implementation, the method does the following:</p>
+	 *
+	 * <p>First of all, if an update is requested for a variable with name 'currentDate' and/or
+	 * 'currentTime', those two variables will be updated to reflect the current date and time in
+	 * the user's provided time zone.</p>
+	 *
+	 * <p>For every other DialogueBranch Variable for which an update is requested, there is a 50%
+	 * chance that this variable will be included in the result set with a lastUpdated timestamp of
+	 * "now" (in the provided time zone of the user), without changing its value.</p>
 	 *
 	 * @param userId the {@code String} identifier of the user who's variable updates are requested.
 	 * @param timeZone the time zone of the user as one of {@code TimeZone.getAvailableIDs()}
 	 *                 (IANA Codes)
-	 * @param params the {@code List} of {@link DLBVariablePayload}s for which it should be
+	 * @param parameters the {@code List} of {@link DLBVariablePayload}s for which it should be
 	 *               verified if an update is needed.
 	 * @return a {@code List} of {@link DLBVariablePayload}s with each of the parameters for which
 	 * an updated value has been found (note that this may be an empty list).
 	 */
 	private List<DLBVariablePayload> executeRetrieveUpdates (String userId, String timeZone,
-															 List<DLBVariablePayload> params)
+															 List<DLBVariablePayload> parameters)
 			throws BadRequestException {
 
 		// Parse the timeZone String into a ZoneId to verify it was given in the right format
@@ -213,38 +216,70 @@ public class VariablesController {
 
 		Random random = new Random();
 
-		for (DLBVariablePayload param : params) {
+		for (DLBVariablePayload parameterToUpdate : parameters) {
 
-			if(param.getUpdatedTime() != null && param.getUpdatedTimeZone() != null) {
+			// Log info about all variables in the request
+			if(parameterToUpdate.getUpdatedTime() != null
+					&& parameterToUpdate.getUpdatedTimeZone() != null) {
 				ZonedDateTime paramZonedDateTime =
 						ZonedDateTime.ofInstant(
 								Instant.ofEpochMilli(
-										param.getUpdatedTime()),
-								ControllerFunctions.parseTimeZone(param.getUpdatedTimeZone()));
+										parameterToUpdate.getUpdatedTime()),
+								ControllerFunctions.parseTimeZone(
+										parameterToUpdate.getUpdatedTimeZone()));
 
 				DateTimeFormatter formatter =
 						DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss Z");
 				String readableTimeString = paramZonedDateTime.format(formatter);
-				logger.info("The DialogueBranch Variable '"+param.getName()+"' " +
-						"with value '"+param.getValue()+"' " +
-						"was last updated at '"+param.getUpdatedTime()+"', " +
+				logger.info("The DialogueBranch Variable '"+parameterToUpdate.getName()+"' " +
+						"with value '"+parameterToUpdate.getValue()+"' " +
+						"was last updated at '"+parameterToUpdate.getUpdatedTime()+"', " +
 						"which was '"+readableTimeString+"' " +
-						"in time zone: '"+param.getUpdatedTimeZone()+"'.");
+						"in time zone: '"+parameterToUpdate.getUpdatedTimeZone()+"'.");
 			} else {
-				logger.info("The DialogueBranch Variable '"+param.getName()+"' " +
-						"with value '"+param.getValue()+"' " +
+				logger.info("The DialogueBranch Variable '"+parameterToUpdate.getName()+"' " +
+						"with value '"+parameterToUpdate.getValue()+"' " +
 						"was last updated at an unknown time.");
 			}
 
-			// With 50% chance, return the variable as if it has been updated
-			if(random.nextBoolean()) {
+			// Handle the 'currentDate' case
+			if(parameterToUpdate.getName().equals("currentDate")) {
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+				ZonedDateTime currentDateTime = ZonedDateTime.ofInstant(Instant.now(),timeZoneId);
+				String readableDateString = currentDateTime.format(formatter);
 				DLBVariablePayload newParam = new DLBVariablePayload(
-						param.getName(),
-						param.getValue(),
+						parameterToUpdate.getName(),
+						readableDateString,
+						Instant.now().toEpochMilli(),
+						timeZone
+				);
+				result.add(newParam);
+			}
+
+			// Handle the 'currentTime' case
+			else if(parameterToUpdate.getName().equals("currentTime")) {
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+				ZonedDateTime currentDateTime = ZonedDateTime.ofInstant(Instant.now(),timeZoneId);
+				String readableTimeString = currentDateTime.format(formatter);
+				DLBVariablePayload newParam = new DLBVariablePayload(
+						parameterToUpdate.getName(),
+						readableTimeString,
+						Instant.now().toEpochMilli(),
+						timeZone
+				);
+				result.add(newParam);
+			}
+
+			// With 50% chance, return the variable as if it has been updated
+			else if(random.nextBoolean()) {
+				DLBVariablePayload newParam = new DLBVariablePayload(
+						parameterToUpdate.getName(),
+						parameterToUpdate.getValue(),
 						Instant.now().toEpochMilli(),
 						timeZone);
 				result.add(newParam);
 			}
+			
 		}
 
 		return result;
