@@ -376,12 +376,12 @@ export class DialogueBranchClient {
     // ---------- 3. Variables: End-points for retrieving or setting DialogueBranch Variables. ----------
     // --------------------------------------------------------------------------------------------------
 
-    // ---------------------------------------------------------
-    // ---------- End-Point: /variables/get-variables ----------
-    // ---------------------------------------------------------
+    // -----------------------------------------------
+    // ---------- End-Point: /variables/get ----------
+    // -----------------------------------------------
 
     callGetVariables() {
-        var url = this._baseUrl + "/variables/get-variables";
+        var url = this._baseUrl + "/variables/get";
 
         fetch(url, {
             method: "GET",
@@ -409,18 +409,18 @@ export class DialogueBranchClient {
         console.log(err)
     }
 
-    // --------------------------------------------------------
-    // ---------- End-Point: /variables/set-variable ----------
-    // --------------------------------------------------------
+    // ------------------------------------------------------
+    // ---------- End-Point: /variables/set-single ----------
+    // ------------------------------------------------------
 
     callSetVariable(variableName, variableValue) {
-        var url = this._baseUrl + "/variables/set-variable";
+        var url = this._baseUrl + "/variables/set-single";
 
         url += "?name="+variableName;
         if(variableValue != null) url += "&value="+variableValue;
         url += "&timeZone="+this._timeZone;
 
-        console.log("Calling /variables/set-variable/ :"+url);
+        console.log("Calling /variables/set-single/ :"+url);
 
         fetch(url, {
             method: "POST",

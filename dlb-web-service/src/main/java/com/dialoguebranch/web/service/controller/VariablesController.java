@@ -72,9 +72,9 @@ public class VariablesController {
 
 	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
 
-	// ------------------------------------------------------------------------------- //
-	// -------------------- END-POINT: "/variables/get-variables" -------------------- //
-	// ------------------------------------------------------------------------------- //
+	// --------------------------------------------------------------------- //
+	// -------------------- END-POINT: "/variables/get" -------------------- //
+	// --------------------------------------------------------------------- //
 
 	@Operation(
 		summary = "Retrieve all- or a subset of DialogueBranch variables for a given user.",
@@ -83,7 +83,7 @@ public class VariablesController {
 			"through the end-point). Either provide a list of variable names for which to " +
 			"retrieve its values, or leave this empty to retrieve all known DialogueBranch " +
 			"Variable data.")
-	@RequestMapping(value="/get-variables", method=RequestMethod.GET)
+	@RequestMapping(value="/get", method=RequestMethod.GET)
 	public Map<String,Object> getVariables(
 		HttpServletRequest request,
 		HttpServletResponse response,
@@ -108,7 +108,7 @@ public class VariablesController {
 		}
 
 		// Log this call to the service log
-		String logInfo = "GET /v" + version + "/variables/get-variables?names=" + variableNames;
+		String logInfo = "GET /v" + version + "/variables/get?names=" + variableNames;
 		if(!(delegateUser == null) && (!delegateUser.isEmpty()))
 			logInfo += "&delegateUser="+delegateUser;
 		logger.info(logInfo);
@@ -174,15 +174,15 @@ public class VariablesController {
 		return result;
 	}
 
-	// ------------------------------------------------------------------------------ //
-	// -------------------- END-POINT: "/variables/set-variable" -------------------- //
-	// ------------------------------------------------------------------------------ //
+	// ---------------------------------------------------------------------------- //
+	// -------------------- END-POINT: "/variables/set-single" -------------------- //
+	// ---------------------------------------------------------------------------- //
 
 	@Operation(
 		summary = "Set the value of a single Dialogue Branch Variable for a given user.",
 		description = "Use this end-point to get set a Dialogue Branch Variable to a specific " +
 			"value (or to remove the stored value by setting it to the empty string.")
-	@RequestMapping(value="/set-variable", method=RequestMethod.POST)
+	@RequestMapping(value="/set-single", method=RequestMethod.POST)
 	public void setVariable(
 		HttpServletRequest request,
 		HttpServletResponse response,
@@ -217,7 +217,7 @@ public class VariablesController {
 		}
 
 		// Log this call to the service log
-		String logInfo = "POST /v" + version + "/variables/set-variable?name=" + name;
+		String logInfo = "POST /v" + version + "/variables/set-single?name=" + name;
 		if(!(value == null) && (!value.isEmpty())) logInfo += "&value="+value;
 		if(!(delegateUser == null) && (!delegateUser.isEmpty())) logInfo += "&delegateUser="
 				+ delegateUser;
@@ -278,15 +278,15 @@ public class VariablesController {
 		return null;
 	}
 
-	// ------------------------------------------------------------------------------- //
-	// -------------------- END-POINT: "/variables/set-variables" -------------------- //
-	// ------------------------------------------------------------------------------- //
+	// --------------------------------------------------------------------- //
+	// -------------------- END-POINT: "/variables/set" -------------------- //
+	// --------------------------------------------------------------------- //
 
 	@Operation(
 		summary = "Set the value of one or multiple DialogueBranch Variable for a given user.",
 		description = "Use this end-point to get set one or many DialogueBranch Variables to " +
 			"their given values (or to remove the stored value by setting it to the empty string.")
-	@RequestMapping(value="/set-variables", method=RequestMethod.POST)
+	@RequestMapping(value="/set", method=RequestMethod.POST)
 	public void setVariables(
 			HttpServletRequest request,
 			HttpServletResponse response,
@@ -315,7 +315,7 @@ public class VariablesController {
 		}
 
 		// Log this call to the service log
-		String logInfo = "POST /v" + version + "/variables/set-variables";
+		String logInfo = "POST /v" + version + "/variables/set";
 		if(!(delegateUser == null) && (!delegateUser.isEmpty()))
 			logInfo += "?delegateUser=" + delegateUser;
 		logger.info(logInfo);
@@ -351,8 +351,7 @@ public class VariablesController {
 
 		if (!invalidNames.isEmpty()) {
 			HttpError error = new HttpError(ErrorCode.INVALID_INPUT,
-					"Invalid variable names: " +
-					String.join(", ", invalidNames));
+					"Invalid variable names: " + String.join(", ", invalidNames));
 			throw new BadRequestException(error);
 		}
 
@@ -373,4 +372,5 @@ public class VariablesController {
 
 		return null;
 	}
+
 }
