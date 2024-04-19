@@ -135,4 +135,20 @@ export class AbstractController {
 
     }
 
+    /**
+     * Called after a successful call to the /admin/list-dialogues end-point.
+     * @param {Array} dialogueNames - the list of names of dialogues received.
+     */
+    handleListDialogues(dialogueNames) { 
+        throw new Error("Method 'handleListDialogues()' must be implemented by a subclass.");
+    }
+
+    /**
+     * Called after a failed call to the /admin/list-dialogues end-point.
+     * @param {String} errorMessage a human-readable error message indicating the cause of the error
+     */
+    handleListDialoguesError(errorMessage) { 
+        throw new Error("Method 'handleListDialoguesError()' must be implemented by a subclass.");
+    }
+
 }

@@ -544,33 +544,25 @@ export class DialogueBranchClient {
         })
         .then((response) => response.json())
         .then((data) => { 
-            this.listDialoguesSuccess(data);
+            if(data == null) {
+                // A null response is unexpected, but should not break the client
+                this.logger.warn(this._LOGTAG,"Call to /admin/list-dialogues returned empty response.");
+                this._clientController.handleListDialogues(new Array());
+            } else {
+                if('dialogueNames' in data) {
+                    this._clientController.handleListDialogues(data.dialogueNames);
+                } else {
+                    // Data without dialogueNames is unexpected, but should not break the client
+                    this.logger.warn(this._LOGTAG,"Call to /admin/list-dialogues returned unexpected response.");
+                    this._clientController.handleListDialogues(new Array());
+                }
+            }
         })
         .catch((err) => {
-            this.listDialoguesError(err);
+            var errorMessage = "Call to /admin/list-dialogues failed with the following error: "+err;
+            this.logger.error(this._LOGTAG,errorMessage);
+            this._clientController.handleListDialoguesError(err);
         });
-    }
-
-    listDialoguesSuccess(data) {
-
-        if(data == null) {
-            // A null response is unexpected, but should not break the client
-            this.logger.warn(this._LOGTAG,"Call to /admin/list-dialogues returned null response.");
-            this._clientController.customListDialoguesSuccess(new Array());
-        } else {
-            if('dialogueNames' in data) {
-                this._clientController.customListDialoguesSuccess(data.dialogueNames);
-            } else {
-                // Data without dialogueNames is unexpected, but should not break the client
-                this.logger.warn(this._LOGTAG,"Call to /admin/list-dialogues returned unexpected response.");
-                this._clientController.customListDialoguesSuccess(new Array());
-            }
-        }
-    }
-
-    listDialoguesError(err) {
-        console.log(err);
-        this._clientController.customListDialoguesError(err);
     }
 
 }

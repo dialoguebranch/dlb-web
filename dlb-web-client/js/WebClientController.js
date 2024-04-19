@@ -161,10 +161,10 @@ export class WebClientController extends AbstractController {
         this._dialogueBranchClient.callListDialogues();
     }
 
-    customListDialoguesSuccess(dialogueNames) {
+    handleListDialogues(dialogueNames) {
         var dialogueBrowserContentField = document.getElementById("dialogue-browser-content");
 
-        // Empty the content field before populating
+        // Empty the content field before (re-)populating
         dialogueBrowserContentField.innerHTML = "";
 
         // If the list of dialogueNames is empty, present a warning message
@@ -188,8 +188,8 @@ export class WebClientController extends AbstractController {
         this._logger.info(this._LOGTAG,"Updated the contents of the Dialogue Browser, showing "+dialogueNames.length+" available dialogues.");
     }
 
-    customListDialoguesError(err) {
-        this._logger.error(this._LOGTAG,"Retrieving dialogue list failed with the following result: "+err);
+    handleListDialoguesError(errorMessage) {
+        this._logger.error(this._LOGTAG,errorMessage);
     }
 
     // ----------------------------------------------------------
