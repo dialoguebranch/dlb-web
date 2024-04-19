@@ -27,7 +27,6 @@
 
 package com.dialoguebranch.web.varservice;
 
-import com.dialoguebranch.web.varservice.controller.schema.LoginParametersPayload;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -99,11 +98,11 @@ public class OpenApiSwaggerConfig {
 
 		// Add the security scheme
 		openAPI.components(new Components().addSecuritySchemes("X-Auth-Token",
-				new SecurityScheme()
-						.name("X-Auth-Token")
-						.scheme("basic")
-						.type(SecurityScheme.Type.APIKEY)
-						.in(SecurityScheme.In.HEADER)
+			new SecurityScheme()
+				.name("X-Auth-Token")
+				.scheme("basic")
+				.type(SecurityScheme.Type.APIKEY)
+				.in(SecurityScheme.In.HEADER)
 
 		));
 
@@ -111,13 +110,14 @@ public class OpenApiSwaggerConfig {
 		openAPI.info(
 			new Info()
 				.title("DialogueBranch External Variable Service Dummy API")
-				.description("The DialogueBranch External Variable Service Dummy API can be used to test " +
-						"the integration of a DialogueBranch Web Service with an external variable service " +
-						"that is used to provide up-to-date information on user's DialogueBranch Variable " +
-						"data. Any real implementation of an 'External Variable Service' should " +
-						"provide the same API and behaviour as this service.")
+				.description("The DialogueBranch External Variable Service Dummy API can be used " +
+					"to test the integration of a DialogueBranch Web Service with an external " +
+					"variable service that is used to provide up-to-date information on user's " +
+					"DialogueBranch Variable data. Any real implementation of an 'External " +
+					"Variable Service' should provide the same API and behaviour as this service.")
 				.version("v"+ProtocolVersion.getLatestVersion().versionName())
-				.contact(new Contact().email("info@dialoguebranch.com").name("DialogueBranch Platform Support"))
+				.contact(new Contact().email("info@dialoguebranch.com")
+						.name("DialogueBranch Platform Support"))
 				.license(new License().name("MIT").url("https://opensource.org/licenses/MIT")));
 
 		return openAPI;
@@ -134,7 +134,6 @@ public class OpenApiSwaggerConfig {
 			.pathsToExclude("/v{version}/info/*",
 				"/v{version}/variables/*",
 				"/v{version}/auth/*")
-			//.pathsToExclude("/v{version}/**") <-- This must be a bug, because it doesn't let /variables/ come through
 			.build();
 	}
 

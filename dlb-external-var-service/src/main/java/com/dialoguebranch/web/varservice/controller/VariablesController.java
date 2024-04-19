@@ -279,7 +279,7 @@ public class VariablesController {
 						timeZone);
 				result.add(newParam);
 			}
-			
+
 		}
 
 		return result;
