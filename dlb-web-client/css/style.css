@@ -84,6 +84,17 @@ td.login-table-labels {
     font-weight: 700;
 }
 
+#login-error-message-box {
+	border-radius: 20px;
+	background-color: white !important;
+	padding: 4px 20px 4px 20px;
+	margin-top: 10px;
+	font-size: 10pt;
+	font-weight: 700;
+	color: red;
+	display: none;
+}
+
 /* Version Info */
 
 #version-info {

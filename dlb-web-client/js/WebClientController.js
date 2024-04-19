@@ -300,11 +300,23 @@ export class WebClientController extends AbstractController {
                 "'."
             );
         }
+
+        // Clear the login error message box
+        var errorMessageBox = document.getElementById("login-error-message-box");
+        errorMessageBox.innerHTML = '';
+        errorMessageBox.style.display = 'none';
+
         this._logger.info(this._LOGTAG,"User '"+this._clientState.user.name+"' successfully logged in with role '"+this._clientState.user.role+"'.");
         this.updateUIState();
     }
 
     handleLoginError(httpStatusCode, errorCode, errorMessage, fieldErrors) {
+        
+        // Show the error message box
+        var errorMessageBox = document.getElementById("login-error-message-box");
+        errorMessageBox.style.display = 'block';
+        errorMessageBox.innerHTML = errorMessage;
+        
         if(errorCode == "INVALID_CREDENTIALS") {
             document.getElementById("login-form-password-field").classList.add("login-form-error-class");
             document.getElementById("login-form-username-field").classList.add("login-form-error-class");
