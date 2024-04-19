@@ -53,6 +53,24 @@ public class OpenApiSwaggerConfig {
 	private static final Object LOCK = new Object();
 	private static boolean customizedPaths = false;
 
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
+	/**
+	 * Instantiation of this class is handled through Spring.
+	 */
+	public OpenApiSwaggerConfig() { }
+
+	// -------------------------------------------------------- //
+	// -------------------- Other Methods --------------------- //
+	// -------------------------------------------------------- //
+
+	/**
+	 * Automatic configuration of various OpenAPI parameters.
+	 *
+	 * @return an {@link OpenAPI} object.
+	 */
 	@Bean
 	public OpenAPI openAPI() {
 		OpenAPI openAPI = new OpenAPI();
@@ -95,6 +113,11 @@ public class OpenApiSwaggerConfig {
 		return openAPI;
 	}
 
+	/**
+	 * Creates a set of end-points that excludes the end-points requiring a specific version number
+	 * for use in the Swagger UI.
+	 * @return a {@link GroupedOpenApi} that excludes all version-dependent end-points.
+	 */
 	@Bean
 	public GroupedOpenApi withoutVersioning() {
 		return GroupedOpenApi.builder().group("API End-Points without Versioning")
@@ -104,7 +127,6 @@ public class OpenApiSwaggerConfig {
 					"/v{version}/auth/*",
 					"/v{version}/log/*",
 					"/v{version}/admin/*")
-			//.pathsToExclude("/v{version}/**") <-- This must be a bug, because it doesn't let /variables/ come through
 			.build();
 	}
 
