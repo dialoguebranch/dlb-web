@@ -56,6 +56,14 @@ export class AbstractController {
     // ---------- Abstract Methods ----------
     // --------------------------------------
 
+    // -----------------------------------------------------------------------------
+    // ---------- 1. Authentication: End-points related to Authentication ----------
+    // -----------------------------------------------------------------------------
+
+    // --------------------------------------------
+    // ---------- End-Point: /auth/login ----------
+    // --------------------------------------------
+
     /**
      * Called after a successful call to the /auth/login end-point by the DialogueBranchClient.
      * @param {User} user a User object containing the information of the logged in user.
@@ -77,6 +85,10 @@ export class AbstractController {
         throw new Error("Method 'handleLoginError()' must be implemented by a subclass.");
     }
 
+    // -----------------------------------------------
+    // ---------- End-Point: /auth/validate ----------
+    // -----------------------------------------------
+
     /**
      * Called after a successful call to the /auth/validate end-point. Indicates that the provided
      * auth token is indeed valid.
@@ -86,6 +98,14 @@ export class AbstractController {
     handleAuthValidate(valid, message) {
         throw new Error("Method 'handleAuthValidate()' must be implemented by a subclass.");
     }
+
+    // -----------------------------------------------------------------------------------------------------------------------
+    // ---------- 2. Dialogue: End-points for starting and controlling the lifecycle of remotely executed dialogues. ----------
+    // ------------------------------------------------------------------------------------------------------------------------
+
+    // ------------------------------------------------
+    // ---------- End-Point: /dialogue/start ----------
+    // ------------------------------------------------
 
     /**
      * Called after a successful call to the /dialogue/start end-point.
@@ -102,6 +122,10 @@ export class AbstractController {
     handleStartDialogueError(errorMessage) { 
         throw new Error("Method 'handleStartDialogueError()' must be implemented by a subclass.");
     }
+
+    // ---------------------------------------------------
+    // ---------- End-Point: /dialogue/progress ----------
+    // ---------------------------------------------------
 
     /**
      * Called after a successful call to the /dialogue/progress end-point.
@@ -120,6 +144,10 @@ export class AbstractController {
         throw new Error("Method 'handleProgressDialogueError()' must be implemented by a subclass.");
     }
 
+    // -------------------------------------------------
+    // ---------- End-Point: /dialogue/cancel ----------
+    // -------------------------------------------------
+
     /**
      * Called after a successful call to the /dialogue/cancel end-point.
      */
@@ -134,6 +162,47 @@ export class AbstractController {
     handleCancelDialogueError(errorMessage) {
 
     }
+
+    // -------------------------------------------------------------------------------------------------
+    // ---------- 3. Variables: End-points for retrieving or setting DialogueBranch Variables. ----------
+    // --------------------------------------------------------------------------------------------------
+
+    // -----------------------------------------------
+    // ---------- End-Point: /variables/get ----------
+    // -----------------------------------------------
+
+    // ...
+
+    // ------------------------------------------------------
+    // ---------- End-Point: /variables/set-single ----------
+    // ------------------------------------------------------
+
+    // ...
+
+    // ---------------------------------------------------------------------------------------------------
+    // ---------- 5. Information: End-points that provide information about the running service ----------
+    // ---------------------------------------------------------------------------------------------------
+
+    // --------------------------------------------
+    // ---------- End-Point: /info/all ------------
+    // --------------------------------------------
+
+    handleServerInfo(serverInfo) {
+        this._logger.info(this._LOGTAG,"Connected to Dialogue Branch Web Service v"+serverInfo.serviceVersion+", using protocol version "+serverInfo.protocolVersion+" (build: '"+serverInfo.build+"' running for "+serverInfo.upTime+").");
+        this.updateServerInfoBox();
+    }
+
+    handleServerInfoError(errorMessage) {
+        this._logger.error(this._LOGTAG,errorMessage);
+    }
+
+    // --------------------------------------------------------------------------------------------------------
+    // ---------- 6. Admin: End-points for administrative control of the Dialogue Branch Web Service. ----------
+    // ---------------------------------------------------------------------------------------------------------
+
+    // ------------------------------------------------------
+    // ---------- End-Point: /admin/list-dialogues ----------
+    // ------------------------------------------------------
 
     /**
      * Called after a successful call to the /admin/list-dialogues end-point.

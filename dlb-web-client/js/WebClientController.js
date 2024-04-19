@@ -268,14 +268,13 @@ export class WebClientController extends AbstractController {
 
     // ---------- Info ----------
 
-    customInfoSuccess() {
-        var serverInfo = this._dialogueBranchClient.serverInfo;
+    handleServerInfo(serverInfo) {
         this._logger.info(this._LOGTAG,"Connected to Dialogue Branch Web Service v"+serverInfo.serviceVersion+", using protocol version "+serverInfo.protocolVersion+" (build: '"+serverInfo.build+"' running for "+serverInfo.upTime+").");
-        this.updateUIState();
+        this.updateServerInfoBox();
     }
 
-    customInfoError(err) {
-        this._logger.error(this._LOGTAG,"Requesting server info failed with the following result: "+err);
+    handleServerInfoError(errorMessage) {
+        this._logger.error(this._LOGTAG,errorMessage);
     }
 
     // ---------- Login ----------
@@ -307,6 +306,8 @@ export class WebClientController extends AbstractController {
         errorMessageBox.style.display = 'none';
 
         this._logger.info(this._LOGTAG,"User '"+this._clientState.user.name+"' successfully logged in with role '"+this._clientState.user.role+"'.");
+        
+        this.updateServerInfoBox();
         this.updateUIState();
     }
 
@@ -390,23 +391,31 @@ export class WebClientController extends AbstractController {
     // -------------------- User Interface Handling --------------------
     // -----------------------------------------------------------------
 
-    updateUIState() {
-
-        // ----- Update Service Info
+    /**
+     * Updates the text displayed in the "server info box", which may changed when a new call to the
+     * service info end-point is done, or when a new user is logged in.
+     */
+    updateServerInfoBox() {
 
         var versionInfoBox = document.getElementById("version-info");
+        var versionInfoString = "Not connected.";
 
         if(this._dialogueBranchClient.serverInfo != null) {
             var serverInfo = this._dialogueBranchClient.serverInfo;
-            versionInfoBox.innerHTML = "Connected to Dialogue Branch Web Service v" + serverInfo.serviceVersion;
+            versionInfoString = "Connected to Dialogue Branch Web Service v" + serverInfo.serviceVersion;
             if(this._clientState.loggedIn) {
-                versionInfoBox.innerHTML += " as user '" + this._clientState.user.name + "'.";
-            } else {
-                versionInfoBox.innerHTML += ".";
+                versionInfoString += " as user '" + this._clientState.user.name +"'";
+                if(this._clientState.user.role == 'admin') {
+                    versionInfoString += " (with admin rights).";
+                } else {
+                    versionInfoString += ".";
+                }
             }
-        } else {
-            document.getElementById("version-info").innerHTML = "Not connected.";
         }
+        versionInfoBox.innerHTML = versionInfoString;
+    }
+
+    updateUIState() {
 
         this.setDebugConsoleVisibility(this._clientState.debugConsoleVisible);
 

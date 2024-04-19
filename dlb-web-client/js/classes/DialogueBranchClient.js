@@ -460,15 +460,13 @@ export class DialogueBranchClient {
     // ---------------------------------------------------------------------------------------------------
 
     // --------------------------------------------
-    // ---------- End-Point: /info/all ----------
+    // ---------- End-Point: /info/all ------------
     // --------------------------------------------
 
     /**
      * Performs a call to the /info/all end-point. A successfull call will result in a call to the
-     * this.infoSuccess() function, while an error will result in a call to this.infoError(). Both
-     * of these functions will perform basic actions (see their individual documentation) and then
-     * call the 'customInfoSuccess' and 'customInfoError' functions respectively that you may define
-     * yourself to perform additional actions. 
+     * this._clientController.handleServerInfo() function, while an error will result in a call to
+     * this._clientController.handleServerInfoError().
      *
      * The /info/all end-point returns information about the running web service, including:
      *  - Service Version - the software version number of the Web Service
@@ -495,35 +493,22 @@ export class DialogueBranchClient {
         })
         .then((response) => response.json())
         .then((data) => { 
-            this.infoSuccess(data);
+            if('build' in data) {
+                this._serverInfo = new ServerInfo(data.serviceVersion, data.protocolVersion, data.build, data.upTime);
+                this._clientController.handleServerInfo(this._serverInfo);
+            }
+            var errorMessage = "Call to /info/all end-point resulted in an unexpected respnse.";
+            this.logger.warn(this._LOGTAG,errorMessage);
+            this._clientController.handleServerInfoError(errorMessage);
         })
         .catch((err) => {
-            this.infoError(err);
+            var errorMessage = "Call to /info/all end-point resulted in an unexpected respnse: "+err;
+            this.logger.warn(this._LOGTAG,errorMessage);
+            this._clientController.handleServerInfoError(errorMessage);
         });
     }
 
-    /**
-     * This function is called upon a succesfull call to the callInfo() function. The data object
-     * will include the web service's response, which is an object that contains the
-     * 'serviceVersion', 'protocolVersion', 'build', and 'upTime' information of the web service.
-     * This information is stored locally (see the get serverInfo() function), after which the
-     * 'customInfoSuccess(data)' function is called.
-     * 
-     * @param {Object} data 
-     */
-    infoSuccess(data) {
-        if('build' in data) {
-            this._serverInfo = new ServerInfo(data.serviceVersion, data.protocolVersion, data.build, data.upTime);
-        }
-        this._clientController.customInfoSuccess(data);
-    }
-
-    infoError(err) {
-        console.log("DLB-CLIENT: Handling error after call to /info/all end-point.");
-        this._clientController.customInfoError(err);
-    }
-
-     // --------------------------------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------------------
     // ---------- 6. Admin: End-points for administrative control of the Dialogue Branch Web Service. ----------
     // ---------------------------------------------------------------------------------------------------------
 
