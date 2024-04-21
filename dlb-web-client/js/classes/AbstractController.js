@@ -152,7 +152,7 @@ export class AbstractController {
      * Called after a successful call to the /dialogue/cancel end-point.
      */
     handleCancelDialogue() {
-
+        throw new Error("Method 'handleCancelDialogue()' must be implemented by a subclass.");
     }
 
     /**
@@ -160,7 +160,7 @@ export class AbstractController {
      * @param {String} errorMessage a human-readable error message indicating the cause of the error.
      */
     handleCancelDialogueError(errorMessage) {
-
+        throw new Error("Method 'handleCancelDialogueError()' must be implemented by a subclass.");
     }
 
     // -------------------------------------------------------------------------------------------------

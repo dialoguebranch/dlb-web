@@ -143,8 +143,6 @@ export class WebClientController extends AbstractController {
     }
 
     handleCancelDialogue() {
-        this._logger.info(this._LOGTAG,"Custom Cancel Dialogue Success!");
-
         this.renderDialogueStep(null, "Dialogue Cancelled");
     }
 
@@ -201,14 +199,13 @@ export class WebClientController extends AbstractController {
         this._dialogueBranchClient.callGetVariables();
     }
 
-    customGetVariablesSuccess(data) {
+    handleGetVariables(variables) {
         var variableBrowserContentField = document.getElementById("variable-browser-content");
 
         // Empty the content field before populating
         variableBrowserContentField.innerHTML = "";
 
-        for (let key in data) {
-
+        variables.forEach(variable => {
             const variableEntryElement = document.createElement("div");
             variableEntryElement.classList.add("variable-browser-entry");
             variableBrowserContentField.appendChild(variableEntryElement);
@@ -220,19 +217,24 @@ export class WebClientController extends AbstractController {
             const variableDeleteIcon = document.createElement("button");
             variableDeleteIcon.classList.add("variable-delete-icon");
             variableDeleteIcon.innerHTML = "<i class='fa-solid fa-trash'></i>";
-            variableDeleteIcon.addEventListener("click", this.actionDeleteVariable.bind(this, key), false);
+            variableDeleteIcon.addEventListener("click", this.actionDeleteVariable.bind(this, variable.name), false);
             variableButtonsBox.appendChild(variableDeleteIcon);
 
             const variableNameElement = document.createElement("div");
             variableNameElement.classList.add("variable-entry-name");
-            variableNameElement.innerHTML = key;
+            variableNameElement.innerHTML = variable.name;
             variableEntryElement.appendChild(variableNameElement);
 
             const variableValueElement = document.createElement("div");
             variableValueElement.classList.add("variable-entry-value");
-            variableValueElement.innerHTML = data[key];
+            variableValueElement.innerHTML = variable.value;
             variableEntryElement.appendChild(variableValueElement);
-        }
+        });
+
+    }
+
+    handleGetVariablesError(errorMessage) {
+        this._logger.error(this._LOGTAG,errorMessage);
     }
 
     actionDeleteVariable(variableName) {

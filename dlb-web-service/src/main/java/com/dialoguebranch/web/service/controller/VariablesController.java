@@ -27,6 +27,7 @@
 
 package com.dialoguebranch.web.service.controller;
 
+import com.dialoguebranch.execution.Variable;
 import com.dialoguebranch.execution.VariableStore;
 import com.dialoguebranch.execution.VariableStoreChange;
 import com.dialoguebranch.web.service.Application;
@@ -84,7 +85,7 @@ public class VariablesController {
 			"retrieve its values, or leave this empty to retrieve all known DialogueBranch " +
 			"Variable data.")
 	@RequestMapping(value="/get", method=RequestMethod.GET)
-	public Map<String,Object> getVariables(
+	public List<Variable> getVariables(
 		HttpServletRequest request,
 		HttpServletResponse response,
 
@@ -139,7 +140,7 @@ public class VariablesController {
 	 * @throws Exception in case of an error retrieving variable data from file.
 	 * TODO: Return a list of Variable objects
 	 */
-	private Map<String,Object> doGetVariables(String userId, String variableNames)
+	private List<Variable> doGetVariables(String userId, String variableNames)
 			throws Exception {
 		UserService userService = application.getApplicationManager()
 				.getActiveUserService(userId);
@@ -150,7 +151,7 @@ public class VariablesController {
 
 		List<String> nameList;
 		if (variableNames.isEmpty()) {
-		nameList = variableStore.getSortedVariableNames();
+			nameList = variableStore.getSortedVariableNames();
 		} else {
 			List<String> invalidNames = new ArrayList<>();
 			String[] nameArray = variableNames.split("\\s+");
@@ -167,10 +168,12 @@ public class VariablesController {
 			nameList = Arrays.asList(nameArray);
 		}
 
-		Map<String,Object> result = new LinkedHashMap<>();
-		for (String name : nameList) {
-			result.put(name, variableStore.getVariable(name).getValue());
+		List<Variable> result = new ArrayList<>();
+
+		for(String variableName : nameList) {
+			result.add(variableStore.getVariable(variableName));
 		}
+
 		return result;
 	}
 

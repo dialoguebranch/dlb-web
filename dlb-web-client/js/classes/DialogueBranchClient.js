@@ -33,6 +33,7 @@ import { ServerInfo } from './ServerInfo.js';
 import { BasicReply } from './BasicReply.js';
 import { DialogueStep } from './DialogueStep.js';
 import { AutoForwardReply } from './AutoForwardReply.js';
+import { Variable } from './model/Variable.js';
 
 export class DialogueBranchClient {
 
@@ -393,20 +394,29 @@ export class DialogueBranchClient {
         })
         .then((response) => response.json())
         .then((data) => { 
-            this.getVariablesSuccess(data);
+            if(data == null || data.length == 0) {
+                this._clientController.handleGetVariables(new Array());
+            } else {
+                var variables = new Array();
+
+                data.forEach(entry => {
+                    var variable = new Variable();
+                    variable.name = entry.name;
+                    variable.value = entry.value;
+                    variable.updatedTime = entry.updatedTime;
+                    variable.updatedTimeZone = entry.updatedTimeZone;
+                    variables.push(variable);
+                });
+
+                this._clientController.handleGetVariables(variables);
+            }
         })
         .catch((err) => {
-            this.getVariablesError(err);
+            var errorMessage = "The Web Service returned an unexpected response when requesting variables list: "+err;
+            this.logger.error(this._LOGTAG,errorMessage);
+            this._clientController.handleGetVariablesError(errorMessage);
         });
 
-    }
-
-    getVariablesSuccess(data) {
-        this._clientController.customGetVariablesSuccess(data);
-    }
-
-    getVariablesError(err) {
-        console.log(err)
     }
 
     // ------------------------------------------------------
