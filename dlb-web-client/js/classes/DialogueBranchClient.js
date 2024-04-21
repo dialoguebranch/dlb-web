@@ -430,8 +430,6 @@ export class DialogueBranchClient {
         if(variableValue != null) url += "&value="+variableValue;
         url += "&timeZone="+this._timeZone;
 
-        console.log("Calling /variables/set-single/ :"+url);
-
         fetch(url, {
             method: "POST",
             headers: {
@@ -447,22 +445,14 @@ export class DialogueBranchClient {
             return Promise.reject(response);
         })
         .then(() => { 
-            this.setVariableSuccess();
+            this._clientController.handleSetVariable(variableName);
         })
         .catch((err) => {
-            this.setVariableError(err);
+            var errorMessage = "The Web Service returned an unexpected response when updating a single variable: "+err;
+            this.logger.error(this._LOGTAG,errorMessage);
+            this._clientController.handleSetVariableError(variableName, errorMessage);
         });
 
-    }
-
-    setVariableSuccess() {
-        console.log("setVariableSuccess");
-        this._clientController.customSetVariableSuccess();
-    }
-
-    setVariableError(err) {
-        console.log("setVariableError");
-        console.log(err)
     }
 
     // ---------------------------------------------------------------------------------------------------

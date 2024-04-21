@@ -238,13 +238,17 @@ export class WebClientController extends AbstractController {
     }
 
     actionDeleteVariable(variableName) {
-        this._logger.info(this._LOGTAG,"Starting to delete variable: "+variableName);
+        this._logger.info(this._LOGTAG,"Requesting to delete variable: '" + variableName + "'.");
         this._dialogueBranchClient.callSetVariable(variableName,null);
     }
 
-    customSetVariableSuccess() {
-        this._logger.debug(this._LOGTAG,"Custom Set Variable Success()");
+    handleSetVariable(variableName) {
+        this._logger.info(this._LOGTAG,"Succesfully updated variable '" + variableName + "'.");
         this.actionListVariables();
+    }
+
+    handleSetVariableError(variableName, errorMessage) {
+        this._logger.error(this._LOGTAG,"Error updating variable '"+variableName+"', with the following message: " + errorMessage);
     }
 
     // ---------- Start Dialogue ----------

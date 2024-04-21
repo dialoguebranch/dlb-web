@@ -171,13 +171,44 @@ export class AbstractController {
     // ---------- End-Point: /variables/get ----------
     // -----------------------------------------------
 
-    // ...
+    /**
+     * Called after a successful call to the /variables/get end-point. Provides a List of Variable objects.
+     * @param {List} the List of Variable objects, or an empty list.
+     */
+    handleGetVariables(variables) { 
+        throw new Error("Method 'handleGetVariables' must be implemented by a subclass.");
+    }
+
+    /**
+     * Called after a failed call to the /variables/get end-point.
+     * @param {String} errorMessage a human-readable error message indicating the cause of the error.
+     */
+    handleGetVariablesError(errorMessage) {
+        throw new Error("Method 'handleGetVariablesError' must be implemented by a subclass.");
+     }
 
     // ------------------------------------------------------
     // ---------- End-Point: /variables/set-single ----------
     // ------------------------------------------------------
 
-    // ...
+    /**
+     * Called after a successful call to the /variables/set-single end-point.
+     * 
+     * @param {String} variableName - the name of the variable that was updated.
+     */
+    handleSetVariable(variableName) {
+        throw new Error("Method 'handleSetVariable' must be implemented by a subclass.");
+    }
+
+    /**
+     * Called after a failed call to the /variables/set-single end-point.
+     * 
+     * @param {String} variableName the name of the variable that was attempted to be updated.
+     * @param {String} errorMessage a human-readable error message indicating the cause of the error.
+     */
+    handleSetVariableError(variableName, errorMessage) {
+        throw new Error("Method 'handleSetVariableError' must be implemented by a subclass.");
+    }
 
     // ---------------------------------------------------------------------------------------------------
     // ---------- 5. Information: End-points that provide information about the running service ----------
@@ -187,11 +218,20 @@ export class AbstractController {
     // ---------- End-Point: /info/all ------------
     // --------------------------------------------
 
+     /**
+     * Called after a successful call to the /info/all end-point. Delivers a ServerInfo object,
+     * containing the information about the running web service.
+     * @param {ServerInfo} serverInfo - the ServerInfo object.
+     */
     handleServerInfo(serverInfo) {
         this._logger.info(this._LOGTAG,"Connected to Dialogue Branch Web Service v"+serverInfo.serviceVersion+", using protocol version "+serverInfo.protocolVersion+" (build: '"+serverInfo.build+"' running for "+serverInfo.upTime+").");
         this.updateServerInfoBox();
     }
 
+    /**
+     * Called after a failed call to the /info/all end-point.
+     * @param {String} errorMessage a human-readable error message indicating the cause of the error.
+     */
     handleServerInfoError(errorMessage) {
         this._logger.error(this._LOGTAG,errorMessage);
     }
