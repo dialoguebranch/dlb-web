@@ -292,8 +292,6 @@ export class DialogueBranchClient {
 
         url += "?loggedDialogueId="+loggedDialogueId;
 
-        console.log("callCancelDialogue: "+url);
-
         fetch(url, {
             method: "POST",
             headers: {
@@ -481,7 +479,6 @@ export class DialogueBranchClient {
      *                                 should never expire.
      */
     callInfo() {
-        console.log("DLB-CLIENT: Calling /info/all/ end-point.");
         const infoUrl = 'http://localhost:8080/dlb-web-service/v1/info/all';
 
         fetch(infoUrl, {
