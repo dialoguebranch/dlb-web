@@ -128,10 +128,17 @@ td.login-table-labels {
 	font-size: 16px;
 	cursor: pointer;
 	border-radius: 50%;
+	background-color: #04AA6D; /* Green */
 }
 
 #button-refresh-dialogue-list {
-	background-color: #04AA6D; /* Green */
+    float: right;
+    width: 30px;
+    height: 30px;
+    margin-right: 5px;
+}
+
+#button-resize-dialogue-list {
     float: right;
     width: 30px;
     height: 30px;
@@ -153,8 +160,15 @@ td.login-table-labels {
 
 #dialogue-browser-container {
     float: left;
-    width: 20%;
     height: 488px;
+}
+
+.browser-size-default {
+	width: 20%;
+}
+
+.browser-size-extended {
+	width: 30%;
 }
 
 .dialogue-browser-entry {
@@ -188,12 +202,17 @@ td.login-table-labels {
 
 #variable-browser-container {
     float: left;
-    width: 20%;
     height: 500px;
 }
 
 #button-refresh-variable-list {
-	background-color: #04AA6D; /* Green */
+    float: right;
+    width: 30px;
+    height: 30px;
+    margin-right: 5px;
+}
+
+#button-resize-variable-list {
     float: right;
     width: 30px;
     height: 30px;
@@ -244,6 +263,23 @@ td.login-table-labels {
 /* ------------------------------------------------------------ */
 /* -------------------- Interaction Tester -------------------- */
 /* ------------------------------------------------------------ */
+
+#interaction-tester-container {
+    float: left;
+    height: 500px;
+}
+
+.tester-size-default {
+	width: 60%;
+}
+
+.tester-size-small {
+	width: 50%
+}
+
+.tester-size-smaller {
+	width: 40%;
+}
 
 #button-cancel-dialogue {
 	background-color: #790606;

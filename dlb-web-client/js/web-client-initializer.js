@@ -52,8 +52,19 @@ window.onload = function() {
         this.webClientController.actionRefreshDialogueBrowser(e);
     });
 
+    document.getElementById("button-resize-dialogue-list").addEventListener("click", (e)=> {
+        e.preventDefault();
+        this.webClientController.actionResizeDialogueBrowser();
+    });
+
     document.getElementById("button-refresh-variable-list").addEventListener("click", (e)=> {
-        this.webClientController.actionListVariables(e);
+        e.preventDefault();
+        this.webClientController.actionRefreshVariableBrowser();
+    });
+
+    document.getElementById("button-resize-variable-list").addEventListener("click", (e)=> {
+        e.preventDefault();
+        this.webClientController.actionResizeVariableBrowser();
     });
 
     

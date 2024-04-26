@@ -78,6 +78,9 @@ export class WebClientController extends AbstractController {
 
         // Update the UI State
         this.updateUIState();
+
+        // Update the size of the interaction tester / variable/dialogue browsers
+        this.updateInteractionTesterSize();
     }
     
     // ------------------------------------------------------
@@ -159,6 +162,17 @@ export class WebClientController extends AbstractController {
         this._dialogueBranchClient.callListDialogues();
     }
 
+    actionResizeDialogueBrowser() {
+
+        if(this._clientState.dialogueBrowserExtended) {
+            this._clientState.dialogueBrowserExtended = false;
+        } else {
+            this._clientState.dialogueBrowserExtended = true;
+        }
+        
+        this.updateInteractionTesterSize();
+    }
+
     handleListDialogues(dialogueNames) {
         var dialogueBrowserContentField = document.getElementById("dialogue-browser-content");
 
@@ -194,9 +208,17 @@ export class WebClientController extends AbstractController {
     // -------------------- Variable Browser --------------------
     // ----------------------------------------------------------
 
-    actionListVariables(event) {
-        if(event != null) event.preventDefault();
+    actionRefreshVariableBrowser() {
         this._dialogueBranchClient.callGetVariables();
+    }
+
+    actionResizeVariableBrowser() {
+        if(this._clientState.variableBrowserExtended) {
+            this._clientState.variableBrowserExtended = false;
+        } else {
+            this._clientState.variableBrowserExtended = true;
+        }
+        this.updateInteractionTesterSize();
     }
 
     handleGetVariables(variables) {
@@ -231,6 +253,8 @@ export class WebClientController extends AbstractController {
             variableEntryElement.appendChild(variableValueElement);
         });
 
+        this._logger.info(this._LOGTAG,"Updated the contents of the Variable Browser, showing "+variables.length+" available variables.");
+
     }
 
     handleGetVariablesError(errorMessage) {
@@ -244,7 +268,7 @@ export class WebClientController extends AbstractController {
 
     handleSetVariable(variableName) {
         this._logger.info(this._LOGTAG,"Succesfully updated variable '" + variableName + "'.");
-        this.actionListVariables();
+        this.actionRefreshVariableBrowser();
     }
 
     handleSetVariableError(variableName, errorMessage) {
@@ -445,7 +469,7 @@ export class WebClientController extends AbstractController {
             this.actionRefreshDialogueBrowser(null);
 
             // Refresh the Variable Browser
-            this.actionListVariables();
+            this.actionRefreshVariableBrowser();
 
         } else {
             document.getElementById("navbar").style.display = 'none';
@@ -456,6 +480,57 @@ export class WebClientController extends AbstractController {
             document.getElementById("dlb-splash-logo").style.display = 'block';
             document.getElementById("dlb-splash-text").style.display = 'block';
             document.getElementById("login-form").style.display = 'block';
+        }
+    }
+
+    updateInteractionTesterSize() {
+
+        //<button id="button-resize-variable-list" class="circle-button-small" title="Resize the contents of the Variable Browser."><i class="fa-solid fa-caret-left"></i></button>
+        var resizeDialogueBrowserButton = document.getElementById("button-resize-dialogue-list");
+        var resizeVariableBrowserButton = document.getElementById("button-resize-variable-list");
+
+        var dialogueBrowserContainer = document.getElementById("dialogue-browser-container");
+        var variableBrowserContainer = document.getElementById("variable-browser-container");
+        var interactionTesterContainer = document.getElementById("interaction-tester-container");
+
+
+        var sideBarsExtended = 0;
+
+        if(this._clientState.dialogueBrowserExtended) {
+            sideBarsExtended++;
+            resizeDialogueBrowserButton.innerHTML = "<i class=\"fa-solid fa-caret-left\"></i>";
+            dialogueBrowserContainer.classList.remove("browser-size-default");
+            dialogueBrowserContainer.classList.add("browser-size-extended");
+
+        } else {
+            resizeDialogueBrowserButton.innerHTML = "<i class=\"fa-solid fa-caret-right\"></i>";
+            dialogueBrowserContainer.classList.remove("browser-size-extended");
+            dialogueBrowserContainer.classList.add("browser-size-default");
+        }
+
+        if(this._clientState.variableBrowserExtended) {
+            sideBarsExtended++;
+            resizeVariableBrowserButton.innerHTML = "<i class=\"fa-solid fa-caret-right\"></i>";
+            variableBrowserContainer.classList.remove("browser-size-default");
+            variableBrowserContainer.classList.add("browser-size-extended");
+        } else {
+            resizeVariableBrowserButton.innerHTML = "<i class=\"fa-solid fa-caret-left\"></i>";
+            variableBrowserContainer.classList.remove("browser-size-extended");
+            variableBrowserContainer.classList.add("browser-size-default");
+        }
+
+        if(sideBarsExtended == 0) {
+            interactionTesterContainer.classList.remove("tester-size-small");
+            interactionTesterContainer.classList.remove("tester-size-smaller");
+            interactionTesterContainer.classList.add("tester-size-default");
+        } else if(sideBarsExtended == 1) {
+            interactionTesterContainer.classList.remove("tester-size-smaller");
+            interactionTesterContainer.classList.remove("tester-size-default");
+            interactionTesterContainer.classList.add("tester-size-small");
+        } else {
+            interactionTesterContainer.classList.remove("tester-size-small");
+            interactionTesterContainer.classList.remove("tester-size-default");
+            interactionTesterContainer.classList.add("tester-size-smaller");
         }
     }
 
@@ -640,7 +715,7 @@ export class WebClientController extends AbstractController {
             contentBlock.scrollTop = fillerElement.offsetTop;
 
             // Refresh the Variable Browser
-            this.actionListVariables();
+            this.actionRefreshVariableBrowser();
         }
 
     }
