@@ -254,15 +254,20 @@ td.login-table-labels {
 	padding-bottom: 4px;
 	padding-left: 4px;
 	font-size: 12px;
-	font-weight: 700;
+	font-weight: 400;
 	color: var(--color-orange-darker);
 	display: flex;
-	min-width: 430px;
+	min-width: 670px;
+}
+
+.variable-browser-header {
+	background-color: var(--color-grey-light);
+	font-weight: 900;
 }
 
 .variable-buttons-box {
 	flex: 1;
-	min-width: 30px;
+	min-width: 70px;
 }
 
 .variable-entry-name {
@@ -272,6 +277,11 @@ td.login-table-labels {
 
 .variable-entry-value {
     flex: 4;
+	min-width: 200px;
+}
+
+.variable-entry-updated {
+	flex: 4;
 	min-width: 200px;
 }
 
@@ -385,4 +395,3 @@ div.reply-option-with-listener:hover {
 	margin-left: auto;
 	margin-right: auto;
 }
-

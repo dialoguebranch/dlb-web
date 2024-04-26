@@ -227,8 +227,34 @@ export class WebClientController extends AbstractController {
         // Empty the content field before populating
         variableBrowserContentField.innerHTML = "";
 
+        // Add some headers to the Variables 'table'
+        var headerElement = document.createElement("div");
+        headerElement.classList.add("variable-browser-entry");
+        headerElement.classList.add("variable-browser-header");
+        variableBrowserContentField.appendChild(headerElement);
+
+        var variableButtonsLabel = document.createElement("div");
+        variableButtonsLabel.classList.add("variable-buttons-box");
+        variableButtonsLabel.innerHTML = "Actions";
+        headerElement.appendChild(variableButtonsLabel);
+
+        var variableNameLabel = document.createElement("div");
+        variableNameLabel.classList.add("variable-entry-name");
+        variableNameLabel.innerHTML = "Name";
+        headerElement.appendChild(variableNameLabel);
+
+        var variableValueLabel = document.createElement("div");
+        variableValueLabel.classList.add("variable-entry-value");
+        variableValueLabel.innerHTML = "Value";
+        headerElement.appendChild(variableValueLabel);
+
+        var variableUpdatedLabel = document.createElement("div");
+        variableUpdatedLabel.classList.add("variable-entry-value");
+        variableUpdatedLabel.innerHTML = "Last Updated";
+        headerElement.appendChild(variableUpdatedLabel);
+
         variables.forEach(variable => {
-            const variableEntryElement = document.createElement("div");
+            var variableEntryElement = document.createElement("div");
             variableEntryElement.classList.add("variable-browser-entry");
             variableBrowserContentField.appendChild(variableEntryElement);
 
@@ -236,21 +262,26 @@ export class WebClientController extends AbstractController {
             variableButtonsBox.classList.add("variable-buttons-box");
             variableEntryElement.appendChild(variableButtonsBox);
             
-            const variableDeleteIcon = document.createElement("button");
+            var variableDeleteIcon = document.createElement("button");
             variableDeleteIcon.classList.add("variable-delete-icon");
             variableDeleteIcon.innerHTML = "<i class='fa-solid fa-trash'></i>";
             variableDeleteIcon.addEventListener("click", this.actionDeleteVariable.bind(this, variable.name), false);
             variableButtonsBox.appendChild(variableDeleteIcon);
 
-            const variableNameElement = document.createElement("div");
+            var variableNameElement = document.createElement("div");
             variableNameElement.classList.add("variable-entry-name");
             variableNameElement.innerHTML = variable.name;
             variableEntryElement.appendChild(variableNameElement);
 
-            const variableValueElement = document.createElement("div");
+            var variableValueElement = document.createElement("div");
             variableValueElement.classList.add("variable-entry-value");
             variableValueElement.innerHTML = variable.value;
             variableEntryElement.appendChild(variableValueElement);
+
+            var variableUpdatedElement = document.createElement("div");
+            variableUpdatedElement.classList.add("variable-entry-updated");
+            variableUpdatedElement.innerHTML = variable.getReadableTimeSinceLastUpdate();
+            variableEntryElement.appendChild(variableUpdatedElement);
         });
 
         this._logger.info(this._LOGTAG,"Updated the contents of the Variable Browser, showing "+variables.length+" available variables.");

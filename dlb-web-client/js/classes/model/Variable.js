@@ -118,12 +118,56 @@ export class Variable {
     // ---------------------------------------
 
     /**
-     * Returns a human-readable string representation of how long ago this variable was updated, e.g. "just now", or "5 days ago".
-     * @param {String} currentTimeZone the timezone in which to check.
+     * Returns a human-readable string representation of how long ago this variable was updated,
+     * e.g. "just now", or "5 days ago".
      */
-    getReadableTimeSinceLastUpdate(currentTimeZone) {
-        //TODO: Implement
-        return currentTimeZone;
+    getReadableTimeSinceLastUpdate() {
+        var secondsAgo = Math.floor((new Date() - new Date(this._updatedTime)) / 1000);
+    
+        const years = Math.floor(secondsAgo / 31536000);
+
+        if (years > 1) {
+            return years + " years ago";
+        }
+
+        if (years === 1) {
+            return years + " year ago";
+        }
+
+        const months = Math.floor(secondsAgo / 2628000);
+        if (months > 1) {
+            return months + " months ago";
+        }
+        if (months === 1) {
+            return months + " month ago";
+        }
+
+        const days = Math.floor(secondsAgo / 86400);
+        if (days > 1) {
+            return days + " days ago";
+        }
+        if (days === 1) {
+            return days + " day ago";
+        }
+
+        const hours = Math.floor(secondsAgo / 3600);
+        if (hours > 1) {
+            return hours + " hours ago";
+        }
+        if (hours === 1) {
+            return hours + " hour ago";
+        }
+
+        const minutes = Math.floor(secondsAgo / 60);
+        if (minutes > 1) {
+            return minutes + " minutes ago";
+        }
+        if (minutes === 1) {
+            return minutes + " minute ago";
+        }
+
+        return "Just now";
+        
     }
 
 }
