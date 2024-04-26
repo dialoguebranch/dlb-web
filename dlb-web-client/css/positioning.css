@@ -114,19 +114,6 @@ td.login-table-submit {
     float: left;
 }
 
-.box-content-scrollable {
-	background-color: white;
-	height: 470px;
-	margin-left: 5px;
-    margin-right: 5px;
-    margin-top: 5px;
-    margin-bottom: 0px;
-	border-color: black;
-    box-shadow: 0 0 1px black;
-    overflow-x: hidden;
-    overflow-y: auto;
-}
-
 .dialogue-step-spacer-element {
     height: 24px;
 }

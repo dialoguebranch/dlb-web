@@ -171,6 +171,19 @@ td.login-table-labels {
 	width: 30%;
 }
 
+#dialogue-browser-content {
+	background-color: white;
+	height: 470px;
+	margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 0px;
+	border-color: black;
+    box-shadow: 0 0 1px black;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
 .dialogue-browser-entry {
 	background-color: var(--color-grey-lighter);
 	margin-top: 4px;
@@ -219,6 +232,19 @@ td.login-table-labels {
     margin-right: 5px;
 }
 
+#variable-browser-content {
+	background-color: white;
+	height: 470px;
+	margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 0px;
+	border-color: black;
+    box-shadow: 0 0 1px black;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
 .variable-browser-entry {
     background-color: var(--color-grey-lighter);
 	margin-top: 4px;
@@ -231,18 +257,22 @@ td.login-table-labels {
 	font-weight: 700;
 	color: var(--color-orange-darker);
 	display: flex;
+	min-width: 430px;
 }
 
 .variable-buttons-box {
 	flex: 1;
+	min-width: 30px;
 }
 
 .variable-entry-name {
-    flex: 4
+    flex: 4;
+	min-width: 200px;
 }
 
 .variable-entry-value {
     flex: 4;
+	min-width: 200px;
 }
 
 .variable-delete-icon {
@@ -267,6 +297,19 @@ td.login-table-labels {
 #interaction-tester-container {
     float: left;
     height: 500px;
+}
+
+#interaction-tester-content {
+	background-color: white;
+	height: 470px;
+	margin-left: 5px;
+	margin-right: 5px;
+	margin-top: 5px;
+	margin-bottom: 0px;
+	border-color: black;
+	box-shadow: 0 0 1px black;
+	overflow-x: hidden;
+	overflow-y: auto;
 }
 
 .tester-size-default {
