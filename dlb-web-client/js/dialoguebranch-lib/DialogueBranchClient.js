@@ -26,14 +26,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { User } from './User.js';
-import { Segment } from './Segment.js';
-import { Statement } from './Statement.js';
-import { ServerInfo } from './ServerInfo.js';
-import { BasicReply } from './BasicReply.js';
-import { DialogueStep } from './DialogueStep.js';
-import { AutoForwardReply } from './AutoForwardReply.js';
+import { User } from './model/User.js';
+import { Segment } from './model/Segment.js';
 import { Variable } from './model/Variable.js';
+import { Statement } from './model/Statement.js';
+import { ServerInfo } from './model/ServerInfo.js';
+import { BasicReply } from './model/BasicReply.js';
+import { DialogueStep } from './model/DialogueStep.js';
+import { AutoForwardReply } from './model/AutoForwardReply.js';
 
 export class DialogueBranchClient {
 
@@ -493,13 +493,14 @@ export class DialogueBranchClient {
             if('build' in data) {
                 this._serverInfo = new ServerInfo(data.serviceVersion, data.protocolVersion, data.build, data.upTime);
                 this._clientController.handleServerInfo(this._serverInfo);
+            } else {
+                var errorMessage = "Call to /info/all end-point resulted in an unexpected response.";
+                this.logger.warn(this._LOGTAG,errorMessage);
+                this._clientController.handleServerInfoError(errorMessage);
             }
-            var errorMessage = "Call to /info/all end-point resulted in an unexpected respnse.";
-            this.logger.warn(this._LOGTAG,errorMessage);
-            this._clientController.handleServerInfoError(errorMessage);
         })
         .catch((err) => {
-            var errorMessage = "Call to /info/all end-point resulted in an unexpected respnse: "+err;
+            var errorMessage = "Call to /info/all end-point resulted in an unexpected response: "+err;
             this.logger.warn(this._LOGTAG,errorMessage);
             this._clientController.handleServerInfoError(errorMessage);
         });

@@ -26,18 +26,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/* eslint-disable no-unused-vars */
+export class User {
 
-import {AutoForwardReply} from './AutoForwardReply.js';
-import {BasicReply} from './BasicReply.js';
-import {ClientState} from './ClientState.js';
-import {Reply} from './Reply.js';
+    // ---------------------------------------
+    // ---------- Constructor(s) -------------
+    // ---------------------------------------
 
-import {DialogueBranchClient} from './DialogueBranchClient.js';
-import {DialogueBranchConfig} from './DialogueBranchConfig.js';
-import {DialogueStep} from './DialogueStep.js';
+    constructor(name, role, authToken) {
+        this._name = name;
+        this._role = role;
+        this._authToken = authToken;
+    }
 
-import {Segment} from './Segment.js';
-import {ServerInfo} from './ServerInfo.js';
-import {Statement} from './Statement.js';
-import {User} from './User.js';
+    // ---------------------------------------
+    // ---------- Getters & Setters ----------
+    // ---------------------------------------
+
+    get name() {
+        return this._name;
+    }
+
+    get role() {
+        return this._role;
+    }
+
+    get authToken() {
+        return this._authToken;
+    }
+
+    // -----------------------------------
+    // ---------- Other Methods ----------
+    // -----------------------------------
+
+    /**
+     * Returns a human readable String representation of this User object.
+     * @returns a human readable String representation of this User object.
+     */
+   toString() {
+       var result = "";
+       result += "\n{name: " + this._name;
+       result += "\nrole: " + this._role;
+       result += "\nauthToken: " + this._authToken +"}";
+       return result;
+   }
+
+}

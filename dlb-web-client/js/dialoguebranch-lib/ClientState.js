@@ -26,8 +26,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { User } from './User.js';
-import { DocumentFunctions } from './DocumentFunctions.js';
+import { User } from './model/User.js';
+import { DocumentFunctions } from './util/DocumentFunctions.js';
 
 /**
  * A ClientState object models the state of the Dialogue Branch Web Client.

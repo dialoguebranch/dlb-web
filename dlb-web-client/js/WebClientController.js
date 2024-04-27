@@ -26,14 +26,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { ClientState } from './classes/ClientState.js';
-import { TextAreaLogger } from './classes/TextAreaLogger.js';
-import { LOG_LEVEL_NAMES } from './classes/AbstractLogger.js';
-import { AutoForwardReply } from './classes/AutoForwardReply.js';
-import { DocumentFunctions } from './classes/DocumentFunctions.js';
-import { AbstractController } from './classes/AbstractController.js';
-import { DialogueBranchConfig } from './classes/DialogueBranchConfig.js';
-import { DialogueBranchClient } from './classes/DialogueBranchClient.js';
+import { ClientState } from './dialoguebranch-lib/ClientState.js';
+import { TextAreaLogger } from './dialoguebranch-lib/util/TextAreaLogger.js';
+import { LOG_LEVEL_NAMES } from './dialoguebranch-lib/util/AbstractLogger.js';
+import { AutoForwardReply } from './dialoguebranch-lib/model/AutoForwardReply.js';
+import { DocumentFunctions } from './dialoguebranch-lib/util/DocumentFunctions.js';
+import { AbstractController } from './dialoguebranch-lib/AbstractController.js';
+import { DialogueBranchConfig } from './dialoguebranch-lib/DialogueBranchConfig.js';
+import { DialogueBranchClient } from './dialoguebranch-lib/DialogueBranchClient.js';
 
 export class WebClientController extends AbstractController {
 
