@@ -26,14 +26,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { ClientState } from './dialoguebranch-lib/ClientState.js';
-import { TextAreaLogger } from './dialoguebranch-lib/util/TextAreaLogger.js';
-import { LOG_LEVEL_NAMES } from './dialoguebranch-lib/util/AbstractLogger.js';
-import { AutoForwardReply } from './dialoguebranch-lib/model/AutoForwardReply.js';
-import { DocumentFunctions } from './dialoguebranch-lib/util/DocumentFunctions.js';
-import { AbstractController } from './dialoguebranch-lib/AbstractController.js';
-import { DialogueBranchConfig } from './dialoguebranch-lib/DialogueBranchConfig.js';
-import { DialogueBranchClient } from './dialoguebranch-lib/DialogueBranchClient.js';
+import { WCTAClientState } from './WCTAClientState.js';
+import { TextAreaLogger } from '../dlb-lib/util/TextAreaLogger.js';
+import { LOG_LEVEL_NAMES } from '../dlb-lib/util/AbstractLogger.js';
+import { AutoForwardReply } from '../dlb-lib/model/AutoForwardReply.js';
+import { DocumentFunctions } from '../dlb-lib/util/DocumentFunctions.js';
+import { AbstractController } from '../dlb-lib/AbstractController.js';
+import { DialogueBranchConfig } from '../dlb-lib/DialogueBranchConfig.js';
+import { DialogueBranchClient } from '../dlb-lib/DialogueBranchClient.js';
 
 export class WebClientController extends AbstractController {
 
@@ -63,7 +63,7 @@ export class WebClientController extends AbstractController {
         this._logger.info(this._LOGTAG,"Initalized DialogueBranchClient directed to the Web Service at '"+ this._dialogueBranchConfig.baseUrl + "'.");
 
         // Initialize the ClientState object and take actions
-        this._clientState = new ClientState(this._logger);
+        this._clientState = new WCTAClientState(this._logger);
         this._clientState.loadFromCookie();
 
         // If user info was loaded from Cookie, validate the authToken that was found

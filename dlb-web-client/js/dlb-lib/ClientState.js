@@ -26,9 +26,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { User } from './model/User.js';
-import { DocumentFunctions } from './util/DocumentFunctions.js';
-
 /**
  * A ClientState object models the state of the Dialogue Branch Web Client.
  * It should be passed a reference to a custom Logger object so that it may
@@ -49,13 +46,13 @@ export class ClientState {
      */
     constructor(logger) {
         this._logger = logger;
-        this._variableBrowserExtended = false;
-        this._dialogueBrowserExtended = false;
     }
 
     // ---------------------------------------
     // ---------- Getters & Setters ----------
     // ---------------------------------------
+
+    // ----- loggedIn
 
     /**
      * Sets whether or not a user is currently logged in to the client app.
@@ -73,6 +70,8 @@ export class ClientState {
         return this._loggedIn;
     }
 
+    // ----- user
+
     /**
      * Sets the User object, representing the user information of a logged in user.
      * @param {User} user the User object, representing the user information of a logged in user.
@@ -89,7 +88,7 @@ export class ClientState {
         return this._user;
     }
 
-    // ----- ServerInfo
+    // ----- serverInfo
 
     /**
      * Sets the ServerInfo object, containing information about the server to which the client is connected.
@@ -106,89 +105,5 @@ export class ClientState {
     get serverInfo() {
         return this._serverInfo;
     }
-
-    // ----- debugConsoleVisible
-
-    /**
-     * Sets a boolean value indicating whether or not the debug console is currently visible.
-     * @param {boolean} debugConsoleVisible a boolean value indicating whether or not the debug console is currently visible.
-     */
-    set debugConsoleVisible(debugConsoleVisible) {
-        this._debugConsoleVisible = debugConsoleVisible;
-        DocumentFunctions.setCookie('state.debugConsoleVisible', this._debugConsoleVisible, 365);
-    }
-
-    /**
-     * Returns a boolean value indicating whether or not the debug console is currently visible.
-     * @returns a boolean value indicating whether or not the debug console is currently visible.
-     */
-    get debugConsoleVisible() {
-        return this._debugConsoleVisible;
-    }
-
-    /**
-     * Sets a boolean value indicating whether the Variable Browser is currently extended or not.
-     * @param {Boolean} variableBrowserExtended - true if the Variable Browser is currently extended, false otherwise.
-     */
-    set variableBrowserExtended(variableBrowserExtended) {
-        this._variableBrowserExtended = variableBrowserExtended;
-        DocumentFunctions.setCookie('state.variableBrowserExtended', this._variableBrowserExtended, 365);
-    }
-
-    /**
-     * Returns a boolean value indicating whether the Variable Browser is currently extended or not.
-     * @returns a boolean value indicating whether the Variable Browser is currently extended or not.
-     */
-    get variableBrowserExtended() {
-        return this._variableBrowserExtended;
-    }
-
-    /**
-     * Sets a boolean value indicating whether the Dialogue Browser is currently extended or not.
-     * @param {Boolean} dialogueBrowserExtended - true if the Dialogue Browser is currently extended, false otherwise.
-     */
-    set dialogueBrowserExtended(dialogueBrowserExtended) {
-        this._dialogueBrowserExtended = dialogueBrowserExtended;
-        DocumentFunctions.setCookie('state.dialogueBrowserExtended', this._dialogueBrowserExtended, 365);
-    }
-
-    /**
-     * Returns a boolean value indicating whether the Dialogue Browser is currently extended or not.
-     * @returns a boolean value indicating whether the Dialogue Browser is currently extended or not.
-     */
-    get dialogueBrowserExtended() {
-        return this._dialogueBrowserExtended;
-    }
-
-    // -----------------------------------
-    // ---------- Other Methods ----------
-    // -----------------------------------
-
-    /**
-     * Loads information about the ClientState from a cookie, if set.
-     */
-    loadFromCookie() {
-        var cookieValue = DocumentFunctions.getCookie('state.debugConsoleVisible');
-        if(cookieValue == "true") this._debugConsoleVisible = true;
-        else this._debugConsoleVisible = false;
-
-        cookieValue = DocumentFunctions.getCookie('state.variableBrowserExtended');
-        if(cookieValue == "true") this._variableBrowserExtended = true;
-        else this._variableBrowserExtended = false;
-
-        cookieValue = DocumentFunctions.getCookie('state.dialogueBrowserExtended');
-        if(cookieValue == "true") this._dialogueBrowserExtended = true;
-        else this._dialogueBrowserExtended = false;
-
-        var cookieUserName = DocumentFunctions.getCookie('user.name');
-        var cookieUserRole = DocumentFunctions.getCookie('user.role');
-        var cookieUserAuthToken = DocumentFunctions.getCookie('user.authToken');
-
-        // All variables are non-empty / non-null
-        if(cookieUserName && cookieUserRole && cookieUserAuthToken) {
-            var user = new User(cookieUserName, cookieUserRole, cookieUserAuthToken);
-            this._user = user;
-        }
-    }
-
+   
 }
