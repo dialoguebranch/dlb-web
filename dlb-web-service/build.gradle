@@ -34,10 +34,10 @@ dependencies {
 	// Enabling this dependency will include the required dlb-core-java from local source.
 	// The location of this project is defined in ../settings.gradle and assumes that it
 	// is located at "../../dlb-core-java" (relative to this project).
-	// implementation project(':dlb-core-java')
+	implementation project(':dlb-core-java')
 
 	// Alternatively, import the dlb-core-java library through maven central
-	implementation 'com.dialoguebranch:dlb-core-java:1.2.3'
+	//implementation 'com.dialoguebranch:dlb-core-java:1.2.3'
 
 	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'

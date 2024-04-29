@@ -31,9 +31,9 @@ import com.dialoguebranch.exception.ExecutionException;
 import com.dialoguebranch.execution.ActiveDialogue;
 import com.dialoguebranch.execution.ExecuteNodeResult;
 import com.dialoguebranch.model.*;
+import com.dialoguebranch.model.nodepointer.ExternalNodePointer;
+import com.dialoguebranch.model.nodepointer.InternalNodePointer;
 import com.dialoguebranch.model.nodepointer.NodePointer;
-import com.dialoguebranch.model.nodepointer.NodePointerExternal;
-import com.dialoguebranch.model.nodepointer.NodePointerInternal;
 import com.dialoguebranch.web.service.storage.ServerLoggedDialogue;
 import nl.rrd.utils.AppComponents;
 import nl.rrd.utils.datetime.DateTimeUtils;
@@ -180,9 +180,9 @@ public class DialogueExecutor {
 		}
 		Dialogue dialogueDefinition = state.getDialogueDefinition();
 		Node nextNode;
-		if (nodePointer instanceof NodePointerInternal) {
+		if (nodePointer instanceof InternalNodePointer) {
 			try {
-				nextNode = dialogue.progressDialogue((NodePointerInternal)nodePointer,
+				nextNode = dialogue.progressDialogue((InternalNodePointer)nodePointer,
 								progressDialogueEventTime);
 			} catch (EvaluationException e) {
 				throw new RuntimeException("Expression evaluation error: " + e.getMessage(), e);
@@ -198,9 +198,9 @@ public class DialogueExecutor {
 			serverLoggedDialogue.setCompleted(true);
 			userService.getLoggedDialogueStore().saveToSession(serverLoggedDialogue);
 			String language = dialogue.getDialogueFileDescription().getLanguage();
-			NodePointerExternal externalNodePointer = (NodePointerExternal)nodePointer;
-			String dialogueId = externalNodePointer.getDialogueId();
-			String nodeId = externalNodePointer.getNodeId();
+			ExternalNodePointer externalNodePointer = (ExternalNodePointer)nodePointer;
+			String dialogueId = externalNodePointer.getAbsoluteTargetDialogue();
+			String nodeId = externalNodePointer.getTargetNodeId();
 
 			FileDescriptor dialogueDescription =
 					userService.getDialogueDescriptionFromId(dialogueId, language);
