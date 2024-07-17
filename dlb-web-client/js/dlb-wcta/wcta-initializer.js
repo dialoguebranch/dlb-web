@@ -26,7 +26,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { WebClientController } from './WCTAController.js';
+import { WCTAController } from './WCTAController.js';
 
 /**
  * This anonymous function contains all the necessary "bindings" of UI to script, as well as any 
@@ -34,37 +34,37 @@ import { WebClientController } from './WCTAController.js';
  */
 window.onload = function() {
 
-    this.webClientController = new WebClientController();
+    this.wctaController = new WCTAController();
 
     document.getElementById("login-button").addEventListener("click", (e)=> {
-        this.webClientController.actionLogin(e);
+        this.wctaController.actionLogin(e);
     });
 
     document.getElementById("toggle-debug-console").addEventListener("click", (e)=> {
-        this.webClientController.actionToggleDebugConsole(e);
+        this.wctaController.actionToggleDebugConsole(e);
     });
 
     document.getElementById("menu-bar-logout").addEventListener("click", (e)=> {
-        this.webClientController.actionLogout(e);
+        this.wctaController.actionLogout(e);
     });
 
     document.getElementById("button-refresh-dialogue-list").addEventListener("click", (e)=> {
-        this.webClientController.actionRefreshDialogueBrowser(e);
+        this.wctaController.actionRefreshDialogueBrowser(e);
     });
 
     document.getElementById("button-resize-dialogue-list").addEventListener("click", (e)=> {
         e.preventDefault();
-        this.webClientController.actionResizeDialogueBrowser();
+        this.wctaController.actionResizeDialogueBrowser();
     });
 
     document.getElementById("button-refresh-variable-list").addEventListener("click", (e)=> {
         e.preventDefault();
-        this.webClientController.actionRefreshVariableBrowser();
+        this.wctaController.actionRefreshVariableBrowser();
     });
 
     document.getElementById("button-resize-variable-list").addEventListener("click", (e)=> {
         e.preventDefault();
-        this.webClientController.actionResizeVariableBrowser();
+        this.wctaController.actionResizeVariableBrowser();
     });
 
     

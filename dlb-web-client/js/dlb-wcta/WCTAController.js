@@ -35,7 +35,15 @@ import { AbstractController } from '../dlb-lib/AbstractController.js';
 import { DialogueBranchConfig } from '../dlb-lib/DialogueBranchConfig.js';
 import { DialogueBranchClient } from '../dlb-lib/DialogueBranchClient.js';
 
-export class WebClientController extends AbstractController {
+/**
+ * The WCTAController (or Web Client Test Application Controller) is an implementation of an AbstractController
+ * specifically for the Dialogue Branch Web Client Test Application. This class implementats all the required handler
+ * functions that are called by the DialogueBranchClient, and handles all the updates to the application specific user
+ * interface.
+ * 
+ * @author Harm op den Akker (Fruit Tree Labs)
+ */
+export class WCTAController extends AbstractController {
 
     // ------------------------------------
     // ---------- Constructor(s) ----------
@@ -44,7 +52,7 @@ export class WebClientController extends AbstractController {
     constructor() {
         super();
 
-        this._LOGTAG = "WebClientController";
+        this._LOGTAG = "WCTAController";
 
         this._dialogueReplyElements = new Array();
         this._dialogueReplyNumbers = new Array();
