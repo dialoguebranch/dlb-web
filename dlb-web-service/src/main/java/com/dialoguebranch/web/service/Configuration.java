@@ -39,12 +39,13 @@ import java.util.Properties;
 import nl.rrd.utils.AppComponent;
 
 /**
- * Configuration of the DialogueBranch Web Service. This is initialized from resources service.properties and
- * deployment.properties. Known property keys are defined as constants in this class.
+ * Configuration of the Dialogue Branch Web Service. This is initialized from resources {@code
+ * service.properties} and {@code deployment.properties}. Known property keys are defined as
+ * constants in this class.
  *
- * @author Harm op den Akker
- * @author Dennis Hofs
- * @author Tessa Beinema
+ * @author Harm op den Akker (Fruit Tree Labs)
+ * @author Dennis Hofs (Roessingh Research and Development)
+ * @author Tessa Beinema (University of Twente)
  */
 @AppComponent
 public class Configuration extends LinkedHashMap<String,String> {
@@ -52,50 +53,123 @@ public class Configuration extends LinkedHashMap<String,String> {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	// ----------------------------------------- //
-	// ---------- Known property keys ---------- //
-	// ----------------------------------------- //
+	// -------------------------------------------------------------
+	// -------------------- Known property keys --------------------
+	// -------------------------------------------------------------
 
-	// ----- General
+	// ---------- General
 
+	/** Name of the config parameter that defines the Web Service's version (as a String) */
 	public static final String VERSION = "version";
+
+	/** Name of the config parameter that defines the 'build time' string */
 	public static final String BUILD_TIME = "buildTime";
+
+	/** Name of the config parameter that defines the base URL where this service is running */
 	public static final String BASE_URL = "baseUrl";
+
+	/**
+	 * Name of the config parameter that defines the JSON Web Token 'secret' use to encrypt
+	 * the JSON Web Tokens generated after a successful login
+	 */
 	public static final String JWT_SECRET_KEY = "jwtSecretKey";
+
+	/** Name of the config parameter that defines the data directory for the Web Service */
 	public static final String DATA_DIR = "dataDir";
 
-	// ----- External Variable Service
+	// ---------- Settings
 
+	/**
+	 * Name of the config parameter indicating whether the service allows the creation of anonymous
+	 * users through its REST API.
+	 */
+	public static final String ALLOW_ANONYMOUS_USERS = "allowAnonymousUsers";
+
+	// ---------- External Variable Service
+
+	/**
+	 * Name of the config parameter that defines whether an External Variable Service should be used
+	 * by this Web Service or not
+	 */
 	public static final String EXTERNAL_VARIABLE_SERVICE_ENABLED = "externalVariableServiceEnabled";
+
+	/**
+	 * Name of the config parameter that defines the base URL where the External Variable Service is
+	 * running
+	 */
 	public static final String EXTERNAL_VARIABLE_SERVICE_URL = "externalVariableServiceUrl";
-	public static final String EXTERNAL_VARIABLE_SERVICE_API_VERSION = "externalVariableServiceAPIVersion";
-	public static final String EXTERNAL_VARIABLE_SERVICE_USERNAME = "externalVariableServiceUsername";
-	public static final String EXTERNAL_VARIABLE_SERVICE_PASSWORD = "externalVariableServicePassword";
 
-	// ----- Azure Data Lake
+	/**
+	 * Name of the config parameter that defines the API Version that should be used with the
+	 * configured External Variable Service
+	 */
+	public static final String EXTERNAL_VARIABLE_SERVICE_API_VERSION
+			= "externalVariableServiceAPIVersion";
 
+	/**
+	 * Name of the config parameter that defines the username used to authenticate with the External
+	 * Variable Service
+	 */
+	public static final String EXTERNAL_VARIABLE_SERVICE_USERNAME
+			= "externalVariableServiceUsername";
+
+	/**
+	 * Name of the config parameter that defines the password used to authenticate with the External
+	 * Variable Service
+	 */
+	public static final String EXTERNAL_VARIABLE_SERVICE_PASSWORD
+			= "externalVariableServicePassword";
+
+	// ---------- Azure Data Lake
+
+	/**
+	 * Name of the config parameter that defines whether synchronizing log files to an Azure Data
+	 * Lake should be enabled or not (this is an experimental feature).
+	 */
 	public static final String AZURE_DATA_LAKE_ENABLED = "azureDataLakeEnabled";
-	public static final String AZURE_DATA_LAKE_AUTHENTICATION_METHOD = "azureDataLakeAuthenticationMethod";
+
+	/**
+	 * Name of the config parameter that defines which authentication method to use for connecting
+	 * to an Azure Data Lake.
+	 */
+	public static final String AZURE_DATA_LAKE_AUTHENTICATION_METHOD
+			= "azureDataLakeAuthenticationMethod";
+
+	/** Name of the config parameter that defines the Azure Data Lake account name */
 	public static final String AZURE_DATA_LAKE_ACCOUNT_NAME = "azureDataLakeAccountName";
+
+	/** Name of the config parameter that defines the Azure Data Lake account key */
 	public static final String AZURE_DATA_LAKE_ACCOUNT_KEY = "azureDataLakeAccountKey";
+
+	/** Name of the config parameter that defines the Azure Data Lake SAS Account URL */
 	public static final String AZURE_DATA_LAKE_SAS_ACCOUNT_URL = "azureDataLakeSASAccountUrl";
+
+	/** Name of the config parameter that defines the Azure Data Lake SAS Token */
 	public static final String AZURE_DATA_LAKE_SAS_TOKEN = "azureDataLakeSASToken";
+
+	/** Name of the config parameter that defines the Azure Data Lake File System name */
 	public static final String AZURE_DATA_LAKE_FILE_SYSTEM_NAME = "azureDataLakeFileSystemName";
 
-	// ------------------------------------------ //
-	// ---------- Hardcoded parameters ---------- //
-	// ------------------------------------------ //
+	// --------------------------------------------------------------
+	// -------------------- Hardcoded parameters --------------------
+	// --------------------------------------------------------------
 
+	/** Hardcoded folder name to use for storing the general Web Service log files */
 	public static final String DIRECTORY_NAME_APPLICATION_LOGS = "logs";
+
+	/** Hardcoded folder name for storing ongoing dialogue logs */
 	public static final String DIRECTORY_NAME_DIALOGUES = "dialogues";
+
+	/** Hardcoded folder name for storing the user-specific Variable Stores */
 	public static final String DIRECTORY_NAME_VARIABLES = "variables";
 
 	private static final Object LOCK = new Object();
+
 	private static Configuration instance = null;
 
-	// --------------------------------------------------- //
-	// ---------- Constructors / Initialisation ---------- //
-	// --------------------------------------------------- //
+	// -------------------------------------------------------------------------
+	// -------------------- Constructor(s) & Initialization --------------------
+	// -------------------------------------------------------------------------
 
 	/**
 	 * Returns the configuration. At startup of the service it should be initialized with
@@ -137,12 +211,13 @@ public class Configuration extends LinkedHashMap<String,String> {
 	// ----- retrieved by using this.get("parameterName") however, using the getters below we can
 	// ----- add some robustness (e.g. null checking).
 
-	// -------------------------------------- //
-	// ---------- Getters: General ---------- //
-	// -------------------------------------- //
+	// ----------------------------------------------------------
+	// -------------------- Getters: General --------------------
+	// ----------------------------------------------------------
 
 	/**
 	 * Returns the application version identifier (e.g. "1.0.0") as a String.
+	 * 
 	 * @return the application version identifier (e.g. "1.0.0") as a String.
 	 */
 	public String getVersion() {
@@ -153,6 +228,7 @@ public class Configuration extends LinkedHashMap<String,String> {
 	/**
 	 * Returns a date-time {@link String} representing the date and time that this version of the
 	 * deployed web service was built.
+	 *
 	 * @return the build-time as a date-time {@link String}.
 	 */
 	public String getBuildTime() {
@@ -162,6 +238,7 @@ public class Configuration extends LinkedHashMap<String,String> {
 
 	/**
 	 * Returns the configured Base URL for the DialogueBranch Web Service.
+	 *
 	 * @return the configured Base URL for the DialogueBranch Web Service.
 	 */
 	public String getBaseUrl() {
@@ -171,6 +248,7 @@ public class Configuration extends LinkedHashMap<String,String> {
 
 	/**
 	 * Returns the secret key used for encoding/decoding the JSON Web Tokens.
+	 *
 	 * @return the secret key used for encoding/decoding the JSON Web Tokens.
 	 */
 	public String getJwtSecretKey() {
@@ -180,6 +258,7 @@ public class Configuration extends LinkedHashMap<String,String> {
 
 	/**
 	 * Returns the location of the data directory used by the web service as a String.
+	 *
 	 * @return the location of the data directory used by the web service as a String.
 	 */
 	public String getDataDir() {
@@ -187,12 +266,26 @@ public class Configuration extends LinkedHashMap<String,String> {
 		else return get(DATA_DIR);
 	}
 
-	// --------------------------------------------------------
-	// ---------- Getters: External Variable Service ----------
-	// --------------------------------------------------------
+	// ----------------------------------------------------------
+	// -------------------- Getters: Settings -------------------
+	// ----------------------------------------------------------
+
+	/**
+	 * Returns whether this Web Service allows the creation of Anonymous User accounts.
+	 *
+	 * @return whether this Web Service allows the creation of Anonymous User accounts.
+	 */
+	public boolean getAllowAnonymousUsers() {
+		return Boolean.parseBoolean(get(ALLOW_ANONYMOUS_USERS));
+	}
+
+	// ----------------------------------------------------------------------------
+	// -------------------- Getters: External Variable Service --------------------
+	// ----------------------------------------------------------------------------
 
 	/**
 	 * Returns whether an "External DialogueBranch Variable Service" has been configured to be used.
+	 *
 	 * @return whether an "External DialogueBranch Variable Service" has been configured to be used.
 	 */
 	public boolean getExternalVariableServiceEnabled() {
@@ -202,6 +295,7 @@ public class Configuration extends LinkedHashMap<String,String> {
 	/**
 	 * Returns the URL of the External Variable Service, or an empty string if incorrectly
 	 * configured.
+	 *
 	 * @return the URL of the External Variable Service, or an empty string if incorrectly
 	 *         configured.
 	 */
@@ -213,6 +307,7 @@ public class Configuration extends LinkedHashMap<String,String> {
 	/**
 	 * Returns the API Version of the External Variable Service as a String, or an empty string if
 	 * incorrectly configured.
+	 *
 	 * @return the API Version of the External Variable Service as a String, or an empty string if
 	 *         incorrectly configured.
 	 */
@@ -224,6 +319,7 @@ public class Configuration extends LinkedHashMap<String,String> {
 	/**
 	 * Returns the username for the External Variable Service as a String, or an empty string if
 	 * incorrectly configured.
+	 *
 	 * @return the username for the External Variable Service as a String, or an empty string if
 	 *         incorrectly configured.
 	 */
@@ -235,6 +331,7 @@ public class Configuration extends LinkedHashMap<String,String> {
 	/**
 	 * Returns the password for the External Variable Service as a String, or an empty string if
 	 * incorrectly configured.
+	 *
 	 * @return the password for the External Variable Service as a String, or an empty string if
 	 *         incorrectly configured.
 	 */
@@ -243,12 +340,13 @@ public class Configuration extends LinkedHashMap<String,String> {
 		else return get(EXTERNAL_VARIABLE_SERVICE_PASSWORD);
 	}
 
-	// ---------------------------------------------- //
-	// ---------- Getters: Azure Data Lake ---------- //
-	// ---------------------------------------------- //
+	// ------------------------------------------------------------------
+	// -------------------- Getters: Azure Data Lake --------------------
+	// ------------------------------------------------------------------
 
 	/**
 	 * Returns whether the Azure Data Lake is enabled.
+	 *
 	 * @return {@code true} if the Azure Data Lake is enabled, {@code false} otherwise.
 	 */
 	public boolean getAzureDataLakeEnabled() {
@@ -258,6 +356,7 @@ public class Configuration extends LinkedHashMap<String,String> {
 	/**
 	 * Returns the authentication method that should be used for connecting to the Azure Data Lake
 	 * as either "sas-token" or "account-key", or returns the empty string if not configured.
+	 *
 	 * @return the authentication method that should be used for connecting to the Azure Data Lake.
 	 */
 	public String getAzureDataLakeAuthenticationMethod() {
@@ -267,6 +366,7 @@ public class Configuration extends LinkedHashMap<String,String> {
 
 	/**
 	 * Returns the Azure Data Lake Account Name, or an empty {@link String} if not configured.
+	 *
 	 * @return the Azure Data Lake Account Name, or an empty {@link String} if not configured.
 	 */
 	public String getAzureDataLakeAccountName() {
@@ -276,6 +376,7 @@ public class Configuration extends LinkedHashMap<String,String> {
 
 	/**
 	 * Returns the Azure Data Lake Account Key, or an empty {@link String} if not configured.
+	 *
 	 * @return the Azure Data Lake Account Key, or an empty {@link String} if not configured.
 	 */
 	public String getAzureDataLakeAccountKey() {
@@ -286,6 +387,7 @@ public class Configuration extends LinkedHashMap<String,String> {
 	/**
 	 * Returns the Azure Storage Account URL used when authenticating with the Azure Data Lake using
 	 * an SAS token, or an empty {@link String} if not configured.
+	 *
 	 * @return the Azure Storage Account URL, or an empty {@link String} if not configured.
 	 */
 	public String getAzureDataLakeSASAccountUrl() {
@@ -295,6 +397,7 @@ public class Configuration extends LinkedHashMap<String,String> {
 
 	/**
 	 * Returns the Azure SAS Token, or an empty {@link String} if not configured.
+	 *
 	 * @return the Azure SAS Token, or an empty {@link String} if not configured.
 	 */
 	public String getAzureDataLakeSASToken() {
@@ -304,6 +407,7 @@ public class Configuration extends LinkedHashMap<String,String> {
 
 	/**
 	 * Returns the Azure File System Name, or an empty {@link String} if not configured.
+	 *
 	 * @return the Azure File System Name, or an empty {@link String} if not configured.
 	 */
 	public String getAzureDataLakeFileSystemName() {
@@ -311,12 +415,13 @@ public class Configuration extends LinkedHashMap<String,String> {
 		else return get(AZURE_DATA_LAKE_FILE_SYSTEM_NAME);
 	}
 
-	// --------------------------------------------------- //
-	// ---------- Getters: Hardcoded parameters ---------- //
-	// --------------------------------------------------- //
+	// -----------------------------------------------------------------------
+	// -------------------- Getters: Hardcoded parameters --------------------
+	// -----------------------------------------------------------------------
 
 	/**
 	 * Returns the name of the folder used for storing the application logs.
+	 *
 	 * @return the name of the folder used for storing the application logs.
 	 */
 	public String getDirectoryNameApplicationLogs() {
@@ -325,6 +430,7 @@ public class Configuration extends LinkedHashMap<String,String> {
 
 	/**
 	 * Returns the name of the folder used for storing dialogue logs.
+	 *
 	 * @return the name of the folder used for storing dialogue logs.
 	 */
 	public String getDirectoryNameDialogues() {
@@ -333,9 +439,11 @@ public class Configuration extends LinkedHashMap<String,String> {
 
 	/**
 	 * Returns the name of the folder used for storing DialogueBranch variable stores.
+	 *
 	 * @return the name of the folder used for storing DialogueBranch variable stores.
 	 */
 	public String getDirectoryNameVariables() {
 		return DIRECTORY_NAME_VARIABLES;
 	}
+
 }
