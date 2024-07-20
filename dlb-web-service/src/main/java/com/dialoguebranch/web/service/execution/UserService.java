@@ -80,6 +80,7 @@ public class UserService {
 	/**
 	 * Instantiates a {@link UserService} for a given {@link User}. The UserService creates a {@link
 	 * VariableStore} instance and loads in all known variables for the user.
+	 *
 	 * @param dialogueBranchUser The {@link User} for which this {@link UserService} is handling the
 	 *                           interactions.
 	 * @param applicationManager the server's {@link ApplicationManager} instance.

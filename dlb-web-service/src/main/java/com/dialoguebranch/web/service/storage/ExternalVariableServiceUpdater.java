@@ -56,8 +56,7 @@ public class ExternalVariableServiceUpdater implements VariableStoreOnChangeList
 	}
 
 	@Override
-	public void onChange(VariableStore variableStore,
-						 List<VariableStoreChange> changes) {
+	public void onChange(VariableStore variableStore, List<VariableStoreChange> changes) {
 
 		String userId = variableStore.getUser().getId();
 		String userTimeZoneString
@@ -174,4 +173,5 @@ public class ExternalVariableServiceUpdater implements VariableStoreOnChangeList
 					Object.class);
 		}
 	}
+
 }

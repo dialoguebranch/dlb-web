@@ -27,54 +27,81 @@
 
 package com.dialoguebranch.web.service.execution;
 
-import com.dialoguebranch.model.Project;
+import com.dialoguebranch.execution.User;
+import com.dialoguebranch.web.service.storage.ExternalVariableServiceUpdater;
+import com.dialoguebranch.web.service.storage.VariableStoreStorageHandler;
 import nl.rrd.utils.exception.DatabaseException;
 
 import java.io.IOException;
 
 /**
- * Abstract factory class for creating {@link UserService} objects. Implementing classes must define
- * how to create a {@link UserService} given a {@code userId} and an {@link ApplicationManager}.
+ * Factory class for creating {@link UserService} objects. Defines how to generate a new {@link
+ * UserService} given a {@code userId} and an {@link ApplicationManager}.
  *
  * @author Harm op den Akker (Fruit Tree Labs)
  */
-public abstract class UserServiceFactory {
+public class UserServiceFactory {
 
-	private Project dialogueBranchProject;
+	/** The ApplicationManager that created this UserServiceFactory */
+	private final ApplicationManager applicationManager;
 
-	private static UserServiceFactory instance = null;
+	/** The VariableStorageHandler that all created UserServices should use */
+	private final VariableStoreStorageHandler storageHandler;
 
 	// -------------------------------------------------------- //
 	// -------------------- Constructor(s) -------------------- //
 	// -------------------------------------------------------- //
 
-	public UserServiceFactory() { }
+	/**
+	 * Creates an instance of a {@link UserServiceFactory} with a given {@link ApplicationManager}
+	 * acting as this factory's owner, and a {@link VariableStoreStorageHandler} that is used to
+	 * read and write Dialogue Branch variables to persistent storage.
+	 *
+	 * @param applicationManager the {@link ApplicationManager} that is the 'owner' of this {@link
+	 *                           UserServiceFactory}.
+	 * @param storageHandler the {@link VariableStoreStorageHandler} that is passed on to the {@link
+	 *                       UserService} for reading and writing Dialogue Branch variables to
+	 *                       persistent storage.
+	 */
+	public UserServiceFactory(ApplicationManager applicationManager,
+							  VariableStoreStorageHandler storageHandler) {
+		this.applicationManager = applicationManager;
+		this.storageHandler = storageHandler;
+	}
+
+	// ----------------------------------------------------------- //
+	// -------------------- Getters & Setters -------------------- //
+	// ----------------------------------------------------------- //
+
+	/**
+	 * Returns the {@link ApplicationManager} that created this {@link UserServiceFactory}.
+	 *
+	 * @return the {@link ApplicationManager} that created this {@link UserServiceFactory}.
+	 */
+	public ApplicationManager getApplicationManager() {
+		return applicationManager;
+	}
 
 	// ------------------------------------------------- //
 	// -------------------- Methods -------------------- //
 	// ------------------------------------------------- //
 
-	public static UserServiceFactory getInstance() {
-		return instance;
+	/**
+	 * Creates a {@link UserService} instance for the user identified by the given  {@code userId}.
+	 *
+	 * @param userId the identifier of the user for which to create the {@link UserService}.
+	 * @return a {@link UserService} instance for the given user.
+	 * @throws DatabaseException In case of an error loading in the known variables for the User.
+	 * @throws IOException In case of an error loading in the known variables for the User.
+	 */
+	//TODO: When creating the User, the timeZone should be taken into account
+	public UserService createUserService(String userId)
+			throws DatabaseException, IOException {
+		return new UserService(
+				new User(userId),
+				applicationManager,
+				storageHandler,
+				new ExternalVariableServiceUpdater(applicationManager));
 	}
-	
-	public static void setInstance(UserServiceFactory instance) {
-		UserServiceFactory.instance = instance;
-	}
 
-	// ----- Getters & Setters
-
-	public void setDialogueBranchProject(Project dialogueBranchProject) {
-		this.dialogueBranchProject = dialogueBranchProject;
-	}
-
-	public Project getDialogueBranchProject() {
-		return dialogueBranchProject;
-	}
-
-	// ----- Abstracts
-
-	public abstract UserService createUserService(String userId,
-			ApplicationManager applicationManager)
-			throws DatabaseException, IOException;
 }

@@ -42,6 +42,7 @@ import com.dialoguebranch.web.service.UserCredentials;
 import com.dialoguebranch.web.service.UserFile;
 import com.dialoguebranch.web.service.storage.AzureDataLakeStore;
 import com.dialoguebranch.model.Project;
+import com.dialoguebranch.web.service.storage.VariableStoreJSONStorageHandler;
 import nl.rrd.utils.AppComponents;
 import nl.rrd.utils.exception.DatabaseException;
 import nl.rrd.utils.exception.ParseException;
@@ -69,6 +70,7 @@ public class ApplicationManager {
 	private final List<UserCredentials> userCredentials;
 	private String externalVariableServiceAPIToken;
 	private AzureDataLakeStore azureDataLakeStore = null;
+	private final UserServiceFactory userServiceFactory;
 
 	// ---------------------------------- //
 	// ---------- Constructors ---------- //
@@ -76,14 +78,13 @@ public class ApplicationManager {
 	
 	/**
 	 * Creates an instance of an {@link ApplicationManager}, that loads in a predefined list of
-	 * DialogueBranch dialogues.
+	 * Dialogue Branch dialogues.
 	 *
 	 * @throws DLBServiceConfigurationException In case any part of the application could not be
 	 *                                          initialized due to an incorrectly set config
 	 *                                          parameter.
 	 */
 	public ApplicationManager(FileLoader fileLoader) throws DLBServiceConfigurationException {
-		UserServiceFactory appConfig = UserServiceFactory.getInstance();
 		ProjectParser projectParser = new ProjectParser(fileLoader);
 		ProjectParserResult readResult;
 		try {
@@ -93,21 +94,25 @@ public class ApplicationManager {
 					+ ex.getMessage(), ex);
 		}
 		for (String path : readResult.getParseErrors().keySet()) {
-			logger.error("Failed to parse " + path + ":");
+            logger.error("Failed to parse {}:", path);
 			for (ParseException ex : readResult.getParseErrors().get(path)) {
-				logger.error("*** " + ex.getMessage());
+                logger.error("*** {}", ex.getMessage());
 			}
 		}
 		for (String path : readResult.getWarnings().keySet()) {
-			logger.warn("Warning at parsing " + path + ":");
+            logger.warn("Warning at parsing {}:", path);
 			for (String warning : readResult.getWarnings().get(path)) {
-				logger.warn("*** " + warning);
+                logger.warn("*** {}", warning);
 			}
 		}
 		if (!readResult.getParseErrors().isEmpty())
 			throw new RuntimeException("Failed to load all dialogues.");
 		project = readResult.getProject();
-		appConfig.setDialogueBranchProject(project);
+
+		this.userServiceFactory = new UserServiceFactory(this,
+				new VariableStoreJSONStorageHandler(
+						AppComponents.get(Configuration.class).
+						getDataDir()+"/variables")); //TODO: This "variables" shouldn't be hardcoded here
 
 		// Read all UserCredentials from users.xml
 		try {
@@ -131,7 +136,7 @@ public class ApplicationManager {
 			try {
 				azureDataLakeStore = new AzureDataLakeStore();
 			} catch(DLBServiceConfigurationException e) {
-				logger.error("Error configuring Azure Data Lake: " + e.getMessage());
+                logger.error("Error configuring Azure Data Lake: {}", e.getMessage());
 				throw e;
 			}
 		}
@@ -184,15 +189,10 @@ public class ApplicationManager {
 				return userService;
 			}
 		}
-		
-		logger.info("No active UserService for userId '" + userId
-				+ "' creating UserService instance.");
-		
-		// Initialize new userService
-		UserServiceFactory userServiceFactory = UserServiceFactory.getInstance();
+
 		UserService newUserService;
 		try {
-			newUserService = userServiceFactory.createUserService(userId, this);
+			newUserService = userServiceFactory.createUserService(userId);
 		} catch (IOException ex) {
 			String error = "Can't create userService: " + ex.getMessage();
 			logger.error(error, ex);
@@ -201,6 +201,10 @@ public class ApplicationManager {
 		
 		// Store as "active userService"
 		activeUserServices.add(newUserService);
+
+		logger.info("No active UserService for userId '{}' created UserService instance " +
+				"(total active users: {}).", userId,activeUserServices.size());
+
 		return newUserService;
 	}
 	
@@ -252,7 +256,7 @@ public class ApplicationManager {
 				+ "/v" + config.getExternalVariableServiceAPIVersion()
 				+ "/auth/login";
 
-		logger.info("Attempting login to external variable service at " + loginUrl);
+        logger.info("Attempting login to external variable service at {}", loginUrl);
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.valueOf("application/json"));
@@ -273,14 +277,14 @@ public class ApplicationManager {
 			LoginResultPayload loginResultPayload = response.getBody();
 			if(loginResultPayload != null) {
 				this.setExternVariableServiceAPIToken(loginResultPayload.getToken());
-				logger.info("User '"+config.getExternalVariableServiceUsername()+"' " +
-						"logged in successfully to external variable service.");
+                logger.info("User '{}' logged in successfully to external variable service.",
+						config.getExternalVariableServiceUsername());
 			} else {
-				logger.error("Login to External Variable Service failed with status code: "
-						+ response.getStatusCode());
+                logger.error("Login to External Variable Service failed with status code: {}",
+						response.getStatusCode());
 			}
 		} else {
-			logger.info("Login failed: " + response.getStatusCode());
+            logger.info("Login failed: {}", response.getStatusCode());
 		}
 	}
 }

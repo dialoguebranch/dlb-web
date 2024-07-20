@@ -29,11 +29,9 @@ package com.dialoguebranch.web.service;
 
 import com.dialoguebranch.web.service.exception.DLBServiceConfigurationException;
 import com.dialoguebranch.web.service.execution.ApplicationManager;
-import com.dialoguebranch.web.service.execution.DefaultUserServiceFactory;
 import com.dialoguebranch.web.service.execution.UserServiceFactory;
 import com.dialoguebranch.web.service.storage.VariableStoreJSONStorageHandler;
 import com.dialoguebranch.parser.ResourceFileLoader;
-import jakarta.validation.constraints.NotNull;
 import nl.rrd.utils.AppComponents;
 import org.slf4j.Logger;
 import org.springframework.boot.SpringApplication;
@@ -104,10 +102,6 @@ ApplicationListener<ApplicationEvent> {
 		Thread.setDefaultUncaughtExceptionHandler((t, e) ->
                 logger.error("Uncaught exception: {}", e.getMessage(), e)
 		);
-
-		UserServiceFactory userServiceFactory = new DefaultUserServiceFactory(
-			new VariableStoreJSONStorageHandler(config.getDataDir()+"/variables"));
-		UserServiceFactory.setInstance(userServiceFactory);
 
 		try {
 			applicationManager = new ApplicationManager(
