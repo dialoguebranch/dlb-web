@@ -87,14 +87,9 @@ public class UserService {
 	 * @param onVarChangeListener the {@link VariableStoreOnChangeListener} that will be added
 	 *                            to the {@link VariableStore} instance that this
 	 *                            {@link UserService} creates.
-	 * @param externalVariableServiceUpdater a {@link VariableStoreOnChangeListener} that listens to
-     *                                       updates on the Dialogue Branch Variable store and
-	 *                                       notifies the external variable service if the changes
-	 *                                       made did not come from that service in the first place.
 	 */
 	public UserService(User dialogueBranchUser, ApplicationManager applicationManager,
-					   VariableStoreOnChangeListener onVarChangeListener,
-					   ExternalVariableServiceUpdater externalVariableServiceUpdater)
+					   VariableStoreOnChangeListener onVarChangeListener)
 			throws DatabaseException, IOException {
 
 		this.dialogueBranchUser = dialogueBranchUser;
@@ -113,7 +108,8 @@ public class UserService {
 
 		this.variableStore.addOnChangeListener(onVarChangeListener);
 		if(config.getExternalVariableServiceEnabled()) {
-			this.variableStore.addOnChangeListener(externalVariableServiceUpdater);
+			this.variableStore.addOnChangeListener(new ExternalVariableServiceUpdater(
+					applicationManager.getExternalVariableServiceAPIToken()));
 		}
 
 		dialogueExecutor = new DialogueExecutor(this);
@@ -220,8 +216,7 @@ public class UserService {
 			throw new DatabaseException("The provided sessionId for a new dialogue session is " +
 					"already in use.");
 
-		logger.info("User '" + dialogueBranchUser.getId() + "' is starting dialogue '"
-				+ dialogueId + "'");
+        logger.info("User '{}' is starting dialogue '{}'", dialogueBranchUser.getId(), dialogueId);
 
 		FileDescriptor dialogueDescription =
 				getDialogueDescriptionFromId(dialogueId, language);
@@ -294,16 +289,15 @@ public class UserService {
 	 */
 	public void cancelDialogueSession(String loggedDialogueId)
 			throws DatabaseException, IOException {
-		logger.info("User '" + dialogueBranchUser.getId() + "' cancels dialogue with Id '"
-				+ loggedDialogueId + "'.");
+        logger.info("User '{}' cancels dialogue with Id '{}'.",
+				dialogueBranchUser.getId(), loggedDialogueId);
 		ServerLoggedDialogue serverLoggedDialogue =
 				loggedDialogueStore.findLoggedDialogue(loggedDialogueId);
 		if(serverLoggedDialogue != null)
 			loggedDialogueStore.setDialogueCancelled(serverLoggedDialogue);
 		else
-			logger.warn("User '" + dialogueBranchUser.getId()
-					+ "' attempted to cancel dialogue with Id '"
-					+ loggedDialogueId + "', but no such dialogue could be found.");
+            logger.warn("User '{}' attempted to cancel dialogue with Id '{}', but no such " +
+					"dialogue could be found.", dialogueBranchUser.getId(), loggedDialogueId);
 	}
 
 	// --------------------------------------------------------------------------
@@ -337,23 +331,23 @@ public class UserService {
 	 *                      updated.
 	 */
 	public void updateVariablesFromExternalService(Set<String> variableNames) {
-		logger.info("Attempting to update values from external service for the following set " +
-				"of variables: "+variableNames);
+        logger.info("Attempting to update values from external service for the following set " +
+				"of variables: {}", variableNames);
 
 		Configuration config = AppComponents.get(Configuration.class);
 
 		if(config.getExternalVariableServiceEnabled()) {
 			logger.info("An external Dialogue Branch Variable Service is configured to be " +
-					"enabled, with parameters:");
-			logger.info("URL: "+config.getExternalVariableServiceURL());
-			logger.info("API Version: "+config.getExternalVariableServiceAPIVersion());
+					"enabled, with the following parameters:");
+            logger.info("URL: {}", config.getExternalVariableServiceURL());
+            logger.info("API Version: {}", config.getExternalVariableServiceAPIVersion());
 
 			List<Variable> varsToUpdate = new ArrayList<>();
 			for(String variableName : variableNames) {
 				Variable variable = variableStore.getVariable(variableName);
 				if(variable != null) {
-					logger.info("A DialogueBranch Variable '"+variableName+"' exists for User '"
-							+ dialogueBranchUser.getId() + "': "+ variable);
+                    logger.info("A DialogueBranch Variable '{}' exists for User '{}': {}",
+							variableName, dialogueBranchUser.getId(), variable);
 					varsToUpdate.add(variable);
 				} else {
 					varsToUpdate.add(
@@ -375,7 +369,7 @@ public class UserService {
 					+ "/v"+config.getExternalVariableServiceAPIVersion()
 					+ "/variables/retrieve-updates";
 
-			logger.info("RetrieveUpdatesURL: "+retrieveUpdatesUrl);
+            logger.info("RetrieveUpdatesURL: {}", retrieveUpdatesUrl);
 
 			LinkedMultiValueMap<String,String> allRequestParams = new LinkedMultiValueMap<>();
 			allRequestParams.put("userId", Collections.singletonList(dialogueBranchUser.getId()));
@@ -467,9 +461,9 @@ public class UserService {
 		try {
 			prefLocale = I18nUtils.languageTagToLocale(language);
 		} catch (ParseException ex) {
-			logger.error(String.format(
-					"Invalid language tag \"%s\", falling back to system locale",
-					language) + ": " + ex.getMessage());
+            logger.error("{}: {}", String.format(
+                    "Invalid language tag \"%s\", falling back to system locale",
+                    language), ex.getMessage());
 			prefLocale = Locale.getDefault();
 		}
 		for (Map<String, FileDescriptor> langMap :
@@ -582,8 +576,8 @@ public class UserService {
 
 	public List<ServerLoggedDialogue> getDialogueSessionLog(String sessionId)
 			throws IOException, DatabaseException {
-		logger.info("Getting dialogue log session data for user '" + dialogueBranchUser.getId() +
-				"' and sessionId '" + sessionId + "'.");
+        logger.info("Getting dialogue log session data for user '{}' and sessionId '{}'.",
+				dialogueBranchUser.getId(), sessionId);
 		return loggedDialogueStore.readSession(sessionId);
 	}
 

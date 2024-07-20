@@ -97,11 +97,7 @@ public class UserServiceFactory {
 	//TODO: When creating the User, the timeZone should be taken into account
 	public UserService createUserService(String userId)
 			throws DatabaseException, IOException {
-		return new UserService(
-				new User(userId),
-				applicationManager,
-				storageHandler,
-				new ExternalVariableServiceUpdater(applicationManager));
+		return new UserService(new User(userId), applicationManager, storageHandler);
 	}
 
 }

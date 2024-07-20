@@ -32,7 +32,6 @@ import com.dialoguebranch.execution.VariableStore;
 import com.dialoguebranch.execution.VariableStoreChange;
 import com.dialoguebranch.execution.VariableStoreOnChangeListener;
 import com.dialoguebranch.web.service.Configuration;
-import com.dialoguebranch.web.service.execution.ApplicationManager;
 import nl.rrd.utils.AppComponents;
 import org.slf4j.Logger;
 import org.springframework.http.*;
@@ -49,10 +48,10 @@ public class ExternalVariableServiceUpdater implements VariableStoreOnChangeList
 	private final Logger logger =
 			AppComponents.getLogger(ClassUtils.getUserClass(getClass()).getSimpleName());
 	private final Configuration config = AppComponents.get(Configuration.class);
-	private final ApplicationManager applicationManager;
+	private final String externalVariableServiceAPIToken;
 
-	public ExternalVariableServiceUpdater(ApplicationManager applicationManager) {
-		this.applicationManager = applicationManager;
+	public ExternalVariableServiceUpdater(String externalVariableServiceAPIToken) {
+		this.externalVariableServiceAPIToken = externalVariableServiceAPIToken;
 	}
 
 	@Override
@@ -80,8 +79,7 @@ public class ExternalVariableServiceUpdater implements VariableStoreOnChangeList
 					if(change instanceof VariableStoreChange.Clear) {
 						RestTemplate restTemplate = new RestTemplate();
 						HttpHeaders requestHeaders = new HttpHeaders();
-						requestHeaders.set("X-Auth-Token",
-							applicationManager.getExternalVariableServiceAPIToken());
+						requestHeaders.set("X-Auth-Token", externalVariableServiceAPIToken);
 
 						String notifyClearedUrl = config.getExternalVariableServiceURL()
 							+ "/v" + config.getExternalVariableServiceAPIVersion()
@@ -146,8 +144,7 @@ public class ExternalVariableServiceUpdater implements VariableStoreOnChangeList
 			RestTemplate restTemplate = new RestTemplate();
 			HttpHeaders requestHeaders = new HttpHeaders();
 			requestHeaders.setContentType(MediaType.valueOf("application/json"));
-			requestHeaders.set("X-Auth-Token",
-					applicationManager.getExternalVariableServiceAPIToken());
+			requestHeaders.set("X-Auth-Token", externalVariableServiceAPIToken);
 
 			String notifyUpdatesUrl = config.getExternalVariableServiceURL()
 					+ "/v" + config.getExternalVariableServiceAPIVersion()
