@@ -35,20 +35,21 @@ import nl.rrd.utils.exception.DatabaseException;
 import java.io.IOException;
 
 /**
- * The implementation of {@link UserServiceFactory} as used in the Dialogue Branch Web Service.
+ * The implementation of a {@link UserServiceFactory} as used in the Dialogue Branch Web Service.
  */
 public class DefaultUserServiceFactory extends UserServiceFactory {
 
 	private final VariableStoreStorageHandler storageHandler;
 
-	// --------------------------------------------------------
-	// -------------------- Constructor(s) --------------------
-	// --------------------------------------------------------
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
 
 	/**
-	 * Creates an instance of a {@link DefaultUserServiceFactory} with a given
-	 * {@link VariableStoreStorageHandler} that is used to read and write Dialogue Branch
-	 * variables to persistent storage.
+	 * Creates an instance of a {@link DefaultUserServiceFactory} with a given {@link
+	 * VariableStoreStorageHandler} that is used to read and write Dialogue Branch variables to
+	 * persistent storage.
+	 *
 	 * @param storageHandler the {@link VariableStoreStorageHandler} that is passed on to the {@link
 	 *                       UserService} for reading and writing Dialogue Branch variables to
 	 *                       persistent storage.
@@ -57,9 +58,9 @@ public class DefaultUserServiceFactory extends UserServiceFactory {
 		this.storageHandler = storageHandler;
 	}
 
-	// -------------------------------------------------------------------
-	// -------------------- Interface Implementations --------------------
-	// -------------------------------------------------------------------
+	// ------------------------------------------------------------------- //
+	// -------------------- Interface Implementations -------------------- //
+	// ------------------------------------------------------------------- //
 
 	@Override
 	public UserService createUserService(String userId, ApplicationManager applicationManager)

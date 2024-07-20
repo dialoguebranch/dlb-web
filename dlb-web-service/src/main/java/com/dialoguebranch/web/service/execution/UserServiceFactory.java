@@ -32,17 +32,27 @@ import nl.rrd.utils.exception.DatabaseException;
 
 import java.io.IOException;
 
+/**
+ * Abstract factory class for creating {@link UserService} objects. Implementing classes must define
+ * how to create a {@link UserService} given a {@code userId} and an {@link ApplicationManager}.
+ *
+ * @author Harm op den Akker (Fruit Tree Labs)
+ */
 public abstract class UserServiceFactory {
 
 	private Project dialogueBranchProject;
+
 	private static UserServiceFactory instance = null;
 
-	// ----- Constructors
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
 
-	public UserServiceFactory() {
-	}
+	public UserServiceFactory() { }
 
-	// ----- Methods
+	// ------------------------------------------------- //
+	// -------------------- Methods -------------------- //
+	// ------------------------------------------------- //
 
 	public static UserServiceFactory getInstance() {
 		return instance;

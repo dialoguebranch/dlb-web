@@ -73,16 +73,45 @@ public class VariablesController {
 
 	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
 
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
+	/**
+	 * Instances of this class are constructed through Spring.
+	 */
+	public VariablesController() { }
+
 	// --------------------------------------------------------------------- //
 	// -------------------- END-POINT: "/variables/get" -------------------- //
 	// --------------------------------------------------------------------- //
 
+	/**
+	 * Retrieve all- or a subset of Dialogue Branch variables for a given user.
+	 *
+	 * <p>Use this end-point to get the latest known Dialogue Branch Variables values for a given
+	 * user (either the currently logged in user, or the one provided through the end-point). Either
+	 * provide a list of variable names for which to retrieve its values, or leave this empty to
+	 * retrieve all known Dialogue Branch Variable data.</p>
+	 *
+	 * @param request the {@link HttpServletRequest} object containing information on the HTTP
+	 *                request.
+	 * @param response the {@link HttpServletResponse} object containing information on the HTTP
+	 *                 response that can be returned to the client.
+	 * @param version the API Version to use, e.g. '1'.
+	 * @param variableNames A space-separated list of Dialogue Branch variable names, or leave empty
+	 *                      to retrieve all known variables.
+	 * @param delegateUser The user for which to request Dialogue Branch variable info (leave empty
+	 *                     if executing for the currently authenticated user).
+	 * @return a {@link List} of {@link Variable} objects that match the given input parameters.
+	 * @throws Exception in case of a network error, internal error, or e.g. authentication error.
+	 */
 	@Operation(
-		summary = "Retrieve all- or a subset of DialogueBranch variables for a given user.",
-		description = "Use this end-point to get the latest known DialogueBranch Variables " +
+		summary = "Retrieve all- or a subset of Dialogue Branch variables for a given user.",
+		description = "Use this end-point to get the latest known Dialogue Branch Variables " +
 			"values for a given user (either the currently logged in user, or the one provided " +
 			"through the end-point). Either provide a list of variable names for which to " +
-			"retrieve its values, or leave this empty to retrieve all known DialogueBranch " +
+			"retrieve its values, or leave this empty to retrieve all known Dialogue Branch " +
 			"Variable data.")
 	@RequestMapping(value="/get", method=RequestMethod.GET)
 	public List<Variable> getVariables(
@@ -93,12 +122,12 @@ public class VariablesController {
 		@PathVariable(value = "version")
 		String version,
 
-		@Parameter(description = "A space-separated list of DialogueBranch variable names, or " +
+		@Parameter(description = "A space-separated list of Dialogue Branch variable names, or " +
 			"leave empty to retrieve all known variables")
 		@RequestParam(value="variableNames", required=false)
 		String variableNames,
 
-		@Parameter(description = "The user for which to request DialogueBranch variable info " +
+		@Parameter(description = "The user for which to request Dialogue Branch variable info " +
 			"(leave empty if executing for the currently authenticated user)")
 		@RequestParam(value="delegateUser", required=false)
 		String delegateUser) throws Exception {
@@ -181,6 +210,26 @@ public class VariablesController {
 	// -------------------- END-POINT: "/variables/set-single" -------------------- //
 	// ---------------------------------------------------------------------------- //
 
+	/**
+	 * Set the value of a single Dialogue Branch Variable for a given user.
+	 *
+	 * <p>Use this end-point to get set a Dialogue Branch Variable to a specific value (or to remove
+	 * the stored value by setting it to the empty string.</p>
+	 *
+	 * @param request the {@link HttpServletRequest} object containing information on the HTTP
+	 *                request.
+	 * @param response the {@link HttpServletResponse} object containing information on the HTTP
+	 *                 response that can be returned to the client.
+	 * @param version the API Version to use, e.g. '1'.
+	 * @param name The name of the Dialogue Branch Variable to set.
+	 * @param value The value for the Dialogue Branch Variable (or leave empty to erase the Dialogue
+	 *              Branch variable)
+	 * @param delegateUser The user for which to set the Dialogue Branch variable (leave empty if
+	 *                     setting for the currently authenticated user)
+	 * @param timeZone The current time zone of the Dialogue Branch user (presented as an IANA
+	 *                 String, e.g. 'Europe/Lisbon').
+	 * @throws Exception in case of a network error, internal error, or e.g. authentication error.
+	 */
 	@Operation(
 		summary = "Set the value of a single Dialogue Branch Variable for a given user.",
 		description = "Use this end-point to get set a Dialogue Branch Variable to a specific " +
@@ -269,9 +318,8 @@ public class VariablesController {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy - HH:mm:ss Z");
 
 		if(value == null) {
-			logger.info("Received request to remove Dialogue Branch Variable '" + name + "' at " +
-				"eventTime '" + eventTime.format(formatter) + "' in time zone '"
-				+ timeZoneString + "'");
+            logger.info("Received request to remove Dialogue Branch Variable '{}' at eventTime" +
+					" '{}' in time zone '{}'", name, eventTime.format(formatter), timeZoneString);
 			userService.getVariableStore().removeByName(name,true,
 					eventTime, VariableStoreChange.Source.WEB_SERVICE);
 		} else {
@@ -285,8 +333,28 @@ public class VariablesController {
 	// -------------------- END-POINT: "/variables/set" -------------------- //
 	// --------------------------------------------------------------------- //
 
+	/**
+	 * End-point definition for setting the value of one or multiple Dialogue Branch Variables for a
+	 * given user.
+	 *
+	 * <p>Use this end-point to get set one or many DialogueBranch Variables to their given values
+	 * (or to remove the stored value by setting it to the empty string.</p>
+	 *
+	 * @param request the {@link HttpServletRequest} object containing information on the HTTP
+	 *                request.
+	 * @param response the {@link HttpServletResponse} object containing information on the HTTP
+	 *                 response that can be returned to the client.
+	 * @param version the API Version to use, e.g. '1'.
+	 * @param delegateUser The user for which to set the Dialogue Branch variables (which may be
+	 *                     empty or {@code null} if setting for the currently authenticated user).
+	 * @param timeZone The current time zone of the Dialogue Branch user (presented as an IANA
+	 *                 String, e.g. 'Europe/Lisbon').
+	 * @param variables A JSON mapping of Dialogue Branch Variable names to values, representing the
+	 *                  variables that should be updated.
+	 * @throws Exception in case of a network error, internal error, or e.g. authentication error.
+	 */
 	@Operation(
-		summary = "Set the value of one or multiple DialogueBranch Variable for a given user.",
+		summary = "Set the value of one or multiple Dialogue Branch Variables for a given user.",
 		description = "Use this end-point to get set one or many DialogueBranch Variables to " +
 			"their given values (or to remove the stored value by setting it to the empty string.")
 	@RequestMapping(value="/set", method=RequestMethod.POST)
@@ -298,17 +366,17 @@ public class VariablesController {
 			@PathVariable(value = "version")
 			String version,
 
-			@Parameter(description = "The user for which to set the DialogueBranch variables " +
+			@Parameter(description = "The user for which to set the Dialogue Branch variables " +
 				"(leave empty if setting for the currently authenticated user)")
 			@RequestParam(value="delegateUser",required=false)
 			String delegateUser,
 
-			@Parameter(description = "The current time zone of the DialogueBranch user (as IANA, " +
-				"e.g. 'Europe/Lisbon')")
+			@Parameter(description = "The current time zone of the Dialogue Branch user (as " +
+					"IANA string, e.g. 'Europe/Lisbon')")
 			@RequestParam(value="timeZone")
 			String timeZone,
 
-			@Parameter(description = "A JSON map of DialogueBranch Variable names to values")
+			@Parameter(description = "A JSON mapping of Dialogue Branch Variable names to values")
 			@RequestBody
 			Map<String,Object> variables) throws Exception {
 

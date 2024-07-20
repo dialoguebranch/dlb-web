@@ -33,6 +33,7 @@ import com.dialoguebranch.web.service.execution.DefaultUserServiceFactory;
 import com.dialoguebranch.web.service.execution.UserServiceFactory;
 import com.dialoguebranch.web.service.storage.VariableStoreJSONStorageHandler;
 import com.dialoguebranch.parser.ResourceFileLoader;
+import jakarta.validation.constraints.NotNull;
 import nl.rrd.utils.AppComponents;
 import org.slf4j.Logger;
 import org.springframework.boot.SpringApplication;
@@ -101,7 +102,7 @@ ApplicationListener<ApplicationEvent> {
 
 		// By default, log uncaught exceptions to this logger
 		Thread.setDefaultUncaughtExceptionHandler((t, e) ->
-				logger.error("Uncaught exception: " + e.getMessage(), e)
+                logger.error("Uncaught exception: {}", e.getMessage(), e)
 		);
 
 		UserServiceFactory userServiceFactory = new DefaultUserServiceFactory(
@@ -147,21 +148,22 @@ ApplicationListener<ApplicationEvent> {
 
 		if(event instanceof ContextRefreshedEvent) {
 			logger.info("========== DialogueBranch Web Service Startup Info ==========");
-			logger.info("=== Version: " + config.get(Configuration.VERSION));
-			logger.info("=== API Version: " + ProtocolVersion.getLatestVersion().versionName());
-			logger.info("=== Build: " + config.getBuildTime());
-			logger.info("=== Spring Version: "+ SpringVersion.getVersion());
-			logger.info("=== JDK Version: "+System.getProperty("java.version"));
-			logger.info("=== Java Version: "+ JavaVersion.getJavaVersion().toString());
-			logger.info("=== External Variable Service Enabled: "
-					+ config.getExternalVariableServiceEnabled());
+            logger.info("=== Version: {}", config.get(Configuration.VERSION));
+            logger.info("=== API Version: {}", ProtocolVersion.getLatestVersion().versionName());
+            logger.info("=== Build: {}", config.getBuildTime());
+            logger.info("=== Spring Version: {}", SpringVersion.getVersion());
+            logger.info("=== JDK Version: {}", System.getProperty("java.version"));
+            logger.info("=== Java Version: {}", JavaVersion.getJavaVersion().toString());
+            logger.info("=== External Variable Service Enabled: {}",
+					config.getExternalVariableServiceEnabled());
 			if(config.getExternalVariableServiceEnabled()) {
-				logger.info("=== External Variable Service URL: "
-						+ config.getExternalVariableServiceURL());
-				logger.info("=== External Variable Service API Version: "
-						+ config.getExternalVariableServiceAPIVersion());
+                logger.info("=== External Variable Service URL: {}",
+						config.getExternalVariableServiceURL());
+                logger.info("=== External Variable Service API Version: {}",
+						config.getExternalVariableServiceAPIVersion());
 			}
-			logger.info("=== Azure Data Lake Storage Enabled: "+config.getAzureDataLakeEnabled());
+            logger.info("=== Azure Data Lake Storage Enabled: {}",
+					config.getAzureDataLakeEnabled());
 			if(config.getAzureDataLakeEnabled()) {
 				//TODO: Output relevant Azure config on startup
 				logger.info("=== TODO: Add other Azure Parameters.");
