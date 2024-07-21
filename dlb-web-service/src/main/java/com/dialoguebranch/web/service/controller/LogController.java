@@ -114,9 +114,12 @@ public class LogController {
 	}
 
 	private List<ServerLoggedDialogue> doGetSession(String userId, String sessionId)
-			throws DatabaseException, IOException {
-		UserService userService =
-				application.getApplicationManager().getActiveUserService(userId);
+            throws DatabaseException, IOException {
+
+		// Get or create a UserService for the user in the default time zone
+		UserService userService = application.getApplicationManager()
+				.getOrCreateActiveUserService(userId);
+
 		return userService.getDialogueSessionLog(sessionId);
 	}
 
@@ -173,9 +176,12 @@ public class LogController {
 
 	}
 
-	private Boolean doVerifyId(String userId, String sessionId) throws DatabaseException {
-		UserService userService =
-				application.getApplicationManager().getActiveUserService(userId);
+	private Boolean doVerifyId(String userId, String sessionId) throws DatabaseException, IOException {
+
+		// Get or create a UserService for the user in the default time zone
+		UserService userService = application.getApplicationManager()
+				.getOrCreateActiveUserService(userId);
+
 		return userService.existsSessionId(sessionId);
 	}
 

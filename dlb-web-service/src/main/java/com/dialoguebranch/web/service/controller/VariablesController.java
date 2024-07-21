@@ -46,10 +46,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import nl.rrd.utils.AppComponents;
 import nl.rrd.utils.datetime.DateTimeUtils;
+import nl.rrd.utils.exception.DatabaseException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -101,6 +103,8 @@ public class VariablesController {
 	 * @param version the API Version to use, e.g. '1'.
 	 * @param variableNames A space-separated list of Dialogue Branch variable names, or leave empty
 	 *                      to retrieve all known variables.
+	 * @param timeZone The current time zone of the Dialogue Branch user (presented as an IANA
+	 *                 String, e.g. 'Europe/Lisbon').
 	 * @param delegateUser The user for which to request Dialogue Branch variable info (leave empty
 	 *                     if executing for the currently authenticated user).
 	 * @return a {@link List} of {@link Variable} objects that match the given input parameters.
@@ -127,6 +131,11 @@ public class VariablesController {
 		@RequestParam(value="variableNames", required=false)
 		String variableNames,
 
+		@Parameter(description = "The current time zone of the DialogueBranch user (as IANA, " +
+				"e.g. 'Europe/Lisbon')")
+		@RequestParam(value="timeZone")
+		String timeZone,
+
 		@Parameter(description = "The user for which to request Dialogue Branch variable info " +
 			"(leave empty if executing for the currently authenticated user)")
 		@RequestParam(value="delegateUser", required=false)
@@ -138,7 +147,8 @@ public class VariablesController {
 		}
 
 		// Log this call to the service log
-		String logInfo = "GET /v" + version + "/variables/get?names=" + variableNames;
+		String logInfo = "GET /v" + version + "/variables/get?names=" + variableNames
+				+ "&timeZone = " + timeZone;
 		if(!(delegateUser == null) && (!delegateUser.isEmpty()))
 			logInfo += "&delegateUser="+delegateUser;
 		logger.info(logInfo);
@@ -148,11 +158,11 @@ public class VariablesController {
 
 		if(delegateUser == null || delegateUser.isEmpty()) {
 			return QueryRunner.runQuery(
-				(protocolVersion, user) -> doGetVariables(user, variableNameList),
+				(protocolVersion, user) -> doGetVariables(user, variableNameList, timeZone),
 				version, request, response, delegateUser, application);
 		} else {
 			return QueryRunner.runQuery(
-				(protocolVersion, user) -> doGetVariables(delegateUser, variableNameList),
+				(protocolVersion, user) -> doGetVariables(delegateUser, variableNameList, timeZone),
 				version, request, response, delegateUser, application);
 		}
 	}
@@ -165,14 +175,21 @@ public class VariablesController {
 	 *
 	 * @param userId the DialogueBranch user for which to retrieve variable data.
 	 * @param variableNames a space-separated list of variable names, or the empty string
+	 * @param timeZone The current time zone of the Dialogue Branch user (presented as an IANA
+	 *                 String, e.g. 'Europe/Lisbon').
 	 * @return a mapping of variable names to variable values
-	 * @throws Exception in case of an error retrieving variable data from file.
-	 * TODO: Return a list of Variable objects
+	 * @throws IOException in case of an error in generating the UserService.
+	 * @throws DatabaseException in case of an error in generating the UserService.
+	 * @throws BadRequestException in case of a malformed or unknown {@code timeZone}.
 	 */
-	private List<Variable> doGetVariables(String userId, String variableNames)
-			throws Exception {
+	private List<Variable> doGetVariables(String userId, String variableNames, String timeZone)
+            throws IOException, DatabaseException, BadRequestException {
+
+		// Get or create a UserService for the user in the given time zone
+		ZoneId timeZoneId = ControllerFunctions.parseTimeZone(timeZone);
 		UserService userService = application.getApplicationManager()
-				.getActiveUserService(userId);
+				.getOrCreateActiveUserService(userId,timeZoneId);
+		userService.getDialogueBranchUser().setTimeZone(timeZoneId);
 
 		VariableStore variableStore = userService.getVariableStore();
 
@@ -288,18 +305,19 @@ public class VariablesController {
 	}
 
 	/**
-	 * Sets a DialogueBranch Variable defined by the given {@code name} to the given {@code value}
+	 * Sets a Dialogue Branch Variable defined by the given {@code name} to the given {@code value}
 	 * for the specified {@code userId} in the given {@code timeZone}.
+	 *
 	 * @param userId the {@link String} identifier of the user for whom to set the variable.
 	 * @param name the name of the DialogueBranch Variable
-	 * @param value the value for the DialogueBranch Variable (or {@code null} in case the variable
-	 *              should be reset).
+	 * @param value the value for the Dialogue Branch Variable (or {@code null} in case the variable
+	 *              should be removed).
 	 * @return {@code null}
 	 * @throws Exception in case of an invalid variable name, invalid timezone, or an error
 	 * 					 accessing the variable store.
 	 */
 	private Object doSetVariable(String userId, String name, String value,
-								 String timeZoneString) throws Exception {
+								 String timeZone) throws Exception {
 		List<HttpFieldError> errors = new ArrayList<>();
 
 		if (!name.matches("[A-Za-z]\\w*")) {
@@ -308,9 +326,10 @@ public class VariablesController {
 			throw BadRequestException.withInvalidInput(errors);
 		}
 
-		// Update the DialogueBranch User's time zone with the latest given value
-		ZoneId timeZoneId = ControllerFunctions.parseTimeZone(timeZoneString);
-		UserService userService = application.getApplicationManager().getActiveUserService(userId);
+		// Get or create a UserService for the user in the given time zone
+		ZoneId timeZoneId = ControllerFunctions.parseTimeZone(timeZone);
+		UserService userService = application.getApplicationManager()
+				.getOrCreateActiveUserService(userId,timeZoneId);
 		userService.getDialogueBranchUser().setTimeZone(timeZoneId);
 
 		ZonedDateTime eventTime = DateTimeUtils.nowMs(timeZoneId);
@@ -319,7 +338,7 @@ public class VariablesController {
 
 		if(value == null) {
             logger.info("Received request to remove Dialogue Branch Variable '{}' at eventTime" +
-					" '{}' in time zone '{}'", name, eventTime.format(formatter), timeZoneString);
+					" '{}' in time zone '{}'", name, eventTime.format(formatter), timeZone);
 			userService.getVariableStore().removeByName(name,true,
 					eventTime, VariableStoreChange.Source.WEB_SERVICE);
 		} else {
@@ -403,16 +422,19 @@ public class VariablesController {
 	}
 
 	/**
-	 * Sets the DialogueBranch Variables in the given {@code variables} map for the given
-	 * {@code userId}.
+	 * Sets the Dialogue Branch Variables in the given {@code variables} map for the give {@code
+	 * userId} in the given {@code timeZone}.
+	 *
 	 * @param userId the {@link String} identifier of the user for whom to set the variables.
 	 * @param variables a mapping of DialogueBranch Variable names to value.
+	 * @param timeZone The current time zone of the Dialogue Branch user (presented as an IANA
+	 * 	               String, e.g. 'Europe/Lisbon').
 	 * @return {@code null}
 	 * @throws Exception in case of an invalid variable name, or an error writing variables to the
 	 * 					 database.
 	 */
 	private Object doSetVariables(String userId, Map<String,Object> variables,
-								  String timeZoneString) throws Exception {
+								  String timeZone) throws Exception {
 
 		List<String> invalidNames = new ArrayList<>();
 		for (String name : variables.keySet()) {
@@ -426,9 +448,10 @@ public class VariablesController {
 			throw new BadRequestException(error);
 		}
 
-		// Update the DialogueBranch User's time zone with the latest given value
-		ZoneId timeZoneId = ControllerFunctions.parseTimeZone(timeZoneString);
-		UserService userService = application.getApplicationManager().getActiveUserService(userId);
+		// Get or create a UserService for the user in the given time zone
+		ZoneId timeZoneId = ControllerFunctions.parseTimeZone(timeZone);
+		UserService userService = application.getApplicationManager()
+				.getOrCreateActiveUserService(userId,timeZoneId);
 		userService.getDialogueBranchUser().setTimeZone(timeZoneId);
 
 		VariableStore variableStore = userService.getVariableStore();
@@ -440,7 +463,6 @@ public class VariablesController {
 					DateTimeUtils.nowMs(userService.getDialogueBranchUser().getTimeZone()),
 					VariableStoreChange.Source.WEB_SERVICE);
 		}
-
 		return null;
 	}
 

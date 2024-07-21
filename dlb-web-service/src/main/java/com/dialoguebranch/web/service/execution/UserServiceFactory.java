@@ -33,6 +33,7 @@ import com.dialoguebranch.web.service.storage.VariableStoreStorageHandler;
 import nl.rrd.utils.exception.DatabaseException;
 
 import java.io.IOException;
+import java.time.ZoneId;
 
 /**
  * Factory class for creating {@link UserService} objects. Defines how to generate a new {@link
@@ -87,16 +88,30 @@ public class UserServiceFactory {
 	// ------------------------------------------------- //
 
 	/**
-	 * Creates a {@link UserService} instance for the user identified by the given  {@code userId}.
+	 * Creates a {@link UserService} instance for the user identified by the given {@code userId},
+	 * located in the given {@code timeZone}.
+	 *
+	 * @param userId the identifier of the user for which to create the {@link UserService}.
+	 * @param timeZone the time zone (as {@link ZoneId}) in which the user resides.
+	 * @return a {@link UserService} instance for the given user.
+	 * @throws DatabaseException In case of an error loading in the known variables for the User.
+	 * @throws IOException In case of an error loading in the known variables for the User.
+	 */
+	public UserService createUserService(String userId, ZoneId timeZone)
+			throws DatabaseException, IOException {
+		return new UserService(new User(userId, timeZone), applicationManager, storageHandler);
+	}
+
+	/**
+	 * Creates a {@link UserService} instance for the user identified by the given {@code userId},
+	 * with an assumed default time zone.
 	 *
 	 * @param userId the identifier of the user for which to create the {@link UserService}.
 	 * @return a {@link UserService} instance for the given user.
 	 * @throws DatabaseException In case of an error loading in the known variables for the User.
 	 * @throws IOException In case of an error loading in the known variables for the User.
 	 */
-	//TODO: When creating the User, the timeZone should be taken into account
-	public UserService createUserService(String userId)
-			throws DatabaseException, IOException {
+	public UserService createUserService(String userId) throws IOException, DatabaseException {
 		return new UserService(new User(userId), applicationManager, storageHandler);
 	}
 

@@ -382,6 +382,8 @@ export class DialogueBranchClient {
     callGetVariables() {
         var url = this._baseUrl + "/variables/get";
 
+        url += "?timeZone="+this._timeZone;
+
         fetch(url, {
             method: "GET",
             headers: {

@@ -177,17 +177,18 @@ public class DialogueController {
 	private DialogueMessage doStartDialogue(String userId, String dialogueName, String language,
 			String timeZone, String sessionId)
 			throws HttpException, IOException, DatabaseException {
+
+		// Get or create a UserService for the user in the given time zone
 		ZoneId timeZoneId = ControllerFunctions.parseTimeZone(timeZone);
 		UserService userService = application.getApplicationManager()
-				.getActiveUserService(userId);
+				.getOrCreateActiveUserService(userId, timeZoneId);
 		userService.getDialogueBranchUser().setTimeZone(timeZoneId);
 
 		// If no sessionId was provided, generate a unique one now
 		if(sessionId == null || sessionId.isEmpty()) {
-			sessionId = UUID.randomUUID().toString().toLowerCase();
-			while(userService.existsSessionId(sessionId)) {
-				sessionId = UUID.randomUUID().toString().toLowerCase();
-			}
+            do {
+                sessionId = UUID.randomUUID().toString().toLowerCase();
+            } while (userService.existsSessionId(sessionId));
 
 		// If a sessionId was provided, check its uniqueness (for this user), or generate error
 		} else {
@@ -334,8 +335,13 @@ public class DialogueController {
 			}
 		}
 		try {
-			UserService userService = application.getApplicationManager()
-					.getActiveUserService(userId);
+			UserService userService
+					= application.getApplicationManager().getActiveUserService(userId);
+			if(userService == null) {
+				throw new BadRequestException("Attempting to progress a dialogue for a user ('" +
+					userId + "') that isn't active. A session of interaction should start with a " +
+					"call to the 'start' or 'continue' end-points.");
+			}
 
 			ZonedDateTime eventTime = DateTimeUtils.nowMs(userService.getDialogueBranchUser()
 					.getTimeZone());
@@ -434,10 +440,10 @@ public class DialogueController {
 																 String timeZone)
 			throws HttpException, DatabaseException, IOException {
 
-		// Update/set the DialogueBranch User's timezone to the given value
+		// Get or create a UserService for the user in the given time zone
 		ZoneId timeZoneId = ControllerFunctions.parseTimeZone(timeZone);
 		UserService userService = application.getApplicationManager()
-				.getActiveUserService(userId);
+				.getOrCreateActiveUserService(userId,timeZoneId);
 		userService.getDialogueBranchUser().setTimeZone(timeZoneId);
 
 		// Determine the event timestamp
@@ -523,17 +529,26 @@ public class DialogueController {
 	/**
 	 * Processes a call to the /dialogue/cancel end-point.
 	 *
-	 * @param userId the user for which to execute the dialogue (leave empty or {@code null} if
+	 * @param userId the user for which to cancel the dialogue (leave empty or {@code null} if
 	 *               executing for the currently authenticated user).
-	 * @param loggedDialogueId the identifier of the (in-progress) dialogue to progress.
+	 * @param loggedDialogueId the identifier of the (in-progress) dialogue to cancel.
 	 * @return {@code null}
 	 * @throws DatabaseException in case of an error in retrieving the specified dialogue.
 	 * @throws IOException in case of any network error.
+	 * @throws BadRequestException if attempting to cancel a dialogue for a user that isn't active
 	 */
 	private Object doCancelDialogue(String userId, String loggedDialogueId)
-			throws DatabaseException, IOException {
-		application.getApplicationManager().getActiveUserService(userId)
-				.cancelDialogueSession(loggedDialogueId);
+            throws DatabaseException, IOException, BadRequestException {
+
+		UserService userService
+				= application.getApplicationManager().getActiveUserService(userId);
+		if(userService == null) {
+			throw new BadRequestException("Attempting to cancel a dialogue for a user ('" +
+					userId + "') that isn't active. A session of interaction should start with a " +
+					"call to the 'start' or 'continue' end-points.");
+		}
+
+		userService.cancelDialogueSession(loggedDialogueId);
 		return null;
 	}
 
@@ -623,8 +638,13 @@ public class DialogueController {
 			throws HttpException, DatabaseException, IOException {
 
 		try {
-			UserService userService = application.getApplicationManager()
-					.getActiveUserService(userId);
+			UserService userService
+					= application.getApplicationManager().getActiveUserService(userId);
+			if(userService == null) {
+				throw new BadRequestException("Attempting to take a step back a dialogue for a " +
+					"user ('" + userId + "') that isn't active. A session of interaction should " +
+					"start with a call to the 'start' or 'continue' end-points.");
+			}
 
 			// Determine the event time stamp
 			ZonedDateTime backDialogueEventTime =
@@ -663,6 +683,11 @@ public class DialogueController {
 		@PathVariable(value = "version")
 		String version,
 
+		@Parameter(description = "The current time zone of the user (as IANA, e.g. " +
+				"'Europe/Lisbon')")
+		@RequestParam(value="timeZone")
+		String timeZone,
+
 		@Parameter(description = "The user for which to retrieve the latest ongoing dialogue " +
 				"information (leave empty if retrieving for the currently authenticated user)")
 		@RequestParam(value="delegateUser", required=false, defaultValue="")
@@ -675,18 +700,18 @@ public class DialogueController {
 		}
 
 		// Log this call to the service log
-		String logInfo = "GET /v" + version + "/dialogue/get-ongoing";
-		if(!(delegateUser == null) && (!delegateUser.isEmpty())) logInfo += "?delegateUser="
+		String logInfo = "GET /v" + version + "/dialogue/get-ongoing?timeZone=" + timeZone;
+		if(!(delegateUser == null) && (!delegateUser.isEmpty())) logInfo += "&delegateUser="
 				+ delegateUser;
 		logger.info(logInfo);
 
 		if(delegateUser == null || delegateUser.isEmpty()) {
 			return QueryRunner.runQuery(
-					(protocolVersion, user) -> doGetOngoingDialogue(user),
+					(protocolVersion, user) -> doGetOngoingDialogue(user, timeZone),
 					version, request, response, delegateUser, application);
 		} else {
 			return QueryRunner.runQuery(
-					(protocolVersion, user) -> doGetOngoingDialogue(delegateUser),
+					(protocolVersion, user) -> doGetOngoingDialogue(delegateUser, timeZone),
 					version, request, response, delegateUser, application);
 		}
 	}
@@ -696,16 +721,23 @@ public class DialogueController {
 	 *
 	 * @param userId the user for which to retrieve the latest ongoing dialogue information
 	 *               (leave empty if retrieving for the currently authenticated user).
+	 * @param timeZone the timeZone of the client as one of {@code TimeZone.getAvailableIDs()}
+	 * 	               (IANA Codes)
 	 * @return a {@link NullableResponse} containing either a {@link OngoingDialoguePayload} object
 	 *         or {@code null}.
 	 * @throws DatabaseException in case of an error retrieving logged dialogues from the database.
 	 * @throws IOException in case of any network error.
+	 * @throws BadRequestException in case of a malformed or unknown {@code timeZone}
 	 */
-	private NullableResponse<OngoingDialoguePayload> doGetOngoingDialogue(String userId)
-			throws DatabaseException, IOException {
+	private NullableResponse<OngoingDialoguePayload> doGetOngoingDialogue(String userId,
+																		  String timeZone)
+            throws DatabaseException, IOException, BadRequestException {
 
+		// Get or create a UserService for the user in the given time zone
+		ZoneId timeZoneId = ControllerFunctions.parseTimeZone(timeZone);
 		UserService userService = application.getApplicationManager()
-				.getActiveUserService(userId);
+				.getOrCreateActiveUserService(userId,timeZoneId);
+		userService.getDialogueBranchUser().setTimeZone(timeZoneId);
 
 		ServerLoggedDialogue latestOngoingDialogue =
 				userService.getLoggedDialogueStore().findLatestOngoingDialogue();

@@ -51,6 +51,7 @@ import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,9 +73,9 @@ public class ApplicationManager {
 	private AzureDataLakeStore azureDataLakeStore = null;
 	private final UserServiceFactory userServiceFactory;
 
-	// ---------------------------------- //
-	// ---------- Constructors ---------- //
-	// ---------------------------------- //
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
 	
 	/**
 	 * Creates an instance of an {@link ApplicationManager}, that loads in a predefined list of
@@ -141,8 +142,10 @@ public class ApplicationManager {
 			}
 		}
 	}
-	
-	// ---------- Getters:
+
+	// ----------------------------------------------------------- //
+	// -------------------- Getters & Setters -------------------- //
+	// ----------------------------------------------------------- //
 	
 	public List<FileDescriptor> getDialogueDescriptions() {
 		return new ArrayList<>(project.getDialogues().keySet());
@@ -150,6 +153,7 @@ public class ApplicationManager {
 
 	/**
 	 * Returns the list of {@link UserCredentials} available for this {@link ApplicationManager}.
+	 *
 	 * @return the list of {@link UserCredentials} available for this {@link ApplicationManager}.
 	 */
 	public List<UserCredentials> getUserCredentials() {
@@ -159,6 +163,7 @@ public class ApplicationManager {
 	/**
 	 * Returns the {@link UserCredentials} object associated with the given {@code username}, or
 	 * {@code null} if no such user is known.
+	 *
 	 * @param username the username of the user to look for.
 	 * @return the {@link UserCredentials} object or {@code null}.
 	 */
@@ -172,48 +177,98 @@ public class ApplicationManager {
 	public AzureDataLakeStore getAzureDataLakeStore() {
 		return azureDataLakeStore;
 	}
-	
-	// ---------- Service Management:
-	
+
+	// ------------------------------------------------------------ //
+	// -------------------- Service Management -------------------- //
+	// ------------------------------------------------------------ //
+
 	/**
-	 * Returns an active {@link UserService} object for the given {@code userId}. Retrieves from an
-	 * internal list of active {@link UserService}s, or instantiates a new {@link UserService} if no
-	 * {@link UserService} is active for the given user.
-	 * @param userId the identifier of the user that is interacting with the {@link UserService}.
+	 * Returns an active {@link UserService} object for the given {@code userId} in the given {@code
+	 * timeZoneId}. Retrieves from an internal list of active {@link UserService}s, or instantiates
+	 * a new {@link UserService} if no {@link UserService} is active for the given user.
+	 *
+	 * @param userId the identifier of the user for which to retrieve a {@link UserService}.
+	 * @param timeZone the time zone as {@link ZoneId} in which the user resides.
 	 * @return a {@link UserService} object that can handle the communication with the user.
+	 * @throws IOException In case of an error loading in the known variables for the User.
+	 * @throws DatabaseException In case of an error loading in the known variables for the User.
 	 */
-	public UserService getActiveUserService(String userId) throws DatabaseException {
-		
+	public UserService getOrCreateActiveUserService(String userId, ZoneId timeZone)
+			throws IOException, DatabaseException {
+		UserService result = getActiveUserService(userId);
+		if(result != null) return result;
+		else {
+			return createActiveUserService(userId, timeZone);
+		}
+	}
+
+	/**
+	 * Returns an active {@link UserService} object for the given {@code userId} in the system's
+	 * default time zone. Retrieves from an internal list of active {@link UserService}s, or
+	 * instantiates a new {@link UserService} if no {@link UserService} is active for the given
+	 * user.
+	 *
+	 * @param userId the identifier of the user for which to retrieve a {@link UserService}.
+	 * @return a {@link UserService} object that can handle the communication with the user.
+	 * @throws IOException In case of an error loading in the known variables for the User.
+	 * @throws DatabaseException In case of an error loading in the known variables for the User.
+	 */
+	public UserService getOrCreateActiveUserService(String userId)
+			throws IOException, DatabaseException {
+		UserService result = getActiveUserService(userId);
+		if(result != null) return result;
+		else {
+			return createActiveUserService(userId,null);
+		}
+	}
+
+	/**
+	 * Returns the {@link UserService} object for a user with the given {@code userId}, or {@code
+	 * null} if there is no currently active user service running.
+	 *
+	 * @param userId the identifier of the user for which to retrieve a {@link UserService}.
+	 * @return a {@link UserService} object, or {@code null} if none exists.
+	 */
+	public UserService getActiveUserService(String userId) {
 		for(UserService userService : activeUserServices) {
 			if(userService.getDialogueBranchUser().getId().equals(userId)) {
 				return userService;
 			}
 		}
+		return null;
+	}
 
+	/**
+	 * Creates a new {@link UserService} object for a new user with the given {@code userId} in the
+	 * given {@code timeZone}. If successfully created, keeps a record of this active user service.
+	 *
+	 * @param userId the identifier of the user for which to create a {@link UserService}.
+	 * @param timeZone the time zone as {@link ZoneId} in which the user resides.
+	 * @return the newly created {@link UserService} object.
+	 * @throws IOException In case of an error loading in the known variables for the User.
+	 * @throws DatabaseException In case of an error loading in the known variables for the User.
+	 */
+	private UserService createActiveUserService(String userId, ZoneId timeZone)
+			throws IOException, DatabaseException {
 		UserService newUserService;
-		try {
+		if(timeZone == null) {
 			newUserService = userServiceFactory.createUserService(userId);
-		} catch (IOException ex) {
-			String error = "Can't create userService: " + ex.getMessage();
-			logger.error(error, ex);
-			throw new RuntimeException(error, ex);
+		} else {
+			newUserService = userServiceFactory.createUserService(userId, timeZone);
 		}
-		
-		// Store as "active userService"
 		activeUserServices.add(newUserService);
-
-		logger.info("No active UserService for userId '{}' created UserService instance " +
-				"(total active users: {}).", userId,activeUserServices.size());
-
+		logger.info("Created a new UserService for userId '{}' (total active users: {}).",
+				userId,activeUserServices.size());
 		return newUserService;
 	}
 	
 	/**
-	 * Removes the given {@link UserService} from the set of active {@link UserService}s in
-	 * this {@link ApplicationManager}.
+	 * Removes the given {@link UserService} from the set of active {@link UserService}s in this
+	 * {@link ApplicationManager}.
+	 *
 	 * @param userService the {@link UserService} to remove.
-	 * @return {@code true} if the given was successfully removed, {@code false} if
-	 * it was not present on the list of active {@link UserService}s in the first place.
+	 * @return {@code true} if the given {@link UserService} was successfully removed, or {@code
+	 * false} if it was not present on the list of active {@link UserService}s in the first place.
 	 */
 	public boolean removeUserService(UserService userService) {
 		return activeUserServices.remove(userService);
