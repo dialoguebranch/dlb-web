@@ -57,12 +57,38 @@ public class InfoController {
 	@Autowired
 	Application application;
 
+	/** Used for writing logging information */
 	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
+
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
+	/**
+	 * Instances of this class are constructed through Spring.
+	 */
+	public InfoController() { }
 
 	// ---------------------------------------------------------------- //
 	// -------------------- END-POINT: "/info/all" -------------------- //
 	// ---------------------------------------------------------------- //
 
+	/**
+	 * Retrieve a set of metadata parameters about the running service.
+	 *
+	 * <p>This end-point may be called without authentication and will return 4 variables that
+	 * describe the current version of the service:
+	 * <ul>
+	 * 		<li>build - Date &amp; Time when the service was built</li>
+	 * 		<li>protocolVersion - latest supported API Protocol version</li>
+	 * 		<li>serviceVersion - software version of the service</li>
+	 * 		<li>upTime - string showing days, hours and minutes since the service was launched</li>
+	 * </ul>
+	 * </p>
+	 *
+	 * @param version The API version to use, e.g. '1'.
+	 * @return a {@link ServiceInfoPayload} object containing information about the running service.
+	 */
 	@Operation(summary = "Retrieve a set of metadata parameters about the running service.",
 		description = "This end-point may be called without authentication and will return 4 " +
 			"variables that describe the current version of the service:" +
@@ -85,7 +111,7 @@ public class InfoController {
 		}
 
 		// Log this call to the service log
-		logger.info("GET /v"+version+"/info/all");
+        logger.info("GET /v{}/info/all", version);
 
 		// Construct the string that indicates the service's uptime
 		Long launchedTime = application.getLaunchedTime();

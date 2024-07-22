@@ -265,6 +265,7 @@ public class DialogueController {
 	 *                   the currently authenticated user)
 	 * @return a {@link NullableResponse} containing either a {@link DialogueMessage} or {@code
 	 *         null}.
+	 * @throws HttpException in case of a bad request, unauthorized user, or internal service error.
 	 */
 	@Operation(
 		summary = "Progresses a given dialogue from a given state with a given reply id.",
@@ -304,7 +305,7 @@ public class DialogueController {
 				"if executing for the currently authenticated user)")
 		@RequestParam(value="delegateUser", required=false)
 		String delegateUser
-	) throws Exception {
+	) throws HttpException {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
 		if (version == null || version.isEmpty()) {

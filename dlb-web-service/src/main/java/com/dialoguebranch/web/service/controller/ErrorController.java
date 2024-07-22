@@ -49,11 +49,10 @@ import jakarta.servlet.http.HttpServletResponse;
  * <p><ul>
  * <li>The request has no exception. It sets the status code and returns the error message or an
  * empty string.</li>
- * <li>The exception has a {@link ResponseStatus ResponseStatus} annotation, such as a
- * {@link HttpException HttpException}. It sets the status code and returns the exception message.
- * </li>
- * <li>The exception is a {@link ServletException ServletException}, which is usually the result of
- * Spring validation. It sets the status code and returns the error message.</li>
+ * <li>The exception has a {@link ResponseStatus} annotation, such as a {@link HttpException}. It
+ * sets the status code and returns the exception message.</li>
+ * <li>The exception is a {@link ServletException}, which is usually the result of Spring
+ * validation. It sets the status code and returns the error message.</li>
  * <li>Any other exception. It logs the exception, sets the status code to 500 Internal Server Error
  * and returns "Internal Server Error". This means that any details about the exception, which may
  * contain sensitive information, are hidden for the client.</li>
@@ -80,6 +79,22 @@ public class ErrorController implements org.springframework.boot.web.servlet.err
 	public ErrorController() { }
 
 	/**
+	 * This controller handles all errors in the application. It looks at the request attributes for
+	 * a status code, error message and exception. It distinguishes the following cases:
+	 *
+	 * <p>
+	 *   <ul>
+	 *     <li>The request has no exception. It sets the status code and returns the error message or
+	 * 	   an empty string.</li>
+	 *     <li>The exception has a {@link ResponseStatus} annotation, such as a {@link
+	 *     HttpException}. It sets the status code and returns the exception message.</li>
+	 *     <li>The exception is a {@link ServletException}, which is usually the result of Spring
+	 *     validation. It sets the status code and returns the error message.</li>
+	 *     <li>Any other exception. It logs the exception, sets the status code to 500 Internal
+	 *     Server Error and returns "Internal Server Error". This means that any details about the
+	 *     exception, which may contain sensitive information, are hidden for the client.</li>
+	 *   </ul>
+	 * </p>
 	 *
 	 * @param request the HTTPRequest object (to retrieve authentication headers and optional body
 	 *                parameters).
