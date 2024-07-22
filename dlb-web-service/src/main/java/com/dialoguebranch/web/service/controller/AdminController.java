@@ -69,12 +69,37 @@ public class AdminController {
     @Autowired
     Application application;
 
+    /** Used for writing logging information */
     private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
+
+    // -------------------------------------------------------- //
+    // -------------------- Constructor(s) -------------------- //
+    // -------------------------------------------------------- //
+
+    /**
+     * Instances of this class are constructed through Spring.
+     */
+    public AdminController() { }
 
     // ---------------------------------------------------------------------------- //
     // -------------------- END-POINT: "/admin/list-dialogues" -------------------- //
     // ---------------------------------------------------------------------------- //
 
+    /**
+     * Retrieve a list of all available dialogues in the Web Service.
+     *
+     * <p>This method returns a JSON object encapsulating a list of all dialogue names that are
+     * hosted by the running instance of this Dialogue Branch Web Service.</p>
+     *
+     * @param request the HTTPRequest object (to retrieve authentication headers and optional body
+     *                parameters).
+     * @param response the HTTP response (to add header WWW-Authenticate in case of a 401
+     *                 Unauthorized error).
+     * @param version The API Version to use, e.g. '1'.
+     * @return a {@link DialogueListPayload} object containing a list of all available dialogues
+     *         in the Web Service.
+     * @throws UnauthorizedException in case the logged-in user does not have admin rights.
+     */
     @Operation(
         summary = "Retrieve a list of all available dialogues in the Web Service.",
         description = "This method returns a JSON object encapsulating a list of all dialogue " +
@@ -87,7 +112,7 @@ public class AdminController {
         @Parameter(hidden = true, description = "API Version to use, e.g. '1'")
         @PathVariable(value = "version")
         String version
-    ) throws Exception {
+    ) throws UnauthorizedException {
 
         // If no versionName is provided, or versionName is empty, assume the latest version
         if (version == null || version.isEmpty()) {
