@@ -86,10 +86,44 @@ public class DialogueController {
 
 	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
 
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
+	/**
+	 * Instances of this class are constructed through Spring.
+	 */
+	public DialogueController() { }
+
 	// ---------------------------------------------------------------------- //
 	// -------------------- END-POINT: "/dialogue/start" -------------------- //
 	// ---------------------------------------------------------------------- //
 
+	/**
+	 * Start the step-by-step execution of the dialogue identified by the given parameters.
+	 *
+	 * <p>A client application that wants to start executing a dialogue should use this end-point to
+	 * do so. The dialogueName (which is the dialogue's filename without it's .dlb extension and
+	 * language are mandatory parameters. The 'userId' is an optional parameter that may be used if
+	 * the currently authorized user is an admin and wants to execute a dialogue on behalf of
+	 * another user. If the authenticated user is running a dialogue 'for himself' this should be
+	 * left empty.</p>
+	 *
+	 * @param request the HTTPRequest object (to retrieve authentication headers and optional body
+	 *                parameters).
+	 * @param response the HTTP response (to add header WWW-Authenticate in case of a 401
+	 *                 Unauthorized error).
+	 * @param version The API Version to use, e.g. '1'.
+	 * @param dialogueName Name of the DialogueBranch Dialogue to start (excluding .dlb)
+	 * @param language Language code of the language in which to start the dialogue (e.g. 'en')
+	 * @param timeZone The current time zone of the user (as IANA, e.g. 'Europe/Lisbon')
+	 * @param delegateUser The user for which to execute the dialogue (leave empty if executing for
+	 *                     the currently authenticated user)
+	 * @param sessionId An optional identifier that is attached to the dialogue logs, allowing this
+	 *                  dialogue session to be cross-referenced with external logs
+	 * @return a {@link DialogueMessage} object containing the first step of the dialogue.
+	 * @throws HttpException In case of a bad request, unauthorized user, or other service error.
+	 */
 	@Operation(
 		summary = "Start the step-by-step execution of the dialogue identified by the given " +
 				"parameters.",
@@ -131,7 +165,7 @@ public class DialogueController {
 				"allowing this dialogue session to be cross-referenced with external logs")
 		@RequestParam(value="sessionId", required = false)
 		String sessionId
-	) throws Exception {
+	) throws HttpException {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
 		if (version == null || version.isEmpty()) {
@@ -222,6 +256,7 @@ public class DialogueController {
 	 *                parameters).
 	 * @param response the HTTP response (to add header WWW-Authenticate in case of a 401
 	 *                 Unauthorized error).
+	 * @param version The API Version to use, e.g. '1'.
 	 * @param loggedDialogueId The identifier of the (in-progress) dialogue to progress.
 	 * @param loggedInteractionIndex The interaction index is the step in the dialogue execution
 	 *                               from which to progress the dialogue.
@@ -347,7 +382,7 @@ public class DialogueController {
 					.getTimeZone());
 
 			// If variable data has been received in the progress call, update the values in the
-			// DialogueBranch Variable Store
+			// Dialogue Branch Variable Store
 			if (!variables.isEmpty()) userService.storeReplyInput(variables,eventTime);
 
 			DialogueState state = userService.getDialogueState(loggedDialogueId,
@@ -366,6 +401,28 @@ public class DialogueController {
 	// -------------------- END-POINT: "/dialogue/continue" -------------------- //
 	// ------------------------------------------------------------------------- //
 
+	/**
+	 * Continue the latest ongoing dialogue with a given name.
+	 *
+	 * <p>Pick up the conversation by providing a dialogue name. If there is an ongoing dialogue
+	 * with the given name (that is not finished or cancelled), this method will return the next
+	 * step in that conversation. As with all methods that 'start' dialogue executions, a valid time
+	 * zone in which the user currently resided must be provided so that time sensitive information
+	 * may be processed correctly.</p>
+	 *
+	 * @param request the HTTPRequest object (to retrieve authentication headers and optional body
+	 *                parameters).
+	 * @param response the HTTP response (to add header WWW-Authenticate in case of a 401
+	 *                 Unauthorized error).
+	 * @param version The API Version to use, e.g. '1'.
+	 * @param dialogueName Name of the DialogueBranch Dialogue to continue (excluding .dlb)
+	 * @param timeZone The current time zone of the user (as IANA, e.g. 'Europe/Lisbon')
+	 * @param delegateUser The user for which to continue executing the dialogue (leave empty if
+	 *                     executing for the currently authenticated user)
+	 * @return a {@link NullableResponse} object, containing either a {@link DialogueMessage} or
+	 *         {@code null}.
+	 * @throws HttpException In case of a bad request, unauthorized user, or internal service error.
+	 */
 	@Operation(
 		summary = "Continue the latest ongoing dialogue with a given name.",
 		description = "Pick up the conversation by providing a dialogue name. If there is an " +
@@ -395,7 +452,7 @@ public class DialogueController {
 				"empty if executing for the currently authenticated user)")
 		@RequestParam(value="delegateUser", required=false, defaultValue="")
 		String delegateUser
-	) throws Exception {
+	) throws HttpException {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
 		if (version == null || version.isEmpty()) {
@@ -480,6 +537,24 @@ public class DialogueController {
 	// -------------------- END-POINT: "/dialogue/cancel" -------------------- //
 	// ----------------------------------------------------------------------- //
 
+	/**
+	 * Cancels a dialogue that is currently in progress, terminating its execution state.
+	 *
+	 * <p>If a client application detects that a user has navigated away, or has deliberately
+	 * requested to stop an ongoing dialogue through a user interface action, this end-point should
+	 * be called so that the dialogue's state can be updated, indicating that it is no longer
+	 * ongoing.</p>
+	 *
+	 * @param request the HTTPRequest object (to retrieve authentication headers and optional body
+	 *                parameters).
+	 * @param response the HTTP response (to add header WWW-Authenticate in case of a 401
+	 *                 Unauthorized error).
+	 * @param version The API Version to use, e.g. '1'.
+	 * @param loggedDialogueId The identifier of the (in-progress) dialogue to cancel
+	 * @param delegateUser The user for which to cancel the dialogue (leave empty if executing for
+	 *                     the currently authenticated user)
+	 * @throws HttpException In case of a bad request, unauthorized user, or internal service error.
+	 */
 	@Operation(
 		summary = "Cancels a dialogue that is currently in progress, terminating its execution " +
 				"state.",
@@ -496,14 +571,14 @@ public class DialogueController {
 		@PathVariable(value = "version")
 		String version,
 
-		@Parameter(description = "The identifier of the (in-progress) dialogue to progress")
+		@Parameter(description = "The identifier of the (in-progress) dialogue to cancel")
 		@RequestParam(value="loggedDialogueId")
 		String loggedDialogueId,
 
-		@Parameter(description = "The user for which to execute the dialogue (leave empty if " +
+		@Parameter(description = "The user for which to cancel the dialogue (leave empty if " +
 				"executing for the currently authenticated user)")
 		@RequestParam(value="delegateUser", required=false)
-		String delegateUser) throws Exception {
+		String delegateUser) throws HttpException {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
 		if (version == null || version.isEmpty()) {
@@ -556,6 +631,33 @@ public class DialogueController {
 	// -------------------- END-POINT: "/dialogue/back" -------------------- //
 	// --------------------------------------------------------------------- //
 
+	/**
+	 * Go back to the previous step in an ongoing dialogue.
+	 *
+	 * <p>Use this end-point by providing a loggedDialogueId (specifying an ongoing dialogue) and
+	 * the loggedInteractionIndex (identifying the current step in the dialogue). This end-point
+	 * will return the previous dialogue step (based on the loggedInteractionIndex) by providing
+	 * that previous DialogueMessage.</p>
+	 *
+	 * <p><b>Caution: Using this method takes the dialogue back to the previous step as if there was
+	 * a regular reply option leading back to that step, but it will not undo any variable
+	 * operations (i.e. setting Dialogue Branch Variables) that may have occurred in the execution
+	 * of the current step. This may lead to unexpected results if the execution of the 'previous'
+	 * dialogue step is affected by variables set in the 'current' step.</b></p>
+	 *
+	 * @param request the HTTPRequest object (to retrieve authentication headers and optional body
+	 *                parameters).
+	 * @param response the HTTP response (to add header WWW-Authenticate in case of a 401
+	 *                 Unauthorized error).
+	 * @param version The API Version to use, e.g. '1'.
+	 * @param loggedDialogueId The identifier of the (in-progress) dialogue to take a step back in
+	 * @param loggedInteractionIndex The interaction index is the step in the dialogue execution
+	 *                               from which to take a step back in the dialogue
+	 * @param delegateUser The user for which to take a step back in the dialogue (leave empty if
+	 *                     executing for the currently authenticated user)
+	 * @return a {@link DialogueMessage} containing the previous dialogue step
+	 * @throws HttpException in case of a bad request, unauthorized user, or internal service error.
+	 */
 	@Operation(
 		summary = "Go back to the previous step in an ongoing dialogue.",
 		description = "Use this end-point by providing a loggedDialogueId (specifying an ongoing " +
@@ -591,7 +693,7 @@ public class DialogueController {
 				"(leave empty if executing for the currently authenticated user)")
 		@RequestParam(value="delegateUser", required=false)
 		String delegateUser
-	) throws Exception {
+	) throws HttpException {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
 		if (version == null || version.isEmpty()) {
@@ -664,6 +766,29 @@ public class DialogueController {
 	// -------------------- END-POINT: "/dialogue/get-ongoing" -------------------- //
 	// ---------------------------------------------------------------------------- //
 
+	/**
+	 * Get information about the latest ongoing dialogue for a given user.
+	 *
+	 * <p>This end-point answers the question 'was there any unfinished business? and if so, how
+	 * long ago?'. As a client application, you may want to call this end-point at the start of a
+	 * session to see if there was an ongoing dialogue left over from a previous session. If so, you
+	 * will get the dialogue-name and the time (in seconds) since the last 'engagement' with that
+	 * dialogue (the last time since either the user or the agent said something). If this wasn't
+	 * too long ago, you may decide to continue the conversation by passing the dialogue name to the
+	 * /dialogues/continue end-point.</p>
+	 *
+	 * @param request the HTTPRequest object (to retrieve authentication headers and optional body
+	 *                parameters).
+	 * @param response the HTTP response (to add header WWW-Authenticate in case of a 401
+	 *                 Unauthorized error).
+	 * @param version The API Version to use, e.g. '1'.
+	 * @param timeZone The current time zone of the user (as IANA, e.g. 'Europe/Lisbon')
+	 * @param delegateUser The user for which to retrieve the latest ongoing dialogue information
+	 *                     (leave empty if retrieving for the currently authenticated user)
+	 * @return a {@link NullableResponse} containing an {@link OngoingDialoguePayload} or {@code
+	 *         null}
+	 * @throws HttpException in case of a bad request, unauthorized user, or internal service error.
+	 */
 	@Operation(
 		summary = "Get information about the latest ongoing dialogue for a given user.",
 		description = "This end-point answers the question 'was there any unfinished business? " +
@@ -673,7 +798,7 @@ public class DialogueController {
 			"(in seconds) since the last 'engagement' with that dialogue (the last time since " +
 			"either the user or the agent said something). If this wasn't too long ago, you may " +
 			"decide to continue the conversation by passing the dialogue name to the " +
-			"/dialogues/continue end-point. ")
+			"/dialogues/continue end-point.")
 	@RequestMapping(value="/get-ongoing", method=RequestMethod.GET)
 	public NullableResponse<OngoingDialoguePayload> getOngoingDialogue(
 		HttpServletRequest request,
@@ -692,7 +817,7 @@ public class DialogueController {
 				"information (leave empty if retrieving for the currently authenticated user)")
 		@RequestParam(value="delegateUser", required=false, defaultValue="")
 		String delegateUser
-	) throws Exception {
+	) throws HttpException {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
 		if (version == null || version.isEmpty()) {
