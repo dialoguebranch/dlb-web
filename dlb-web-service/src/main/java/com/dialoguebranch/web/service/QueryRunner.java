@@ -60,12 +60,12 @@ public class QueryRunner {
 	 *                    in a non-static way.
 	 * @return the query result
 	 * @throws HttpException if the query should return an HTTP error status
-	 * @throws Exception if an unexpected error occurs. This results in HTTP error status 500
+	 * @throws HttpException if an unexpected error occurs. This results in HTTP error status 500
 	 *                   Internal Server Error.
 	 */
 	public static <T> T runQuery(AuthQuery<T> query, String versionName, HttpServletRequest request,
 			HttpServletResponse response, String delegateUser, Application application)
-			throws HttpException, Exception {
+			throws HttpException {
 		ProtocolVersion version;
 		try {
 			version = ProtocolVersion.forVersionName(versionName);

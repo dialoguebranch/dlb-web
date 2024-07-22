@@ -30,15 +30,10 @@ package com.dialoguebranch.web.service.controller;
 import com.dialoguebranch.web.service.*;
 import com.dialoguebranch.web.service.controller.schema.LoginParametersPayload;
 import com.dialoguebranch.web.service.controller.schema.LoginResultPayload;
+import com.dialoguebranch.web.service.exception.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import nl.rrd.utils.AppComponents;
 import nl.rrd.utils.datetime.DateTimeUtils;
-import nl.rrd.utils.exception.ParseException;
-import nl.rrd.utils.http.URLParameters;
-import com.dialoguebranch.web.service.exception.BadRequestException;
-import com.dialoguebranch.web.service.exception.ErrorCode;
-import com.dialoguebranch.web.service.exception.HttpFieldError;
-import com.dialoguebranch.web.service.exception.UnauthorizedException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -53,7 +48,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Controller for the /auth/... end-points of the Dialogue Branch Web Service.
@@ -69,10 +63,46 @@ public class AuthController {
 	@Autowired
 	Application application;
 
+	/** Used for executing QueryRunner operations in a thread-safe manner */
 	private static final Object AUTH_LOCK = new Object();
 
+	/** Used for writing logging information */
 	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
 
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
+	/**
+	 * Instances of this class are constructed through Spring.
+	 */
+	public AuthController() { }
+
+	// ------------------------------------------------------------------ //
+	// -------------------- END-POINT: "/auth/login" -------------------- //
+	// ------------------------------------------------------------------ //
+
+	/**
+	 * Obtain an authentication token by logging in.
+	 *
+	 * <p>Log in to the service by providing a username, password and indicating the desired
+	 * duration of the authentication token in minutes. If you want to obtain an authentication
+	 * token that does not expire, either provide '0' or 'never' as the value for
+	 * '*tokenExpiration*'. This method returns a JSON object containing the provided '*user*' name,
+	 * the '*role*' of the user, and the JWT '*token*' that may be used to authenticate subsequent
+	 * API calls.</p>
+	 *
+	 * @param request the HTTPRequest object (to retrieve authentication headers and optional body
+	 *                parameters).
+	 * @param response the HTTP response (to add header WWW-Authenticate in case of a 401
+	 *                 Unauthorized error).
+	 * @param version The API Version to use, e.g. '1'.
+	 * @param loginParametersPayload the JSON payload containing the username, password and token
+	 *                               expiration values.
+	 * @return a {@link LoginResultPayload} object, containing the username, the corresponding role
+	 *         and a JSON Web Token.
+	 * @throws HttpException in case of a malformed request, or invalid login credentials
+	 */
 	@Operation(summary = "Obtain an authentication token by logging in.",
 		description = "Log in to the service by providing a username, password and indicating " +
 			"the desired duration of the authentication token in minutes. If you want to obtain " +
@@ -91,7 +121,7 @@ public class AuthController {
 			String version,
 
 			@RequestBody
-			LoginParametersPayload loginParametersPayload) throws Exception {
+			LoginParametersPayload loginParametersPayload) throws HttpException {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
 		if (version == null || version.isEmpty()) {
@@ -100,10 +130,10 @@ public class AuthController {
 
 		// Log this call to the service log
 		if(loginParametersPayload != null) {
-			logger.info("POST /v" + version + "/auth/login for user '" +
-					loginParametersPayload.getUser() + "'.");
+            logger.info("POST /v{}/auth/login for user '{}'.",
+					version, loginParametersPayload.getUser());
 		} else {
-			logger.info("POST /v" + version + "/auth/login with empty login parameters.");
+            logger.info("POST /v{}/auth/login with empty login parameters.", version);
 			throw new BadRequestException("Missing login parameters in request body.");
 		}
 
@@ -114,11 +144,23 @@ public class AuthController {
 		}
 	}
 
+	/**
+	 * Performs the operation after a call to the /auth/login end-point.
+	 *
+	 * @param request the HTTPRequest object (to retrieve authentication headers and optional body
+	 *                parameters).
+	 * @param loginParametersPayload the JSON payload containing the username, password and token
+	 * 	                             expiration values.
+	 * @return a {@link LoginResultPayload} object, containing the username, the corresponding role
+	 * 	       and a JSON Web Token.
+	 * @throws BadRequestException in case of any error in the given {@link LoginParametersPayload}.
+	 * @throws UnauthorizedException in case the username and passwords don't match.
+	 */
 	private LoginResultPayload doLogin(HttpServletRequest request,
 									   LoginParametersPayload loginParametersPayload)
-			throws Exception {
-		Logger logger = AppComponents.getLogger(getClass().getSimpleName());
-		validateForbiddenQueryParams(request, "user", "password");
+			throws BadRequestException, UnauthorizedException {
+
+		ControllerFunctions.validateForbiddenQueryParams(request, "user", "password");
 		String user = loginParametersPayload.getUser();
 		String password = loginParametersPayload.getPassword();
 		Integer tokenExpiration = loginParametersPayload.getTokenExpiration();
@@ -136,7 +178,7 @@ public class AuthController {
 					"Parameter 'tokenExpiration' must be greater than 0 or 'never'."));
 		}
 		if (!fieldErrors.isEmpty()) {
-			logger.info("Failed login attempt: " + fieldErrors);
+            logger.info("Failed login attempt: {}", fieldErrors);
 			throw BadRequestException.withMessageAndInvalidInput(
 					"One or more login parameters were not correctly provided.",
 					fieldErrors);
@@ -171,6 +213,25 @@ public class AuthController {
 				token);
 	}
 
+	// --------------------------------------------------------------------- //
+	// -------------------- END-POINT: "/auth/validate" -------------------- //
+	// --------------------------------------------------------------------- //
+
+	/**
+	 * Validate a given authentication token.
+	 *
+	 * <p>If your client application has a stored authentication token you may use this method to
+	 * check whether or not that is a valid token. This method will either return 'true', or throw
+	 * an Authentication error.</p>
+	 *
+	 * @param request the HTTPRequest object (to retrieve authentication headers and optional body
+	 *                parameters).
+	 * @param response the HTTP response (to add header WWW-Authenticate in case of a 401
+	 *                 Unauthorized error).
+	 * @param version The API Version to use, e.g. '1'.
+	 * @return 'true' if the token is correct, otherwise it will throw an exception.
+	 * @throws UnauthorizedException if the given authentication token is not (or no longer) valid.
+	 */
 	@SecurityRequirement(name = "X-Auth-Token")
 	@Operation(summary = "Validate a given authentication token.",
 		description = "If your client application has a stored authentication token you may use" +
@@ -184,7 +245,7 @@ public class AuthController {
 		@Parameter(hidden = true, description = "API Version to use, e.g. '1'")
 		@PathVariable(value = "version")
 		String version
-	) throws Exception {
+	) throws UnauthorizedException {
 
 		// If no versionName is provided, or versionName is empty, assume the latest version
 		if (version == null || version.isEmpty()) {
@@ -192,7 +253,7 @@ public class AuthController {
 		}
 
 		// Log this call to the service log
-		logger.info("POST /v" + version + "/auth/validate");
+        logger.info("POST /v{}/auth/validate", version);
 
 		synchronized (AUTH_LOCK) {
 			QueryRunner.validateToken(request,application);
@@ -200,21 +261,4 @@ public class AuthController {
 		}
 	}
 
-	private void validateForbiddenQueryParams(HttpServletRequest request, String... paramNames)
-			throws BadRequestException {
-		if (request.getQueryString() == null)
-			return;
-		Map<String,String> params;
-		try {
-			params = URLParameters.parseParameterString(request.getQueryString());
-		} catch (ParseException ex) {
-			throw new BadRequestException(ex.getMessage());
-		}
-		for (String name : paramNames) {
-			if (params.containsKey(name)) {
-				throw new BadRequestException(
-					"Query parameters not accepted, parameters must be set in the request body.");
-			}
-		}
-	}
 }
