@@ -376,6 +376,7 @@ export class WCTAController extends AbstractController {
 
         this._logger.info(this._LOGTAG,"User '"+this._clientState.user.name+"' successfully logged in with role '"+this._clientState.user.role+"'.");
         
+        this.postLoginActions();
         this.updateServerInfoBox();
         this.updateUIState();
     }
@@ -405,6 +406,7 @@ export class WCTAController extends AbstractController {
         // All is well, mark user as logged in and proceed
         if(valid == true) {
             this._clientState.loggedIn = true;
+            this.postLoginActions();
         
         // There is an invalid authToken in cookie, delete all info and assume user is logged out
         } else {
@@ -419,6 +421,34 @@ export class WCTAController extends AbstractController {
 
         // Finally, update the User Interface State
         this.updateUIState();
+    }
+
+    /**
+     * Perform actions that need to happen immediately after a user has logged in.
+     */
+    postLoginActions() {
+        this._logger.info(this._LOGTAG,"Performing post-login actions.");
+        this._dialogueBranchClient.callGetOngoingDialogue();
+    }
+
+    // ------------------------------------------------------
+    // ---------- End-Point: /dialogue/get-ongoing ----------
+    // ------------------------------------------------------
+
+    handleOngoingDialogue(ongoingDialogue) {
+        // If called with null, there is no ongoing dialogue, and we are done here
+        if(ongoingDialogue != null) {
+            this._logger.info(this._LOGTAG,"Found an ongoing dialogue for user '"+this._clientState.user.name+"', dialogue name: '"+ongoingDialogue.name+"', with last engagement: "+ongoingDialogue.secondsSinceLastEngagement+" seconds ago.");
+            
+            // If the ongoing dialogue is less than a day old, pick up the conversation
+            if(ongoingDialogue.secondsSinceLastEngagement <= 24 * 60 * 60) {
+                this._logger.info(this._LOGTAG,"Ongoing dialogue is less than a day old, so picking up the conversation.");
+                this._dialogueBranchClient.callContinueDialogue(ongoingDialogue.name);
+            } else {
+                this._logger.info(this._LOGTAG,"Ongoing dialogue is more than a day old, time to let go...");
+            }
+        }
+        
     }
     
     // ---------- Start Dialogue

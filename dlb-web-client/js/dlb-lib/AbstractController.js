@@ -103,6 +103,14 @@ export class AbstractController {
     // ---------- 2. Dialogue: End-points for starting and controlling the lifecycle of remotely executed dialogues. ----------
     // ------------------------------------------------------------------------------------------------------------------------
 
+    // ------------------------------------------------------
+    // ---------- End-Point: /dialogue/get-ongoing ----------
+    // ------------------------------------------------------
+
+    handleOngoingDialogue(ongoingDialogue) {
+        throw new Error("Method 'handleOngoingDialogue()' must be implemented by a subclass.");
+    }
+
     // ------------------------------------------------
     // ---------- End-Point: /dialogue/start ----------
     // ------------------------------------------------

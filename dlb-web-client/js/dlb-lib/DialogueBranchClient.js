@@ -33,6 +33,7 @@ import { Statement } from './model/Statement.js';
 import { ServerInfo } from './model/ServerInfo.js';
 import { BasicReply } from './model/BasicReply.js';
 import { DialogueStep } from './model/DialogueStep.js';
+import { OngoingDialogue } from './model/OngoingDialogue.js';
 import { AutoForwardReply } from './model/AutoForwardReply.js';
 
 export class DialogueBranchClient {
@@ -195,6 +196,38 @@ export class DialogueBranchClient {
     // ---------- 2. Dialogue: End-points for starting and controlling the lifecycle of remotely executed dialogues. ----------
     // ------------------------------------------------------------------------------------------------------------------------
 
+    // ------------------------------------------------------
+    // ---------- End-Point: /dialogue/get-ongoing ----------
+    // ------------------------------------------------------
+
+    callGetOngoingDialogue() {
+        var url = this._baseUrl + "/dialogue/get-ongoing";
+
+        url += "?timeZone="+this._timeZone;
+
+        fetch(url, {
+            method: "GET",
+            headers: {
+                'X-Auth-Token': this._user.authToken,
+                Accept: "application/json, text/plain, */*",
+                "Content-Type": "application/json"
+            }
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            if('value' in data) {
+                if(data.value == null) {
+                    this._clientController.handleOngoingDialogue(null);
+                } else {
+                    var ongoingDialogue = new OngoingDialogue(data.value.dialogueName, data.value.secondsSinceLastEngagement);
+                    this._clientController.handleOngoingDialogue(ongoingDialogue);
+                }
+            } else {
+                this._clientController.handleOngoingDialogue(null);
+            }
+        })
+    }
+
     // ------------------------------------------------
     // ---------- End-Point: /dialogue/start ----------
     // ------------------------------------------------
@@ -281,6 +314,48 @@ export class DialogueBranchClient {
             this._clientController.handleProgressDialogueError(errorMessage);
         });
 
+    }
+
+    // ---------------------------------------------------
+    // ---------- End-Point: /dialogue/continue ----------
+    // ---------------------------------------------------
+
+    callContinueDialogue(dialogueName) {
+        var url = this._baseUrl + "/dialogue/continue";
+
+        url += "?dialogueName="+dialogueName;
+        url += "&timeZone="+this._timeZone;
+
+        fetch(url, {
+            method: "POST",
+            headers: {
+                'X-Auth-Token': this._user.authToken,
+                Accept: "application/json, text/plain, */*",
+                "Content-Type": "application/json",
+            }
+        })
+        .then((response) => response.json())
+        .then((data) => { 
+            if('value' in data) {
+                var dialogueData = data.value;
+                if('dialogue' in dialogueData) {
+                    // Create a DialogueStep object from the received data
+                    var dialogueStep = this.createDialogueStepObject(dialogueData);
+
+                    // Let the controller handle it
+                    this._clientController.handleStartDialogue(dialogueStep);
+                }
+            } else {
+                var errorMessage = "No data received when trying to continue dialogue.";
+                this.logger.error(this._LOGTAG,errorMessage);
+                this._clientController.handleStartDialogueError(errorMessage);
+            }
+        })
+        .catch((err) => {
+            var errorMessage = "An unexpected error occured when attempting to continue a dialogue: "+err;
+            this.logger.error(this._LOGTAG,errorMessage);
+            this._clientController.handleStartDialogueError(errorMessage);
+        });
     }
 
     // -------------------------------------------------
