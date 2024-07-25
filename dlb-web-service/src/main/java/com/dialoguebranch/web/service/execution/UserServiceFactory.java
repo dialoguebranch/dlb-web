@@ -28,7 +28,6 @@
 package com.dialoguebranch.web.service.execution;
 
 import com.dialoguebranch.execution.User;
-import com.dialoguebranch.web.service.storage.ExternalVariableServiceUpdater;
 import com.dialoguebranch.web.service.storage.VariableStoreStorageHandler;
 import nl.rrd.utils.exception.DatabaseException;
 
@@ -37,7 +36,7 @@ import java.time.ZoneId;
 
 /**
  * Factory class for creating {@link UserService} objects. Defines how to generate a new {@link
- * UserService} given a {@code userId} and an {@link ApplicationManager}.
+ * UserService} given a {@code userId} and an optional time zone.
  *
  * @author Harm op den Akker (Fruit Tree Labs)
  */
