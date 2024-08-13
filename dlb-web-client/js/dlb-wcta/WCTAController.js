@@ -29,11 +29,15 @@
 import { WCTAClientState } from './WCTAClientState.js';
 import { TextAreaLogger } from '../dlb-lib/util/TextAreaLogger.js';
 import { LOG_LEVEL_NAMES } from '../dlb-lib/util/AbstractLogger.js';
-import { AutoForwardReply } from '../dlb-lib/model/AutoForwardReply.js';
 import { DocumentFunctions } from '../dlb-lib/util/DocumentFunctions.js';
 import { AbstractController } from '../dlb-lib/AbstractController.js';
 import { DialogueBranchConfig } from '../dlb-lib/DialogueBranchConfig.js';
 import { DialogueBranchClient } from '../dlb-lib/DialogueBranchClient.js';
+import { WCTATextRenderer } from './WCTATextRenderer.js';
+import { WCTABalloonsRenderer } from './WCTABalloonsRenderer.js';
+
+import { INTERACTION_TESTER_STYLE_TEXT } from './WCTAClientState.js';
+import { INTERACTION_TESTER_STYLE_BALLOONS } from './WCTAClientState.js';
 
 /**
  * The WCTAController (or Web Client Test Application Controller) is an implementation of an AbstractController
@@ -81,6 +85,9 @@ export class WCTAController extends AbstractController {
             this._dialogueBranchClient.callAuthValidate(this._clientState.user.authToken);
         }
         
+        this._interactionTextRenderer = new WCTATextRenderer(this);
+        this._interactionBalloonsRenderer = new WCTABalloonsRenderer(this);
+
         // Make a call to the Web Service for service info.
         this._dialogueBranchClient.callInfo();
 
@@ -90,7 +97,31 @@ export class WCTAController extends AbstractController {
         // Update the size of the interaction tester / variable/dialogue browsers
         this.updateInteractionTesterSize();
     }
+
+    // -----------------------------------------------------------
+    // -------------------- Getters & Setters --------------------
+    // -----------------------------------------------------------
+
+    set dialogueReplyElements(dialogueReplyElements) {
+        this._dialogueReplyElements = dialogueReplyElements;
+    }
     
+    get dialogueReplyElements() {
+        return this._dialogueReplyElements;
+    }
+
+    set dialogueReplyNumbers(dialogueReplyNumbers) {
+        this._dialogueReplyNumbers = dialogueReplyNumbers;
+    }
+
+    get dialogueReplyNumbers() {
+        return this._dialogueReplyNumbers;
+    }
+
+    get logTag() {
+        return this._LOGTAG;
+    }
+
     // ------------------------------------------------------
     // -------------------- User Actions --------------------
     // ------------------------------------------------------
@@ -319,8 +350,8 @@ export class WCTAController extends AbstractController {
     actionStartDialogue(dialogueName) {
         this._logger.info(this._LOGTAG, "Starting dialogue '" + dialogueName + "'.");
 
-        var contentBlock = document.getElementById("interaction-tester-content");
-        contentBlock.innerHTML = "";
+        document.getElementById("interaction-tester-content-text").innerHTML = "";
+        document.getElementById("interaction-tester-content-balloons").innerHTML = "";
         this._dialogueBranchClient.callStartDialogue(dialogueName,"en");
     }
 
@@ -462,7 +493,7 @@ export class WCTAController extends AbstractController {
         var cancelButton = document.getElementById("button-cancel-dialogue");
         cancelButton.addEventListener("click", this.actionCancelDialogue.bind(this, dialogueStep.loggedDialogueId), false);
         cancelButton.setAttribute('title',"Cancel the current ongoing dialogue.");
-        cancelButton.classList.remove("button-cancel-dialogue-disabled");
+        cancelButton.classList.remove("button-disabled");
 
         // Render the newly created DialogueStep in the UI
         this.renderDialogueStep(dialogueStep);
@@ -518,6 +549,8 @@ export class WCTAController extends AbstractController {
 
         this.setDebugConsoleVisibility(this._clientState.debugConsoleVisible);
 
+        this.setInteractionTesterStyle(this._clientState.interactionTesterStyle);
+
         if(this._clientState.loggedIn) {
             document.getElementById("navbar").style.display = 'block';
             document.getElementById("dialogue-container").style.display = 'block';
@@ -526,10 +559,10 @@ export class WCTAController extends AbstractController {
             document.getElementById("dlb-splash-text").style.display = 'none';
             var dialogueListButton = document.getElementById("button-refresh-dialogue-list");
             if(this._clientState.user.role == "admin") {
-                dialogueListButton.classList.remove("button-refresh-dialogue-list-disabled");
+                dialogueListButton.classList.remove("button-disabled");
                 dialogueListButton.setAttribute('title',"Refresh the content of the Dialogue Browser.");
             } else {
-                dialogueListButton.classList.add("button-refresh-dialogue-list-disabled");
+                dialogueListButton.classList.add("button-disabled");
                 dialogueListButton.setAttribute('title',"Retrieving a dialogue list is only available for 'admin' users.");
             }
 
@@ -544,7 +577,8 @@ export class WCTAController extends AbstractController {
             document.getElementById("navbar").style.display = 'none';
             document.getElementById("dialogue-container").style.display = 'none';
             document.getElementById("dialogue-browser-content").innerHTML = "";
-            document.getElementById("interaction-tester-content").innerHTML = "";
+            document.getElementById("interaction-tester-content-text").innerHTML = "";
+            document.getElementById("interaction-tester-content-balloons").innerHTML = "";
             document.getElementById("variable-browser-content").innerHTML = "";
             document.getElementById("dlb-splash-logo").style.display = 'block';
             document.getElementById("dlb-splash-text").style.display = 'block';
@@ -622,6 +656,54 @@ export class WCTAController extends AbstractController {
         }
     }
 
+    // ---------- Interaction Tester Style ----------
+
+    setInteractionTesterStyle(style) {
+
+        if(style != INTERACTION_TESTER_STYLE_BALLOONS && style != INTERACTION_TESTER_STYLE_TEXT) {
+            // Something is wrong, assume the 'text' style.
+            style = INTERACTION_TESTER_STYLE_TEXT;
+        }
+
+        var interactionTesterStyleBalloonsButton = document.getElementById("button-interaction-style-balloons");
+        var interactionTesterStyleTextButton = document.getElementById("button-interaction-style-text");
+
+        if(style == INTERACTION_TESTER_STYLE_TEXT) {
+            
+            // Enable the "other" style buttons
+            interactionTesterStyleBalloonsButton.addEventListener("click", this.setInteractionTesterStyle.bind(this, INTERACTION_TESTER_STYLE_BALLOONS), false);
+            interactionTesterStyleBalloonsButton.setAttribute('title',"Switch to a balloon-based interaction style.");
+            interactionTesterStyleBalloonsButton.classList.remove("button-disabled");
+
+            // Disable the "text" style button
+            interactionTesterStyleTextButton.classList.add("button-disabled");
+            interactionTesterStyleTextButton.setAttribute('title',"Interaction style already in use.");
+            interactionTesterStyleTextButton.replaceWith(interactionTesterStyleTextButton.cloneNode(true));
+
+            document.getElementById("interaction-tester-content-text").style.visibility = 'visible';
+            document.getElementById("interaction-tester-content-balloons").style.visibility = 'hidden';
+
+
+        } else {
+            // Enable the "other" style buttons
+            interactionTesterStyleTextButton.addEventListener("click", this.setInteractionTesterStyle.bind(this, INTERACTION_TESTER_STYLE_TEXT), false);
+            interactionTesterStyleTextButton.setAttribute('title',"Switch to a text-based interaction style.");
+            interactionTesterStyleTextButton.classList.remove("button-disabled");
+
+            // Disable the "balloon" style button
+            interactionTesterStyleBalloonsButton.classList.add("button-disabled");
+            interactionTesterStyleBalloonsButton.setAttribute('title',"Interaction style already in use.");
+            interactionTesterStyleBalloonsButton.replaceWith(interactionTesterStyleBalloonsButton.cloneNode(true));
+
+            document.getElementById("interaction-tester-content-balloons").style.visibility = 'visible';
+            document.getElementById("interaction-tester-content-text").style.visibility = 'hidden';
+        }
+
+        // Update the client state
+        this._clientState.interactionTesterStyle = style;
+
+    }
+
     // ---------- Dialogue Step Rendering ----------
 
     /**
@@ -633,159 +715,11 @@ export class WCTAController extends AbstractController {
      */
     renderDialogueStep(dialogueStep, nullMessage) {
 
-        // Remove the previous temporary filler element
-        const element = document.getElementById("temp-dialogue-filler");
-        if(element != null) element.remove();
-
-        // Remove previous click event listeners
-        if(this._dialogueReplyElements.length > 0) {
-            for(var i=0; i<this._dialogueReplyElements.length; i++) {
-                // Replace the node with a clone, which removes all (bound) event listeners
-                this._dialogueReplyElements[i].classList.remove("reply-option-with-listener");
-                this._dialogueReplyElements[i].replaceWith(this._dialogueReplyElements[i].cloneNode(true));
-            }
-            // Finally, empty the set of dialogueReplyElements
-            this._dialogueReplyElements = new Array();
-            this._dialogueReplyNumbers = new Array();
-        }
-
-        var contentBlock = document.getElementById("interaction-tester-content");
+        this._interactionTextRenderer.renderDialogueStep(dialogueStep, nullMessage);
+        this._interactionBalloonsRenderer.renderDialogueStep(dialogueStep, nullMessage);
         
-        // Create the container element for the Statement
-        const statementContainer = document.createElement("div");
-        statementContainer.classList.add("dialogue-step-statement-container");
-        contentBlock.appendChild(statementContainer);
-
-        if(dialogueStep == null) {
-            
-            // Create and show a message why the dialogue has ended
-            var dialogueOverElement = document.createElement("div");
-            dialogueOverElement.classList.add("dialogue-finished-statement");
-            if(nullMessage != null) {
-                dialogueOverElement.innerHTML = nullMessage;
-            } else {
-                dialogueOverElement.innerHTML = "Dialogue Finished";
-            }
-            statementContainer.appendChild(dialogueOverElement);
-
-            // Disable the "cancel dialogue" button
-            var cancelButton = document.getElementById("button-cancel-dialogue");
-            cancelButton.classList.add("button-cancel-dialogue-disabled");
-            cancelButton.setAttribute('title',"You can cancel a dialogue when there is a dialogue in progress.");
-            cancelButton.replaceWith(cancelButton.cloneNode(true));
-            
-            // Create a filler element that fills the "rest" of the scrollable area, to allow a proper
-            // scrolling to the top (this element will be removed when rendering the next dialogue step)
-            const fillerElement = document.createElement("div");
-            fillerElement.setAttribute("id","temp-dialogue-filler");
-            fillerElement.classList.add("dialogue-step-filler-element");
-            contentBlock.appendChild(fillerElement);
-
-            var contentBlockHeight = contentBlock.getBoundingClientRect().height;
-            var statementContainerHeight = statementContainer.getBoundingClientRect().height;
-            
-            // Set the calculated height of the temporary filler element
-            fillerElement.style.height = ((contentBlockHeight - statementContainerHeight) + "px");
-            
-            // Scroll to the top of scrollable element
-            contentBlock.scrollTop = fillerElement.offsetTop;
-        } else {
-            // Add the speaker to the statement container
-            const speakerElement = document.createElement("div");
-            speakerElement.classList.add("dialogue-step-speaker");
-            speakerElement.innerHTML = dialogueStep.speaker + ":";
-            statementContainer.appendChild(speakerElement);
-
-            // Add the statement to the statement container
-            const statementElement = document.createElement("div");
-            statementElement.classList.add("dialogue-step-statement");
-            statementElement.innerHTML = dialogueStep.statement.fullStatement();
-            statementContainer.appendChild(statementElement);
-
-            // If there are any reply options
-            const replyContainer = document.createElement("div");
-            replyContainer.classList.add("dialogue-step-reply-container");
-            contentBlock.appendChild(replyContainer);
-            if(dialogueStep.replies.length > 0) { 
-                
-                let replyNumber = 1;
-
-                dialogueStep.replies.forEach(
-                    (reply) => {
-
-                        const replyOptionContainer = document.createElement("div");
-                        replyOptionContainer.classList.add("dialogue-step-reply-option-container");
-                        replyContainer.appendChild(replyOptionContainer);
-
-                        if(reply instanceof AutoForwardReply) {
-                            const autoForwardReplyButton = document.createElement("button");
-                            autoForwardReplyButton.classList.add("dialogue-step-reply-autoforward");
-                            autoForwardReplyButton.classList.add("reply-option-with-listener");
-                            if(reply.endsDialogue) {
-                                autoForwardReplyButton.innerHTML = "<i class='fa-solid fa-ban'></i> END DIALOGUE";
-                            } else {
-                                autoForwardReplyButton.innerHTML = "CONTINUE";
-                            }
-                            autoForwardReplyButton.addEventListener("click", this.actionSelectReply.bind(this, replyNumber, reply, dialogueStep), false);
-                            replyOptionContainer.appendChild(autoForwardReplyButton);
-                            this._dialogueReplyElements.push(autoForwardReplyButton);
-                            // Add an empty element to the list, so that adding the 'user-selected-reply' class won't break.
-                            this._dialogueReplyNumbers.push(document.createElement("div"));
-                        } else {
-                            const replyOptionNumberElement = document.createElement("div");
-                            replyOptionNumberElement.classList.add("dialogue-step-reply-number");
-                            replyOptionNumberElement.innerHTML = replyNumber + ": - ";
-                            replyOptionContainer.appendChild(replyOptionNumberElement);
-
-                            const replyOptionElement = document.createElement("div");
-                            replyOptionElement.classList.add("dialogue-step-reply-basic");
-                            replyOptionElement.classList.add("reply-option-with-listener");
-                            if(reply.endsDialogue) {
-                                replyOptionElement.innerHTML = "<i class='fa-solid fa-ban'></i> " + reply.statement;
-                            } else {
-                                replyOptionElement.innerHTML = reply.statement;
-                            }
-                            replyOptionElement.addEventListener("click", this.actionSelectReply.bind(this, replyNumber, reply, dialogueStep), false);
-                            replyOptionContainer.appendChild(replyOptionElement);
-                            this._dialogueReplyElements.push(replyOptionElement);
-                            this._dialogueReplyNumbers.push(replyOptionNumberElement);
-                        }
-                        replyNumber++;
-                    }
-                    
-                );
-            } else {
-                // In case there are no reply options, add the "Dialogue over" message
-                replyContainer.innerHTML = "The dialogue is over.";
-
-            }
-            // Create a spacer element between different dialogue steps (this one stays, so there 
-            // will always be some space between different dialogue steps).
-            const spacerElement = document.createElement("div");
-            spacerElement.classList.add("dialogue-step-spacer-element");
-            contentBlock.appendChild(spacerElement);
-
-            // Create a filler element that fills the "rest" of the scrollable area, to allow a proper
-            // scrolling to the top (this element will be removed when rendering the next dialogue step)
-            const fillerElement = document.createElement("div");
-            fillerElement.setAttribute("id","temp-dialogue-filler");
-            fillerElement.classList.add("dialogue-step-filler-element");
-            contentBlock.appendChild(fillerElement);
-
-            contentBlockHeight = contentBlock.getBoundingClientRect().height;
-            statementContainerHeight = statementContainer.getBoundingClientRect().height;
-            var replyContainerHeight = replyContainer.getBoundingClientRect().height;
-            var spacerElementHeight = spacerElement.getBoundingClientRect().height;
-            
-            // Set the calculated height of the temporary filler element
-            fillerElement.style.height = ((contentBlockHeight - statementContainerHeight - replyContainerHeight - spacerElementHeight) + "px");
-            
-            // Scroll to the top of scrollable element
-            contentBlock.scrollTop = fillerElement.offsetTop;
-
-            // Refresh the Variable Browser
-            this.actionRefreshVariableBrowser();
-        }
+        // Refresh the Variable Browser
+        this.actionRefreshVariableBrowser();
 
     }
 

@@ -30,6 +30,9 @@ import { User } from '../dlb-lib/model/User.js';
 import { ClientState } from '../dlb-lib/ClientState.js';
 import { DocumentFunctions } from '../dlb-lib/util/DocumentFunctions.js';
 
+export const INTERACTION_TESTER_STYLE_TEXT = "TEXT";
+export const INTERACTION_TESTER_STYLE_BALLOONS = "BALLOONS";
+
 /**
  * The WCTAClientState is the client-specific ClientState object for the Dialogue Branch Web Client Test Application.
  *
@@ -49,8 +52,10 @@ export class WCTAClientState extends ClientState {
      */
     constructor(logger) {
         super(logger);
+        this._LOGTAG = "WCTAClientState";
         this._variableBrowserExtended = false;
         this._dialogueBrowserExtended = false;
+        this._interactionTesterStyle = INTERACTION_TESTER_STYLE_TEXT;
     }
 
     // ---------------------------------------
@@ -114,6 +119,25 @@ export class WCTAClientState extends ClientState {
         return this._dialogueBrowserExtended;
     }
 
+    // ----- interactionTesterStyle
+
+    /**
+     * Sets the style of the interaction tester (as either 'text' or 'balloons' style).
+     * @param {String} interactionTesterStyle - the style value for the interaction tester.
+     */
+    set interactionTesterStyle(interactionTesterStyle) {
+        this._interactionTesterStyle = interactionTesterStyle;
+        DocumentFunctions.setCookie('state.interactionTesterStyle', this._interactionTesterStyle, 365);
+    }
+
+    /**
+     * Returns the style of the interaction tester (as either 'text' or 'balloons' style).
+     * @returns the style of the interaction tester (as either 'text' or 'balloons' style).
+     */
+    get interactionTesterStyle() {
+        return this._interactionTesterStyle;
+    }
+
     // -----------------------------------
     // ---------- Other Methods ----------
     // -----------------------------------
@@ -133,6 +157,14 @@ export class WCTAClientState extends ClientState {
         cookieValue = DocumentFunctions.getCookie('state.dialogueBrowserExtended');
         if(cookieValue == "true") this._dialogueBrowserExtended = true;
         else this._dialogueBrowserExtended = false;
+
+        cookieValue = DocumentFunctions.getCookie('state.interactionTesterStyle');
+        if(cookieValue != null) {
+            if(cookieValue == INTERACTION_TESTER_STYLE_TEXT || cookieValue == INTERACTION_TESTER_STYLE_BALLOONS) {
+                this._interactionTesterStyle = cookieValue;
+                this.logger.debug(this._LOGTAG, "Found a valid cookie-stored value for 'state.interactionTesterStyle': "+cookieValue);
+            }
+        }
 
         var cookieUserName = DocumentFunctions.getCookie('user.name');
         var cookieUserRole = DocumentFunctions.getCookie('user.role');

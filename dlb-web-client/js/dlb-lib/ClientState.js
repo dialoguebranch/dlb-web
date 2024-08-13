@@ -52,6 +52,12 @@ export class ClientState {
     // ---------- Getters & Setters ----------
     // ---------------------------------------
 
+    // ----- logger
+
+    get logger() {
+        return this._logger;
+    }
+
     // ----- loggedIn
 
     /**

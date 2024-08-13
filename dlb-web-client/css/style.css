@@ -145,13 +145,13 @@ td.login-table-labels {
     margin-right: 5px;
 }
 
-.button-refresh-dialogue-list-disabled {
-    background-color: #787878;
-	cursor: not-allowed;
-}
-
 .medium-title {
     font-weight: 400;
+}
+
+.button-disabled {
+	background-color: #787878 !important;
+	cursor: not-allowed;
 }
 
 /* ---------------------------------------------------------- */
@@ -309,7 +309,15 @@ td.login-table-labels {
     height: 500px;
 }
 
+/*
+
+First, make sure there is some actualy content being added to the balloons box, otherwise it won't be visible at all (0 size).
+The text content box should be scrollable, while the balloon box should always remain the same (max) size.
+
+*/
+
 #interaction-tester-content {
+	position: relative;
 	background-color: white;
 	height: 470px;
 	margin-left: 5px;
@@ -318,8 +326,26 @@ td.login-table-labels {
 	margin-bottom: 0px;
 	border-color: black;
 	box-shadow: 0 0 1px black;
+}
+
+#interaction-tester-content-text {
+	visibility: visible;
+	height: 470px;
 	overflow-x: hidden;
 	overflow-y: auto;
+}
+
+#interaction-tester-content-balloons {
+	position: absolute;
+	top: 0;
+	left: 0;
+	visibility: hidden;
+	height: 470px;
+	width: 100%;
+}
+
+.interaction-tester-inner {
+
 }
 
 .tester-size-default {
@@ -342,9 +368,31 @@ td.login-table-labels {
     margin-right: 5px;
 }
 
-.button-cancel-dialogue-disabled {
-	background-color: #787878 !important;
-	cursor: not-allowed;
+#interaction-tester-style-switcher {
+	float: right;
+	height: 30px;
+	width: 63px; 
+	background-color: rgb(89, 89, 89);
+	border-radius: 15px;
+	margin-right: 6px;
+}
+
+#button-interaction-style-text {
+    float: right;
+    width: 26px;
+    height: 26px;
+    margin-right: 2px;
+	margin-top: 2px;
+	margin-bottom: 2px;
+}
+
+#button-interaction-style-balloons {
+	float: right;
+    width: 26px;
+    height: 26px;
+    margin-right: 6px;
+	margin-top: 2px;
+	margin-bottom: 2px;
 }
 
 /* Dialogue Step Rendering */
