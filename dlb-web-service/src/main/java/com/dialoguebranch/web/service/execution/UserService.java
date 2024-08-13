@@ -61,7 +61,10 @@ import java.util.*;
  */
 public class UserService {
 
+	/** The dialogue branch user associated with this UserService */
 	private final User dialogueBranchUser;
+
+	/** The general ApplicationManager object that governs this UserService */
 	private final ApplicationManager applicationManager;
 	private final VariableStore variableStore;
 	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
