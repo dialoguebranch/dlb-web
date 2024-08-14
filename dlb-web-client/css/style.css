@@ -443,3 +443,51 @@ div.reply-option-with-listener:hover {
 	margin-left: auto;
 	margin-right: auto;
 }
+
+/* ----------------------------------------------------------- */
+/* -------------------- Balloons Renderer -------------------- */
+/* ----------------------------------------------------------- */
+
+.int-balloon-avatar {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	width: 300px;
+	height: 300px;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+.int-balloon-statement-balloon {
+	position: absolute;
+	top: 5px;
+	right: 20%;
+	width: 60%;
+	height: 150px;
+	background-color: lightblue;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 10px;
+	border-radius: 15px;
+}
+
+.int-balloon-statement-balloon:before {
+	content: "";
+	position: absolute;
+	padding: 7px 15px;
+	bottom: -14px;
+	right: -2px;
+	background-color: lightblue;
+	border-bottom-left-radius: 30px 20px;
+  }
+  
+  .int-balloon-statement-balloon:after {
+	content: "";
+	position: absolute;
+	padding: 7px 15px;
+	bottom: -14px;
+	right: -12px;
+	background-color: white;
+	border-bottom-left-radius: 30px 20px;
+  }

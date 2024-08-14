@@ -10,6 +10,15 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
         super(controller);
     }
 
+    get contentBlock() {
+        return this._contentBlock;
+    }
+
+    get avatarBlock() {
+        return this._avatarBlock;
+    }
+
+
     // ---------- Dialogue Step Rendering ----------
 
     /**
@@ -21,13 +30,17 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
      */
     renderDialogueStep(dialogueStep, nullMessage) {
 
+        console.log("Balloons Renderer asked to render the following dialogueStep: ");
+        console.log(dialogueStep);
 
-        var contentBlock = document.getElementById("interaction-tester-content-balloons");
+        if(this._contentBlock == null) {
+            this._contentBlock = document.getElementById("interaction-tester-content-balloons");
+        }
         
         // Create the container element for the Statement
         const statementContainer = document.createElement("div");
         statementContainer.classList.add("dialogue-step-statement-container");
-        contentBlock.appendChild(statementContainer);
+        this.contentBlock.appendChild(statementContainer);
 
         if(dialogueStep == null) {
             
@@ -47,28 +60,47 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
             cancelButton.setAttribute('title',"You can cancel a dialogue when there is a dialogue in progress.");
             cancelButton.replaceWith(cancelButton.cloneNode(true));
             
-            // Create a filler element that fills the "rest" of the scrollable area, to allow a proper
-            // scrolling to the top (this element will be removed when rendering the next dialogue step)
-            const fillerElement = document.createElement("div");
-            fillerElement.setAttribute("id","temp-dialogue-filler");
-            fillerElement.classList.add("dialogue-step-filler-element");
-            contentBlock.appendChild(fillerElement);
-
-            var contentBlockHeight = contentBlock.getBoundingClientRect().height;
-            var statementContainerHeight = statementContainer.getBoundingClientRect().height;
             
-            // Set the calculated height of the temporary filler element
-            fillerElement.style.height = ((contentBlockHeight - statementContainerHeight) + "px");
-            
-            // Scroll to the top of scrollable element
-            contentBlock.scrollTop = fillerElement.offsetTop;
         } else {
 
-            contentBlock.innerHTML = dialogueStep.speaker + ":" + dialogueStep.statement.fullStatement();
+            // Render the correct Agent Avatar
+            this.renderAgentAvatar(dialogueStep.speaker);
 
+            // Create a statement balloon
+            const statementBalloon = document.createElement("div");
+            statementBalloon.classList.add("int-balloon-statement-balloon");
+            statementBalloon.innerHTML = dialogueStep.statement.fullStatement();
+
+                // Calculate and set the width of the balloon element
+                //var contentBlockWidth = this.contentBlock.getBoundingClientRect().width;
+                //var avatarBlockWidth = this.avatarBlock.getBoundingClientRect().width;
+                //var statementBalloonWidth = contentBlockWidth - avatarBlockWidth;
+                //statementBalloon.style.width = statementBalloonWidth + "px";
+
+            // Add the statementBalloon to the main container
+            this.contentBlock.appendChild(statementBalloon);
+
+            //this.contentBlock.innerHTML = dialogueStep.speaker + ":" + dialogueStep.statement.fullStatement();
 
         }
 
+    }
+
+    renderAgentAvatar(speaker) {
+        if(this.avatarBlock == null) {
+            this._avatarBlock = document.createElement("div");
+            this._avatarBlock.classList.add("int-balloon-avatar");
+            this.contentBlock.appendChild(this._avatarBlock);
+        }
+        
+        if(speaker == "Martin McOwl") {
+            this.avatarBlock.style.backgroundImage="url(img/avatar-martin.png)";
+        } else {
+            // Todo: get a random avatar for any new speaker name we encounter (and then store it)
+            this.avatarBlock.style.backgroundImage="url(img/avatar-green.png)";
+        }
+
+        this.avatarBlock.title = speaker;
     }
 
 }
