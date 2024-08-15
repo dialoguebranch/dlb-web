@@ -142,8 +142,11 @@ export class WCTATextRenderer extends WCTAInteractionRenderer {
                     
                 );
             } else {
-                // In case there are no reply options, add the "Dialogue over" message
-                replyContainer.innerHTML = "The dialogue is over.";
+                // In case there are no reply options, add the "Dialogue Finished" message
+                dialogueOverElement = document.createElement("div");
+                dialogueOverElement.classList.add("dialogue-finished-statement");
+                dialogueOverElement.innerHTML = "Dialogue Finished";
+                replyContainer.appendChild(dialogueOverElement);
 
             }
             // Create a spacer element between different dialogue steps (this one stays, so there 

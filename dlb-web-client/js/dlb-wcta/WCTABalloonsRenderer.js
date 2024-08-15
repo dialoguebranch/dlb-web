@@ -59,14 +59,20 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
      * Make a clean sheet for the Balloons Text renderer, clearing out and hiding all relevant elements.
      */
     clear() {
-        this.avatarBlock.style.backgroundImage="";
-        this.avatarBlock.title = "";
-        this.avatarBlock.style.visibility = "hidden";
+        if(this.avatarBlock != null) {
+            this.avatarBlock.style.backgroundImage="";
+            this.avatarBlock.title = "";
+            this.avatarBlock.style.visibility = "hidden";
+        }
         
-        this.statementBlock.innerHTML = "";
-        this.statementBlock.style.visibility = "hidden";
+        if(this.statementBlock != null) {
+            this.statementBlock.innerHTML = "";
+            this.statementBlock.style.visibility = "hidden";
+        }
 
-        this.repliesBlock.innerHTML = "";
+        if(this.repliesBlock != null) {
+            this.repliesBlock.innerHTML = "";
+        }
     }
 
     hide() {
@@ -83,7 +89,11 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
 
         if(this.contentBlock != null) this.contentBlock.style.visibility = "visible";
         if(this.avatarBlock != null) this.avatarBlock.style.visibility = "visible";
-        if(this.statementBlock != null) this.statementBlock.style.visibility = "visible";
+        if(this.statementBlock != null) {
+            if(this.statementBlock.innerHTML != "") {
+                this.statementBlock.style.visibility = "visible";
+            }   
+        }
         if(this.repliesBlock != null) this.repliesBlock.style.visibility = "visible";
     }
 
@@ -93,27 +103,28 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
         if(this.contentBlock == null) {
             this.contentBlock = document.getElementById("interaction-tester-content-balloons");
         }
+        this.contentBlock.innerHTML = "";
 
         // Create the statement Block element if it doesn't exist yet
         if(this.statementBlock == null) { 
              this.statementBlock = document.createElement("div");
              this.statementBlock.classList.add("int-balloon-statement-balloon");
-             this.contentBlock.appendChild(this.statementBlock);
         }
+        this.contentBlock.appendChild(this.statementBlock);
 
         // Create the avatar block if it doesn't exist
         if(this.avatarBlock == null) {
             this.avatarBlock = document.createElement("div");
             this.avatarBlock.classList.add("int-balloon-avatar");
-            this.contentBlock.appendChild(this.avatarBlock);
         }
+        this.contentBlock.appendChild(this.avatarBlock);
 
         // Create the replyContainer, or empty it if it already existed
         if(this.repliesBlock == null) {
             this.repliesBlock = document.createElement("div");
             this.repliesBlock.classList.add("int-balloon-replies-block");
-            this.contentBlock.appendChild(this.repliesBlock);
-        } 
+        }
+        this.contentBlock.appendChild(this.repliesBlock);
 
     }
 
@@ -133,6 +144,9 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
         this.initialize();
         
         if(dialogueStep == null) {
+
+            // Clear all the interactive elements
+            this.clear();
             
             // Create and show a message why the dialogue has ended
             var dialogueOverElement = document.createElement("div");
@@ -209,9 +223,11 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
                     
                 );
             } else {
-                // In case there are no reply options, add the "Dialogue over" message
-                this.repliesBlock.innerHTML = "The dialogue is over.";
-
+                // In case there are no reply options, add the "Dialogue Finished" message
+                dialogueOverElement = document.createElement("div");
+                dialogueOverElement.classList.add("dialogue-finished-statement");
+                dialogueOverElement.innerHTML = "Dialogue Finished";
+                this.repliesBlock.appendChild(dialogueOverElement);
             }
 
         }
