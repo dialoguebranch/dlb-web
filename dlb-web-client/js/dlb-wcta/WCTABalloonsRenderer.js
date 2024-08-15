@@ -150,7 +150,11 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
             this.renderAgentAvatar(dialogueStep.speaker);
 
             // Add the statement text to the balloon element (and make it visible)
-            this.statementBlock.innerHTML = dialogueStep.statement.fullStatement();
+            var statementTextElement = document.createElement("span");
+            statementTextElement.classList.add("int-balloon-statement-balloon-text");
+            statementTextElement.innerHTML = dialogueStep.statement.fullStatement();
+            this.statementBlock.innerHTML = "";
+            this.statementBlock.appendChild(statementTextElement);
             if(this.rendererVisible) this.statementBlock.style.visibility = "visible";
 
             // If there are any reply options

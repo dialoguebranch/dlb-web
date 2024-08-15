@@ -456,16 +456,14 @@ div.reply-option-with-listener:hover {
 
 .int-balloon-statement-balloon {
 	position: absolute;
-	top: 5px;
+	bottom: 300px;
 	right: 20%;
 	width: 60%;
-	height: 150px;
 	background-color: lightblue;
-	display: flex;
 	justify-content: center;
-	align-items: center;
 	padding: 10px;
 	border-radius: 15px;
+	vertical-align: middle;
 }
 
 .int-balloon-statement-balloon:before {
@@ -487,6 +485,11 @@ div.reply-option-with-listener:hover {
 	background-color: white;
 	border-bottom-left-radius: 30px 20px;
   }
+
+/** The text content element iside the balloon element. */
+.int-balloon-statement-balloon-text {
+	vertical-align: middle;
+}
 
 .int-balloon-replies-block {
 	position: absolute;
