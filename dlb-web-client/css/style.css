@@ -344,10 +344,6 @@ The text content box should be scrollable, while the balloon box should always r
 	width: 100%;
 }
 
-.interaction-tester-inner {
-
-}
-
 .tester-size-default {
 	width: 60%;
 }
@@ -491,3 +487,12 @@ div.reply-option-with-listener:hover {
 	background-color: white;
 	border-bottom-left-radius: 30px 20px;
   }
+
+.int-balloon-replies-block {
+	position: absolute;
+	top: 180px;
+	right: 20%;
+	width: 60%;
+	height: 200px;
+	padding: 10px;
+}

@@ -122,6 +122,14 @@ export class WCTAController extends AbstractController {
         return this._LOGTAG;
     }
 
+    get interactionTextRenderer() {
+        return this._interactionTextRenderer;
+    }
+
+    get interactionBalloonsRenderer() {
+        return this._interactionBalloonsRenderer;
+    }
+
     // ------------------------------------------------------
     // -------------------- User Actions --------------------
     // ------------------------------------------------------
@@ -350,8 +358,10 @@ export class WCTAController extends AbstractController {
     actionStartDialogue(dialogueName) {
         this._logger.info(this._LOGTAG, "Starting dialogue '" + dialogueName + "'.");
 
-        document.getElementById("interaction-tester-content-text").innerHTML = "";
-        document.getElementById("interaction-tester-content-balloons").innerHTML = "";
+        // Todo: call the renderer's and tell them to 'clear'
+        this.interactionTextRenderer.clear();
+        this.interactionBalloonsRenderer.clear();
+        
         this._dialogueBranchClient.callStartDialogue(dialogueName,"en");
     }
 
@@ -682,6 +692,7 @@ export class WCTAController extends AbstractController {
 
             document.getElementById("interaction-tester-content-text").style.visibility = 'visible';
             document.getElementById("interaction-tester-content-balloons").style.visibility = 'hidden';
+            this.interactionBalloonsRenderer.hide();
 
 
         } else {
@@ -697,6 +708,7 @@ export class WCTAController extends AbstractController {
 
             document.getElementById("interaction-tester-content-balloons").style.visibility = 'visible';
             document.getElementById("interaction-tester-content-text").style.visibility = 'hidden';
+            this.interactionBalloonsRenderer.unhide();
         }
 
         // Update the client state
@@ -715,8 +727,16 @@ export class WCTAController extends AbstractController {
      */
     renderDialogueStep(dialogueStep, nullMessage) {
 
-        this._interactionTextRenderer.renderDialogueStep(dialogueStep, nullMessage);
-        this._interactionBalloonsRenderer.renderDialogueStep(dialogueStep, nullMessage);
+        if(dialogueStep == null) {
+            // Disable the "cancel dialogue" button
+            var cancelButton = document.getElementById("button-cancel-dialogue");
+            cancelButton.classList.add("button-disabled");
+            cancelButton.setAttribute('title',"You can cancel a dialogue when there is a dialogue in progress.");
+            cancelButton.replaceWith(cancelButton.cloneNode(true));
+        }
+        
+        this.interactionTextRenderer.renderDialogueStep(dialogueStep, nullMessage);
+        this.interactionBalloonsRenderer.renderDialogueStep(dialogueStep, nullMessage);
         
         // Refresh the Variable Browser
         this.actionRefreshVariableBrowser();

@@ -1,4 +1,5 @@
 import { WCTAInteractionRenderer } from './WCTAInteractionRenderer.js';
+import { AutoForwardReply } from '../dlb-lib/model/AutoForwardReply.js';
 
 export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
 
@@ -8,18 +9,113 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
 
     constructor(controller) {
         super(controller);
+        this.rendererVisible = false;
     }
 
     get contentBlock() {
         return this._contentBlock;
     }
 
+    set contentBlock(contentBlock) {
+        this._contentBlock = contentBlock;
+    }
+
     get avatarBlock() {
         return this._avatarBlock;
     }
 
+    set avatarBlock(avatarBlock) {
+        this._avatarBlock = avatarBlock;
+    }
+
+    get statementBlock() {
+        return this._statementBlock;
+    }
+
+    set statementBlock(statementBlock) {
+        this._statementBlock = statementBlock;
+    }
+
+    get repliesBlock() {
+        return this._repliesBlock;
+    }
+
+    set repliesBlock(repliesBlock) {
+        this._repliesBlock = repliesBlock;
+    }
+
+    get rendererVisible() {
+        return this._rendererVisible;
+    }
+
+    set rendererVisible(rendererVisible) {
+        this._rendererVisible = rendererVisible;
+    }
+
 
     // ---------- Dialogue Step Rendering ----------
+
+    /**
+     * Make a clean sheet for the Balloons Text renderer, clearing out and hiding all relevant elements.
+     */
+    clear() {
+        this.avatarBlock.style.backgroundImage="";
+        this.avatarBlock.title = "";
+        this.avatarBlock.style.visibility = "hidden";
+        
+        this.statementBlock.innerHTML = "";
+        this.statementBlock.style.visibility = "hidden";
+
+        this.repliesBlock.innerHTML = "";
+    }
+
+    hide() {
+        this.rendererVisible = false;
+
+        if(this.contentBlock != null) this.contentBlock.style.visibility = "hidden";
+        if(this.avatarBlock != null) this.avatarBlock.style.visibility = "hidden";
+        if(this.statementBlock != null) this.statementBlock.style.visibility = "hidden";
+        if(this.repliesBlock != null) this.repliesBlock.style.visibility = "hidden";
+    }
+
+    unhide() { 
+        this.rendererVisible = true;
+
+        if(this.contentBlock != null) this.contentBlock.style.visibility = "visible";
+        if(this.avatarBlock != null) this.avatarBlock.style.visibility = "visible";
+        if(this.statementBlock != null) this.statementBlock.style.visibility = "visible";
+        if(this.repliesBlock != null) this.repliesBlock.style.visibility = "visible";
+    }
+
+    initialize() {
+
+        // Set the pointer to the main balloons interaction container
+        if(this.contentBlock == null) {
+            this.contentBlock = document.getElementById("interaction-tester-content-balloons");
+        }
+
+        // Create the statement Block element if it doesn't exist yet
+        if(this.statementBlock == null) { 
+             this.statementBlock = document.createElement("div");
+             this.statementBlock.classList.add("int-balloon-statement-balloon");
+             this.contentBlock.appendChild(this.statementBlock);
+        }
+
+        // Create the avatar block if it doesn't exist
+        if(this.avatarBlock == null) {
+            this.avatarBlock = document.createElement("div");
+            this.avatarBlock.classList.add("int-balloon-avatar");
+            this.contentBlock.appendChild(this.avatarBlock);
+        }
+
+        // Create the replyContainer, or empty it if it already existed
+        if(this.repliesBlock == null) {
+            this.repliesBlock = document.createElement("div");
+            this.repliesBlock.classList.add("int-balloon-replies-block");
+            this.contentBlock.appendChild(this.repliesBlock);
+        } 
+
+    }
 
     /**
      * Render a step in the dialogue given the information provided in the given dialogueStep object, or
@@ -33,15 +129,9 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
         console.log("Balloons Renderer asked to render the following dialogueStep: ");
         console.log(dialogueStep);
 
-        if(this._contentBlock == null) {
-            this._contentBlock = document.getElementById("interaction-tester-content-balloons");
-        }
+        // Make sure all main elements exist
+        this.initialize();
         
-        // Create the container element for the Statement
-        const statementContainer = document.createElement("div");
-        statementContainer.classList.add("dialogue-step-statement-container");
-        this.contentBlock.appendChild(statementContainer);
-
         if(dialogueStep == null) {
             
             // Create and show a message why the dialogue has ended
@@ -52,46 +142,82 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
             } else {
                 dialogueOverElement.innerHTML = "Dialogue Finished";
             }
-            statementContainer.appendChild(dialogueOverElement);
-
-            // Disable the "cancel dialogue" button
-            var cancelButton = document.getElementById("button-cancel-dialogue");
-            cancelButton.classList.add("button-disabled");
-            cancelButton.setAttribute('title',"You can cancel a dialogue when there is a dialogue in progress.");
-            cancelButton.replaceWith(cancelButton.cloneNode(true));
-            
+            this.contentBlock.appendChild(dialogueOverElement);
             
         } else {
 
             // Render the correct Agent Avatar
             this.renderAgentAvatar(dialogueStep.speaker);
 
-            // Create a statement balloon
-            const statementBalloon = document.createElement("div");
-            statementBalloon.classList.add("int-balloon-statement-balloon");
-            statementBalloon.innerHTML = dialogueStep.statement.fullStatement();
+            // Add the statement text to the balloon element (and make it visible)
+            this.statementBlock.innerHTML = dialogueStep.statement.fullStatement();
+            if(this.rendererVisible) this.statementBlock.style.visibility = "visible";
 
-                // Calculate and set the width of the balloon element
-                //var contentBlockWidth = this.contentBlock.getBoundingClientRect().width;
-                //var avatarBlockWidth = this.avatarBlock.getBoundingClientRect().width;
-                //var statementBalloonWidth = contentBlockWidth - avatarBlockWidth;
-                //statementBalloon.style.width = statementBalloonWidth + "px";
+            // If there are any reply options
+            this.repliesBlock.innerHTML = "";
 
-            // Add the statementBalloon to the main container
-            this.contentBlock.appendChild(statementBalloon);
+            if(dialogueStep.replies.length > 0) { 
+                
+                let replyNumber = 1;
 
-            //this.contentBlock.innerHTML = dialogueStep.speaker + ":" + dialogueStep.statement.fullStatement();
+                dialogueStep.replies.forEach(
+                    (reply) => {
+
+                        const replyOptionContainer = document.createElement("div");
+                        replyOptionContainer.classList.add("dialogue-step-reply-option-container");
+                        this.repliesBlock.appendChild(replyOptionContainer);
+
+                        if(reply instanceof AutoForwardReply) {
+                            const autoForwardReplyButton = document.createElement("button");
+                            autoForwardReplyButton.classList.add("dialogue-step-reply-autoforward");
+                            autoForwardReplyButton.classList.add("reply-option-with-listener");
+                            if(reply.endsDialogue) {
+                                autoForwardReplyButton.innerHTML = "<i class='fa-solid fa-ban'></i> END DIALOGUE";
+                            } else {
+                                autoForwardReplyButton.innerHTML = "CONTINUE";
+                            }
+                            autoForwardReplyButton.addEventListener("click", this.controller.actionSelectReply.bind(this.controller, replyNumber, reply, dialogueStep), false);
+                            replyOptionContainer.appendChild(autoForwardReplyButton);
+                            this.controller.dialogueReplyElements.push(autoForwardReplyButton);
+                            // Add an empty element to the list, so that adding the 'user-selected-reply' class won't break.
+                            this.controller.dialogueReplyNumbers.push(document.createElement("div"));
+                        } else {
+                            const replyOptionNumberElement = document.createElement("div");
+                            replyOptionNumberElement.classList.add("dialogue-step-reply-number");
+                            replyOptionNumberElement.innerHTML = replyNumber + ": - ";
+                            replyOptionContainer.appendChild(replyOptionNumberElement);
+
+                            const replyOptionElement = document.createElement("div");
+                            replyOptionElement.classList.add("dialogue-step-reply-basic");
+                            replyOptionElement.classList.add("reply-option-with-listener");
+                            if(reply.endsDialogue) {
+                                replyOptionElement.innerHTML = "<i class='fa-solid fa-ban'></i> " + reply.statement;
+                            } else {
+                                replyOptionElement.innerHTML = reply.statement;
+                            }
+                            replyOptionElement.addEventListener("click", this.controller.actionSelectReply.bind(this.controller, replyNumber, reply, dialogueStep), false);
+                            replyOptionContainer.appendChild(replyOptionElement);
+                            this.controller.dialogueReplyElements.push(replyOptionElement);
+                            this.controller.dialogueReplyNumbers.push(replyOptionNumberElement);
+                        }
+                        replyNumber++;
+                    }
+                    
+                );
+            } else {
+                // In case there are no reply options, add the "Dialogue over" message
+                this.repliesBlock.innerHTML = "The dialogue is over.";
+
+            }
 
         }
 
     }
 
     renderAgentAvatar(speaker) {
-        if(this.avatarBlock == null) {
-            this._avatarBlock = document.createElement("div");
-            this._avatarBlock.classList.add("int-balloon-avatar");
-            this.contentBlock.appendChild(this._avatarBlock);
-        }
+
+        var img = new Image();
+        img.src = "img/avatar-green.png";
         
         if(speaker == "Martin McOwl") {
             this.avatarBlock.style.backgroundImage="url(img/avatar-martin.png)";
@@ -101,6 +227,7 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
         }
 
         this.avatarBlock.title = speaker;
+        if(this.rendererVisible) this.avatarBlock.style.visibility = "visible";
     }
 
 }

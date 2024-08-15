@@ -13,6 +13,10 @@ export class WCTATextRenderer extends WCTAInteractionRenderer {
 
     // ---------- Dialogue Step Rendering ----------
 
+    clear() {
+        document.getElementById("interaction-tester-content-text").innerHTML = "";
+    }
+
     /**
      * Render a step in the dialogue given the information provided in the given dialogueStep object, or
      * render a "Dialogue Finished" statement if the given dialogueStep is null.
@@ -56,12 +60,6 @@ export class WCTATextRenderer extends WCTAInteractionRenderer {
                 dialogueOverElement.innerHTML = "Dialogue Finished";
             }
             statementContainer.appendChild(dialogueOverElement);
-
-            // Disable the "cancel dialogue" button
-            var cancelButton = document.getElementById("button-cancel-dialogue");
-            cancelButton.classList.add("button-disabled");
-            cancelButton.setAttribute('title',"You can cancel a dialogue when there is a dialogue in progress.");
-            cancelButton.replaceWith(cancelButton.cloneNode(true));
             
             // Create a filler element that fills the "rest" of the scrollable area, to allow a proper
             // scrolling to the top (this element will be removed when rendering the next dialogue step)
