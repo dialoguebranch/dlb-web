@@ -556,9 +556,9 @@ export class DialogueBranchClient {
      *                                 should never expire.
      */
     callInfo() {
-        const infoUrl = 'http://localhost:8080/dlb-web-service/v1/info/all';
+        var url = this._baseUrl + "/info/all";
 
-        fetch(infoUrl, {
+        fetch(url, {
             method: "GET",
             headers: {
                 Accept: "application/json, text/plain, */*",
