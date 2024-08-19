@@ -12,6 +12,10 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
         this.rendererVisible = false;
     }
 
+    // ---------------------------------------
+    // ---------- Getters & Setters ----------
+    // ---------------------------------------
+
     get contentBlock() {
         return this._contentBlock;
     }
