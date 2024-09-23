@@ -62,7 +62,7 @@ export class WCTAController extends AbstractController {
         this._dialogueReplyNumbers = new Array();
 
         // Initialize the Configuration and Logger objects
-        this._dialogueBranchConfig = new DialogueBranchConfig(1,'http://localhost:8081/dlb-web-service/v1');
+        this._dialogueBranchConfig = new DialogueBranchConfig(1,'http://localhost:8080/dlb-web-service/v1');
         this._logger = new TextAreaLogger(this._dialogueBranchConfig.logLevel, document.getElementById("debug-textarea"));
         this._logger.info(this._LOGTAG,"Initialized Logger with log level '" 
             + this._dialogueBranchConfig.logLevel 
