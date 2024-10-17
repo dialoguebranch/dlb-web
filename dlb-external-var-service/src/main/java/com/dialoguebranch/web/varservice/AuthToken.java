@@ -32,7 +32,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import org.apache.tomcat.util.codec.binary.Base64;
+import java.util.Base64;
 
 import java.security.Key;
 
@@ -93,7 +93,7 @@ public class AuthToken {
 	 */
 	private static Key getSecretKey() {
 		String base64Key = Configuration.getInstance().get(Configuration.JWT_SECRET_KEY);
-		return Keys.hmacShaKeyFor(Base64.decodeBase64(base64Key));
+		return Keys.hmacShaKeyFor(Base64.getDecoder().decode(base64Key));
 	}
 
 }
