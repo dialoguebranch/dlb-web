@@ -5,4 +5,5 @@
 /src/main/resources/service.properties
 /src/main/resources/dialogues/*
 !/src/main/resources/dialogues/README.md
+/config/users.xml
 
