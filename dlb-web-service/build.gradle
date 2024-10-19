@@ -74,6 +74,13 @@ dependencies {
 	cargo 'org.codehaus.cargo:cargo-ant:1.10.11'
 }
 
+configurations {
+	runtime.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+	runtime.exclude group: 'org.slf4j', module: 'slf4j-jdk14'
+	compile.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+	compile.exclude group: 'org.slf4j', module: 'slf4j-jdk14'
+}
+
 def cargoTomcatDeployPath = project.hasProperty('tomcatDeployPath') ? tomcatDeployPath : ''
 def cargoRemoteTomcatHost = project.hasProperty('remoteTomcatHost') ? remoteTomcatHost : ''
 def cargoRemoteTomcatUser = project.hasProperty('remoteTomcatUser') ? remoteTomcatUser : ''
