@@ -55,7 +55,12 @@ public class CorsFilter implements Filter {
 		httpResponse.setHeader("Access-Control-Allow-Methods",
 				"GET, HEAD, POST, PUT, DELETE, OPTIONS");
 		httpResponse.setHeader("Access-Control-Allow-Headers",
-				"Content-Type, Accept, Accept-Language, X-Requested-With, X-Auth-Token");
+				"Content-Type, " +
+					"Accept, " +
+					"Accept-Language, " +
+					"X-Requested-With, " +
+					"X-Auth-Token, " +
+					"ngrok-skip-browser-warning");
 		chain.doFilter(request, response);
 	}
 
