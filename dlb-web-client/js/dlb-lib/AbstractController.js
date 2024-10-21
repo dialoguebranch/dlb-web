@@ -229,19 +229,20 @@ export class AbstractController {
      /**
      * Called after a successful call to the /info/all end-point. Delivers a ServerInfo object,
      * containing the information about the running web service.
+     * 
      * @param {ServerInfo} serverInfo - the ServerInfo object.
      */
     handleServerInfo(serverInfo) {
-        this._logger.info(this._LOGTAG,"Connected to Dialogue Branch Web Service v"+serverInfo.serviceVersion+", using protocol version "+serverInfo.protocolVersion+" (build: '"+serverInfo.build+"' running for "+serverInfo.upTime+").");
-        this.updateServerInfoBox();
+        throw new Error("Method 'handleServerInfo' must be implemented by a subclass.");
     }
 
     /**
      * Called after a failed call to the /info/all end-point.
+     * 
      * @param {String} errorMessage a human-readable error message indicating the cause of the error.
      */
     handleServerInfoError(errorMessage) {
-        this._logger.error(this._LOGTAG,errorMessage);
+        throw new Error("Method 'handleServerInfoError' must be implemented by a subclass.");
     }
 
     // --------------------------------------------------------------------------------------------------------
