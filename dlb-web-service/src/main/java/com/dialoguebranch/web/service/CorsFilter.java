@@ -60,7 +60,8 @@ public class CorsFilter implements Filter {
 					"Accept-Language, " +
 					"X-Requested-With, " +
 					"X-Auth-Token, " +
-					"ngrok-skip-browser-warning");
+					"ngrok-skip-browser-warning, " +
+					"User-Agent");
 		chain.doFilter(request, response);
 	}
 
