@@ -112,6 +112,7 @@ export class DialogueBranchClient {
             headers: {
                 Accept: "application/json, text/plain, */*",
                 "Content-Type": "application/json",
+                "User-Agent":"Dialogue Branch Web Client"
             },
             body: JSON.stringify({
                 user: user,
@@ -166,6 +167,7 @@ export class DialogueBranchClient {
                 'X-Auth-Token': tokenToValidate,
                 Accept: "application/json, text/plain, */*",
                 "Content-Type": "application/json",
+                "User-Agent":"Dialogue Branch Web Client"
             }
         })
 
@@ -210,7 +212,8 @@ export class DialogueBranchClient {
             headers: {
                 'X-Auth-Token': this._user.authToken,
                 Accept: "application/json, text/plain, */*",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "User-Agent":"Dialogue Branch Web Client"
             }
         })
         .then((response) => response.json())
@@ -245,6 +248,7 @@ export class DialogueBranchClient {
                 'X-Auth-Token': this._user.authToken,
                 Accept: "application/json, text/plain, */*",
                 "Content-Type": "application/json",
+                "User-Agent":"Dialogue Branch Web Client"
             }
         })
         .then((response) => response.json())
@@ -285,6 +289,7 @@ export class DialogueBranchClient {
                 'X-Auth-Token': this._user.authToken,
                 Accept: "application/json, text/plain, */*",
                 "Content-Type": "application/json",
+                "User-Agent":"Dialogue Branch Web Client"
             }
         })
         .then((response) => response.json())
@@ -332,6 +337,7 @@ export class DialogueBranchClient {
                 'X-Auth-Token': this._user.authToken,
                 Accept: "application/json, text/plain, */*",
                 "Content-Type": "application/json",
+                "User-Agent":"Dialogue Branch Web Client"
             }
         })
         .then((response) => response.json())
@@ -373,6 +379,7 @@ export class DialogueBranchClient {
                 'X-Auth-Token': this._user.authToken,
                 Accept: "application/json, text/plain, */*",
                 "Content-Type": "application/json",
+                "User-Agent":"Dialogue Branch Web Client"
             }
         })
         .then((response) => {
@@ -465,6 +472,7 @@ export class DialogueBranchClient {
                 'X-Auth-Token': this._user.authToken,
                 Accept: "application/json, text/plain, */*",
                 "Content-Type": "application/json",
+                "User-Agent":"Dialogue Branch Web Client"
             }
         })
         .then((response) => response.json())
@@ -511,6 +519,7 @@ export class DialogueBranchClient {
                 'X-Auth-Token': this._user.authToken,
                 Accept: "application/json, text/plain, */*",
                 "Content-Type": "application/json",
+                "User-Agent":"Dialogue Branch Web Client"
             }
         })
         .then((response) => {
@@ -563,6 +572,7 @@ export class DialogueBranchClient {
             headers: {
                 Accept: "application/json, text/plain, */*",
                 "Content-Type": "application/json",
+                "User-Agent":"Dialogue Branch Web Client"
             }
         })
         .then((response) => response.json())
@@ -600,6 +610,7 @@ export class DialogueBranchClient {
                 'X-Auth-Token': this._user.authToken,
                 Accept: "application/json, text/plain, */*",
                 "Content-Type": "application/json",
+                "User-Agent":"Dialogue Branch Web Client"
             }
         })
         .then((response) => response.json())
