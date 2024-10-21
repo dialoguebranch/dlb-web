@@ -27,7 +27,7 @@ RUN mkdir /usr/local/dialogue-branch/data/dlb-external-var-service/
 # Set the working directory to the DLB External Variable Service source folder
 WORKDIR /usr/local/dialogue-branch/source/dlb-web/dlb-external-var-service/
 
-# Execute a clean build
+# Execute a clean build (when building from Windows, make sure the line endings of the "gradlew" script are set to "LF" and not "CRLF")
 RUN ./gradlew clean build
 
 # Copy the generated .war file into the tomcat webapps
