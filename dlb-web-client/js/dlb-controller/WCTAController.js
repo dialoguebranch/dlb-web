@@ -49,8 +49,6 @@ import { INTERACTION_TESTER_STYLE_BALLOONS } from './WCTAClientState.js';
  */
 export class WCTAController extends AbstractController {
 
-    // TODO: Replace calls to this._logger to this.logger
-
     // ------------------------------------
     // ---------- Constructor(s) ----------
     // ------------------------------------
@@ -69,23 +67,23 @@ export class WCTAController extends AbstractController {
         await this.initializeConfig();
         
         this._logger = new TextAreaLogger(this._dialogueBranchConfig.logLevel, document.getElementById("debug-textarea"));
-        this._logger.info(this._LOGTAG,"Initialized Logger with log level '" 
+        this.logger.info(this._LOGTAG,"Initialized Logger with log level '" 
             + this._dialogueBranchConfig.logLevel 
             + "' ('" 
             + LOG_LEVEL_NAMES[this._dialogueBranchConfig.logLevel] 
             + "').");
 
         // Initialize the DialogueBranchClient object, used for communication to the Dialogue Branch Web Service
-        this._dialogueBranchClient = new DialogueBranchClient(this._dialogueBranchConfig.baseUrl, this._logger, this);
-        this._logger.info(this._LOGTAG,"Initalized DialogueBranchClient directed to the Web Service at '"+ this._dialogueBranchConfig.baseUrl + "'.");
+        this._dialogueBranchClient = new DialogueBranchClient(this._dialogueBranchConfig.baseUrl, this.logger, this);
+        this.logger.info(this._LOGTAG,"Initalized DialogueBranchClient directed to the Web Service at '"+ this._dialogueBranchConfig.baseUrl + "'.");
 
         // Initialize the ClientState object and take actions
-        this._clientState = new WCTAClientState(this._logger);
+        this._clientState = new WCTAClientState(this.logger);
         this._clientState.loadFromCookie();
 
         // If user info was loaded from Cookie, validate the authToken that was found
         if(this._clientState.user != null) {
-            this._logger.info(this._LOGTAG, "Existing user info found in cookie - username: " + this._clientState.user.name + ", role: " + this._clientState.user.role);
+            this.logger.info(this._LOGTAG, "Existing user info found in cookie - username: " + this._clientState.user.name + ", role: " + this._clientState.user.role);
             this._dialogueBranchClient.user = this._clientState.user;
             this._dialogueBranchClient.callAuthValidate(this._clientState.user.authToken);
         }
@@ -168,7 +166,7 @@ export class WCTAController extends AbstractController {
     actionLogout(event) {
         event.preventDefault();
 
-        this._logger.info(this._LOGTAG,"Logging out user '" + this._clientState.user.name + "'.");
+        this.logger.info(this._LOGTAG,"Logging out user '" + this._clientState.user.name + "'.");
         DocumentFunctions.deleteCookie('user.name');
         DocumentFunctions.deleteCookie('user.authToken');
         DocumentFunctions.deleteCookie('user.role');
@@ -202,7 +200,7 @@ export class WCTAController extends AbstractController {
     // ------------------------------------------------------------
 
     actionCancelDialogue(loggedDialogueId) {
-        this._logger.info(this._LOGTAG,"Cancelling the current dialogue with loggedDialogueId: '"+loggedDialogueId+"'.");
+        this.logger.info(this._LOGTAG,"Cancelling the current dialogue with loggedDialogueId: '"+loggedDialogueId+"'.");
         this._dialogueBranchClient.callCancelDialogue(loggedDialogueId);
     }
 
@@ -211,7 +209,7 @@ export class WCTAController extends AbstractController {
     }
 
     handleCancelDialogueError(errorMessage) {
-        this._logger.error(this._LOGTAG,"Cancelling dialogue failed with the following result: "+errorMessage);
+        this.logger.error(this._LOGTAG,"Cancelling dialogue failed with the following result: "+errorMessage);
     }
 
     // ----------------------------------------------------------
@@ -258,11 +256,11 @@ export class WCTAController extends AbstractController {
             }
         }
 
-        this._logger.info(this._LOGTAG,"Updated the contents of the Dialogue Browser, showing "+dialogueNames.length+" available dialogues.");
+        this.logger.info(this._LOGTAG,"Updated the contents of the Dialogue Browser, showing "+dialogueNames.length+" available dialogues.");
     }
 
     handleListDialoguesError(errorMessage) {
-        this._logger.error(this._LOGTAG,errorMessage);
+        this.logger.error(this._LOGTAG,errorMessage);
     }
 
     // ----------------------------------------------------------
@@ -345,32 +343,32 @@ export class WCTAController extends AbstractController {
             variableEntryElement.appendChild(variableUpdatedElement);
         });
 
-        this._logger.info(this._LOGTAG,"Updated the contents of the Variable Browser, showing "+variables.length+" available variables.");
+        this.logger.info(this._LOGTAG,"Updated the contents of the Variable Browser, showing "+variables.length+" available variables.");
 
     }
 
     handleGetVariablesError(errorMessage) {
-        this._logger.error(this._LOGTAG,errorMessage);
+        this.logger.error(this._LOGTAG,errorMessage);
     }
 
     actionDeleteVariable(variableName) {
-        this._logger.info(this._LOGTAG,"Requesting to delete variable: '" + variableName + "'.");
+        this.logger.info(this._LOGTAG,"Requesting to delete variable: '" + variableName + "'.");
         this._dialogueBranchClient.callSetVariable(variableName,null);
     }
 
     handleSetVariable(variableName) {
-        this._logger.info(this._LOGTAG,"Succesfully updated variable '" + variableName + "'.");
+        this.logger.info(this._LOGTAG,"Succesfully updated variable '" + variableName + "'.");
         this.actionRefreshVariableBrowser();
     }
 
     handleSetVariableError(variableName, errorMessage) {
-        this._logger.error(this._LOGTAG,"Error updating variable '"+variableName+"', with the following message: " + errorMessage);
+        this.logger.error(this._LOGTAG,"Error updating variable '"+variableName+"', with the following message: " + errorMessage);
     }
 
     // ---------- Start Dialogue ----------
 
     actionStartDialogue(dialogueName) {
-        this._logger.info(this._LOGTAG, "Starting dialogue '" + dialogueName + "'.");
+        this._ogger.info(this._LOGTAG, "Starting dialogue '" + dialogueName + "'.");
 
         // Todo: call the renderer's and tell them to 'clear'
         this.interactionTextRenderer.clear();
@@ -393,12 +391,12 @@ export class WCTAController extends AbstractController {
     // ---------- Info ----------
 
     handleServerInfo(serverInfo) {
-        this._logger.info(this._LOGTAG,"Connected to Dialogue Branch Web Service v"+serverInfo.serviceVersion+", using protocol version "+serverInfo.protocolVersion+" (build: '"+serverInfo.build+"' running for "+serverInfo.upTime+").");
+        this.logger.info(this._LOGTAG,"Connected to Dialogue Branch Web Service v"+serverInfo.serviceVersion+", using protocol version "+serverInfo.protocolVersion+" (build: '"+serverInfo.build+"' running for "+serverInfo.upTime+").");
         this.updateServerInfoBox();
     }
 
     handleServerInfoError(errorMessage) {
-        this._logger.error(this._LOGTAG,errorMessage);
+        this.logger.error(this._LOGTAG,errorMessage);
     }
 
     // ---------- Login ----------
@@ -413,7 +411,7 @@ export class WCTAController extends AbstractController {
             DocumentFunctions.setCookie('user.authToken',this._clientState.user.authToken,365);
             DocumentFunctions.setCookie('user.role',this._clientState.user.role,365);
 
-            this._logger.debug(this._LOGTAG,
+            this.logger.debug(this._LOGTAG,
                 "Stored user info in cookie: user.name '" + 
                 DocumentFunctions.getCookie('user.name') + 
                 "', user.role '" + 
@@ -429,7 +427,7 @@ export class WCTAController extends AbstractController {
         errorMessageBox.innerHTML = '';
         errorMessageBox.style.display = 'none';
 
-        this._logger.info(this._LOGTAG,"User '"+this._clientState.user.name+"' successfully logged in with role '"+this._clientState.user.role+"'.");
+        this.logger.info(this._LOGTAG,"User '"+this._clientState.user.name+"' successfully logged in with role '"+this._clientState.user.role+"'.");
         
         this.postLoginActions();
         this.updateServerInfoBox();
@@ -465,7 +463,7 @@ export class WCTAController extends AbstractController {
         
         // There is an invalid authToken in cookie, delete all info and assume user is logged out
         } else {
-            this._logger.warn(this._LOGTAG,"Unable to validate stored authentication token: '" + message + "'. Requiring new login.");
+            this.logger.warn(this._LOGTAG,"Unable to validate stored authentication token: '" + message + "'. Requiring new login.");
             this._clientState.loggedIn = false;
             this._clientState.user = null;
             this._dialogueBranchClient.user = null;
@@ -482,7 +480,7 @@ export class WCTAController extends AbstractController {
      * Perform actions that need to happen immediately after a user has logged in.
      */
     postLoginActions() {
-        this._logger.info(this._LOGTAG,"Performing post-login actions.");
+        this.logger.info(this._LOGTAG,"Performing post-login actions.");
         this._dialogueBranchClient.callGetOngoingDialogue();
     }
 
@@ -493,14 +491,14 @@ export class WCTAController extends AbstractController {
     handleOngoingDialogue(ongoingDialogue) {
         // If called with null, there is no ongoing dialogue, and we are done here
         if(ongoingDialogue != null) {
-            this._logger.info(this._LOGTAG,"Found an ongoing dialogue for user '"+this._clientState.user.name+"', dialogue name: '"+ongoingDialogue.name+"', with last engagement: "+ongoingDialogue.secondsSinceLastEngagement+" seconds ago.");
+            this.logger.info(this._LOGTAG,"Found an ongoing dialogue for user '"+this._clientState.user.name+"', dialogue name: '"+ongoingDialogue.name+"', with last engagement: "+ongoingDialogue.secondsSinceLastEngagement+" seconds ago.");
             
             // If the ongoing dialogue is less than a day old, pick up the conversation
             if(ongoingDialogue.secondsSinceLastEngagement <= 24 * 60 * 60) {
-                this._logger.info(this._LOGTAG,"Ongoing dialogue is less than a day old, so picking up the conversation.");
+                this.logger.info(this._LOGTAG,"Ongoing dialogue is less than a day old, so picking up the conversation.");
                 this._dialogueBranchClient.callContinueDialogue(ongoingDialogue.name);
             } else {
-                this._logger.info(this._LOGTAG,"Ongoing dialogue is more than a day old, time to let go...");
+                this.logger.info(this._LOGTAG,"Ongoing dialogue is more than a day old, time to let go...");
             }
         }
         
@@ -524,7 +522,7 @@ export class WCTAController extends AbstractController {
     }
 
     handleStartDialogueError(errorMessage) {
-        this._logger.error(this._LOGTAG,"Starting dialogue failed with the following result: "+errorMessage);
+        this.logger.error(this._LOGTAG,"Starting dialogue failed with the following result: "+errorMessage);
     }
 
     // ---------- Progress Dialogue
@@ -538,7 +536,7 @@ export class WCTAController extends AbstractController {
     }
 
     handleProgressDialogueError(errorMessage) {
-        this._logger.error(this._LOGTAG,errorMessage);
+        this.logger.error(this._LOGTAG,errorMessage);
     }
 
     // -----------------------------------------------------------------
