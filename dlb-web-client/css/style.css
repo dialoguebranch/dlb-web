@@ -399,18 +399,26 @@ The text content box should be scrollable, while the balloon box should always r
     font-weight: 600;
 }
 
-.dialogue-step-reply-autoforward {
+.dialogue-step-reply-button {
 	font-family: var(--font-family-sans);
 	background-color: var(--color-orange-dark);
 	font-size: 14px;
 	color: white;
-	padding: 12px 60px;
 	border: none;
 	border-radius: 10px;
 	cursor: pointer;
+}
+
+.dialogue-step-reply-button-autoforward {
 	margin-top: 8px;
+	padding: 12px 60px;
 	margin: auto;
-	cursor: default;
+}
+
+.dialogue-step-reply-button-basic {
+	margin-top: 6px;
+	text-align: left;
+	padding: 12px 12px;
 }
 
 /* Normal reply options that were chosen by the user */

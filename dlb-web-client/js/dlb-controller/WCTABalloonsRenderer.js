@@ -191,7 +191,8 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
 
                         if(reply instanceof AutoForwardReply) {
                             const autoForwardReplyButton = document.createElement("button");
-                            autoForwardReplyButton.classList.add("dialogue-step-reply-autoforward");
+                            autoForwardReplyButton.classList.add("dialogue-step-reply-button");
+                            autoForwardReplyButton.classList.add("dialogue-step-reply-button-autoforward");
                             autoForwardReplyButton.classList.add("reply-option-with-listener");
                             if(reply.endsDialogue) {
                                 autoForwardReplyButton.innerHTML = "<i class='fa-solid fa-ban'></i> END DIALOGUE";
@@ -204,23 +205,19 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
                             // Add an empty element to the list, so that adding the 'user-selected-reply' class won't break.
                             this.controller.dialogueReplyNumbers.push(document.createElement("div"));
                         } else {
-                            const replyOptionNumberElement = document.createElement("div");
-                            replyOptionNumberElement.classList.add("dialogue-step-reply-number");
-                            replyOptionNumberElement.innerHTML = replyNumber + ": - ";
-                            replyOptionContainer.appendChild(replyOptionNumberElement);
-
-                            const replyOptionElement = document.createElement("div");
-                            replyOptionElement.classList.add("dialogue-step-reply-basic");
-                            replyOptionElement.classList.add("reply-option-with-listener");
+                            const basicReplyButton = document.createElement("button");
+                            basicReplyButton.classList.add("dialogue-step-reply-button");
+                            basicReplyButton.classList.add("dialogue-step-reply-button-basic");
+                            basicReplyButton.classList.add("reply-option-with-listener");
                             if(reply.endsDialogue) {
-                                replyOptionElement.innerHTML = "<i class='fa-solid fa-ban'></i> " + reply.statement;
+                                basicReplyButton.innerHTML = "<i class='fa-solid fa-ban'></i> " + reply.statement;
                             } else {
-                                replyOptionElement.innerHTML = reply.statement;
+                                basicReplyButton.innerHTML = reply.statement;
                             }
-                            replyOptionElement.addEventListener("click", this.controller.actionSelectReply.bind(this.controller, replyNumber, reply, dialogueStep), false);
-                            replyOptionContainer.appendChild(replyOptionElement);
-                            this.controller.dialogueReplyElements.push(replyOptionElement);
-                            this.controller.dialogueReplyNumbers.push(replyOptionNumberElement);
+                            basicReplyButton.addEventListener("click", this.controller.actionSelectReply.bind(this.controller, replyNumber, reply, dialogueStep), false);
+                            replyOptionContainer.appendChild(basicReplyButton);
+                            this.controller.dialogueReplyElements.push(basicReplyButton);
+                            this.controller.dialogueReplyNumbers.push(basicReplyButton);
                         }
                         replyNumber++;
                     }

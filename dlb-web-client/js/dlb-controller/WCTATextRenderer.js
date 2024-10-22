@@ -106,7 +106,8 @@ export class WCTATextRenderer extends WCTAInteractionRenderer {
 
                         if(reply instanceof AutoForwardReply) {
                             const autoForwardReplyButton = document.createElement("button");
-                            autoForwardReplyButton.classList.add("dialogue-step-reply-autoforward");
+                            autoForwardReplyButton.classList.add("dialogue-step-reply-button");
+                            autoForwardReplyButton.classList.add("dialogue-step-reply-button-autoforward");
                             autoForwardReplyButton.classList.add("reply-option-with-listener");
                             if(reply.endsDialogue) {
                                 autoForwardReplyButton.innerHTML = "<i class='fa-solid fa-ban'></i> END DIALOGUE";
