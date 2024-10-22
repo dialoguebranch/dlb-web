@@ -58,18 +58,11 @@ export class DialogueBranchConfig {
     async loadFromFile() {
         await fetch('config.json')
         .then((response) => {
-            console.log("fetch response:");
-            console.log(response);
             return response.json();
         })
         .then((data) => {
-            console.log("fetch data:");
-            console.log(data);
-            console.log("baseUrl:" + data.baseUrl)
             this._baseUrl = data.baseUrl;
             this._logLevel = data.logLevel;
-
-            console.log("get baseUrl: "+ this.baseUrl);
         })
     }
 
