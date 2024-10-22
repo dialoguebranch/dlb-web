@@ -368,7 +368,7 @@ export class WCTAController extends AbstractController {
     // ---------- Start Dialogue ----------
 
     actionStartDialogue(dialogueName) {
-        this._ogger.info(this._LOGTAG, "Starting dialogue '" + dialogueName + "'.");
+        this._logger.info(this._LOGTAG, "Starting dialogue '" + dialogueName + "'.");
 
         // Todo: call the renderer's and tell them to 'clear'
         this.interactionTextRenderer.clear();
