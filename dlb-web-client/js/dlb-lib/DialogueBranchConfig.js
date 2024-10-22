@@ -26,33 +26,95 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * A DialogueBranchConfig object contains configurable information that can be loaded from a
+ * config.json file in the root directory of the project.
+ *
+ * @author Harm op den Akker (Fruit Tree Labs)
+ */
 export class DialogueBranchConfig {
 
     // ------------------------------------
     // ---------- Constructor(s) ----------
     // ------------------------------------
 
-    constructor(logLevel, baseUrl) {
-        this._logLevel = logLevel;
-        this._baseUrl = baseUrl;
+    /**
+     * Creates an empty instance of a DialogueBranchConfig.
+     * 
+     * @constructor
+     */
+    constructor() { 
+        this._logLevel = null;
+        this._baseUrl = null;
+    }
+
+    // ------------------------------------
+    // ---------- Initialization ----------
+    // ------------------------------------
+
+    /**
+     * Reads configuration values into this DialogueBranchConfig object in an asynchronous way.
+     */
+    async loadFromFile() {
+        await fetch('config.json')
+        .then((response) => {
+            console.log("fetch response:");
+            console.log(response);
+            return response.json();
+        })
+        .then((data) => {
+            console.log("fetch data:");
+            console.log(data);
+            console.log("baseUrl:" + data.baseUrl)
+            this._baseUrl = data.baseUrl;
+            this._logLevel = data.logLevel;
+
+            console.log("get baseUrl: "+ this.baseUrl);
+        })
     }
 
     // ---------------------------------------
     // ---------- Getters & Setters ----------
     // ---------------------------------------
 
+    /**
+     * Returns the logging level to be used while executing. Currently supports the following log levels as defined in AbstractLogger:
+     * - LOG_LEVEL_INFO = 0
+     * - LOG_LEVEL_DEBUG = 1
+     *
+     * @returns {number} the logging level to be used while executing.
+     */
     get logLevel() {
         return this._logLevel;
     }
 
+    /**
+     * Sets the logging level to be used while executing. Currently supports the following log levels as defined in AbstractLogger:
+     * - LOG_LEVEL_INFO = 0
+     * - LOG_LEVEL_DEBUG = 1
+     * 
+     * @param {number} logLevel the logging level.
+     */
     set logLevel(logLevel) {
         this._logLevel = logLevel;
     }
 
+    /**
+     * Returns the common part of the url to be used in all API calls, including the API version to
+     * use (e.g. localhost:8080/dlb-web-service/v1).
+     *
+     * @returns the common part of the url to be used in all API calls.
+     */
     get baseUrl() {
         return this._baseUrl;
     }
 
+    /**
+     * Sets the common part of the url to be used in all API calls, including the API version to
+     * use (e.g. localhost:8080/dlb-web-service/v1).
+     *
+     * @param {String} baseUrl the common part of the url to be used in all API calls.
+     */
     set baseUrl(baseUrl) {
         this._baseUrl = baseUrl;
     }

@@ -34,7 +34,11 @@ import { WCTAController } from './WCTAController.js';
  */
 window.onload = function() {
 
+    // Create an instance of the Controller object
     this.wctaController = new WCTAController();
+
+    // Initialize it
+    this.wctaController.initialize();
 
     document.getElementById("login-button").addEventListener("click", (e)=> {
         this.wctaController.actionLogin(e);

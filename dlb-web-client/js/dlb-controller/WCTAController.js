@@ -62,9 +62,12 @@ export class WCTAController extends AbstractController {
 
         this._dialogueReplyElements = new Array();
         this._dialogueReplyNumbers = new Array();
+    }
 
-        // Initialize the Configuration and Logger objects
-        this._dialogueBranchConfig = new DialogueBranchConfig(1,'http://localhost:8081/dlb-web-service/v1');
+    async initialize() {
+        // First initialize the configuration in an asynchronous way
+        await this.initializeConfig();
+        
         this._logger = new TextAreaLogger(this._dialogueBranchConfig.logLevel, document.getElementById("debug-textarea"));
         this._logger.info(this._LOGTAG,"Initialized Logger with log level '" 
             + this._dialogueBranchConfig.logLevel 
@@ -98,6 +101,11 @@ export class WCTAController extends AbstractController {
 
         // Update the size of the interaction tester / variable/dialogue browsers
         this.updateInteractionTesterSize();
+    }
+
+    async initializeConfig() {
+        this._dialogueBranchConfig = new DialogueBranchConfig();
+        await this._dialogueBranchConfig.loadFromFile();
     }
 
     // -----------------------------------------------------------
