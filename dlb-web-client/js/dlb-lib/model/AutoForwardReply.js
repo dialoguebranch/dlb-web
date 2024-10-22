@@ -62,6 +62,7 @@ export class AutoForwardReply extends Reply {
 
     /**
      * This method may be used to instantiate an 'empty' instance of an AutoForwardReply.
+     * 
      * @returns a new, empty instance of an AutoForwardReply.
      */
     static emptyInstance() {

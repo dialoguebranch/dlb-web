@@ -44,8 +44,9 @@ export class BasicReply extends Reply {
 
     /**
      * Creates an instance of a BasicReply with the given parameters.
-     * 
-     * @param {number} replyId The identifier of this reply option that is unique within this dialogue step.
+     *
+     * @param {number} replyId The identifier of this reply option that is unique within this
+     * dialogue step.
      * @param {boolean} endsDialogue Whether or not selecting this reply will end the dialogue.
      * @param {Array} actions A list of Actions that should be executed when this reply is chosen.
      * @param {String} statement The statement that the user 'utters' when selecting this Reply.
@@ -58,6 +59,7 @@ export class BasicReply extends Reply {
     /**
      * Returns a new instance of a BasicReply objects that is 'empty'. The object is instantiated
      * with null values and an empty list of actions.
+     * 
      * @returns a new, empty instance of a BasicReply.
      */
     static emptyInstance() {
@@ -70,7 +72,9 @@ export class BasicReply extends Reply {
 
     /**
      * Sets the statement that the user makes in reply to the agent when selecting this reply.
-     * @param {String} statement The statement that the user makes in reply to the agent when selecting this reply.
+     *
+     * @param {String} statement The statement that the user makes in reply to the agent when
+     * selecting this reply.
      */
     set statement(statement) {
         this._statement = statement;
@@ -78,6 +82,7 @@ export class BasicReply extends Reply {
 
     /**
      * Returns the statement that the user makes in reply to the agent when selecting this reply.
+     * 
      * @returns the statement that the user makes in reply to the agent when selecting this reply.
      */
     get statement() {
