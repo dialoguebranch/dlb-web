@@ -489,6 +489,20 @@ div.reply-option-with-listener:hover {
 	vertical-align: middle;
 }
 
+.int-balloon-statement-balloon-text a {
+	font-weight: 900;
+	text-decoration-line: underline;
+}
+
+.int-balloon-cancel-dialogue-button {
+	position: absolute;
+	top: -5px;
+	right: -5px;
+	background-color: #790606;
+	width: 30px;
+	height: 30px;
+}
+
 .int-balloon-replies-block {
 	position: absolute;
 	top: 180px;

@@ -40,6 +40,14 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
         this._statementBlock = statementBlock;
     }
 
+    get cancelDialogueButton() {
+        return this._cancelDialogueButton;
+    }
+
+    set cancelDialogueButton(cancelDialogueButton) {
+        this._cancelDialogueButton = cancelDialogueButton;
+    }
+
     get repliesBlock() {
         return this._repliesBlock;
     }
@@ -74,6 +82,10 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
             this.statementBlock.style.visibility = "hidden";
         }
 
+        if(this.cancelDialogueButton != null) {
+            this.cancelDialogueButton.style.visibility = "hidden";
+        }
+
         if(this.repliesBlock != null) {
             this.repliesBlock.innerHTML = "";
         }
@@ -85,6 +97,7 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
         if(this.contentBlock != null) this.contentBlock.style.visibility = "hidden";
         if(this.avatarBlock != null) this.avatarBlock.style.visibility = "hidden";
         if(this.statementBlock != null) this.statementBlock.style.visibility = "hidden";
+        if(this.cancelDialogueButton != null) this.cancelDialogueButton.style.visibility = "hidden";
         if(this.repliesBlock != null) this.repliesBlock.style.visibility = "hidden";
     }
 
@@ -98,6 +111,7 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
                 this.statementBlock.style.visibility = "visible";
             }   
         }
+        if(this.cancelDialogueButton != null) this.cancelDialogueButton.style.visibility = "visible";
         if(this.repliesBlock != null) this.repliesBlock.style.visibility = "visible";
     }
 
@@ -114,6 +128,15 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
              this.statementBlock = document.createElement("div");
              this.statementBlock.classList.add("int-balloon-statement-balloon");
         }
+        
+        if(this.cancelDialogueButton == null) {
+            this.cancelDialogueButton = document.createElement("button");
+            this.cancelDialogueButton.innerHTML = "<i class=\"fa-solid fa-circle-xmark\"></i>";
+            this.cancelDialogueButton.classList.add("int-balloon-cancel-dialogue-button");
+            this.cancelDialogueButton.classList.add("circle-button-small");
+            this.statementBlock.appendChild(this.cancelDialogueButton);
+        }
+        
         this.contentBlock.appendChild(this.statementBlock);
 
         // Create the avatar block if it doesn't exist
@@ -173,7 +196,14 @@ export class WCTABalloonsRenderer extends WCTAInteractionRenderer {
             statementTextElement.innerHTML = dialogueStep.statement.fullStatement();
             this.statementBlock.innerHTML = "";
             this.statementBlock.appendChild(statementTextElement);
-            if(this.rendererVisible) this.statementBlock.style.visibility = "visible";
+
+            this.cancelDialogueButton.addEventListener("click", this.controller.actionCancelDialogue.bind(this.controller, dialogueStep.loggedDialogueId), false);
+
+            this.statementBlock.appendChild(this.cancelDialogueButton);
+            if(this.rendererVisible) {
+                this.statementBlock.style.visibility = "visible";
+                this.cancelDialogueButton.style.visibility = "visible";
+            }
 
             // If there are any reply options
             this.repliesBlock.innerHTML = "";
