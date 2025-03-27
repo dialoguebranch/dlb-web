@@ -31,6 +31,8 @@ package com.dialoguebranch.web.service.controller.schema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import nl.rrd.utils.json.JsonObject;
 
+import java.util.Arrays;
+
 /**
  * A {@link DialogueListPayload} object contains a list of dialogue names that is somehow provided
  * by the web service.
@@ -59,7 +61,7 @@ public class DialogueListPayload extends JsonObject {
      * @param dialogueNames an array of dialogue names as a {@code String[]}.
      */
     public DialogueListPayload(String[] dialogueNames) {
-        this.dialogueNames = dialogueNames;
+        this.dialogueNames = sortDialogueNames(dialogueNames);
     }
 
     // -----------------------------------------------------------
@@ -79,7 +81,18 @@ public class DialogueListPayload extends JsonObject {
      * @param dialogueNames the array of dialogue names in this {@link DialogueListPayload}.
      */
     public void setDialogueNames(String[] dialogueNames) {
-        this.dialogueNames = dialogueNames;
+        this.dialogueNames = sortDialogueNames(dialogueNames);
+    }
+
+    /**
+     * Takes a String array of dialogue names, and returns the sorted list.
+     * TODO: Make sure the sorting takes into account the expected ordering of "folders first"
+     * @param dialogueNames the list of dialogue names to sort.
+     * @return a sorted list of dialogues.
+     */
+    private String[] sortDialogueNames(String[] dialogueNames) {
+        Arrays.sort(dialogueNames);
+        return dialogueNames;
     }
 
 }
