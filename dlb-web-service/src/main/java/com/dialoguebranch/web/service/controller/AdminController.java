@@ -29,7 +29,7 @@
 package com.dialoguebranch.web.service.controller;
 
 import com.dialoguebranch.model.FileDescriptor;
-import com.dialoguebranch.model.FileType;
+import com.dialoguebranch.model.ResourceType;
 import com.dialoguebranch.web.service.Application;
 import com.dialoguebranch.web.service.ProtocolVersion;
 import com.dialoguebranch.web.service.QueryRunner;
@@ -145,7 +145,7 @@ public class AdminController {
         List<String> scriptNames = new ArrayList<>();
 
         for(FileDescriptor fileDescriptor : files) {
-            if(fileDescriptor.getFileType().equals(FileType.SCRIPT)) {
+            if(fileDescriptor.getFileType().equals(ResourceType.SCRIPT)) {
                 scriptNames.add(fileDescriptor.getDialogueName());
             }
         }
