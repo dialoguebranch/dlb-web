@@ -37,3 +37,12 @@ the following settings in IntelliJ:
 * Under `IntelliJ IDEA` -> `Settings...`
   * Go to `Build, Execution, Deployment` -> `Build Tools` -> `Gradle`
     * Make sure the Gradle JVM is set to a JVM of version 17 or higher.
+
+### Configuration files
+Before deploying, create the following configuration files:
+
+* dlb-web/dlb-external-var-service/gradle.properties
+* dlb-web/dlb-external-var-service/config/users.xml
+* dlb-web/dlb-web-service/gradle.properties
+* dlb-web/dlb-web-service/config/users.xml
+* dlb-web-client/config.json

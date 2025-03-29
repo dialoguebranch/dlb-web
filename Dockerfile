@@ -16,6 +16,7 @@ EXPOSE 8089
 # Copy the local source folder into the container
 COPY ./dlb-web/ /usr/local/dialogue-branch/source/dlb-web/
 COPY ./dlb-core-java/ /usr/local/dialogue-branch/source/dlb-core-java/
+RUN for f in `find /usr/local/dialogue-branch/source -name "gradlew" -print`; do chmod 755 $f && sed -i -e 's/\r//' $f; done
 
 # Create some data folders used by the services
 RUN mkdir /usr/local/dialogue-branch/data/
