@@ -1,12 +1,19 @@
 <script setup>
 import { computed } from 'vue';
+import state from '../../state.js';
 import HeaderMenuItem from '../widgets/HeaderMenuItem.vue';
+
+const emit = defineEmits([
+    'logout',
+]);
 
 const versionInfo = computed(() => {
     return 'Not connected.';
 });
 
-function logout() {
+function onLogoutClick() {
+    state.loggedIn = false;
+    emit('logout');
 }
 </script>
 
@@ -18,7 +25,7 @@ function logout() {
             <div class="grow"></div>
             <div class="flex basis-0">
                 <HeaderMenuItem text="Documentation" link="https://www.dialoguebranch.com/docs/dialogue-branch/dev/index.html" />
-                <HeaderMenuItem text="Logout" @click="logout" />
+                <HeaderMenuItem text="Logout" @click="onLogoutClick" />
             </div>
         </header>
 
