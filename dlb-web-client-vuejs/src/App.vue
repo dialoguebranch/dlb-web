@@ -1,47 +1,23 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import HeaderNavLink from './components/HeaderNavLink.vue';
+
+function logout() {
+}
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+    <div class="w-screen h-screen flex flex-col">
+        <header class="flex shadow-md shadow-grey-200 z-1">
+            <a href="/"><img class="box-content h-[60px] pl-4 py-3" src="./assets/img/dlb-square.png"></a>
+            <span class="font-title text-sm self-end pl-2 pb-3">Some version info here.</span>
+            <div class="grow"></div>
+            <div class="flex">
+                <HeaderNavLink text="Documentation" link="https://www.dialoguebranch.com/docs/dialogue-branch/dev/index.html" />
+                <HeaderNavLink text="Logout" @click="logout" />
+            </div>
+        </header>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+        <main class="bg-gray-200 grow">
+        </main>
     </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
 </template>
-
-<style scoped>
-header {
-  line-height: 1.5;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
-</style>

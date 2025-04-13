@@ -1,0 +1,7 @@
+@theme {
+	--color-menu-item-hover: rgb(240,240,240,1.0);
+	--color-menu-text: rgb(0,0,0);
+	--color-menu-text-hover: rgb(30,30,30);
+
+    --font-title: 'Roboto Slab',sans-serif;
+}
