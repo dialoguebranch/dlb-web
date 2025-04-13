@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue';
-import HeaderNavLink from './components/HeaderNavLink.vue';
+import HeaderMenuItem from './components/HeaderMenuItem.vue';
 
 const versionInfo = computed(() => {
     return 'Not connected.';
@@ -17,8 +17,8 @@ function logout() {
             <span class="hidden sm:block font-title text-sm self-end pl-2 pb-3">{{ versionInfo }}</span>
             <div class="grow"></div>
             <div class="flex basis-0">
-                <HeaderNavLink text="Documentation" link="https://www.dialoguebranch.com/docs/dialogue-branch/dev/index.html" />
-                <HeaderNavLink text="Logout" @click="logout" />
+                <HeaderMenuItem text="Documentation" link="https://www.dialoguebranch.com/docs/dialogue-branch/dev/index.html" />
+                <HeaderMenuItem text="Logout" @click="logout" />
             </div>
         </header>
 
