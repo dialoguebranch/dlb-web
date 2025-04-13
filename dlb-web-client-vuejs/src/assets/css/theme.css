@@ -1,7 +1,34 @@
 @theme {
-	--color-menu-item-hover: rgb(240,240,240,1.0);
-	--color-menu-text: rgb(0,0,0);
-	--color-menu-text-hover: rgb(30,30,30);
-
     --font-title: 'Roboto Slab',sans-serif;
+
+    /* Definition of colors */
+    --color-grey-light: rgb(200,200,200);
+	--color-grey-lighter: rgb(240,240,240);
+    --color-darken: rgba(0,0,0,0.5);
+    --color-brighten: rgba(255,255,255,0.5);
+    --color-orange-darker: rgb(119, 81, 24);
+    --color-orange-dark: rgb(153,102,0);
+    --color-orange-medium: rgb(179, 141, 83);
+    --color-orange-light: rgb(246, 203, 139);
+	--color-red-dark: rgb(101, 10, 10);
+    
+    /* Definition of color elements */
+    --color-background: var(--color-grey-light);
+    --color-box: var(--color-orange-darker);
+    --color-lines: var(--color-orange-dark);
+    --color-lines-highlight: var(--color-orange-light);
+    --color-text: var(--color-black);
+    --color-text-subtle: var(--color-orange-darker);
+    --color-text-shadow: var(--color-black);
+    --color-text-emphasis: var(--color-orange-dark);
+    --color-text-highlight: var(--color-orange-light);
+
+	/* Nav Bar */
+	--color-menu-bar: rgba(250,250,250,1.0);
+	--color-menu-item: rgba(250,250,250,1.0);
+	--color-menu-item-highlight: rgb(240,240,240,1.0);
+	--color-menu-text: rgb(0,0,0);
+	--color-menu-text-highlight: rgb(30,30,30);
+
+	--color-speech-bubble: rgb(135, 124, 24);
 }

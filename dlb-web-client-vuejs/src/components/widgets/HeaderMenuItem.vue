@@ -1,4 +1,6 @@
 <script setup>
+import state from '../../state.js';
+
 const props = defineProps([
     'link',
     'text',
@@ -18,7 +20,7 @@ function onclick() {
 </script>
 
 <template>
-    <button class="font-title font-medium text-menu-text text-xl text-center hover:text-menu-text-hover bg-white hover:bg-menu-item-hover px-4 cursor-pointer"
+    <button class="font-title font-medium text-menu-text text-xl text-center hover:text-menu-text-highlight bg-menu-item hover:bg-menu-item-highlight px-4 cursor-pointer"
         @click="onclick"
     >{{ text }}</button>
 </template>
