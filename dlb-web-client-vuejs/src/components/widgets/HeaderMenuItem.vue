@@ -1,6 +1,4 @@
 <script setup>
-import state from '../../state.js';
-
 const props = defineProps([
     'link',
     'text',
