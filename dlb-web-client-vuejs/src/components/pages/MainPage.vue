@@ -25,7 +25,7 @@ function onLogoutClick() {
             <div class="grow"></div>
             <div class="flex basis-0">
                 <HeaderMenuItem text="Documentation" link="https://www.dialoguebranch.com/docs/dialogue-branch/dev/index.html" />
-                <HeaderMenuItem text="Logout" @click="onLogoutClick" />
+                <HeaderMenuItem text="Log out" @click="onLogoutClick" />
             </div>
         </header>
 

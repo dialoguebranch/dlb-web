@@ -20,7 +20,7 @@ function onclick() {
 </script>
 
 <template>
-    <button class="font-title font-medium text-menu-text text-xl text-center hover:text-menu-text-highlight bg-menu-item hover:bg-menu-item-highlight px-4 cursor-pointer"
+    <button class="font-title font-medium text-menu-text text-l sm:text-xl text-center hover:text-menu-text-highlight bg-menu-item hover:bg-menu-item-highlight px-2 sm:px-4 cursor-pointer whitespace-nowrap"
         @click="onclick"
     >{{ text }}</button>
 </template>
