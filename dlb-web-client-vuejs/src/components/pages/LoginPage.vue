@@ -1,5 +1,5 @@
 <script setup>
-import { inject, ref } from 'vue';
+import { inject, onMounted, ref } from 'vue';
 import TextInput from '../widgets/TextInput.vue';
 import PushButton from '../widgets/PushButton.vue';
 
@@ -8,10 +8,74 @@ const state = inject('state');
 
 const username = ref('');
 const password = ref('');
+const errors = ref({});
+const errorMessage = ref('');
+
+const inputs = {};
+
+onMounted(() => {
+    inputs.username = document.getElementsByName('username')[0];
+    inputs.password = document.getElementsByName('password')[0];
+    inputs.username.focus();
+});
 
 function onLoginClick() {
-    console.log(config.baseUrl);
-    state.value.loggedIn = true;
+    const input = validateInput();
+    if (input === false) {
+        return;
+    }
+    fetch(config.baseUrl + '/auth/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            user: input.username,
+            password: input.password,
+            tokenExpiration: 0,
+        }),
+    })
+    .then((response) => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            return Promise.reject(response);
+        }
+    })
+    .then((json) => {
+        state.value.user = json;
+        state.value.loggedIn = true;
+    })
+    .catch((error) => {
+        inputs.username.focus();
+        if (error instanceof Response && (error.status === 400 || error.status === 401)) {
+            errorMessage.value = 'The username or password is incorrect.';
+        } else {
+            errorMessage.value = 'An unknown error has occured.';
+        }
+    });
+}
+
+function validateInput() {
+    errors.value = {};
+    errorMessage.value = '';
+    const input = {
+        username: username.value.trim(),
+        password: password.value,
+    }
+    if (input.password.length == 0) {
+        errors.value['password'] = true;
+        inputs.password.focus();
+    }
+    if (input.username.length == 0) {
+        errors.value['username'] = true;
+        inputs.username.focus();
+    }
+    if (Object.keys(errors.value).length > 0) {
+        return false;
+    } else {
+        return input;
+    }
 }
 </script>
 
@@ -25,15 +89,16 @@ function onLoginClick() {
                 <form @submit.prevent>
                     <div class="sm:flex sm:items-center">
                         <label class="font-title font-bold text-right sm:basis-[130px] sm:pr-4" for="username">Username:</label>
-                        <TextInput class="block w-full sm:basis-0 sm:grow mt-2 sm:mt-0" type="text" name="username" placeholder="Username..." v-model="username"></TextInput>
+                        <TextInput class="block w-full sm:basis-0 sm:grow mt-2 sm:mt-0" type="text" name="username" placeholder="Username..." :error="errors.username" v-model="username"></TextInput>
                     </div>
                     <div class="sm:flex sm:items-center mt-6">
                         <label class="font-title font-bold text-right sm:basis-[130px] sm:pr-4" for="password">Password:</label>
-                        <TextInput class="block w-full sm:basis-0 sm:grow mt-2 sm:mt-0" type="password" name="password" placeholder="Password..." v-model="password"></TextInput>
+                        <TextInput class="block w-full sm:basis-0 sm:grow mt-2 sm:mt-0" type="password" name="password" placeholder="Password..." :error="errors.password" v-model="password"></TextInput>
                     </div>
                     <div class="text-right mt-6">
                         <PushButton text="Log in" type="submit" @click="onLoginClick" />
                     </div>
+                    <div v-if="errorMessage" class="bg-white font-title font-bold text-sm text-red-500 rounded-3xl px-4 py-2 mt-4">{{ errorMessage }}</div>
                 </form>
             </div>
         </div>

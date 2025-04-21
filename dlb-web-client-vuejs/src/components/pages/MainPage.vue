@@ -9,6 +9,7 @@ const versionInfo = computed(() => {
 });
 
 function onLogoutClick() {
+    state.value.user = null;
     state.value.loggedIn = false;
 }
 </script>
