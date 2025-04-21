@@ -1,19 +1,15 @@
 <script setup>
-import { computed } from 'vue';
-import state from '../../state.js';
+import { computed, inject } from 'vue';
 import HeaderMenuItem from '../widgets/HeaderMenuItem.vue';
 
-const emit = defineEmits([
-    'logout',
-]);
+const state = inject('state');
 
 const versionInfo = computed(() => {
     return 'Not connected.';
 });
 
 function onLogoutClick() {
-    state.loggedIn = false;
-    emit('logout');
+    state.value.loggedIn = false;
 }
 </script>
 

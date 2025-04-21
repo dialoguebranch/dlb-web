@@ -1,7 +1,13 @@
 import './assets/css/main.css';
-import './state.js';
+import config from './config.js';
+import state from './state.js';
 
-import { createApp } from 'vue';
+import { createApp, ref } from 'vue';
 import App from './App.vue';
 
-createApp(App).mount('#app');
+const stateRef = ref(state);
+
+const app = createApp(App);
+app.provide('config', config);
+app.provide('state', stateRef);
+app.mount('#app');

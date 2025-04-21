@@ -1,17 +1,13 @@
 <script setup>
-import { ref } from 'vue';
-import state from './state.js';
+import { inject } from 'vue';
+
 import LoginPage from './components/pages/LoginPage.vue';
 import MainPage from './components/pages/MainPage.vue';
 
-const loggedIn = ref(state.loggedIn);
-
-function updateLoggedIn() {
-    loggedIn.value = state.loggedIn;
-}
+const state = inject('state');
 </script>
 
 <template>
-    <MainPage v-if="loggedIn" @logout="updateLoggedIn" />
+    <MainPage v-if="state.loggedIn" />
     <LoginPage v-else @login="updateLoggedIn" />
 </template>

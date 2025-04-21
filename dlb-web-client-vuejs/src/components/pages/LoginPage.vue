@@ -1,19 +1,17 @@
 <script setup>
-import { ref } from 'vue';
-import state from '../../state.js';
+import { inject, ref } from 'vue';
 import TextInput from '../widgets/TextInput.vue';
 import PushButton from '../widgets/PushButton.vue';
 
-const emit = defineEmits([
-    'login',
-]);
+const config = inject('config');
+const state = inject('state');
 
 const username = ref('');
 const password = ref('');
 
 function onLoginClick() {
-    state.loggedIn = true;
-    emit('login');
+    console.log(config.baseUrl);
+    state.value.loggedIn = true;
 }
 </script>
 
