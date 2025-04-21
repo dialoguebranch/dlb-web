@@ -8,6 +8,6 @@ const state = inject('state');
 </script>
 
 <template>
-    <MainPage v-if="state.loggedIn" />
+    <MainPage v-if="state.user" />
     <LoginPage v-else />
 </template>

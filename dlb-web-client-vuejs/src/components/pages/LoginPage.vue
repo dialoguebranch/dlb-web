@@ -1,5 +1,7 @@
 <script setup>
 import { inject, onMounted, ref } from 'vue';
+import { DocumentFunctions } from '../../dlb-lib/util/DocumentFunctions.js';
+import { User } from '../../dlb-lib/model/User.js';
 import TextInput from '../widgets/TextInput.vue';
 import PushButton from '../widgets/PushButton.vue';
 
@@ -8,6 +10,7 @@ const state = inject('state');
 
 const username = ref('');
 const password = ref('');
+const remember = ref(false);
 const errors = ref({});
 const errorMessage = ref('');
 
@@ -43,8 +46,7 @@ function onLoginClick() {
         }
     })
     .then((json) => {
-        state.value.user = json;
-        state.value.loggedIn = true;
+        onLoginSuccess(json);
     })
     .catch((error) => {
         inputs.username.focus();
@@ -77,6 +79,15 @@ function validateInput() {
         return input;
     }
 }
+
+function onLoginSuccess(responseJson) {
+    const user = new User(responseJson.user, responseJson.role, responseJson.token);
+    const expireDays = remember.value ? 365 : null;
+    DocumentFunctions.setCookie('user.name', user.name, expireDays);
+    DocumentFunctions.setCookie('user.authToken', user.authToken, expireDays);
+    DocumentFunctions.setCookie('user.role', user.role, expireDays);
+    state.value.user = user;
+}
 </script>
 
 <template>
@@ -94,6 +105,10 @@ function validateInput() {
                     <div class="sm:flex sm:items-center mt-6">
                         <label class="font-title font-bold text-right sm:basis-[130px] sm:pr-4" for="password">Password:</label>
                         <TextInput class="block w-full sm:basis-0 sm:grow mt-2 sm:mt-0" type="password" name="password" placeholder="Password..." :error="errors.password" v-model="password"></TextInput>
+                    </div>
+                    <div class="flex items-center mt-6">
+                        <label class="font-title font-light text-right grow pr-2" for="remember">Remember me?</label>
+                        <input type="checkbox" name="remember" v-model="remember" />
                     </div>
                     <div class="text-right mt-6">
                         <PushButton text="Log in" type="submit" @click="onLoginClick" />

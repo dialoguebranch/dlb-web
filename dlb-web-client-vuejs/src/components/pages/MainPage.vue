@@ -1,5 +1,6 @@
 <script setup>
 import { computed, inject } from 'vue';
+import { DocumentFunctions } from '../../dlb-lib/util/DocumentFunctions.js';
 import HeaderMenuItem from '../widgets/HeaderMenuItem.vue';
 
 const state = inject('state');
@@ -9,8 +10,10 @@ const versionInfo = computed(() => {
 });
 
 function onLogoutClick() {
+    DocumentFunctions.deleteCookie('user.name');
+    DocumentFunctions.deleteCookie('user.authToken');
+    DocumentFunctions.deleteCookie('user.role');
     state.value.user = null;
-    state.value.loggedIn = false;
 }
 </script>
 

@@ -58,24 +58,6 @@ export class ClientState {
         return this._logger;
     }
 
-    // ----- loggedIn
-
-    /**
-     * Sets whether or not a user is currently logged in to the client app.
-     * @param {boolean} loggedIn whether or not a user is currently logged in to the client app.
-     */
-    set loggedIn(loggedIn) {
-        this._loggedIn = loggedIn;
-    }
-
-    /**
-     * Returns whether or not a user is currently logged in to the client app.
-     * @returns whether or not a user is currently logged in to the client app.
-     */
-    get loggedIn() {
-        return this._loggedIn;
-    }
-
     // ----- user
 
     /**
