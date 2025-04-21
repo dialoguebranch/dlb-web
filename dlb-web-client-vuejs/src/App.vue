@@ -9,5 +9,5 @@ const state = inject('state');
 
 <template>
     <MainPage v-if="state.loggedIn" />
-    <LoginPage v-else @login="updateLoggedIn" />
+    <LoginPage v-else />
 </template>
