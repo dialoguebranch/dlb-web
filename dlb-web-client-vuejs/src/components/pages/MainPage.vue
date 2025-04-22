@@ -1,16 +1,63 @@
 <script setup>
-import { computed, inject, ref } from 'vue';
+import { computed, inject, ref, onMounted, onUnmounted } from 'vue';
 import { DocumentFunctions } from '../../dlb-lib/util/DocumentFunctions.js';
 import HeaderMenuItem from '../widgets/HeaderMenuItem.vue';
 
 const state = inject('state');
 
-const dialogueBrowserWidth = ref(200);
-const variableBrowserWidth = ref(200);
+const versionInfo = computed(() => {
+    return 'Not connected.';
+});
 
+function onLogoutClick() {
+    DocumentFunctions.deleteCookie('user.name');
+    DocumentFunctions.deleteCookie('user.authToken');
+    DocumentFunctions.deleteCookie('user.role');
+    state.value.user = null;
+}
+
+const minPanelWidth = 200;
+const leftPanelWidth = ref(200);
+const rightPanelWidth = ref(200);
+const dividerWidth = 8;
+var resizeListener;
 var dragResizeState;
 
-function initDragResize() {
+onMounted(() => {
+    initPanelWidths();
+    clearDragResizeState();
+    resizeListener = () => reduceSideWidthsToFit();
+    addEventListener('resize', resizeListener);
+});
+
+onUnmounted(() => {
+    removeEventListener('resize', resizeListener);
+});
+
+function initPanelWidths() {
+    let leftWidth = DocumentFunctions.getCookie('mainPageLeftPanelWidth');
+    if (leftWidth) {
+        leftPanelWidth.value = Math.max(minPanelWidth, parseInt(leftWidth));
+    }
+    let rightWidth = DocumentFunctions.getCookie('mainPageRightPanelWidth');
+    if (rightWidth) {
+        rightPanelWidth.value = Math.max(minPanelWidth, parseInt(rightWidth));
+    }
+    reduceSideWidthsToFit();
+    // always save the widths again so the cookies stay valid
+    saveLeftPanelWidth();
+    saveRightPanelWidth();
+}
+
+function saveLeftPanelWidth() {
+    DocumentFunctions.setCookie('mainPageLeftPanelWidth', leftPanelWidth.value.toString(), 365);
+}
+
+function saveRightPanelWidth() {
+    DocumentFunctions.setCookie('mainPageRightPanelWidth', rightPanelWidth.value.toString(), 365);
+}
+
+function clearDragResizeState() {
     dragResizeState = {
         left: {
             dragging: false,
@@ -25,32 +72,40 @@ function initDragResize() {
     };
 }
 
-initDragResize();
-
-const versionInfo = computed(() => {
-    return 'Not connected.';
-});
-
-function onLogoutClick() {
-    DocumentFunctions.deleteCookie('user.name');
-    DocumentFunctions.deleteCookie('user.authToken');
-    DocumentFunctions.deleteCookie('user.role');
-    state.value.user = null;
+function stopDragResize() {
+    if (!dragResizeState) {
+        return;
+    }
+    if (dragResizeState.left.dragging) {
+        saveLeftPanelWidth();
+    } else if (dragResizeState.right.dragging) {
+        saveRightPanelWidth();
+    }
+    clearDragResizeState();
 }
 
 function onMouseDownLeftDivider(event) {
+    if (!dragResizeState) {
+        return;
+    }
     dragResizeState.left.dragging = true;
     dragResizeState.left.startX = event.pageX;
-    dragResizeState.left.startWidth = dialogueBrowserWidth.value;
+    dragResizeState.left.startWidth = leftPanelWidth.value;
 }
 
-function onMouseDownRightDivider() {
+function onMouseDownRightDivider(event) {
+    if (!dragResizeState) {
+        return;
+    }
     dragResizeState.right.dragging = true;
     dragResizeState.right.startX = event.pageX;
-    dragResizeState.right.startWidth = variableBrowserWidth.value;
+    dragResizeState.right.startWidth = rightPanelWidth.value;
 }
 
 function onMouseMove(event) {
+    if (!dragResizeState) {
+        return;
+    }
     if (dragResizeState.left.dragging) {
         onDragLeftDivider(event);
     } else if (dragResizeState.right.dragging) {
@@ -59,13 +114,50 @@ function onMouseMove(event) {
 }
 
 function onDragLeftDivider(event) {
-    dialogueBrowserWidth.value = dragResizeState.left.startWidth +
-        event.x - dragResizeState.left.startX;
+    const mainContainer = document.getElementById('main-container');
+    const leftSpace = mainContainer.clientWidth - 2 * dividerWidth - minPanelWidth -
+        rightPanelWidth.value;
+    if (leftSpace < minPanelWidth)
+        return;
+    const prefWidth = dragResizeState.left.startWidth + event.x - dragResizeState.left.startX;
+    leftPanelWidth.value = Math.max(minPanelWidth, Math.min(leftSpace, prefWidth));
 }
 
 function onDragRightDivider(event) {
-    variableBrowserWidth.value = dragResizeState.right.startWidth +
-        dragResizeState.right.startX - event.x;
+    const mainContainer = document.getElementById('main-container');
+    const rightSpace = mainContainer.clientWidth - 2 * dividerWidth - minPanelWidth -
+        leftPanelWidth.value;
+    if (rightSpace < minPanelWidth)
+        return;
+    const prefWidth = dragResizeState.right.startWidth + dragResizeState.right.startX - event.x;
+    rightPanelWidth.value = Math.max(minPanelWidth, Math.min(rightSpace, prefWidth));
+}
+
+function reduceSideWidthsToFit() {
+    const mainContainer = document.getElementById('main-container');
+    const sideSpace = mainContainer.clientWidth - 2 * dividerWidth - minPanelWidth;
+    let leftWidth = leftPanelWidth.value;
+    let rightWidth = rightPanelWidth.value;
+    const reduce = leftWidth + rightWidth - sideSpace;
+    if (reduce > 0) {
+        // left and side panel now take more space than available:
+        // try to reduce their sizes proportionally
+        const prefReduceLeft = Math.round(reduce * leftWidth / (leftWidth + rightWidth));
+        const prefLeftWidth = leftWidth - prefReduceLeft;
+        // set leftWidth to prefLeftWidth, but keep enough space for the right panel, and never go
+        // under minPanelWidth
+        leftWidth = Math.max(minPanelWidth, Math.min(sideSpace - minPanelWidth, prefLeftWidth));
+        // set rightWidth to remaining space, and never go under minPanelWidth
+        rightWidth = Math.max(minPanelWidth, sideSpace - leftWidth);
+        if (leftWidth != leftPanelWidth.value) {
+            leftPanelWidth.value = leftWidth;
+            saveLeftPanelWidth();
+        }
+        if (rightWidth != rightPanelWidth.value) {
+            rightPanelWidth.value = rightWidth;
+            saveRightPanelWidth();
+        }
+    }
 }
 </script>
 
@@ -81,12 +173,12 @@ function onDragRightDivider(event) {
             </div>
         </header>
 
-        <main class="bg-background grow flex" @mousemove="onMouseMove" @mouseup="initDragResize" @mouseleave="initDragResize">
-            <div class="bg-white" :style="{width: dialogueBrowserWidth + 'px'}"></div>
-            <div class="w-2 cursor-col-resize" @mousedown="onMouseDownLeftDivider"></div>
-            <div class="grow bg-white"></div>
-            <div class="w-2 cursor-col-resize" @mousedown="onMouseDownRightDivider"></div>
-            <div class="bg-white" :style="{width: variableBrowserWidth + 'px'}"></div>
+        <main id="main-container" class="bg-background grow flex" @mousemove="onMouseMove" @mouseup="stopDragResize" @mouseleave="stopDragResize">
+            <div id="left-panel" class="bg-white hidden sm:block" :style="{width: leftPanelWidth + 'px'}"></div>
+            <div class="cursor-col-resize hidden sm:block" :style="{width: dividerWidth + 'px'}" @mousedown="onMouseDownLeftDivider"></div>
+            <div id="main-panel" class="grow bg-white"></div>
+            <div class="cursor-col-resize hidden sm:block" :style="{width: dividerWidth + 'px'}" @mousedown="onMouseDownRightDivider"></div>
+            <div id="right-panel" class="bg-white hidden sm:block" :style="{width: rightPanelWidth + 'px'}"></div>
         </main>
     </div>
 </template>
