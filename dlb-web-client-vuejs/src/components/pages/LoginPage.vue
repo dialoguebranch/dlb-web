@@ -96,9 +96,9 @@ function onLoginSuccess(responseJson) {
         <div class="mt-3 font-title font-bold">Web Client Test Application</div>
 
         <div class="w-full px-4 my-6">
-            <div class="sm:w-[448px] bg-box rounded-2xl px-6 py-8 mx-auto">
+            <div class="sm:w-[448px] bg-box rounded-2xl px-5 py-5 mx-auto">
                 <form @submit.prevent>
-                    <div class="sm:flex sm:items-center">
+                    <div class="sm:flex sm:items-center mt-2">
                         <label class="font-title font-bold text-right sm:basis-[130px] sm:pr-4" for="username">Username:</label>
                         <TextInput class="block w-full sm:basis-0 sm:grow mt-2 sm:mt-0" type="text" name="username" placeholder="Username..." :error="errors.username" v-model="username"></TextInput>
                     </div>
@@ -106,11 +106,11 @@ function onLoginSuccess(responseJson) {
                         <label class="font-title font-bold text-right sm:basis-[130px] sm:pr-4" for="password">Password:</label>
                         <TextInput class="block w-full sm:basis-0 sm:grow mt-2 sm:mt-0" type="password" name="password" placeholder="Password..." :error="errors.password" v-model="password"></TextInput>
                     </div>
-                    <div class="flex items-center mt-6">
+                    <div class="flex items-center mt-2">
                         <label class="font-title font-light text-right grow pr-2" for="remember">Remember me?</label>
                         <input type="checkbox" name="remember" v-model="remember" />
                     </div>
-                    <div class="text-right mt-6">
+                    <div class="text-right mt-4">
                         <PushButton text="Log in" type="submit" @click="onLoginClick" />
                     </div>
                     <div v-if="errorMessage" class="bg-white font-title font-bold text-sm text-red-500 rounded-3xl px-4 py-2 mt-4">{{ errorMessage }}</div>

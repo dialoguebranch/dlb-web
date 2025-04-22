@@ -12,7 +12,7 @@ const emit = defineEmits([
 </script>
 
 <template>
-    <button class="bg-orange-dark rounded-lg p-3 min-w-[140px] font-title text-sm text-white cursor-pointer"
+    <button class="bg-orange-dark rounded-lg px-6 py-2 min-w-[140px] font-title text-sm text-white cursor-pointer"
         :type="type"
         @click="emit('click')"
     >{{ text }}</button>
