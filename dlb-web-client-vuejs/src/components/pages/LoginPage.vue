@@ -1,12 +1,13 @@
 <script setup>
 import { inject, onMounted, ref } from 'vue';
+import { useClient } from '../../composables/client.js';
 import { DocumentFunctions } from '../../dlb-lib/util/DocumentFunctions.js';
 import { User } from '../../dlb-lib/model/User.js';
 import TextInput from '../widgets/TextInput.vue';
 import PushButton from '../widgets/PushButton.vue';
 
-const config = inject('config');
 const state = inject('state');
+const client = useClient();
 
 const username = ref('');
 const password = ref('');
@@ -27,24 +28,7 @@ function onLoginClick() {
     if (input === false) {
         return;
     }
-    fetch(config.baseUrl + '/auth/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            user: input.username,
-            password: input.password,
-            tokenExpiration: 0,
-        }),
-    })
-    .then((response) => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            return Promise.reject(response);
-        }
-    })
+    client.login(input.username, input.password, 0)
     .then((json) => {
         onLoginSuccess(json);
     })
