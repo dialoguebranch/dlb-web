@@ -27,35 +27,11 @@
  */
 
 export class DialogueBranchClient {
-    constructor(baseUrl) {
+    constructor(baseUrl, authToken) {
         this._baseUrl = baseUrl;
+        this._authToken = authToken;
     }
 
-    // -----------------------------------------------------------------------------
-    // ---------- 1. Authentication: End-points related to Authentication ----------
-    // -----------------------------------------------------------------------------
-
-    // --------------------------------------------
-    // ---------- End-Point: /auth/login ----------
-    // --------------------------------------------
-
-    /**
-     * Performs a call to the /auth/login end-point. A successfull call will result in a call to the
-     * this.loginSuccess() function, while an error will result in a call to this.loginError(). Both
-     * of these functions will perform basic actions (see their individual documentation) and then
-     * call the 'customLoginSuccess' and 'customLoginError' functions respectively that you may
-     * define yourself to perform additional actions. 
-     *
-     * Note that "success" does not necessarily mean that the authentication was successful.
-     * Providing an invalid username/password combination is deemed a "success", but will result in
-     * an error message being delivered to loginSuccess().
-     *
-     * @param {String} user The username of the Dialogue Branch Web Service user.
-     * @param {String} password The password corresponding to the user.
-     * @param {Number} tokenExpiration The time (in minutes) after which the authentication token
-     *                                 should expire. This can be set to '0' or 'never' if the token
-     *                                 should never expire.
-     */
     login(user, password, tokenExpiration) {
         const loginUrl = this._baseUrl + "/auth/login";
 
@@ -71,10 +47,31 @@ export class DialogueBranchClient {
             }),
         })
         .then((response) => {
-            if(response.ok) {
+            if (response.ok) {
                 return response.json();
+            } else {
+                return Promise.reject(response);
             }
-            return Promise.reject(response);
+        });
+    }
+
+    // TODO log out at 401 (token must have become invalid)
+    listDialogues() {
+        const url = this._baseUrl + "/admin/list-dialogues";
+
+        return fetch(url, {
+            method: "GET",
+            headers: {
+                'X-Auth-Token': this._authToken,
+                "Content-Type": "application/json",
+            }
+        })
+        .then((response) => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                return Promise.reject(response);
+            }
         });
     }
 }

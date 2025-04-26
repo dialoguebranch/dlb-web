@@ -1,6 +1,7 @@
 <script setup>
 import { computed, inject } from 'vue';
 import { DocumentFunctions } from '../../dlb-lib/util/DocumentFunctions.js';
+import DialogueBrowser from '../partials/DialogueBrowser.vue';
 import HeaderMenuItem from '../widgets/HeaderMenuItem.vue';
 import ResizablePanels from '../widgets/ResizablePanels.vue';
 
@@ -32,7 +33,7 @@ function onLogoutClick() {
 
         <ResizablePanels id="main-container" cookiePrefix="mainPage" class="grow">
             <template #left>
-                <div class="bg-white grow"></div>
+                <DialogueBrowser class="grow" />
             </template>
             <template #main>
                 <div class="bg-white grow"></div>

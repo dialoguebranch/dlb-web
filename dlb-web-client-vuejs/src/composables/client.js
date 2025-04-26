@@ -3,6 +3,7 @@ import { DialogueBranchClient } from '../dlb-lib/DialogueBranchClient.js';
 
 export function useClient() {
 	const config = inject('config');
-	const client = new DialogueBranchClient(config.baseUrl);
+	const state = inject('state');
+	const client = new DialogueBranchClient(config.baseUrl, state.value.user ? state.value.user.authToken : null);
 	return client;
 }
