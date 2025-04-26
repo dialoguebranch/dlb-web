@@ -1,21 +1,18 @@
 <script setup>
-import { computed, inject } from 'vue';
-import { DocumentFunctions } from '../../dlb-lib/util/DocumentFunctions.js';
+import { computed } from 'vue';
+import { useStateManagement } from '../../composables/state-management.js';
 import DialogueBrowser from '../partials/DialogueBrowser.vue';
 import HeaderMenuItem from '../widgets/HeaderMenuItem.vue';
 import ResizablePanels from '../widgets/ResizablePanels.vue';
-
-const state = inject('state');
 
 const versionInfo = computed(() => {
     return 'Not connected.';
 });
 
+const stateManagement = useStateManagement();
+
 function onLogoutClick() {
-    DocumentFunctions.deleteCookie('user.name');
-    DocumentFunctions.deleteCookie('user.authToken');
-    DocumentFunctions.deleteCookie('user.role');
-    state.value.user = null;
+    stateManagement.logout();
 }
 </script>
 

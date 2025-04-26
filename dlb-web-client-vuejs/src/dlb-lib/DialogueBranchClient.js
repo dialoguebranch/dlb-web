@@ -32,6 +32,10 @@ export class DialogueBranchClient {
         this._authToken = authToken;
     }
 
+    onUnauthorized(onUnauthorized) {
+        this._onUnauthorized = onUnauthorized;
+    }
+
     login(user, password, tokenExpiration) {
         const loginUrl = this._baseUrl + "/auth/login";
 
@@ -55,7 +59,6 @@ export class DialogueBranchClient {
         });
     }
 
-    // TODO log out at 401 (token must have become invalid)
     listDialogues() {
         const url = this._baseUrl + "/admin/list-dialogues";
 
@@ -67,11 +70,20 @@ export class DialogueBranchClient {
             }
         })
         .then((response) => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                return Promise.reject(response);
-            }
+            return this._handleResponse(response);
         });
+    }
+
+    _handleResponse(response) {
+        if (response.ok) {
+            return response.json();
+        } else if (response.status == 401) {
+            if (this._onUnauthorized) {
+                this._onUnauthorized(response);
+            }
+            return Promise.reject(response);
+        } else {
+            return Promise.reject(response);
+        }
     }
 }
