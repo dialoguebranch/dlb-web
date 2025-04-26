@@ -1,8 +1,9 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, useTemplateRef } from 'vue';
 import { useStateManagement } from '../../composables/state-management.js';
 import DialogueBrowser from '../partials/DialogueBrowser.vue';
 import HeaderMenuItem from '../widgets/HeaderMenuItem.vue';
+import InteractionTester from '../partials/InteractionTester.vue';
 import ResizablePanels from '../widgets/ResizablePanels.vue';
 
 const versionInfo = computed(() => {
@@ -11,8 +12,14 @@ const versionInfo = computed(() => {
 
 const stateManagement = useStateManagement();
 
+const interactionTester = useTemplateRef('interaction-tester');
+
 function onLogoutClick() {
     stateManagement.logout();
+}
+
+function onSelectDialogue(dialogueName) {
+    interactionTester.value.loadDialogue(dialogueName);
 }
 </script>
 
@@ -30,10 +37,10 @@ function onLogoutClick() {
 
         <ResizablePanels id="main-container" cookiePrefix="mainPage" class="grow">
             <template #left>
-                <DialogueBrowser class="grow" />
+                <DialogueBrowser class="grow" @selectDialogue="onSelectDialogue" />
             </template>
             <template #main>
-                <div class="bg-white grow"></div>
+                <InteractionTester ref="interaction-tester" class="grow" />
             </template>
             <template #right>
                 <div class="bg-white grow"></div>
