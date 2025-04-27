@@ -154,16 +154,16 @@ function reduceSideWidthsToFit() {
 
 <template>
     <div :id="id" class="bg-background flex" @mousemove.prevent="onMouseMove" @mouseup.prevent="stopDragResize" @mouseleave.prevent="stopDragResize">
-        <div class="hidden sm:flex flex-col" :style="{width: leftPanelWidth + 'px'}">
-            <slot name="left"></slot>
+        <div class="hidden overflow-x-hidden sm:flex flex-col" :style="{width: leftPanelWidth + 'px'}">
+            <slot name="left" />
         </div>
         <div class="cursor-col-resize hidden sm:block" :style="{width: dividerWidth + 'px'}" @mousedown.prevent="onMouseDownLeftDivider"></div>
-        <div class="grow flex flex-col">
-            <slot name="main"></slot>
+        <div class="basis-0 grow overflow-x-hidden flex flex-col">
+            <slot name="main" />
         </div>
         <div class="cursor-col-resize hidden sm:block" :style="{width: dividerWidth + 'px'}" @mousedown.prevent="onMouseDownRightDivider"></div>
-        <div class="hidden sm:flex flex-col" :style="{width: rightPanelWidth + 'px'}">
-            <slot name="right"></slot>
+        <div class="hidden overflow-x-hidden sm:flex flex-col" :style="{width: rightPanelWidth + 'px'}">
+            <slot name="right" />
         </div>
     </div>
 </template>

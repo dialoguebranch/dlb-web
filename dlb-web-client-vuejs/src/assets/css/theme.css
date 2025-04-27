@@ -32,6 +32,9 @@
 
 	--color-speech-bubble: rgb(135, 124, 24);
 
-    --color-icon-button: #04AA6D;
+    --color-icon-button: #04aa6d;
+    --color-icon-button-hover: #0bbb7a;
     --color-icon-button-warning: #790606;
+    --color-icon-button-warning-hover: #9e1515;
+    --color-icon-button-disabled: #787878;
 }

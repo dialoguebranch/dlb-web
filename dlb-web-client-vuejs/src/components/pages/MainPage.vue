@@ -5,6 +5,7 @@ import DialogueBrowser from '../partials/DialogueBrowser.vue';
 import HeaderMenuItem from '../widgets/HeaderMenuItem.vue';
 import InteractionTester from '../partials/InteractionTester.vue';
 import ResizablePanels from '../widgets/ResizablePanels.vue';
+import VariableBrowser from '../partials/VariableBrowser.vue';
 
 const versionInfo = computed(() => {
     return 'Not connected.';
@@ -43,7 +44,7 @@ function onSelectDialogue(dialogueName) {
                 <InteractionTester ref="interaction-tester" class="grow" />
             </template>
             <template #right>
-                <div class="bg-white grow"></div>
+                <VariableBrowser class="grow" />
             </template>
         </ResizablePanels>
     </div>
