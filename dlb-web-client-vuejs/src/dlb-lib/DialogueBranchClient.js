@@ -26,10 +26,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import { AutoForwardReply } from "./model/AutoForwardReply";
+import { BasicReply } from "./model/BasicReply";
+import { DialogueStep } from "./model/DialogueStep";
+import { Segment } from "./model/Segment";
+import { Statement } from "./model/Statement";
+
 export class DialogueBranchClient {
     constructor(baseUrl, authToken) {
         this._baseUrl = baseUrl;
         this._authToken = authToken;
+        this._timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     }
 
     onUnauthorized(onUnauthorized) {
@@ -69,9 +76,97 @@ export class DialogueBranchClient {
                 "Content-Type": "application/json",
             }
         })
-        .then((response) => {
-            return this._handleResponse(response);
-        });
+        .then((response) => this._handleResponse(response));
+    }
+
+    startDialogue(dialogueName, language) {
+        var url = this._baseUrl + "/dialogue/start";
+
+        url += "?dialogueName="+dialogueName;
+        url += "&language="+language;
+        url += "&timeZone="+this._timeZone;
+
+        return fetch(url, {
+            method: "POST",
+            headers: {
+                'X-Auth-Token': this._authToken,
+                "Content-Type": "application/json",
+            }
+        })
+        .then((response) => this._handleResponse(response))
+        .then((json) => this.createDialogueStepObject(json));
+    }
+
+    progressDialogue(loggedDialogueId, loggedInteractionIndex, replyId) {
+        var url = this._baseUrl + "/dialogue/progress";
+
+        url += "?loggedDialogueId="+loggedDialogueId;
+        url += "&loggedInteractionIndex="+loggedInteractionIndex;
+        url += "&replyId="+replyId;
+
+        return fetch(url, {
+            method: "POST",
+            headers: {
+                'X-Auth-Token': this._authToken,
+                "Content-Type": "application/json",
+            }
+        })
+        .then((response) => this._handleResponse(response))
+        .then((json) => json.value ? this.createDialogueStepObject(json.value) : null);
+    }
+
+    // ----------------------------------------------------------
+    // ---------- Helper functions related to Dialogue ----------
+    // ----------------------------------------------------------
+
+    createDialogueStepObject(data) {
+        // Instantiate an empty DialogueStep
+        var dialogueStep = DialogueStep.emptyInstance();
+
+        // Add the simple parameters
+        dialogueStep.dialogueName = data.dialogue;
+        dialogueStep.node = data.node;
+        dialogueStep.speaker = data.speaker;
+        dialogueStep.loggedDialogueId = data.loggedDialogueId;
+        dialogueStep.loggedInteractionIndex = data.loggedInteractionIndex;
+
+        // Add the statement (consisting of a list of segments)
+        var statement = Statement.emptyInstance();
+        data.statement.segments.forEach(
+            (element) => {
+                var segment = new Segment(element.segmentType,element.text);
+                statement.addSegment(segment);
+            }
+        );
+        dialogueStep.statement = statement;
+
+        // Add the replies
+        data.replies.forEach(
+            (element) => {
+                var reply = null;
+                if(element.statement == null) {
+                    reply = AutoForwardReply.emptyInstance();
+                } else {
+                    reply = BasicReply.emptyInstance();
+                }
+                reply.replyId = element.replyId;
+                reply.endsDialogue = element.endsDialogue;
+                
+                if(reply instanceof BasicReply) {
+                    statement = Statement.emptyInstance();
+                    element.statement.segments.forEach(
+                        (segmentElement) => {
+                            var segment = new Segment(segmentElement.segmentType,segmentElement.text);
+                            statement.addSegment(segment);
+                        }
+                    );
+                    reply.statement = statement;
+                }
+                reply.actions = element.actions; // TODO: Unfold 'actions' into Action-objects
+                dialogueStep.addReply(reply);
+            }
+        );
+        return dialogueStep;
     }
 
     _handleResponse(response) {

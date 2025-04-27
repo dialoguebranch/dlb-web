@@ -6,7 +6,7 @@ export function useClient() {
     const config = inject('config');
     const state = inject('state');
     const stateManagement = useStateManagement();
-    const client = new DialogueBranchClient(config.baseUrl, state.value.user ? state.value.user.authToken : null);
+    const client = new DialogueBranchClient(config.baseUrl, state.value.user?.authToken ?? null);
     client.onUnauthorized((response) => {
         // the token must have become invalid
         stateManagement.logout();
