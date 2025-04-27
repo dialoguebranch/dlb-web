@@ -1,5 +1,5 @@
 <script setup>
-import { computed, useTemplateRef } from 'vue';
+import { computed, onMounted, useTemplateRef } from 'vue';
 import { useStateManagement } from '../../composables/state-management.js';
 import DialogueBrowser from '../partials/DialogueBrowser.vue';
 import HeaderMenuItem from '../widgets/HeaderMenuItem.vue';
@@ -13,13 +13,19 @@ const versionInfo = computed(() => {
 
 const stateManagement = useStateManagement();
 
+const panels = useTemplateRef('panels');
 const interactionTester = useTemplateRef('interaction-tester');
+
+onMounted(() => {
+    panels.value.selectMobileTab(0);
+});
 
 function onLogoutClick() {
     stateManagement.logout();
 }
 
 function onSelectDialogue(dialogueName) {
+    panels.value.selectMobileTab(1);
     interactionTester.value.loadDialogue(dialogueName);
 }
 </script>
@@ -36,7 +42,12 @@ function onSelectDialogue(dialogueName) {
             </div>
         </header>
 
-        <ResizablePanels id="main-container" cookiePrefix="mainPage" class="grow">
+        <ResizablePanels
+            ref="panels"
+            class="grow"
+            cookiePrefix="mainPage"
+            :mobileTabNames="['Dialogues', 'Interactions', 'Variables']"
+        >
             <template #left>
                 <DialogueBrowser class="grow" @selectDialogue="onSelectDialogue" />
             </template>

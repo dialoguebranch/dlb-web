@@ -29,12 +29,12 @@ listDialogues();
 
 <template>
     <div class="flex flex-col gap-1">
-        <MainPagePanelHeader title="Dialogue Browser" class="ml-2">
+        <MainPagePanelHeader title="Dialogue Browser" class="sm:ml-2">
             <template #buttons>
                 <IconButton icon="fa-solid fa-arrows-rotate" @click="listDialogues" />
             </template>
         </MainPagePanelHeader>
-        <MainPagePanelContainer class="ml-1 p-1 gap-1 flex flex-col">
+        <MainPagePanelContainer class="p-1 gap-1 flex flex-col sm:ml-1">
             <div
                 v-for="dialogue in dialogues"
                 class="cursor-pointer bg-grey-lighter text-orange-darker hover:text-orange-dark font-title font-black text-xs p-1"

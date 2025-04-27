@@ -1,15 +1,28 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, useTemplateRef } from 'vue';
 import { DocumentFunctions } from '../../dlb-lib/util/DocumentFunctions.js';
 
-const props = defineProps([
-    'id',
-    'cookiePrefix',
-]);
+const props = defineProps({
+    'cookiePrefix': String,
+    'mobileTabNames': Array,
+});
+
+const selectedMobileTab = ref(1);
+
+const selectMobileTab = (index) => {
+    selectedMobileTab.value = index;
+};
+
+defineExpose({
+    selectMobileTab,
+});
 
 const minPanelWidth = 200;
 const leftPanelWidth = ref(200);
 const rightPanelWidth = ref(200);
+
+const root = useTemplateRef('root');
+
 const dividerWidth = 8;
 var resizeListener;
 var dragResizeState;
@@ -105,8 +118,7 @@ function onMouseMove(event) {
 }
 
 function onDragLeftDivider(event) {
-    const root = document.getElementById(props.id);
-    const leftSpace = root.clientWidth - 2 * dividerWidth - minPanelWidth -
+    const leftSpace = root.value.clientWidth - 2 * dividerWidth - minPanelWidth -
         rightPanelWidth.value;
     if (leftSpace < minPanelWidth)
         return;
@@ -115,8 +127,7 @@ function onDragLeftDivider(event) {
 }
 
 function onDragRightDivider(event) {
-    const root = document.getElementById(props.id);
-    const rightSpace = root.clientWidth - 2 * dividerWidth - minPanelWidth -
+    const rightSpace = root.value.clientWidth - 2 * dividerWidth - minPanelWidth -
         leftPanelWidth.value;
     if (rightSpace < minPanelWidth)
         return;
@@ -125,8 +136,7 @@ function onDragRightDivider(event) {
 }
 
 function reduceSideWidthsToFit() {
-    const root = document.getElementById(props.id);
-    const sideSpace = root.clientWidth - 2 * dividerWidth - minPanelWidth;
+    const sideSpace = root.value.clientWidth - 2 * dividerWidth - minPanelWidth;
     let leftWidth = leftPanelWidth.value;
     let rightWidth = rightPanelWidth.value;
     const reduce = leftWidth + rightWidth - sideSpace;
@@ -150,20 +160,53 @@ function reduceSideWidthsToFit() {
         }
     }
 }
+
+function getMobilePanelClasses(index) {
+    return {
+        'hidden': selectedMobileTab.value !== index,
+        'flex': selectedMobileTab.value === index,
+    }
+}
 </script>
 
 <template>
-    <div :id="id" class="bg-background flex" @mousemove.prevent="onMouseMove" @mouseup.prevent="stopDragResize" @mouseleave.prevent="stopDragResize">
-        <div class="hidden overflow-x-hidden sm:flex flex-col" :style="{width: leftPanelWidth + 'px'}">
-            <slot name="left" />
+    <div class="flex flex-col">
+        <div class="grid grid-cols-3 bg-background space-x-px sm:hidden">
+            <button
+                v-for="(tab, index) in mobileTabNames"
+                class="font-title font-medium text-sm px-4 py-2 text-center cursor-pointer"
+                :class="{
+                    'bg-white': selectedMobileTab != index,
+                    'hover:bg-menu-item-highlight': selectedMobileTab != index,
+                }"
+                @click="selectMobileTab(index)"
+            >
+                {{ tab }}
+            </button>
         </div>
-        <div class="cursor-col-resize hidden sm:block" :style="{width: dividerWidth + 'px'}" @mousedown.prevent="onMouseDownLeftDivider"></div>
-        <div class="basis-0 grow overflow-x-hidden flex flex-col">
-            <slot name="main" />
-        </div>
-        <div class="cursor-col-resize hidden sm:block" :style="{width: dividerWidth + 'px'}" @mousedown.prevent="onMouseDownRightDivider"></div>
-        <div class="hidden overflow-x-hidden sm:flex flex-col" :style="{width: rightPanelWidth + 'px'}">
-            <slot name="right" />
+        <div ref="root" class="grow bg-background flex" @mousemove.prevent="onMouseMove" @mouseup.prevent="stopDragResize" @mouseleave.prevent="stopDragResize">
+            <div
+                :class="getMobilePanelClasses(0)"
+                class="sm:flex basis-0 grow sm:basis-auto sm:flex-none overflow-x-hidden flex-col"
+                :style="{width: leftPanelWidth + 'px'}"
+            >
+                <slot name="left" />
+            </div>
+            <div class="cursor-col-resize hidden sm:block" :style="{width: dividerWidth + 'px'}" @mousedown.prevent="onMouseDownLeftDivider"></div>
+            <div
+                :class="getMobilePanelClasses(1)"
+                class="sm:flex basis-0 grow overflow-x-hidden flex-col"
+            >
+                <slot name="main" />
+            </div>
+            <div class="cursor-col-resize hidden sm:block" :style="{width: dividerWidth + 'px'}" @mousedown.prevent="onMouseDownRightDivider"></div>
+            <div
+                :class="getMobilePanelClasses(2)"
+                class="sm:flex basis-0 grow sm:basis-auto sm:flex-none overflow-x-hidden flex-col"
+                :style="{width: rightPanelWidth + 'px'}"
+            >
+                <slot name="right" />
+            </div>
         </div>
     </div>
 </template>

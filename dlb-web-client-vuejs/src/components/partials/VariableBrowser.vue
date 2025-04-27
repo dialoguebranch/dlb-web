@@ -6,12 +6,12 @@ import MainPagePanelContainer from '../widgets/MainPagePanelContainer.vue';
 
 <template>
     <div class="flex flex-col gap-1">
-        <MainPagePanelHeader title="Variable Browser" class="mx-1">
+        <MainPagePanelHeader title="Variable Browser" class="sm:mr-1">
             <template #buttons>
                 <IconButton icon="fa-solid fa-arrows-rotate" />
             </template>
         </MainPagePanelHeader>
-        <MainPagePanelContainer class="mr-1">
+        <MainPagePanelContainer class="sm:mr-1">
         </MainPagePanelContainer>
     </div>
 </template>
