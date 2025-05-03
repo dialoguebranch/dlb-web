@@ -8,7 +8,7 @@ FROM tomcat:11.0
 # Edit the server.xml, changing the port from 8080 to 8089
 RUN sed -i 's/port="8080"/port="8089"/' ${CATALINA_HOME}/conf/server.xml
 
-# Make port 8080 available to the world outside this container
+# Make port 8089 available to the world outside this container
 EXPOSE 8089
 
 ### Prepare the source files and data folders
