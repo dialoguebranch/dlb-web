@@ -3,22 +3,32 @@
 name: dlb-web-service-keycloak
 
 services:
+
+  ###############################
+  # Dialogue Branch Web Service #
+  ###############################
+
   dlb-web-service:
     container_name: dlb-web-service
     image: dlb-web-service:1.2.4
     ports:
       - 127.0.0.1:8089:8089
+
+  ##############################
+  # Dialogue Branch Web Client #
+  ##############################
+
   dlb-web-client:
     container_name: dlb-web-client
     image: httpd:2.4
     ports:
       - 127.0.0.1:8080:80
     volumes:
-      - ./dlb-web-client:/usr/local/apache2/htdocs
+      - ../dlb-web-client:/usr/local/apache2/htdocs
 
-########################################
-# Keycloak Identity Management Service #
-########################################
+  ########################################
+  # Keycloak Identity Management Service #
+  ########################################
 
   # Compose configuration based on https://medium.com/@fingervinicius/easy-running-keycloak-with-docker-compose-b0d7a4ee2358
   keycloak:
@@ -33,10 +43,10 @@ services:
       KC_HOSTNAME: localhost
 
       # Keycloak container internal port. Default is 7080.
-      KC_HOSTNAME_PORT: 8443
+      #KC_HOSTNAME_PORT: 7080
 
       # Enables or disables backchannel communication between servers.
-      KC_HOSTNAME_STRICT_BACKCHANNEL: "true"
+      #KC_HOSTNAME_STRICT_BACKCHANNEL: "true"
 
       # Keycloak admin user username.
       KEYCLOAK_ADMIN: admin
@@ -51,15 +61,19 @@ services:
       # Set the log level for Keycloak.
       KC_LOG_LEVEL: info
 
-      KC_HTTP_PORT: 7080
-      KC_HTTPS_PORT: 8443
+      KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/dialoguebranch/certs/localhostcert.pem
+
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/dialoguebranch/certs/localhostkey.pem
+
+    volumes:
+      - ./certs:/opt/keycloak/dialoguebranch/certs 
 
     # If KC_HEALTH_ENABLED is 'true', defines the following parameters for performing the health check
     # Basically an http request will be sent to http://localhost:7080/health/ready every 15 seconds to 
     # check if everything is ok. If it gives a timeout of 2 seconds, it will try 15 times, and if it 
     # still doesn’t give a health signal, Docker will mark the container as “unhealty” and take the necessary action.
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8443/health/ready"]
+      test: ["CMD", "curl", "-f", "https://localhost:8443/health/ready"]
       interval: 15s
       timeout: 2s
       retries: 15
