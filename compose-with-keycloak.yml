@@ -1,11 +1,15 @@
-# Run using docker compose -f compose-with-keycloak.yml up
+# Run using: "docker compose -f compose-with-keycloak.yml up" from the {GIT}/dialoguebranch/dlb-web folder
+
+name: dlb-web-service-keycloak
 
 services:
   dlb-web-service:
+    container_name: dlb-web-service
     image: dlb-web-service:1.2.4
     ports:
       - 127.0.0.1:8089:8089
   dlb-web-client:
+    container_name: dlb-web-client
     image: httpd:2.4
     ports:
       - 127.0.0.1:8080:80
@@ -18,16 +22,18 @@ services:
 
   # Compose configuration based on https://medium.com/@fingervinicius/easy-running-keycloak-with-docker-compose-b0d7a4ee2358
   keycloak:
+    container_name: keycloak
     image: quay.io/keycloak/keycloak:26.2.2
     ports:
-     - 127.0.0.1:7080:7080
+      - "7080:7080"
+      - "8443:8443"
     environment:
 
       # Hostname used by Keycloak. Running locally must be "localhost".
       KC_HOSTNAME: localhost
 
       # Keycloak container internal port. Default is 7080.
-      KC_HOSTNAME_PORT: 7080
+      KC_HOSTNAME_PORT: 8443
 
       # Enables or disables backchannel communication between servers.
       KC_HOSTNAME_STRICT_BACKCHANNEL: "true"
@@ -45,17 +51,20 @@ services:
       # Set the log level for Keycloak.
       KC_LOG_LEVEL: info
 
+      KC_HTTP_PORT: 7080
+      KC_HTTPS_PORT: 8443
+
     # If KC_HEALTH_ENABLED is 'true', defines the following parameters for performing the health check
     # Basically an http request will be sent to http://localhost:7080/health/ready every 15 seconds to 
     # check if everything is ok. If it gives a timeout of 2 seconds, it will try 15 times, and if it 
     # still doesn’t give a health signal, Docker will mark the container as “unhealty” and take the necessary action.
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7080/health/ready"]
+      test: ["CMD", "curl", "-f", "http://localhost:8443/health/ready"]
       interval: 15s
       timeout: 2s
       retries: 15
 
-    command: ["start-dev", "--http-port", "7080", "--https-port", "7443"]
+    command: ["start-dev", "--http-port", "7080", "--https-port", "8443"]
 
 networks:
   local_network:

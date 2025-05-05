@@ -28,6 +28,7 @@
 package com.dialoguebranch.web.service.controller;
 
 import com.dialoguebranch.web.service.*;
+import com.dialoguebranch.web.service.controller.schema.AccessTokenResponse;
 import com.dialoguebranch.web.service.controller.schema.LoginParametersPayload;
 import com.dialoguebranch.web.service.controller.schema.LoginResultPayload;
 import com.dialoguebranch.web.service.exception.*;
@@ -41,6 +42,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -51,7 +53,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -268,51 +269,36 @@ public class AuthController {
 	private LoginResultPayload doLoginKeycloak(LoginParametersPayload loginParametersPayload) {
 
 		RestTemplate restTemplate = new RestTemplate();
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.setContentType(MediaType.valueOf("application/json"));
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
 		String keycloakLoginUrl = config.getKeycloakBaseUrl();
 		if(!keycloakLoginUrl.endsWith("/")) keycloakLoginUrl += "/";
 		keycloakLoginUrl += "realms/"
 		+ config.getKeycloakRealm()
 		+ "/protocol/openid-connect/token";
-		//+ "?client_id="
-		//+ config.getKeycloakClientId()
-		//+ "&client_secret="
-		//+ config.getKeycloakClientSecret()
-		//+ "&username="
-		//+ loginParametersPayload.getUser()
-		//+ "&password="
-		//+ loginParametersPayload.getPassword()
-		//+ "&grant_type=password";
 
         logger.info("Redirecting login attempt to: {}", keycloakLoginUrl);
 
-		LinkedMultiValueMap<String, String> allRequestParams =
-				new LinkedMultiValueMap<>();
-		allRequestParams.put("client_id", Arrays.asList(config.getKeycloakClientId()));
-		allRequestParams.put("client_secret", Arrays.asList(config.getKeycloakClientSecret()));
-		allRequestParams.put("username", Arrays.asList(loginParametersPayload.getUser()));
-		allRequestParams.put("password", Arrays.asList(loginParametersPayload.getPassword()));
-		allRequestParams.put("grant_type", Arrays.asList("password"));
+		MultiValueMap<String, String> requestParameters = new LinkedMultiValueMap<>();
+		requestParameters.add("client_id",config.getKeycloakClientId());
+		requestParameters.add("client_secret",config.getKeycloakClientSecret());
+		requestParameters.add("username",loginParametersPayload.getUser());
+		requestParameters.add("password",loginParametersPayload.getPassword());
+		requestParameters.add("grant_type","password");
 
-		HttpEntity<?> entity = new HttpEntity<>(requestHeaders);
-		UriComponentsBuilder builder =
-				UriComponentsBuilder.fromUriString(keycloakLoginUrl)
-						.queryParams(
-								(LinkedMultiValueMap<String, String>) allRequestParams);
-		UriComponents uriComponents = builder.build().encode();
-
-		//HttpEntity<?> entity = new HttpEntity<>(requestHeaders);
-		//UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(keycloakLoginUrl);
-		//UriComponents uriComponents = builder.build().encode();
-
-		// Todo: check if we need to do something with the 200 OK response
-		ResponseEntity<Object> response = restTemplate.exchange(
-				uriComponents.toUri(),
+		HttpEntity<MultiValueMap<String,String>> entity = new HttpEntity<>(requestParameters, headers);
+		ResponseEntity<AccessTokenResponse> response = restTemplate.exchange(
+				keycloakLoginUrl,
 				HttpMethod.POST,
 				entity,
-				Object.class);
+				AccessTokenResponse.class);
+
+		if(response.getStatusCode() == HttpStatus.OK) {
+			logger.info("Call to Keycloak token end-point successful.");
+		} else {
+			logger.warn("Call to Keycloak token end-point failed.");
+		}
 
         logger.info("KeyCloak Response: {}", response);
 
