@@ -48,7 +48,7 @@ onMounted(() => {
                     'mr-20': breakpoint === 'md',
                 }"
             >
-                <div class="bg-speech-bubble text-white rounded-2xl p-5">{{ currentStep.statement.fullStatement() }}</div>
+                <div class="bg-speech-bubble text-white text-lg rounded-2xl p-5">{{ currentStep.statement.fullStatement() }}</div>
                 <div class="border-20 border-transparent border-t-speech-bubble self-end mr-[10%]"></div>
             </div>
             <div class="flex" :class="{
