@@ -84,7 +84,7 @@ onMounted(() => {
                         </button>
                         <button
                             v-if="reply instanceof AutoForwardReply"
-                            class="block rounded-xl bg-orange-dark hover:bg-orange-medium text-white text-left uppercase p-3 cursor-pointer"
+                            class="block rounded-xl bg-orange-dark hover:bg-orange-medium text-white uppercase p-3 min-w-[160px] cursor-pointer"
                             @click="$emit('selectReply', currentStep, reply)"
                         >
                             Continue
