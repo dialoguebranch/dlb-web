@@ -1,5 +1,6 @@
 <script setup>
-import { computed, onMounted, ref, useTemplateRef } from 'vue';
+import { computed, useTemplateRef } from 'vue';
+import { useResizablePanel } from '@/composables/resizablepanel.js';
 import { BasicReply } from '@/dlb-lib/model/BasicReply';
 import { AutoForwardReply } from '@/dlb-lib/model/AutoForwardReply';
 
@@ -11,29 +12,17 @@ defineEmits([
     'selectReply',
 ]);
 
-const breakpoint = ref('sm');
+const root = useTemplateRef('root');
 
-const resize = (newWidth) => {
-    if (newWidth < 700) {
-        breakpoint.value = 'sm';
-    } else {
-        breakpoint.value = 'md';
-    }
-};
+const { resize, resizableClasses } = useResizablePanel(root);
 
 defineExpose({
     resize,
 });
 
-const root = useTemplateRef('root');
-
 const currentStep = computed(() => {
     return props.dialogueSteps.length == 0 ? null :
         props.dialogueSteps[props.dialogueSteps.length - 1];
-});
-
-onMounted(() => {
-    resize(root.value.clientWidth);
 });
 </script>
 
@@ -42,37 +31,32 @@ onMounted(() => {
         <div v-if="currentStep" ref="root" class="flex flex-col font-title">
             <div
                 class="mt-10 flex flex-col"
-                :class="{
-                    'mx-4': breakpoint !== 'md',
-                    'ml-10': breakpoint === 'md',
-                    'mr-20': breakpoint === 'md',
-                }"
+                :class="resizableClasses({
+                    default: 'mx-4',
+                    sm: 'ml-10 mr-20',
+                })"
             >
                 <div class="bg-speech-bubble text-white text-lg rounded-2xl p-5">{{ currentStep.statement.fullStatement() }}</div>
                 <div class="border-20 border-transparent border-t-speech-bubble self-end mr-[10%]"></div>
             </div>
-            <div class="flex" :class="{
-                'flex-col': breakpoint !== 'md',
-                'flex-row-reverse': breakpoint === 'md',
-                'items-start': breakpoint === 'md',
-            }">
+            <div class="flex mb-10"
+                :class="resizableClasses({
+                    default: 'flex-col',
+                    sm: 'flex-row-reverse items-start',
+                })"
+            >
                 <img class="w-[300px]" src="@/assets/img/avatar-martin.png"
-                    :class="{
-                        'self-end': breakpoint !== 'md',
-                    }"
+                    :class="resizableClasses({
+                        default: 'self-end',
+                        sm: 'self-start',
+                    })"
                 >
                 <div
                     class="flex flex-col gap-2"
-                    :class="{
-                        'mx-4': breakpoint !== 'md',
-                        'mt-4': breakpoint !== 'md',
-                        'basis-0': breakpoint === 'md',
-                        'grow': breakpoint === 'md',
-                        'overflow-x-hidden': breakpoint === 'md',
-                        'ml-12': breakpoint === 'md',
-                        'mr-2': breakpoint === 'md',
-                        'items-start': breakpoint === 'md',
-                    }"
+                    :class="resizableClasses({
+                        default: 'mx-4 mt-4',
+                        sm: 'basis-0 grow overflow-x-hidden ml-12 mr-2 mt-0 items-start',
+                    })"
                 >
                     <template v-for="(reply, index) in currentStep.replies">
                         <button
