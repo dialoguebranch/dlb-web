@@ -1,15 +1,32 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, useTemplateRef } from 'vue';
 import { useClient } from '@/composables/client.js';
 import IconButton from '../widgets/IconButton.vue';
-import InteractionDialogueComponent from './InteractionDialogueComponent.vue';
+import BalloonDialogueComponent from './BalloonDialogueComponent.vue';
+import TextDialogueComponent from './TextDialogueComponent.vue';
 import MainPagePanelHeader from '../widgets/MainPagePanelHeader.vue';
 import MainPagePanelContainer from '../widgets/MainPagePanelContainer.vue';
+import ModeSelector from '../widgets/ModeSelector.vue';
 
 const dialogueName = ref(null);
 const dialogueSteps = ref([]);
 
+const modes = [
+    {
+        name: 'balloon',
+        icon: 'fa-regular fa-comments',
+    },
+    {
+        name: 'text',
+        icon: 'fa-solid fa-paragraph',
+    },
+];
+
+const selectedMode = ref('balloon');
+
 const client = useClient();
+
+const balloons = useTemplateRef('balloons');
 
 const loadDialogue = (name) => {
     dialogueName.value = name;
@@ -19,8 +36,15 @@ const loadDialogue = (name) => {
     });
 };
 
+const resize = (newWidth) => {
+    if (balloons.value) {
+        balloons.value.resize(newWidth);
+    }
+};
+
 defineExpose({
     loadDialogue,
+    resize,
 });
 
 function onSelectReply(dialogueStep, reply) {
@@ -41,11 +65,13 @@ function onSelectReply(dialogueStep, reply) {
             :subtitle="dialogueName ? dialogueName + '.dlb' : null"
         >
             <template #buttons>
+                <ModeSelector :modes="modes" v-model="selectedMode" />
                 <IconButton icon="fa-solid fa-circle-xmark" color="warning" :disabled="dialogueName === null" />
             </template>
         </MainPagePanelHeader>
         <MainPagePanelContainer>
-            <InteractionDialogueComponent :dialogueSteps="dialogueSteps" @selectReply="onSelectReply" />
+            <BalloonDialogueComponent v-if="selectedMode == 'balloon'" ref="balloons" :dialogueSteps="dialogueSteps" @selectReply="onSelectReply" />
+            <TextDialogueComponent v-if="selectedMode == 'text'" :dialogueSteps="dialogueSteps" @selectReply="onSelectReply" />
         </MainPagePanelContainer>
     </div>
 </template>

@@ -7,19 +7,25 @@ const props = defineProps({
     'mobileTabNames': Array,
 });
 
+const emit = defineEmits(['resize']);
+
 const selectedMobileTab = ref(1);
 
 const selectMobileTab = (index) => {
     selectedMobileTab.value = index;
 };
 
-defineExpose({
-    selectMobileTab,
-});
-
 const minPanelWidth = 200;
 const leftPanelWidth = ref(200);
+const mainPanelWidth = ref(0);
 const rightPanelWidth = ref(200);
+
+defineExpose({
+    selectMobileTab,
+    minPanelWidth,
+    mainPanelWidth,
+    rightPanelWidth,
+});
 
 const root = useTemplateRef('root');
 
@@ -124,6 +130,7 @@ function onDragLeftDivider(event) {
         return;
     const prefWidth = dragResizeState.left.startWidth + event.x - dragResizeState.left.startX;
     leftPanelWidth.value = Math.max(minPanelWidth, Math.min(leftSpace, prefWidth));
+    emitResize();
 }
 
 function onDragRightDivider(event) {
@@ -133,6 +140,7 @@ function onDragRightDivider(event) {
         return;
     const prefWidth = dragResizeState.right.startWidth + dragResizeState.right.startX - event.x;
     rightPanelWidth.value = Math.max(minPanelWidth, Math.min(rightSpace, prefWidth));
+    emitResize();
 }
 
 function reduceSideWidthsToFit() {
@@ -159,6 +167,12 @@ function reduceSideWidthsToFit() {
             saveRightPanelWidth();
         }
     }
+    emitResize();
+}
+
+function emitResize() {
+    mainPanelWidth.value = root.value.clientWidth - 2 * dividerWidth - leftPanelWidth.value - rightPanelWidth.value;
+    emit('resize');
 }
 
 function getMobilePanelClasses(index) {

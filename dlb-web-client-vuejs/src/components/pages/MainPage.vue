@@ -28,6 +28,10 @@ function onSelectDialogue(dialogueName) {
     panels.value.selectMobileTab(1);
     interactionTester.value.loadDialogue(dialogueName);
 }
+
+function onResizePanels() {
+    interactionTester.value.resize(panels.value.mainPanelWidth);
+}
 </script>
 
 <template>
@@ -47,6 +51,7 @@ function onSelectDialogue(dialogueName) {
             class="grow"
             cookiePrefix="mainPage"
             :mobileTabNames="['Dialogues', 'Interactions', 'Variables']"
+            @resize="onResizePanels()"
         >
             <template #left>
                 <DialogueBrowser class="grow" @selectDialogue="onSelectDialogue" />
