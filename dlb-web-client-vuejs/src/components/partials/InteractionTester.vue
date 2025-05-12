@@ -36,9 +36,9 @@ const loadDialogue = (name) => {
     });
 };
 
-const resize = (newWidth) => {
+const resize = () => {
     if (balloons.value) {
-        balloons.value.resize(newWidth);
+        balloons.value.resize();
     }
 };
 

@@ -11,8 +11,8 @@ export function useResizablePanel(root) {
         '2xl': 1536,
     };
 
-    const resize = (newWidth) => {
-        width.value = newWidth;
+    const resize = () => {
+        width.value = root.value.clientWidth;
     };
 
     onMounted(() => {

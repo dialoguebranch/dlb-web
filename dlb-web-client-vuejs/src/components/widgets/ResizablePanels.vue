@@ -17,13 +17,11 @@ const selectMobileTab = (index) => {
 
 const minPanelWidth = 200;
 const leftPanelWidth = ref(200);
-const mainPanelWidth = ref(0);
 const rightPanelWidth = ref(200);
 
 defineExpose({
     selectMobileTab,
     minPanelWidth,
-    mainPanelWidth,
     rightPanelWidth,
 });
 
@@ -171,8 +169,9 @@ function reduceSideWidthsToFit() {
 }
 
 function emitResize() {
-    mainPanelWidth.value = root.value.clientWidth - 2 * dividerWidth - leftPanelWidth.value - rightPanelWidth.value;
-    emit('resize');
+    setTimeout(() => {
+        emit('resize');
+    });
 }
 
 function getMobilePanelClasses(index) {
