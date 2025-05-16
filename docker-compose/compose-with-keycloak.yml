@@ -10,7 +10,7 @@ services:
 
   dlb-web-service:
     container_name: dlb-web-service
-    image: dlb-web-service:1.2.4
+    image: dlb-web-service:1.2.5
     ports:
       - 127.0.0.1:8089:8089
 
@@ -39,8 +39,8 @@ services:
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin 
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-      KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/dialoguebranch/certs/localhostcert.pem
-      KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/dialoguebranch/certs/localhostkey.pem
+      KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/dialoguebranch/certs/keycloakcert.pem
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/dialoguebranch/certs/keycloakkey.pem
     command: 
       - start-dev 
       - --import-realm

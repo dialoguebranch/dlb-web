@@ -296,6 +296,12 @@ public class AuthController {
 
 		if(response.getStatusCode() == HttpStatus.OK) {
 			logger.info("Call to Keycloak token end-point successful.");
+			AccessTokenResponse keyCloakResponse = response.getBody();
+			LoginResultPayload lrp = new LoginResultPayload();
+			lrp.setToken(keyCloakResponse.getAccessToken());
+			lrp.setUser(loginParametersPayload.getUser());
+			lrp.setRole("user");
+			return lrp;
 		} else {
 			logger.warn("Call to Keycloak token end-point failed.");
 		}
