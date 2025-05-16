@@ -1,0 +1,53 @@
+# Run using: "docker compose -f compose-with-keycloak.yml up" from the {GIT}/dialoguebranch/dlb-web folder
+
+name: dlb-web-service-keycloak
+
+services:
+
+  ###############################
+  # Dialogue Branch Web Service #
+  ###############################
+
+  dlb-web-service:
+    container_name: dlb-web-service
+    image: dlb-web-service:1.2.4
+    ports:
+      - 127.0.0.1:8089:8089
+
+  ##############################
+  # Dialogue Branch Web Client #
+  ##############################
+
+  #dlb-web-client:
+  #  container_name: dlb-web-client
+  #  image: httpd:2.4
+  #  ports:
+  #    - 127.0.0.1:8080:80
+  #  volumes:
+  #    - ../dlb-web-client:/usr/local/apache2/htdocs
+
+  ########################################
+  # Keycloak Identity Management Service #
+  ########################################
+
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak
+    ports:
+      - "8081:8081"
+      - "8443:8443"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin 
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/dialoguebranch/certs/localhostcert.pem
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/dialoguebranch/certs/localhostkey.pem
+    command: 
+      - start-dev 
+      - --import-realm
+    volumes:
+      - ./import/dialoguebranch-realm.json:/opt/keycloak/data/import/dialoguebranch-realm.json
+      - ./certs:/opt/keycloak/dialoguebranch/certs
+
+networks:
+  local_network:
+    driver: bridge
