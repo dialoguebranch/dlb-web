@@ -1,6 +1,6 @@
 /*
  *
- *                Copyright (c) 2023-2024 Fruit Tree Labs (www.fruittreelabs.com)
+ *                Copyright (c) 2023-2025 Fruit Tree Labs (www.fruittreelabs.com)
  *
  *     This material is part of the DialogueBranch Platform, and is covered by the MIT License
  *      as outlined below. Based on original source code licensed under the following terms:
@@ -84,6 +84,22 @@ public class Configuration extends LinkedHashMap<String,String> {
 	 * users through its REST API.
 	 */
 	public static final String ALLOW_ANONYMOUS_USERS = "allowAnonymousUsers";
+
+	// ---------- KeyCloak Configuration
+
+	/**
+	 * Name of the config parameter indicating whether the service should use an external Keycloak
+	 * service for handling user authorization.
+	 */
+	public static final String KEYCLOAK_ENABLED = "keycloakEnabled";
+
+	public static final String KEYCLOAK_BASEURL = "keycloakBaseUrl";
+
+	public static final String KEYCLOAK_REALM = "keycloakRealm";
+
+	public static final String KEYCLOAK_CLIENT_ID = "keycloakClientId";
+
+	public static final String KEYCLOAK_CLIENT_SECRET = "keycloakClientSecret";
 
 	// ---------- External Variable Service
 
@@ -209,7 +225,7 @@ public class Configuration extends LinkedHashMap<String,String> {
 
 	// ----- Note that this Configuration is a LinkedHashMap, so all parameters can simply be
 	// ----- retrieved by using this.get("parameterName") however, using the getters below we can
-	// ----- add some robustness (e.g. null checking).
+	// ----- add some robustness (e.g. null checking), and some convenience (readability) for devs
 
 	// ----------------------------------------------------------
 	// -------------------- Getters: General --------------------
@@ -277,6 +293,34 @@ public class Configuration extends LinkedHashMap<String,String> {
 	 */
 	public boolean getAllowAnonymousUsers() {
 		return Boolean.parseBoolean(get(ALLOW_ANONYMOUS_USERS));
+	}
+
+	// -------------------------------------------------------------------------
+	// -------------------- Getters: Keycloak Configuration --------------------
+	// -------------------------------------------------------------------------
+
+	public boolean getKeycloakEnabled() {
+		return Boolean.parseBoolean(get(KEYCLOAK_ENABLED));
+	}
+
+	public String getKeycloakBaseUrl() {
+		if(get(KEYCLOAK_BASEURL) == null) return "";
+		else return get(KEYCLOAK_BASEURL);
+	}
+
+	public String getKeycloakRealm() {
+		if(get(KEYCLOAK_REALM) == null) return "";
+		else return get(KEYCLOAK_REALM);
+	}
+
+	public String getKeycloakClientId() {
+		if(get(KEYCLOAK_CLIENT_ID) == null) return "";
+		else return get(KEYCLOAK_CLIENT_ID);
+	}
+
+	public String getKeycloakClientSecret() {
+		if(get(KEYCLOAK_CLIENT_SECRET) == null) return "";
+		else return get(KEYCLOAK_CLIENT_SECRET);
 	}
 
 	// ----------------------------------------------------------------------------

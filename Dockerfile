@@ -23,6 +23,12 @@ RUN mkdir /usr/local/dialogue-branch/data/
 RUN mkdir /usr/local/dialogue-branch/data/dlb-web-service/
 RUN mkdir /usr/local/dialogue-branch/data/dlb-external-var-service/
 
+### 
+# Take the keycloak SSL certificate and add it to the trusted keystore of the JVM running in this container
+# This will allow this DLB Web Service to communicate to a Keycloak instance over HTTPS
+COPY ./dlb-web/docker-compose/certs/keycloakcert.pem /usr/local/share/ca-certificates/keycloakcert.crt
+RUN keytool -noprompt -import -alias keycloak -file /usr/local/share/ca-certificates/keycloakcert.crt -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -trustcacerts
+
 ### Next, build and deploy the External Variable Service
 
 # Set the working directory to the DLB External Variable Service source folder

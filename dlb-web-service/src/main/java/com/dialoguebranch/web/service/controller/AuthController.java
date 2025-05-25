@@ -1,6 +1,6 @@
 /*
  *
- *                Copyright (c) 2023-2024 Fruit Tree Labs (www.fruittreelabs.com)
+ *                Copyright (c) 2023-2025 Fruit Tree Labs (www.fruittreelabs.com)
  *
  *     This material is part of the DialogueBranch Platform, and is covered by the MIT License
  *      as outlined below. Based on original source code licensed under the following terms:
@@ -28,6 +28,7 @@
 package com.dialoguebranch.web.service.controller;
 
 import com.dialoguebranch.web.service.*;
+import com.dialoguebranch.web.service.controller.schema.AccessTokenResponse;
 import com.dialoguebranch.web.service.controller.schema.LoginParametersPayload;
 import com.dialoguebranch.web.service.controller.schema.LoginResultPayload;
 import com.dialoguebranch.web.service.exception.*;
@@ -39,11 +40,17 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -68,6 +75,9 @@ public class AuthController {
 
 	/** Used for writing logging information */
 	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
+
+	/** Used to access configuration parameters */
+	private final Configuration config = Configuration.getInstance();
 
 	// -------------------------------------------------------- //
 	// -------------------- Constructor(s) -------------------- //
@@ -158,8 +168,35 @@ public class AuthController {
 	 */
 	private LoginResultPayload doLogin(HttpServletRequest request,
 									   LoginParametersPayload loginParametersPayload)
-			throws BadRequestException, UnauthorizedException {
+            throws BadRequestException, UnauthorizedException {
 
+		// Perform some validations on the request and login parameters, throwing a
+		// BadRequestException in case of errors
+		validateLoginParameters(request, loginParametersPayload);
+
+		if(config.getKeycloakEnabled()) {
+			logger.info("Keycloak authentication enabled.");
+			return doLoginKeycloak(loginParametersPayload);
+		} else {
+			logger.info("Keycloak authentication disabled - using native user management.");
+			return doLoginNative(loginParametersPayload);
+		}
+
+	}
+
+	/**
+	 * Helper function for the doLogin method, validates the given {@code request} and
+	 * {@code loginParametersPayload} parameters.
+	 *
+	 * @param request the HTTPRequest object (to retrieve authentication headers and optional body
+	 * 	              parameters).
+	 * @param loginParametersPayload the JSON payload containing the username, password and token
+	 * 	 * 	                         expiration values.
+	 * @throws BadRequestException in case of any error in the given {@link LoginParametersPayload}.
+	 */
+	private void validateLoginParameters(HttpServletRequest request,
+										 LoginParametersPayload loginParametersPayload)
+			throws BadRequestException {
 		ControllerFunctions.validateForbiddenQueryParams(request, "user", "password");
 		String user = loginParametersPayload.getUser();
 		String password = loginParametersPayload.getPassword();
@@ -173,16 +210,32 @@ public class AuthController {
 			fieldErrors.add(new HttpFieldError("password",
 					"Parameter 'password' not defined."));
 		}
-		if (tokenExpiration != null && tokenExpiration <= 0) {
-			fieldErrors.add(new HttpFieldError("tokenExpiration",
-					"Parameter 'tokenExpiration' must be greater than 0 or 'never'."));
+
+		// If Keycloak is used for authentication, a specific token expiration can not actually be
+		// set, so we're not going to complain about it here.
+		if(!config.getKeycloakEnabled()) {
+
+			if (tokenExpiration != null && tokenExpiration <= 0) {
+				fieldErrors.add(new HttpFieldError("tokenExpiration",
+						"Parameter 'tokenExpiration' must be greater than 0 or 'never'."));
+			}
+
 		}
 		if (!fieldErrors.isEmpty()) {
-            logger.info("Failed login attempt: {}", fieldErrors);
+			logger.info("Failed login attempt: {}", fieldErrors);
 			throw BadRequestException.withMessageAndInvalidInput(
 					"One or more login parameters were not correctly provided.",
 					fieldErrors);
 		}
+	}
+
+	private LoginResultPayload doLoginNative(LoginParametersPayload loginParametersPayload)
+			throws UnauthorizedException {
+
+		String user = loginParametersPayload.getUser();
+		String password = loginParametersPayload.getPassword();
+		Integer tokenExpiration = loginParametersPayload.getTokenExpiration();
+
 		UserCredentials userCredentials = UserFile.findUser(user);
 		String invalidError = "Username or password is invalid";
 		if (userCredentials == null) {
@@ -199,7 +252,7 @@ public class AuthController {
 
 		ZonedDateTime now = DateTimeUtils.nowMs();
 
-		if (loginParametersPayload.getTokenExpiration() != null) {
+		if (tokenExpiration != null) {
 			expiration = Date.from(now.plusMinutes(
 					loginParametersPayload.getTokenExpiration()).toInstant());
 		}
@@ -211,6 +264,51 @@ public class AuthController {
 				userCredentials.getUsername(),
 				userCredentials.getRole(),
 				token);
+	}
+
+	private LoginResultPayload doLoginKeycloak(LoginParametersPayload loginParametersPayload) {
+
+		RestTemplate restTemplate = new RestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+		String keycloakLoginUrl = config.getKeycloakBaseUrl();
+		if(!keycloakLoginUrl.endsWith("/")) keycloakLoginUrl += "/";
+		keycloakLoginUrl += "realms/"
+		+ config.getKeycloakRealm()
+		+ "/protocol/openid-connect/token";
+
+        logger.info("Redirecting login attempt to: {}", keycloakLoginUrl);
+
+		MultiValueMap<String, String> requestParameters = new LinkedMultiValueMap<>();
+		requestParameters.add("client_id",config.getKeycloakClientId());
+		requestParameters.add("client_secret",config.getKeycloakClientSecret());
+		requestParameters.add("username",loginParametersPayload.getUser());
+		requestParameters.add("password",loginParametersPayload.getPassword());
+		requestParameters.add("grant_type","password");
+
+		HttpEntity<MultiValueMap<String,String>> entity = new HttpEntity<>(requestParameters, headers);
+		ResponseEntity<AccessTokenResponse> response = restTemplate.exchange(
+				keycloakLoginUrl,
+				HttpMethod.POST,
+				entity,
+				AccessTokenResponse.class);
+
+		if(response.getStatusCode() == HttpStatus.OK) {
+			logger.info("Call to Keycloak token end-point successful.");
+			AccessTokenResponse keyCloakResponse = response.getBody();
+			LoginResultPayload lrp = new LoginResultPayload();
+			lrp.setToken(keyCloakResponse.getAccessToken());
+			lrp.setUser(loginParametersPayload.getUser());
+			lrp.setRole("user");
+			return lrp;
+		} else {
+			logger.warn("Call to Keycloak token end-point failed.");
+		}
+
+        logger.info("KeyCloak Response: {}", response);
+
+		return null;
 	}
 
 	// --------------------------------------------------------------------- //

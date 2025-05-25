@@ -35,7 +35,7 @@ function onNewDialogueStep() {
 }
 
 function onResizePanels() {
-    interactionTester.value.resize(panels.value.mainPanelWidth);
+    interactionTester.value.resize();
 }
 </script>
 
