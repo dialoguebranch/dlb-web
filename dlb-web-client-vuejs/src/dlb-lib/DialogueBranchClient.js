@@ -116,6 +116,32 @@ export class DialogueBranchClient {
         .then((json) => json.value ? this.createDialogueStepObject(json.value) : null);
     }
 
+    continueDialogue(dialogueName) {
+        var url = this._baseUrl + "/dialogue/continue";
+
+        url += "?dialogueName="+dialogueName;
+        url += "&timeZone="+this._timeZone;
+
+        return fetch(url, {
+            method: "POST",
+            headers: {
+                'X-Auth-Token': this._authToken,
+                "Content-Type": "application/json",
+            }
+        })
+        .then((response) => this._handleResponse(response))
+        .then((data) => { 
+            if('value' in data) {
+                var dialogueData = data.value;
+                if('dialogue' in dialogueData) {
+                    // Create a DialogueStep object from the received data
+                    return this.createDialogueStepObject(dialogueData);
+                }
+            }
+            return null;
+        });
+    }
+
     getVariables() {
         var url = this._baseUrl + "/variables/get";
 

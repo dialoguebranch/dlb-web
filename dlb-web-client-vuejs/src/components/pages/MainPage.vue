@@ -34,6 +34,10 @@ function onNewDialogueStep() {
     variableBrowser.value.loadVariables();
 }
 
+function onChangeVariable() {
+    interactionTester.value.reloadStep();
+}
+
 function onResizePanels() {
     interactionTester.value.resize();
 }
@@ -65,7 +69,7 @@ function onResizePanels() {
                 <InteractionTester ref="interaction-tester" class="grow" @newDialogueStep="onNewDialogueStep" />
             </template>
             <template #right>
-                <VariableBrowser ref="variable-browser" class="grow" />
+                <VariableBrowser ref="variable-browser" class="grow" @changeVariable="onChangeVariable" />
             </template>
         </ResizablePanels>
     </div>

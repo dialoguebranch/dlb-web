@@ -34,11 +34,23 @@ const balloons = useTemplateRef('balloons');
 
 const loadDialogue = (name) => {
     dialogueName.value = name;
+    dialogueSteps.value = [];
     client.startDialogue(name, 'en')
     .then((dialogueStep) => {
         dialogueSteps.value.push(dialogueStep);
         emit('newDialogueStep');
     });
+};
+
+const reloadStep = () => {
+    if (dialogueName.value) {
+        client.continueDialogue(dialogueName.value)
+        .then((dialogueStep) => {
+            dialogueSteps.value.pop();
+            dialogueSteps.value.push(dialogueStep);
+            emit('newDialogueStep');
+        });
+    }
 };
 
 const resize = () => {
@@ -49,6 +61,7 @@ const resize = () => {
 
 defineExpose({
     loadDialogue,
+    reloadStep,
     resize,
 });
 
