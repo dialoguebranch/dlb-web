@@ -8,6 +8,10 @@ import MainPagePanelHeader from '../widgets/MainPagePanelHeader.vue';
 import MainPagePanelContainer from '../widgets/MainPagePanelContainer.vue';
 import ModeSelector from '../widgets/ModeSelector.vue';
 
+const emit = defineEmits([
+    'newDialogueStep',
+]);
+
 const dialogueName = ref(null);
 const dialogueSteps = ref([]);
 
@@ -33,6 +37,7 @@ const loadDialogue = (name) => {
     client.startDialogue(name, 'en')
     .then((dialogueStep) => {
         dialogueSteps.value.push(dialogueStep);
+        emit('newDialogueStep');
     });
 };
 
@@ -54,6 +59,7 @@ function onSelectReply(dialogueStep, reply) {
         if (dialogueStep) {
             dialogueSteps.value.push(dialogueStep);
         }
+        emit('newDialogueStep');
     });
 }
 </script>

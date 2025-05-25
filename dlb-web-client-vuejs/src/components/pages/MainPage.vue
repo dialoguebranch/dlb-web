@@ -15,6 +15,7 @@ const stateManagement = useStateManagement();
 
 const panels = useTemplateRef('panels');
 const interactionTester = useTemplateRef('interaction-tester');
+const variableBrowser = useTemplateRef('variable-browser');
 
 onMounted(() => {
     panels.value.selectMobileTab(0);
@@ -27,6 +28,10 @@ function onLogoutClick() {
 function onSelectDialogue(dialogueName) {
     panels.value.selectMobileTab(1);
     interactionTester.value.loadDialogue(dialogueName);
+}
+
+function onNewDialogueStep() {
+    variableBrowser.value.loadVariables();
 }
 
 function onResizePanels() {
@@ -57,10 +62,10 @@ function onResizePanels() {
                 <DialogueBrowser class="grow" @selectDialogue="onSelectDialogue" />
             </template>
             <template #main>
-                <InteractionTester ref="interaction-tester" class="grow" />
+                <InteractionTester ref="interaction-tester" class="grow" @newDialogueStep="onNewDialogueStep" />
             </template>
             <template #right>
-                <VariableBrowser class="grow" />
+                <VariableBrowser ref="variable-browser" class="grow" />
             </template>
         </ResizablePanels>
     </div>

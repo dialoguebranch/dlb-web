@@ -31,6 +31,7 @@ import { BasicReply } from "./model/BasicReply";
 import { DialogueStep } from "./model/DialogueStep";
 import { Segment } from "./model/Segment";
 import { Statement } from "./model/Statement";
+import { Variable } from "./model/Variable";
 
 export class DialogueBranchClient {
     constructor(baseUrl, authToken) {
@@ -115,6 +116,56 @@ export class DialogueBranchClient {
         .then((json) => json.value ? this.createDialogueStepObject(json.value) : null);
     }
 
+    getVariables() {
+        var url = this._baseUrl + "/variables/get";
+
+        url += "?timeZone="+this._timeZone;
+
+        return fetch(url, {
+            method: "GET",
+            headers: {
+                'X-Auth-Token': this._authToken,
+                "Content-Type": "application/json",
+            }
+        })
+        .then((response) => this._handleResponse(response))
+        .then((data) => { 
+            if(data == null || data.length == 0) {
+                return new Array();
+            } else {
+                var variables = new Array();
+
+                data.forEach(entry => {
+                    var variable = new Variable();
+                    variable.name = entry.name;
+                    variable.value = entry.value;
+                    variable.updatedTime = entry.updatedTime;
+                    variable.updatedTimeZone = entry.updatedTimeZone;
+                    variables.push(variable);
+                });
+
+                return variables;
+            }
+        })
+    }
+
+    setVariable(variableName, variableValue) {
+        var url = this._baseUrl + "/variables/set-single";
+
+        url += "?name="+variableName;
+        if(variableValue != null) url += "&value="+variableValue;
+        url += "&timeZone="+this._timeZone;
+
+        return fetch(url, {
+            method: "POST",
+            headers: {
+                'X-Auth-Token': this._authToken,
+                "Content-Type": "application/json",
+            }
+        })
+        .then((response) => this._handleResponse(response));
+    }
+
     // ----------------------------------------------------------
     // ---------- Helper functions related to Dialogue ----------
     // ----------------------------------------------------------
@@ -171,7 +222,12 @@ export class DialogueBranchClient {
 
     _handleResponse(response) {
         if (response.ok) {
-            return response.json();
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.startsWith('application/json')) {
+                return response.json();
+            } else {
+                return response.text();
+            }
         } else if (response.status == 401) {
             if (this._onUnauthorized) {
                 this._onUnauthorized(response);
