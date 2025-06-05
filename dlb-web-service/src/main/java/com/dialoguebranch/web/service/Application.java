@@ -117,20 +117,30 @@ ApplicationListener<ApplicationEvent> {
 
 	/**
 	 * Return the UTC timestamp of when this service was first launched.
+	 *
 	 * @return the UTC timestamp of when this service was first launched.
 	 */
 	public Long getLaunchedTime() {
 		return launchedTime;
 	}
 
+	public Configuration getConfiguration() {
+		return config;
+	}
+
 	/**
 	 * Returns a pointer to the {@link ApplicationManager} that is used to manage application-wide
 	 * processes.
-	 * @return the {@link ApplicationManager} associated with this DialogueBranch Web Service.
+	 *
+	 * @return the {@link ApplicationManager} associated with this Dialogue Branch Web Service.
 	 */
 	public ApplicationManager getApplicationManager() {
 		return applicationManager;
 	}
+
+	// -------------------------------------------------------- //
+	// -------------------- App Management -------------------- //
+	// -------------------------------------------------------- //
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {

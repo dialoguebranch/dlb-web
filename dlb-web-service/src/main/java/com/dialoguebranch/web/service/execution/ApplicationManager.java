@@ -40,6 +40,7 @@ import com.dialoguebranch.web.service.exception.DLBServiceConfigurationException
 import com.dialoguebranch.web.service.Configuration;
 import com.dialoguebranch.web.service.UserCredentials;
 import com.dialoguebranch.web.service.UserFile;
+import com.dialoguebranch.web.service.keycloak.KeycloakManager;
 import com.dialoguebranch.web.service.storage.AzureDataLakeStore;
 import com.dialoguebranch.model.Project;
 import com.dialoguebranch.web.service.storage.VariableStoreJSONStorageHandler;
@@ -123,7 +124,7 @@ public class ApplicationManager {
 
 		// KeyCloak related initialisation
 		if(config.getKeycloakEnabled()) {
-			keycloakManager = new KeycloakManager(config);
+			keycloakManager = new KeycloakManager();
 		}
 
 		// Read all UserCredentials from users.xml

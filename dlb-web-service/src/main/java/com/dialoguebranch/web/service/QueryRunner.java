@@ -125,16 +125,21 @@ public class QueryRunner {
 	public static UserCredentials validateToken(HttpServletRequest request, Application application)
 			throws UnauthorizedException {
 		String token = request.getHeader("X-Auth-Token");
-		if (token != null)
-			return validateDefaultToken(token, application);
+		if (token != null) {
+			if(application.getConfiguration().getKeycloakEnabled())
+				return validateKeycloakToken(token, application);
+			else
+				return validateDefaultToken(token, application);
+		}
+
 		throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_NOT_FOUND,
 				"Authentication token not found");
 	}
 	
 	/**
-	 * Validates a token from request header X-Auth-Token. If it's empty or invalid, it will throw
-	 * an HttpException with 401 Unauthorized. Otherwise, it will return the user object for the
-	 * authenticated user.
+	 * Validates the given token from request header, using the built-in user management and token
+	 * system. If it's empty or invalid, it will throw an HttpException with 401 Unauthorized.
+	 * Otherwise, it will return the user object for the authenticated user.
 	 *
 	 * @param token the authentication token (not null)
 	 * @param application the {@link Application} context used to access {@link UserCredentials} in
@@ -175,5 +180,22 @@ public class QueryRunner {
 					"Authentication token expired");
 		}
 		return user;
+	}
+
+	/**
+	 * Validates the given Keycloak token from request header. If it's empty or invalid, it will
+	 * throw an HttpException with 401 Unauthorized. Otherwise, it will return the user object for
+	 * the authenticated user.
+	 *
+	 * @param token the authentication token (not null)
+	 * @param application the {@link Application} context used to access {@link UserCredentials} in
+	 *                    a non-static way.
+	 * @return the authenticated user
+	 * @throws UnauthorizedException if the token is empty or invalid
+	 */
+	private static UserCredentials validateKeycloakToken(String token, Application application) {
+		application.getApplicationManager().getKeycloakManager().validateToken(token);
+
+		return null;
 	}
 }

@@ -287,38 +287,46 @@ public class AuthController {
 		requestParameters.add("password",loginParametersPayload.getPassword());
 		requestParameters.add("grant_type","password");
 
-		HttpEntity<MultiValueMap<String,String>> entity = new HttpEntity<>(requestParameters,
-				headers);
-		ResponseEntity<AccessTokenResponse> response = restTemplate.exchange(
-				keycloakLoginUrl,
-				HttpMethod.POST,
-				entity,
-				AccessTokenResponse.class);
+		ResponseEntity<AccessTokenResponse> response;
 
-		if(response.getStatusCode() == HttpStatus.OK) {
-			logger.info("Call to Keycloak token end-point successful.");
-			AccessTokenResponse keyCloakResponse = response.getBody();
-			if(keyCloakResponse != null) {
-				LoginResultPayload loginResultPayload = new LoginResultPayload();
-				loginResultPayload.setToken(keyCloakResponse.getAccessToken());
-				loginResultPayload.setUser(loginParametersPayload.getUser());
-				loginResultPayload.setRole("user"); // TODO: Get actual Keycloak roles
-				return loginResultPayload;
-			} else {
-				logger.warn("Failed login attempt (empty response) for user {}.",
-						loginParametersPayload.getUser());
-				throw new UnauthorizedException(ErrorCode.KEYCLOAK_ERROR,
-						"Invalid response from Keycloak service.");
-			}
-
-		} else {
-			logger.warn("Failed login attempt for user {}: invalid request, status code {}.",
-					loginParametersPayload.getUser(), response.getStatusCode());
+		try {
+			HttpEntity<MultiValueMap<String,String>> entity = new HttpEntity<>(requestParameters,
+					headers);
+			response = restTemplate.exchange(
+					keycloakLoginUrl,
+					HttpMethod.POST,
+					entity,
+					AccessTokenResponse.class);
+		} catch(Exception ex) {
 			throw new UnauthorizedException(ErrorCode.KEYCLOAK_ERROR,
-					"Keycloak service returned status code "+response.getStatusCode()+".");
+					"Error contacting Keycloak service.");
+			// TODO: Catch additional details and add as fieldErrors to the UnauthorizedException
 		}
 
-	}
+        if (response.getStatusCode() == HttpStatus.OK) {
+            logger.info("Call to Keycloak token end-point successful.");
+            AccessTokenResponse keyCloakResponse = response.getBody();
+            if (keyCloakResponse != null) {
+                LoginResultPayload loginResultPayload = new LoginResultPayload();
+                loginResultPayload.setToken(keyCloakResponse.getAccessToken());
+                loginResultPayload.setUser(loginParametersPayload.getUser());
+                loginResultPayload.setRole("user"); // TODO: Get actual Keycloak roles
+                return loginResultPayload;
+            } else {
+                logger.warn("Failed login attempt (empty response) for user {}.",
+                        loginParametersPayload.getUser());
+                throw new UnauthorizedException(ErrorCode.KEYCLOAK_ERROR,
+                        "Invalid response from Keycloak service.");
+            }
+
+        } else {
+            logger.warn("Failed login attempt for user {}: invalid request, status code {}.",
+                    loginParametersPayload.getUser(), response.getStatusCode());
+            throw new UnauthorizedException(ErrorCode.KEYCLOAK_ERROR,
+                    "Keycloak service returned status code " + response.getStatusCode() + ".");
+        }
+
+    }
 
 	// --------------------------------------------------------------------- //
 	// -------------------- END-POINT: "/auth/validate" -------------------- //
