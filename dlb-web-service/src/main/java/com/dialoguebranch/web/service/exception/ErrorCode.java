@@ -53,4 +53,7 @@ public class ErrorCode {
 	/** In case the currently logged-in user is not allowed to perform the operation. */
 	public static final String INSUFFICIENT_PRIVILEGES = "INSUFFICIENT_PRIVILEGES";
 
+	/** In case an error occurred related to the Keycloak service. */
+	public static final String KEYCLOAK_ERROR = "KEYCLOAK_ERROR";
+
 }

@@ -1,6 +1,6 @@
 /*
  *
- *                Copyright (c) 2023-2024 Fruit Tree Labs (www.fruittreelabs.com)
+ *                Copyright (c) 2023-2025 Fruit Tree Labs (www.fruittreelabs.com)
  *
  *     This material is part of the DialogueBranch Platform, and is covered by the MIT License
  *      as outlined below. Based on original source code licensed under the following terms:
@@ -29,8 +29,6 @@ package com.dialoguebranch.web.service;
 
 import com.dialoguebranch.web.service.exception.DLBServiceConfigurationException;
 import com.dialoguebranch.web.service.execution.ApplicationManager;
-import com.dialoguebranch.web.service.execution.UserServiceFactory;
-import com.dialoguebranch.web.service.storage.VariableStoreJSONStorageHandler;
 import com.dialoguebranch.parser.ResourceFileLoader;
 import nl.rrd.utils.AppComponents;
 import org.slf4j.Logger;

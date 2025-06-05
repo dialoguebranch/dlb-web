@@ -1,6 +1,6 @@
 /*
  *
- *                Copyright (c) 2023-2024 Fruit Tree Labs (www.fruittreelabs.com)
+ *                Copyright (c) 2023-2025 Fruit Tree Labs (www.fruittreelabs.com)
  *
  *     This material is part of the DialogueBranch Platform, and is covered by the MIT License
  *      as outlined below. Based on original source code licensed under the following terms:
@@ -106,7 +106,7 @@ public class QueryRunner {
 			throw ex;
 		} catch (Exception ex) {
 			Logger logger = AppComponents.getLogger(QueryRunner.class.getSimpleName());
-			logger.error("Internal Server Error: " + ex.getMessage(), ex);
+            logger.error("Internal Server Error: {}", ex.getMessage(), ex);
 			throw new InternalServerErrorException();
 		}
 	}
@@ -157,7 +157,7 @@ public class QueryRunner {
 			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_EXPIRED,
 					"Authentication token expired");
 		} catch (JwtException ex) {
-			logger.info("Invalid authentication token: failed to parse: " + ex.getMessage());
+            logger.info("Invalid authentication token: failed to parse: {}", ex.getMessage());
 			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_INVALID,
 					"Authentication token invalid");
 		}
@@ -165,8 +165,7 @@ public class QueryRunner {
 		UserCredentials user = application.getApplicationManager()
 				.getUserCredentialsForUsername(details.getSubject());
 		if (user == null) {
-			logger.info("Invalid authentication token: user not found: " +
-					details.getSubject());
+            logger.info("Invalid authentication token: user not found: {}", details.getSubject());
 			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_INVALID,
 					"Authentication token invalid");
 		}

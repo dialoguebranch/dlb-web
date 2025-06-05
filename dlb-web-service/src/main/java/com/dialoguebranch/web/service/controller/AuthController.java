@@ -48,8 +48,6 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -197,7 +195,8 @@ public class AuthController {
 	private void validateLoginParameters(HttpServletRequest request,
 										 LoginParametersPayload loginParametersPayload)
 			throws BadRequestException {
-		ControllerFunctions.validateForbiddenQueryParams(request, "user", "password");
+		ControllerFunctions.validateForbiddenQueryParams(request, "user",
+				"password");
 		String user = loginParametersPayload.getUser();
 		String password = loginParametersPayload.getPassword();
 		Integer tokenExpiration = loginParametersPayload.getTokenExpiration();
@@ -266,7 +265,8 @@ public class AuthController {
 				token);
 	}
 
-	private LoginResultPayload doLoginKeycloak(LoginParametersPayload loginParametersPayload) {
+	private LoginResultPayload doLoginKeycloak(LoginParametersPayload loginParametersPayload)
+			throws UnauthorizedException {
 
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
@@ -287,7 +287,8 @@ public class AuthController {
 		requestParameters.add("password",loginParametersPayload.getPassword());
 		requestParameters.add("grant_type","password");
 
-		HttpEntity<MultiValueMap<String,String>> entity = new HttpEntity<>(requestParameters, headers);
+		HttpEntity<MultiValueMap<String,String>> entity = new HttpEntity<>(requestParameters,
+				headers);
 		ResponseEntity<AccessTokenResponse> response = restTemplate.exchange(
 				keycloakLoginUrl,
 				HttpMethod.POST,
@@ -297,18 +298,26 @@ public class AuthController {
 		if(response.getStatusCode() == HttpStatus.OK) {
 			logger.info("Call to Keycloak token end-point successful.");
 			AccessTokenResponse keyCloakResponse = response.getBody();
-			LoginResultPayload lrp = new LoginResultPayload();
-			lrp.setToken(keyCloakResponse.getAccessToken());
-			lrp.setUser(loginParametersPayload.getUser());
-			lrp.setRole("user");
-			return lrp;
+			if(keyCloakResponse != null) {
+				LoginResultPayload loginResultPayload = new LoginResultPayload();
+				loginResultPayload.setToken(keyCloakResponse.getAccessToken());
+				loginResultPayload.setUser(loginParametersPayload.getUser());
+				loginResultPayload.setRole("user"); // TODO: Get actual Keycloak roles
+				return loginResultPayload;
+			} else {
+				logger.warn("Failed login attempt (empty response) for user {}.",
+						loginParametersPayload.getUser());
+				throw new UnauthorizedException(ErrorCode.KEYCLOAK_ERROR,
+						"Invalid response from Keycloak service.");
+			}
+
 		} else {
-			logger.warn("Call to Keycloak token end-point failed.");
+			logger.warn("Failed login attempt for user {}: invalid request, status code {}.",
+					loginParametersPayload.getUser(), response.getStatusCode());
+			throw new UnauthorizedException(ErrorCode.KEYCLOAK_ERROR,
+					"Keycloak service returned status code "+response.getStatusCode()+".");
 		}
 
-        logger.info("KeyCloak Response: {}", response);
-
-		return null;
 	}
 
 	// --------------------------------------------------------------------- //

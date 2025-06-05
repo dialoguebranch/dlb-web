@@ -1,6 +1,6 @@
 /*
  *
- *                Copyright (c) 2023-2024 Fruit Tree Labs (www.fruittreelabs.com)
+ *                Copyright (c) 2023-2025 Fruit Tree Labs (www.fruittreelabs.com)
  *
  *     This material is part of the DialogueBranch Platform, and is covered by the MIT License
  *      as outlined below. Based on original source code licensed under the following terms:
@@ -71,6 +71,7 @@ public class ApplicationManager {
 	private final List<UserCredentials> userCredentials;
 	private String externalVariableServiceAPIToken;
 	private AzureDataLakeStore azureDataLakeStore = null;
+	private KeycloakManager keycloakManager = null;
 	private final UserServiceFactory userServiceFactory;
 
 	// -------------------------------------------------------- //
@@ -86,6 +87,7 @@ public class ApplicationManager {
 	 *                                          parameter.
 	 */
 	public ApplicationManager(FileLoader fileLoader) throws DLBServiceConfigurationException {
+
 		ProjectParser projectParser = new ProjectParser(fileLoader);
 		ProjectParserResult readResult;
 		try {
@@ -115,6 +117,15 @@ public class ApplicationManager {
 						AppComponents.get(Configuration.class).
 						getDataDir()+"/variables")); //TODO: This "variables" shouldn't be hardcoded here
 
+
+		// Load in configuration values
+		Configuration config = AppComponents.get(Configuration.class);
+
+		// KeyCloak related initialisation
+		if(config.getKeycloakEnabled()) {
+			keycloakManager = new KeycloakManager(config);
+		}
+
 		// Read all UserCredentials from users.xml
 		try {
 			userCredentials = UserFile.read();
@@ -123,7 +134,7 @@ public class ApplicationManager {
 		}
 
 		// login to external variable service
-		Configuration config = AppComponents.get(Configuration.class);
+
 		if(config.getExternalVariableServiceEnabled()) {
 			try {
 				this.loginToExternalVariableService();
@@ -176,6 +187,10 @@ public class ApplicationManager {
 
 	public AzureDataLakeStore getAzureDataLakeStore() {
 		return azureDataLakeStore;
+	}
+
+	public KeycloakManager getKeycloakManager() {
+		return keycloakManager;
 	}
 
 	// ------------------------------------------------------------ //
