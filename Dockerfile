@@ -36,10 +36,10 @@ RUN keytool -noprompt -import -alias keycloak -file /usr/local/share/ca-certific
 WORKDIR /usr/local/dialogue-branch/source/dlb-web/dlb-external-var-service/
 
 # Execute a clean build (when building from Windows, make sure the line endings of the "gradlew" script are set to "LF" and not "CRLF")
-RUN ./gradlew clean build
+RUN ./gradlew clean updateVersion build
 
 # Copy the generated .war file into the tomcat webapps
-RUN cp /usr/local/dialogue-branch/source/dlb-web/dlb-external-var-service/build/libs/dlb-external-var-service-1.2.4.war /usr/local/tomcat/webapps/dlb-external-var-service.war
+RUN cp /usr/local/dialogue-branch/source/dlb-web/dlb-external-var-service/build/libs/dlb-external-var-service-1.2.5.war /usr/local/tomcat/webapps/dlb-external-var-service.war
 
 RUN cp /usr/local/dialogue-branch/source/dlb-web/dlb-external-var-service/config/users.xml /usr/local/dialogue-branch/data/dlb-external-var-service/
 
@@ -49,10 +49,10 @@ RUN cp /usr/local/dialogue-branch/source/dlb-web/dlb-external-var-service/config
 WORKDIR /usr/local/dialogue-branch/source/dlb-web/dlb-web-service/
 
 # Execute a clean build
-RUN ./gradlew clean build
+RUN ./gradlew clean updateVersion build
 
 # Copy the generated .war file into the tomcat webapps
-RUN cp /usr/local/dialogue-branch/source/dlb-web/dlb-web-service/build/libs/dlb-web-service-1.2.4.war /usr/local/tomcat/webapps/dlb-web-service.war
+RUN cp /usr/local/dialogue-branch/source/dlb-web/dlb-web-service/build/libs/dlb-web-service-1.2.5.war /usr/local/tomcat/webapps/dlb-web-service.war
 
 RUN cp /usr/local/dialogue-branch/source/dlb-web/dlb-web-service/config/users.xml /usr/local/dialogue-branch/data/dlb-web-service/
 
