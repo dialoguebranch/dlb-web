@@ -5,7 +5,7 @@
 	xmlns="http://java.sun.com/xml/ns/j2ee"
 	version="2.5"
 >
-	<display-name>DialogueBranch Web Service 1.2.4</display-name>
+	<display-name>DialogueBranch Web Service 1.2.5</display-name>
 	<description>
 		This web application provides the DialogueBranch Web Service.
 	</description>
