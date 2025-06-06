@@ -159,16 +159,25 @@ ApplicationListener<ApplicationEvent> {
             logger.info("=== External Variable Service Enabled: {}",
 					config.getExternalVariableServiceEnabled());
 			if(config.getExternalVariableServiceEnabled()) {
-                logger.info("=== External Variable Service URL: {}",
+                logger.info("===== External Variable Service URL: {}",
 						config.getExternalVariableServiceURL());
-                logger.info("=== External Variable Service API Version: {}",
+                logger.info("===== External Variable Service API Version: {}",
 						config.getExternalVariableServiceAPIVersion());
+			}
+			logger.info("=== Keycloak Authentication Enabled: {}",
+					config.getKeycloakEnabled());
+			if(config.getKeycloakEnabled()) {
+				logger.info("===== Keycloak URL: {}", config.getKeycloakBaseUrl());
+				logger.info("===== Keycloak Realm: {}", config.getKeycloakRealm());
+				logger.info("===== Keycloak Client ID: {}", config.getKeycloakClientId());
 			}
             logger.info("=== Azure Data Lake Storage Enabled: {}",
 					config.getAzureDataLakeEnabled());
 			if(config.getAzureDataLakeEnabled()) {
-				//TODO: Output relevant Azure config on startup
-				logger.info("=== TODO: Add other Azure Parameters.");
+				logger.info("===== Azure Data Lake Account URL: {}",
+						config.getAzureDataLakeSASAccountUrl());
+				logger.info("===== Azure Data Lake Filesystem: {}",
+						config.getAzureDataLakeFileSystemName());
 			}
 			logger.info("===================================================");
 		}
