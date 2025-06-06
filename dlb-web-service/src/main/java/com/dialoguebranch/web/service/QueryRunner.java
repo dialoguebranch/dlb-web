@@ -125,8 +125,18 @@ public class QueryRunner {
 	 */
 	public static UserCredentials validateToken(HttpServletRequest request, Application application)
 			throws UnauthorizedException {
+		Logger logger = AppComponents.getLogger(QueryRunner.class.getSimpleName());
+
 		String token = request.getHeader("X-Auth-Token");
+
 		if (token != null) {
+
+			if (token.trim().isEmpty()) {
+				logger.info("Invalid authentication token: token empty");
+				throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_INVALID,
+						"Authentication token invalid");
+			}
+
 			if(application.getConfiguration().getKeycloakEnabled())
 				return validateKeycloakToken(token, application);
 			else
@@ -151,11 +161,7 @@ public class QueryRunner {
 	private static UserCredentials validateDefaultToken(String token, Application application)
 			throws UnauthorizedException {
 		Logger logger = AppComponents.getLogger(QueryRunner.class.getSimpleName());
-		if (token.trim().isEmpty()) {
-			logger.info("Invalid authentication token: token empty");
-			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_INVALID,
-					"Authentication token invalid");
-		}
+
 		AuthDetails details;
 		try {
 			details = JWTUtils.isTokenValid(token);
@@ -194,9 +200,11 @@ public class QueryRunner {
 	 * @return the authenticated user
 	 * @throws UnauthorizedException if the token is empty or invalid
 	 */
-	private static UserCredentials validateKeycloakToken(String token, Application application) {
-		application.getApplicationManager().getKeycloakManager().validateToken(token);
-
-		return null;
+	private static UserCredentials validateKeycloakToken(String token, Application application)
+			throws UnauthorizedException{
+		AuthDetails details;
+		details = application.getApplicationManager().getKeycloakManager().validateToken(token);
+		return new UserCredentials(details.getSubject(),"user");
+		// TODO: Get actual roles from Keycloak
 	}
 }

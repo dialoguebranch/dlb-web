@@ -28,12 +28,24 @@
 
 package com.dialoguebranch.web.service.auth.keycloak;
 
+import com.dialoguebranch.web.service.AuthDetails;
 import com.dialoguebranch.web.service.Configuration;
+import com.dialoguebranch.web.service.exception.UnauthorizedException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import nl.rrd.utils.AppComponents;
 import org.slf4j.Logger;
 import org.springframework.http.*;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import java.math.BigInteger;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPublicKeySpec;
+import java.util.Base64;
 
 public class KeycloakManager {
 
@@ -46,6 +58,9 @@ public class KeycloakManager {
     /** Indicates whether the Keycloak manager has already been initialized. */
     private boolean initialized = false;
 
+    /** The public part of the RSA key as obtained from the Keycloak instance. */
+    private PublicKey publicKey;
+
     // -------------------------------------------------------- //
     // -------------------- Constructor(s) -------------------- //
     // -------------------------------------------------------- //
@@ -54,7 +69,7 @@ public class KeycloakManager {
 
     }
 
-    private void initialize() {
+    private void initialize() throws NoSuchAlgorithmException, InvalidKeySpecException {
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -80,22 +95,46 @@ public class KeycloakManager {
             KeycloakCertsResponse keyCloakResponse = response.getBody();
             logger.info("Response: {}", keyCloakResponse);
 
+            for(KeycloakKey key : keyCloakResponse.getKeys()) {
+                if(key.getAlgorithm().equals("RS256")) {
+                    BigInteger modulus = new BigInteger(1, Base64.getUrlDecoder().decode(key.getN()));
+                    BigInteger exponent = new BigInteger(1,Base64.getUrlDecoder().decode(key.getE()));
+                    RSAPublicKeySpec rsaPublicKeySpec = new RSAPublicKeySpec(modulus, exponent);
+                    KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+                    this.publicKey = keyFactory.generatePublic(rsaPublicKeySpec);
+                }
+            }
             this.setInitialized();
         } else {
             logger.warn("Call to Keycloak token end-point failed.");
         }
     }
 
-    public void validateToken(String token) {
+    public AuthDetails validateToken(String token) throws UnauthorizedException {
 
+        // Only on first time use
         if(!this.isInitialized()) {
-            this.initialize();
+            try {
+                this.initialize();
+            } catch(NoSuchAlgorithmException nsae) {
+                throw new UnauthorizedException(
+                        "NoSuchAlgorithmException while validating token: "+nsae.getMessage());
+            } catch(InvalidKeySpecException ikse) {
+                throw new UnauthorizedException(
+                        "InvalidKeySpecException while validating token: "+ikse.getMessage());
+            }
         }
 
+        final Claims claims = Jwts.parser()
+                .verifyWith(this.publicKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
 
-
-
+        return new AuthDetails(claims.get("preferred_username",String.class), claims.getIssuedAt(),
+                claims.getExpiration());
     }
+
 
     // ----------------------------------------------------------- //
     // -------------------- Getters & Setters -------------------- //

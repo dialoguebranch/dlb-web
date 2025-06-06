@@ -105,6 +105,23 @@ public class KeycloakKey {
         this.use = use;
     }
 
+    /**
+     * "x5c" (X.509 Certificate Chain) Parameter
+     *
+     *    The "x5c" (X.509 certificate chain) parameter contains a chain of one
+     *    or more PKIX certificates [RFC5280].  The certificate chain is
+     *    represented as a JSON array of certificate value strings.  Each
+     *    string in the array is a base64-encoded (Section 4 of [RFC4648] --
+     *    not base64url-encoded) DER [ITU.X690.1994] PKIX certificate value.
+     *    The PKIX certificate containing the key value MUST be the first
+     *    certificate.  This MAY be followed by additional certificates, with
+     *    each subsequent certificate being the one used to certify the
+     *    previous one.  The key in the first certificate MUST match the public
+     *    key represented by other members of the JWK.  Use of this member is
+     *    OPTIONAL.
+     *
+     * @return
+     */
     public ArrayList<String> getX5c() {
         return x5c;
     }
@@ -113,6 +130,15 @@ public class KeycloakKey {
         this.x5c = x5c;
     }
 
+    /**
+     * The "x5t" (X.509 certificate SHA-1 thumbprint) parameter is a base64url-encoded SHA-1
+     * thumbprint (a.k.a. digest) of the DER encoding of an X.509 certificate [RFC5280]. Note that
+     * certificate thumbprints are also sometimes known as certificate fingerprints. The key in the
+     * certificate MUST match the public key represented by other members of the JWK. Use of this
+     * member is OPTIONAL.
+     *
+     * @return
+     */
     public String getX5t() {
         return x5t;
     }

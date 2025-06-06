@@ -33,12 +33,17 @@ public class UserCredentials {
 	public static final String USER_ROLE_ADMIN = "admin";
 
 	private final String username;
-	private final String password;
+	private String password = null;
 	private final String role;
 
 	public UserCredentials(String username, String password, String role) {
 		this.username = username;
 		this.password = password;
+		this.role = role;
+	}
+
+	public UserCredentials(String username, String role) {
+		this.username = username;
 		this.role = role;
 	}
 
