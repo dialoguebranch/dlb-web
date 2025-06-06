@@ -171,4 +171,18 @@ public class KeycloakKey {
         this.e = e;
     }
 
+    @Override
+    public String toString() {
+        return "KeycloakKey{" +
+                "keyId='" + keyId + '\'' +
+                ", keyType='" + keyType + '\'' +
+                ", algorithm='" + algorithm + '\'' +
+                ", use='" + use + '\'' +
+                ", x5c=" + x5c +
+                ", x5t='" + x5t + '\'' +
+                ", x5tS256='" + x5tS256 + '\'' +
+                ", n='" + n + '\'' +
+                ", e='" + e + '\'' +
+                '}';
+    }
 }

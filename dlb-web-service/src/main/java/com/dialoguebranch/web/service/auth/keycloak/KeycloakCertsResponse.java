@@ -51,4 +51,14 @@ public class KeycloakCertsResponse extends JsonObject {
     public void setKeys(ArrayList<KeycloakKey> keys) {
         this.keys = keys;
     }
+
+    @Override
+    public String toString() {
+        String result = "KeycloakCertsResponse{";
+        for(KeycloakKey key : keys) {
+            result += key.toString() + "\n";
+        }
+        result += "}";
+        return result;
+    }
 }

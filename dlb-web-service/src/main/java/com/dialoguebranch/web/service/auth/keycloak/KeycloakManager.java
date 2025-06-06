@@ -31,6 +31,8 @@ package com.dialoguebranch.web.service.auth.keycloak;
 import com.dialoguebranch.web.service.AuthDetails;
 import com.dialoguebranch.web.service.Configuration;
 import com.dialoguebranch.web.service.exception.UnauthorizedException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import nl.rrd.utils.AppComponents;
@@ -46,7 +48,13 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
+/**
+ *
+ * @author Harm op den Akker
+ */
 public class KeycloakManager {
 
     /** Used for writing logging information */
@@ -58,18 +66,22 @@ public class KeycloakManager {
     /** Indicates whether the Keycloak manager has already been initialized. */
     private boolean initialized = false;
 
-    /** The public part of the RSA key as obtained from the Keycloak instance. */
-    private PublicKey publicKey;
+    /** A set of public RSA keys as obtained from the Keycloak instance, mapped by 'kid'. */
+    private final Map<String,PublicKey> publicKeys;
 
     // -------------------------------------------------------- //
     // -------------------- Constructor(s) -------------------- //
     // -------------------------------------------------------- //
 
     public KeycloakManager() {
+        this.publicKeys = new HashMap<>();
 
+        //TODO: Start initializing from the moment this manager is created, but give it some
+        // time for the Keycloak service to actually start up (and maybe attempt a few retries).
     }
 
     private void initialize() throws NoSuchAlgorithmException, InvalidKeySpecException {
+        logger.info("Attempting to initialize KeycloakManager...");
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -81,7 +93,8 @@ public class KeycloakManager {
                 + config.getKeycloakRealm()
                 + "/protocol/openid-connect/certs";
 
-        logger.info("Retrieving public Keycloak certificate data from: {}", keyCloakCertsUrl);
+        logger.info(" - Retrieving public Keycloak certificate data from: {} ...",
+                keyCloakCertsUrl);
 
         HttpEntity<MultiValueMap<String,String>> entity = new HttpEntity<>(headers);
         ResponseEntity<KeycloakCertsResponse> response = restTemplate.exchange(
@@ -91,47 +104,76 @@ public class KeycloakManager {
                 KeycloakCertsResponse.class);
 
         if(response.getStatusCode() == HttpStatus.OK) {
-            logger.info("Successfully retrieved Keycloak certificates.");
+            logger.info(" - Response OK.");
             KeycloakCertsResponse keyCloakResponse = response.getBody();
-            logger.info("Response: {}", keyCloakResponse);
 
             for(KeycloakKey key : keyCloakResponse.getKeys()) {
-                if(key.getAlgorithm().equals("RS256")) {
-                    BigInteger modulus = new BigInteger(1, Base64.getUrlDecoder().decode(key.getN()));
-                    BigInteger exponent = new BigInteger(1,Base64.getUrlDecoder().decode(key.getE()));
-                    RSAPublicKeySpec rsaPublicKeySpec = new RSAPublicKeySpec(modulus, exponent);
-                    KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-                    this.publicKey = keyFactory.generatePublic(rsaPublicKeySpec);
-                }
+                BigInteger modulus = new BigInteger(
+                        1, Base64.getUrlDecoder().decode(key.getN()));
+                BigInteger exponent = new BigInteger(
+                        1,Base64.getUrlDecoder().decode(key.getE()));
+                RSAPublicKeySpec rsaPublicKeySpec = new RSAPublicKeySpec(modulus, exponent);
+                KeyFactory keyFactory = KeyFactory.getInstance(key.getKeyType());
+                this.publicKeys.put(key.getKeyId(),keyFactory.generatePublic(rsaPublicKeySpec));
             }
             this.setInitialized();
+            logger.info(" - KeycloakManager initialized successfully.");
         } else {
-            logger.warn("Call to Keycloak token end-point failed.");
+            logger.warn(" - Call to Keycloak token end-point failed.");
         }
     }
 
     public AuthDetails validateToken(String token) throws UnauthorizedException {
 
-        // Only on first time use
+        // Only on first time use, make sure the KeycloakManager is initialized (retrieved its
+        // public keys).
         if(!this.isInitialized()) {
             try {
                 this.initialize();
-            } catch(NoSuchAlgorithmException nsae) {
+            } catch(NoSuchAlgorithmException noSuchAlgorithmException) {
                 throw new UnauthorizedException(
-                        "NoSuchAlgorithmException while validating token: "+nsae.getMessage());
-            } catch(InvalidKeySpecException ikse) {
+                        "NoSuchAlgorithmException while validating token: "
+                                + noSuchAlgorithmException.getMessage());
+            } catch(InvalidKeySpecException invalidKeySpecException) {
                 throw new UnauthorizedException(
-                        "InvalidKeySpecException while validating token: "+ikse.getMessage());
+                        "InvalidKeySpecException while validating token: "
+                                + invalidKeySpecException.getMessage());
             }
         }
 
+        // We need to extract the "key id" ("kid") from the header of the token.
+        // Based on the "kid", we should use the correct, corresponding Public Key that we
+        // obtained from the Keycloak service.
+
+        // Split the JWT into its parts (header . payload . signature)
+        String[] parts = token.split("\\.");
+        if (parts.length != 3) {
+            throw new UnauthorizedException("Invalid JWT token.");
+        }
+
+        // Extract the keyID ("kid") from the header.
+        String keyId;
+        try {
+            // Decode the header into a JSON String
+            String headerJson = new String(Base64.getUrlDecoder().decode(parts[0]));
+
+            // Convert JSON to a map
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String,String> headerData = objectMapper.readValue(headerJson, Map.class);
+            keyId = headerData.get("kid");
+        } catch(JsonProcessingException e) {
+            throw new UnauthorizedException("Unable to parse JWT header.");
+        }
+
         final Claims claims = Jwts.parser()
-                .verifyWith(this.publicKey)
+                .verifyWith(this.publicKeys.get(keyId)) // Use the public key that matches this kid
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
 
-        return new AuthDetails(claims.get("preferred_username",String.class), claims.getIssuedAt(),
+        return new AuthDetails(
+                claims.get("preferred_username",String.class),
+                claims.getIssuedAt(),
                 claims.getExpiration());
     }
 
