@@ -22,7 +22,7 @@ RUN for f in `find /usr/local/dialogue-branch/source -name "gradlew" -print`; do
 # Create some data folders used by the services
 RUN mkdir /usr/local/dialogue-branch/data/
 RUN mkdir /usr/local/dialogue-branch/data/dlb-web-service/
-RUN mkdir /usr/local/dialogue-branch/data/dlb-external-var-service/
+# RUN mkdir /usr/local/dialogue-branch/data/dlb-external-var-service/
 
 ### 
 # Take the keycloak SSL certificate and add it to the trusted keystore of the JVM running in this container
@@ -33,15 +33,15 @@ RUN keytool -noprompt -import -alias keycloak -file /usr/local/share/ca-certific
 ### Next, build and deploy the External Variable Service
 
 # Set the working directory to the DLB External Variable Service source folder
-WORKDIR /usr/local/dialogue-branch/source/dlb-web/dlb-external-var-service/
+# WORKDIR /usr/local/dialogue-branch/source/dlb-web/dlb-external-var-service/
 
 # Execute a clean build (when building from Windows, make sure the line endings of the "gradlew" script are set to "LF" and not "CRLF")
-RUN ./gradlew clean updateVersion build
+# RUN ./gradlew clean updateVersion build
 
 # Copy the generated .war file into the tomcat webapps
-RUN cp /usr/local/dialogue-branch/source/dlb-web/dlb-external-var-service/build/libs/dlb-external-var-service-1.2.5.war /usr/local/tomcat/webapps/dlb-external-var-service.war
+# RUN cp /usr/local/dialogue-branch/source/dlb-web/dlb-external-var-service/build/libs/dlb-external-var-service-1.2.5.war /usr/local/tomcat/webapps/dlb-external-var-service.war
 
-RUN cp /usr/local/dialogue-branch/source/dlb-web/dlb-external-var-service/config/users.xml /usr/local/dialogue-branch/data/dlb-external-var-service/
+# RUN cp /usr/local/dialogue-branch/source/dlb-web/dlb-external-var-service/config/users.xml /usr/local/dialogue-branch/data/dlb-external-var-service/
 
 ### Next, build and deploy the Web Service
 
