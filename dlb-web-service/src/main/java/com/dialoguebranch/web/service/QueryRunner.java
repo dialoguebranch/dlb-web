@@ -27,6 +27,7 @@
 
 package com.dialoguebranch.web.service;
 
+import com.dialoguebranch.web.service.auth.jwt.JWTUtils;
 import com.dialoguebranch.web.service.exception.*;
 import nl.rrd.utils.AppComponents;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -157,7 +158,7 @@ public class QueryRunner {
 		}
 		AuthDetails details;
 		try {
-			details = AuthToken.parseToken(token);
+			details = JWTUtils.isTokenValid(token);
 		} catch (ExpiredJwtException ex) {
 			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_EXPIRED,
 					"Authentication token expired");

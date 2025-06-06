@@ -1,6 +1,6 @@
+import org.gradle.api.JavaVersion
+
 plugins {
-	id 'java'
-	id 'java-library'
 	id 'war'
 	id 'eclipse-wtp'
 	id 'org.springframework.boot' version '3.0.2'

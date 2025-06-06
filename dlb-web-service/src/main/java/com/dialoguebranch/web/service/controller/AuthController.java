@@ -32,6 +32,7 @@ import com.dialoguebranch.web.service.controller.schema.AccessTokenResponse;
 import com.dialoguebranch.web.service.controller.schema.LoginParametersPayload;
 import com.dialoguebranch.web.service.controller.schema.LoginResultPayload;
 import com.dialoguebranch.web.service.exception.*;
+import com.dialoguebranch.web.service.auth.jwt.JWTUtils;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import nl.rrd.utils.AppComponents;
 import nl.rrd.utils.datetime.DateTimeUtils;
@@ -257,7 +258,9 @@ public class AuthController {
 		}
 
 		AuthDetails details = new AuthDetails(user, Date.from(now.toInstant()), expiration);
-		String token = AuthToken.createToken(details);
+
+		//String token = AuthToken.createToken(details);
+		String token = JWTUtils.generateToken(details);
 
 		return new LoginResultPayload(
 				userCredentials.getUsername(),
