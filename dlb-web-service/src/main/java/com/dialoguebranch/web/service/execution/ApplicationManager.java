@@ -40,7 +40,7 @@ import com.dialoguebranch.web.service.exception.DLBServiceConfigurationException
 import com.dialoguebranch.web.service.Configuration;
 import com.dialoguebranch.web.service.UserCredentials;
 import com.dialoguebranch.web.service.UserFile;
-import com.dialoguebranch.web.service.keycloak.KeycloakManager;
+import com.dialoguebranch.web.service.auth.keycloak.KeycloakManager;
 import com.dialoguebranch.web.service.storage.AzureDataLakeStore;
 import com.dialoguebranch.model.Project;
 import com.dialoguebranch.web.service.storage.VariableStoreJSONStorageHandler;

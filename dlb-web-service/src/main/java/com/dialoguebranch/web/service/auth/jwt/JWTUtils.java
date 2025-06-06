@@ -5,11 +5,10 @@ import com.dialoguebranch.web.service.Configuration;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.function.Function;
 
@@ -19,29 +18,29 @@ public class JWTUtils {
 
     public static String generateToken(AuthDetails userDetails) {
         return Jwts.builder()
-                .setSubject(userDetails.getSubject())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .subject(userDetails.getSubject())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(getSecretKey())
                 .compact();
     }
 
     public static <T> T extractClaims(String token, Function<Claims, T> claimFunction) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSecretKey())
+        Claims claims = Jwts.parser()
+                .verifyWith(getSecretKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
         return claimFunction.apply(claims);
     }
 
     public static AuthDetails isTokenValid(String token)
             throws JwtException {
-        final Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSecretKey())
+        final Claims claims = Jwts.parser()
+                .verifyWith(getSecretKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
         return new AuthDetails(claims.getSubject(), claims.getIssuedAt(),
                 claims.getExpiration());
     }
@@ -57,8 +56,8 @@ public class JWTUtils {
      * @return the secret key
      */
     private static SecretKey getSecretKey() {
-        String secretString = Configuration.getInstance().get(Configuration.JWT_SECRET_KEY);
-        return new SecretKeySpec(secretString.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.getJcaName());
+        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(Configuration.getInstance()
+                .getJwtSecretKey()));
     }
 
 }

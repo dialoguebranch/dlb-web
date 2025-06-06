@@ -26,7 +26,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.dialoguebranch.web.service.keycloak;
+package com.dialoguebranch.web.service.auth.keycloak;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import nl.rrd.utils.json.JsonObject;
