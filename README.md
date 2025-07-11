@@ -7,17 +7,25 @@ documentation available at www.dialoguebranch.com/docs
 
 ## Deploying a Dialogue Branch Web Service using Docker
 The quickest way to start playing with a Dialogue Branch Web Service is to deploy an instance 
-as a Docker container. To do this, follow these steps:
+as a Docker container.
 
+### Checkout all required code
+Make sure you have pulled both this `dlb-web` repository and the `dlb-core-java` repository to your local machine. If your git folder is `${GIT}`, your folder structure should look like this:
+
+* `${GIT}`/dialoguebranch/dlb-core-java/
+* `${GIT}`/dialoguebranch/dlb-web/
+
+### Prepare configurations
 * Create a `gradle.properties` file in the `dlb-web/dlb-web-service/` folder (copy the existing 
 `gradle.sample.properties` file)
 * Prepare a `users.xml` file in the `dlb-web/dlb-web-service/config/` folder (copy the existing 
 `users-example.xml` file).
 
+### Build and run the Docker image
 * Open a terminal and enter your `{GIT}/dialoguebranch/` folder (containing `/dlb-web/` and 
 `/dlb-core-java/` repositories)
-* Enter the following command to build the Docker image: `docker build --no-cache -t dlb-web-service:1.2.4 -f dlb-web/Dockerfile .`
-* Enter the following command to run the Docker image: `docker run -itd -p 8089:8089 --name DLB_Web_Service dlb-web-service:1.2.4`
+* Enter the following command to build the Docker image: `docker build --no-cache -t dlb-web-service:1.2.5 -f ./dlb-web/dlb-web-service/standalone.Dockerfile .`
+* Enter the following command to run the Docker image: `docker run -itd -p 8089:8089 --name DLB_Web_Service dlb-web-service:1.2.5`
 * Open a Web Browser and navigate to `http://localhost:8089/dlb-web-service/` (you should see 
 the Swagger documentation page of your running Web Service).
 
