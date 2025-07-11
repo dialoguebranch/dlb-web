@@ -19,8 +19,12 @@ your local machine. If your git folder is `${GIT}`, your folder structure should
 ### 1.2. Prepare configurations
 * Create a `gradle.properties` file in the `dlb-web/dlb-web-service/` folder (copy the existing 
 `gradle.sample.properties` file)
+  * You only need to provide a value for the `dlb-configJwtSecretKey` parameter (you can
+    generate a Base64 of length 128 using this website: https://generate.plus/en/base64).
 * Prepare a `users.xml` file in the `dlb-web/dlb-web-service/config/` folder (copy the existing 
 `users-example.xml` file).
+  * You can define your own users here, or simply keep the example `user::user` and `admin::admin`
+    users.
 
 ### 1.3. Build and Run Docker Image
 * Open a terminal and enter your `{GIT}/dialoguebranch/` folder (containing `/dlb-web/` and 
