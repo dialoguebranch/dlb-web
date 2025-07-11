@@ -1,4 +1,4 @@
-# Run using: "docker compose -f compose-with-keycloak.yml up" from the {GIT}/dialoguebranch/dlb-web folder
+# Run using: "docker compose -f compose-with-keycloak.yml up" from the {GIT}/dialoguebranch/dlb-web/docker-compose/ folder
 
 name: dlb-web-service-keycloak
 
