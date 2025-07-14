@@ -122,20 +122,20 @@ public class ApplicationManager {
 		// Load in configuration values
 		Configuration config = AppComponents.get(Configuration.class);
 
-		// KeyCloak related initialisation
+		// Initialize User Manager
 		if(config.getKeycloakEnabled()) {
 			keycloakManager = new KeycloakManager();
-		}
-
-		// Read all UserCredentials from users.xml
-		try {
-			userCredentials = UserFile.read();
-		} catch (ParseException | IOException e) {
-			throw new RuntimeException(e);
+			userCredentials = new ArrayList<>(); // This is the (now unused) built-in list
+		} else {
+			// Read all UserCredentials from users.xml
+			try {
+				userCredentials = UserFile.read();
+			} catch (ParseException | IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
 
 		// login to external variable service
-
 		if(config.getExternalVariableServiceEnabled()) {
 			try {
 				this.loginToExternalVariableService();
