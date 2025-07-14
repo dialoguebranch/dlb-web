@@ -5,18 +5,19 @@ Branch scripts in a server environment.
 For additional information please refer to www.dialoguebranch.com and specifically the
 documentation available at www.dialoguebranch.com/docs
 
-## 1. Deploying a Standalone Dialogue Branch Web Service using Docker
-The quickest way to start playing with a Dialogue Branch Web Service is to deploy a simple, stand-
-alone instance as a Docker container. To do so, follow these steps:
-
-### 1.1. Checkout all required code
-Make sure you have pulled both this `dlb-web` repository and the `dlb-core-java` repository to 
-your local machine. If your git folder is `${GIT}`, your folder structure should look like this:
+## First Things First
+Whether you want to deploy or develop on this code, first make sure you have pulled both this 
+`dlb-web` repository and the `dlb-core-java` repository to your local machine. If your git folder is
+ `${GIT}`, your folder structure should look like this:
 
 * `${GIT}`/dialoguebranch/dlb-core-java/
 * `${GIT}`/dialoguebranch/dlb-web/
 
-### 1.2. Prepare configurations
+## 1. Deploying a Standalone Dialogue Branch Web Service using Docker
+The quickest way to start playing with a Dialogue Branch Web Service is to deploy a simple, stand-
+alone instance as a Docker container. To do so, follow these steps:
+
+### 1.1. Prepare configurations
 * Create a `gradle.properties` file in the `dlb-web/dlb-web-service/` folder by copying the existing 
 `gradle.docker-standalone.properties`. This contains workable default configuration values. 
 * Prepare a `users.xml` file in the `dlb-web/dlb-web-service/config/` folder (copy the existing 
@@ -24,22 +25,71 @@ your local machine. If your git folder is `${GIT}`, your folder structure should
   * You can define your own users here, or simply keep the example `user::user` and `admin::admin`
     users.
 
-### 1.3. Build and Run Docker Image
+### 1.2. Build and Run Docker Image
 * Open a terminal and enter your `{GIT}/dialoguebranch/` folder (containing `/dlb-web/` and 
 `/dlb-core-java/` repositories)
 * Enter the following command to build the Docker image: `docker build --no-cache -t
 dlb-web-service -f ./dlb-web/dlb-web-service/standalone.Dockerfile .`
-* Enter the following command to run the Docker image: `docker run -itd -p 8089:8089 --name 
-  dlb-web-service dlb-web-service`
+* Enter the following command to run the Docker image: `docker run -itd -p 8089:8089 --name dlb-web-service dlb-web-service`
 * Open a Web Browser and navigate to `http://localhost:8089/dlb-web-service/` (you should see 
 the Swagger documentation page of your running Web Service).
 
-## 2. Development Setup
+## 2. Deploying DLB Web Service with Keycloak using Docker (experimental)
+Instead of using the built-in user management (i.e. with user credentials as defined in the 
+users.xml file), you can choose to delegate account management to a Keycloak server. To set this up
+on your local machine follow these steps.
+
+### 2.1. Prepare configuration
+* Create a `gradle.properties` file in the `dlb-web/dlb-web-service/` folder by copying the existing 
+`gradle.docker-with-keycloak.properties`. This contains workable default configuration values.
+* Generate local SSL certificates that will be used to secure the communication between the 
+  Dialogue Branch Web Service and the Keycloak server. 
+  * Open a terminal and enter the `{GIT}/dialoguebranch/dlb-web/docker-compose/certs/` folder.
+  * Run the following command to generate a certificate and key file for your localhost (see 
+    https://letsencrypt.org/docs/certificates-for-localhost/):
+
+```
+openssl req -x509 -out keycloakcert.pem -keyout keycloakkey.pem \
+ -newkey rsa:2048 -nodes -sha256 \
+ -subj '/CN=keycloak' -extensions EXT -config <( \
+  printf "[dn]\nCN=keycloak\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:keycloak\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
+```
+
+### 2.2. Build DLB Web Service Image
+* Open a terminal and enter your `{GIT}/dialoguebranch/` folder (containing `/dlb-web/` and 
+`/dlb-core-java/` repositories)
+* Enter the following command to build the Docker image: `docker build --no-cache -t dlb-web-service -f ./dlb-web/dlb-web-service/with-keycloak.Dockerfile .`
+
+### 2.3. Running DLB Web Service and Keycloak using Docker Compose
+* In your terminal, navigate to the `{GIT}/dialoguebranch/dlb-web/docker-compose/` folder.
+* Run using `docker compose -f compose-with-keycloak.yml up`.
+
+### 2.4. Test the Setup
+* Open a web-browser in https://localhost:8443/. This should bring up the Keycloak administration
+  panel. Login with the default username and password (admin/admin), and do the following:
+  * Make sure that the currently selected Realm is `dialoguebranch`.
+  * Create a user with e.g. username `user` and set a fixed password (e.g. `user`).
+* Open in another tab: http://localhost:8089/dlb-web-service/. This should open up the Swagger pages
+  for Dialogue Branch Web Service. Do the following:
+  * Select the `/auth/login/` end-point, and click on "Try it out".
+  * In the Request body, set both `user` and `password` fields to "user".
+  * Click on "Execute". You should receive a response like this:
+
+```
+{
+  "user": "user",
+  "role": "user",
+  "token": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJfVmVnYUlxaHJVZllfZ2VtOWh4N3VOcDQ5OTVlLXZ2bGJRaWhBbFhVU2pBIn0.eyJleHAiOjE3NTI0OTc4NzUsImlhdCI6MTc1MjQ5NzU3NSwianRpIjoib25ydHJvOmQxMmJkMTczLTY1OTItNDA1ZC05ZTU5LTFkMGQ3MjY0ZGQ1OCIsImlzcyI6Imh0dHBzOi8va2V5Y2xvYWs6ODQ0My9yZWFsbXMvZGlhbG9ndWVicmFuY2giLCJzdWIiOiI0ZjMwMzUzNC0xNmNkLTQ4ZDUtODYxMC0yNjA4MmQ1MGIyM2YiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJkbGItd2ViLXNlcnZpY2UiLCJzaWQiOiI4NzIyMzU3Zi05OTA2LTQyOTctYmRhOS0yMTJiNzdhOWUxNzAiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly9sb2NhbGhvc3Q6ODA4OSJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiIsImRlZmF1bHQtcm9sZXMtZGlhbG9ndWVicmFuY2giXX0sInNjb3BlIjoicHJvZmlsZSBlbWFpbCIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwibmFtZSI6IkpvaG4gRG9lIiwicHJlZmVycmVkX3VzZXJuYW1lIjoidXNlciIsImdpdmVuX25hbWUiOiJKb2huIiwiZmFtaWx5X25hbWUiOiJEb2UiLCJlbWFpbCI6ImpvaG5AZG9lLm9yZyJ9.ky2Rp6pJGEAigBsQgqFKt6yEz8LJcNRaD5PW4dWGK_rMCMSWBFznGfyiWb8AU86HLGJik-vGhtsb7XxjjBMeJrdv071U-g7_aP55soxw2xjeTn4yw2ItVczHZjKccuEXqrMy7WkwkHUjc_d7G2Zhx0e1TwWavW2yC-vhLfMEHAek1dvzEa_R31iHCGJr995PeiuijCZB3PgRmZ7X71gBGxHo1B5MWGTRJLiaFpwJTYunNPfbz3A9W3CUKMq8FhmpRDINKjVH-pI9f0_3TwOX2UtgaifYHsgo3jpUxJUo7s45R-E8r6yNUfD113B2XfM3X5QPWD5xFoxjPi_o1Af5Gg"
+}
+```
+
+
+## 3. Development Setup
 Getting started with development on the Dialogue Branch Web Service tools should be relatively 
 straightforward. If you run into issues after following the guide below, please contact 
 `info@dialoguebranch.com`
 
-### 2.1. File Structure
+### 3.1. File Structure
 Let's assume that `{GIT}` is your local git folder (e.g. `/Users/johnny/git/`). Then, make 
 sure you have the following file structure:
 
@@ -49,7 +99,7 @@ https://github.com/dialoguebranch/dlb-core-java) - the Dialogue Branch Web Servi
 mostly as a server-wrapper around the core Java Library that is used for parsing and executing
 dialogue scripts.
 
-### 2.2. IntelliJ Configuration
+### 3.2. IntelliJ Configuration
 On the IntelliJ Welcome Screen, select `Open` and select the `{GIT}/dialoguebranch/dlb-web` 
 folder.
 
@@ -72,7 +122,7 @@ the following settings in IntelliJ:
   * Go to `Build, Execution, Deployment` -> `Build Tools` -> `Gradle`
     * Make sure the Gradle JVM is set to a JVM of version 17 or higher.
 
-### 2.3. Configuration files
+### 3.3. Configuration files
 Before deploying, create the following configuration files:
 
 * dlb-web/dlb-external-var-service/gradle.properties

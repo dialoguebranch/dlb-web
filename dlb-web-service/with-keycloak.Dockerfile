@@ -23,6 +23,26 @@ RUN for f in `find /usr/local/dialogue-branch/source -name "gradlew" -print`; do
 RUN mkdir /usr/local/dialogue-branch/data/
 RUN mkdir /usr/local/dialogue-branch/data/dlb-web-service/
 
+### Next, build and deploy the Web Service
+
+# Set the working directory to the DLB Web Service source folder
+WORKDIR /usr/local/dialogue-branch/source/dlb-web/dlb-web-service/
+
+# Execute a clean build
+RUN ./gradlew clean updateVersion build
+
+# Copy the generated .war file into the tomcat webapps
+RUN cp /usr/local/dialogue-branch/source/dlb-web/dlb-web-service/build/libs/dlb-web-service-1.2.5.war /usr/local/tomcat/webapps/dlb-web-service.war
+
+# Copy the users.xml file into the data folder (not for the keycloak version!)
+# RUN cp /usr/local/dialogue-branch/source/dlb-web/dlb-web-service/config/users.xml /usr/local/dialogue-branch/data/dlb-web-service/
+
+# Set the working directory in the container
+WORKDIR /usr/local/tomcat
+
+# Run Tomcat server
+CMD ["catalina.sh", "run"]
+
 ### Install the SSL Certificate used by the Keycloack service
 
 # - Open a terminal and enter the {GIT}/dialoguebranch/dlb-web/docker-compose/certs/ folder.
@@ -38,22 +58,3 @@ RUN mkdir /usr/local/dialogue-branch/data/dlb-web-service/
 COPY ./dlb-web/docker-compose/certs/keycloakcert.pem /usr/local/share/ca-certificates/keycloakcert.crt
 RUN keytool -noprompt -import -alias keycloak -file /usr/local/share/ca-certificates/keycloakcert.crt -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -trustcacerts
 
-### Next, build and deploy the Web Service
-
-# Set the working directory to the DLB Web Service source folder
-WORKDIR /usr/local/dialogue-branch/source/dlb-web/dlb-web-service/
-
-# Execute a clean build
-RUN ./gradlew clean updateVersion build
-
-# Copy the generated .war file into the tomcat webapps
-RUN cp /usr/local/dialogue-branch/source/dlb-web/dlb-web-service/build/libs/dlb-web-service-1.2.5.war /usr/local/tomcat/webapps/dlb-web-service.war
-
-# Copy the users.xml file into the data folder
-RUN cp /usr/local/dialogue-branch/source/dlb-web/dlb-web-service/config/users.xml /usr/local/dialogue-branch/data/dlb-web-service/
-
-# Set the working directory in the container
-WORKDIR /usr/local/tomcat
-
-# Run Tomcat server
-CMD ["catalina.sh", "run"]

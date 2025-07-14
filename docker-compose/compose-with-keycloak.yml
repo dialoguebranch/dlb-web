@@ -10,7 +10,7 @@ services:
 
   dlb-web-service:
     container_name: dlb-web-service
-    image: dlb-web-service:1.2.5
+    image: dlb-web-service
     ports:
       - 127.0.0.1:8089:8089
 
