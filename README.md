@@ -44,7 +44,7 @@ on your local machine follow these steps.
 `gradle.docker-with-keycloak.properties`. This contains workable default configuration values.
 * Generate local SSL certificates that will be used to secure the communication between the 
   Dialogue Branch Web Service and the Keycloak server. 
-  * Open a terminal and enter the `{GIT}/dialoguebranch/dlb-web/docker-compose/certs/` folder.
+  * Open a terminal and enter the `{GIT}/dialoguebranch/dlb-web/docker-compose/certs/` folder (create it if it does not exist).
   * Run the following command to generate a certificate and key file for your localhost (see 
     https://letsencrypt.org/docs/certificates-for-localhost/):
 
@@ -54,8 +54,13 @@ openssl req -x509 -out keycloakcert.pem -keyout keycloakkey.pem \
  -subj '/CN=keycloak' -extensions EXT -config <( \
   printf "[dn]\nCN=keycloak\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:keycloak\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
 ```
+  * If you are using Windows, you need to install OpenSSL first. You can find binaries at
+    https://github.com/openssl/openssl/wiki/Binaries or you can use Cygwin (https://www.cygwin.com).
+    If you open the Cygwin terminal, you can find your C: drive in /cygdrive/c. Navigate to
+    `{GIT}/dialoguebranch/dlb-web/docker-compose/certs/` and run the command above.
 
 ### 2.2. Build DLB Web Service Image
+* Make sure that Docker is running. You can install Docker Desktop on your computer.
 * Open a terminal and enter your `{GIT}/dialoguebranch/` folder (containing `/dlb-web/` and 
 `/dlb-core-java/` repositories)
 * Enter the following command to build the Docker image: `docker build --no-cache -t dlb-web-service -f ./dlb-web/dlb-web-service/with-keycloak.Dockerfile .`
@@ -66,7 +71,8 @@ openssl req -x509 -out keycloakcert.pem -keyout keycloakkey.pem \
 
 ### 2.4. Test the Setup
 * Open a web-browser in https://localhost:8443/. This should bring up the Keycloak administration
-  panel. Login with the default username and password (admin/admin), and do the following:
+  panel. Your browser will probably show a warning about an insecure connection, because you are
+  using a self-signed certificate. Log in with the default username and password (admin/admin), and do the following:
   * Make sure that the currently selected Realm is `dialoguebranch`.
   * Create a user with e.g. username `user` and set a fixed password (e.g. `user`).
 * Open in another tab: http://localhost:8089/dlb-web-service/. This should open up the Swagger pages
