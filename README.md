@@ -5,9 +5,9 @@ Branch scripts in a server environment.
 For additional information please refer to www.dialoguebranch.com and specifically the
 documentation available at www.dialoguebranch.com/docs
 
-## 1. Deploying a Dialogue Branch Web Service using Docker
-The quickest way to start playing with a Dialogue Branch Web Service is to deploy an instance 
-as a Docker container. To do so, follow these steps:
+## 1. Deploying a Standalone Dialogue Branch Web Service using Docker
+The quickest way to start playing with a Dialogue Branch Web Service is to deploy a simple, stand-
+alone instance as a Docker container. To do so, follow these steps:
 
 ### 1.1. Checkout all required code
 Make sure you have pulled both this `dlb-web` repository and the `dlb-core-java` repository to 
@@ -17,10 +17,8 @@ your local machine. If your git folder is `${GIT}`, your folder structure should
 * `${GIT}`/dialoguebranch/dlb-web/
 
 ### 1.2. Prepare configurations
-* Create a `gradle.properties` file in the `dlb-web/dlb-web-service/` folder (copy the existing 
-`gradle.sample.properties` file)
-  * You only need to provide a value for the `dlb-configJwtSecretKey` parameter (you can
-    generate a Base64 of length 128 using this website: https://generate.plus/en/base64).
+* Create a `gradle.properties` file in the `dlb-web/dlb-web-service/` folder by copying the existing 
+`gradle.docker-standalone.properties`. This contains workable default configuration values. 
 * Prepare a `users.xml` file in the `dlb-web/dlb-web-service/config/` folder (copy the existing 
 `users-example.xml` file).
   * You can define your own users here, or simply keep the example `user::user` and `admin::admin`
@@ -30,9 +28,9 @@ your local machine. If your git folder is `${GIT}`, your folder structure should
 * Open a terminal and enter your `{GIT}/dialoguebranch/` folder (containing `/dlb-web/` and 
 `/dlb-core-java/` repositories)
 * Enter the following command to build the Docker image: `docker build --no-cache -t
-  dlb-web-service:1.2.5 -f ./dlb-web/dlb-web-service/standalone.Dockerfile .`
-* Enter the following command to run the Docker image: `docker run -itd -p 8089:8089 --name
-  DLB_Web_Service dlb-web-service:1.2.5`
+dlb-web-service -f ./dlb-web/dlb-web-service/standalone.Dockerfile .`
+* Enter the following command to run the Docker image: `docker run -itd -p 8089:8089 --name 
+  dlb-web-service dlb-web-service`
 * Open a Web Browser and navigate to `http://localhost:8089/dlb-web-service/` (you should see 
 the Swagger documentation page of your running Web Service).
 
