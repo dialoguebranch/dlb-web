@@ -1,6 +1,6 @@
 ### From your GIT/dialoguebranch/ folder
-### docker build --no-cache -t dlb-web-service:1.2.5 -f ./dlb-web/dlb-web-service/standalone.Dockerfile .
-### docker run -itd -p 8089:8089 --name DLB_Web_Service dlb-web-service:1.2.5
+### docker build --no-cache -t dlb-web-service -f ./dlb-web/dlb-web-service/standalone.Dockerfile .
+### docker run -itd -p 8089:8089 --name dlb-web-service dlb-web-service
 ### (User 'docker system prune -a') to clean up the cache and free up disk space
 
 # Use an official Java runtime as a parent image
