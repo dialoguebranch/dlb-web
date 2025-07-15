@@ -22,8 +22,8 @@ alone instance as a Docker container. To do so, follow these steps:
 `gradle.docker-standalone.properties`. This contains workable default configuration values. 
 * Prepare a `users.xml` file in the `dlb-web/dlb-web-service/config/` folder (copy the existing 
 `users-example.xml` file).
-  * You can define your own users here, or simply keep the example `user::user` and `admin::admin`
-    users.
+  * You can define your own users here, or simply keep the example `client::client`, 
+  `editor::editor`, and `admin::admin` users.
 
 ### 1.2. Build and Run Docker Image
 * Open a terminal and enter your `{GIT}/dialoguebranch/` folder (containing `/dlb-web/` and 
@@ -89,13 +89,29 @@ openssl req -x509 -out keycloakcert.pem -keyout keycloakkey.pem \
 }
 ```
 
+## 3. Deploying a standalone DLB External Variable Service using Docker
 
-## 3. Development Setup
+### 3.1. Prepare configurations
+* Create a `gradle.properties` file in the `dlb-web/dlb-external-var-service/` folder by copying the existing 
+`gradle.docker-standalone.properties`. This contains workable default configuration values. 
+* Prepare a `service-users.xml` file in the `dlb-web/dlb-web-service/config/` folder (copy the existing 
+`service-users-example.xml` file).
+  * You can define your own users here, or simply keep the example `dlb-web-service::dlb-web-service` user.
+
+### 3.2. Build and Run Docker Image
+* Open a terminal and enter your `{GIT}/dialoguebranch/` folder (containing the `/dlb-web/` 
+  repository).
+* Enter the following command to build the Docker image: `docker build --no-cache -t dlb-external-var-service -f ./dlb-web/dlb-external-var-service/standalone.Dockerfile .`
+* Enter the following command to run the Docker image: `docker run -itd -p 8090:8090 --name dlb-external-var-service dlb-external-var-service`
+* Open a Web Browser and navigate to `http://localhost:8090/dlb-external-var-service/` (you should see 
+  the Swagger documentation page of your running External Variable Service).
+
+## 4. Development Setup
 Getting started with development on the Dialogue Branch Web Service tools should be relatively 
 straightforward. If you run into issues after following the guide below, please contact 
 `info@dialoguebranch.com`
 
-### 3.1. File Structure
+### 4.1. File Structure
 Let's assume that `{GIT}` is your local git folder (e.g. `/Users/johnny/git/`). Then, make 
 sure you have the following file structure:
 
@@ -105,7 +121,7 @@ https://github.com/dialoguebranch/dlb-core-java) - the Dialogue Branch Web Servi
 mostly as a server-wrapper around the core Java Library that is used for parsing and executing
 dialogue scripts.
 
-### 3.2. IntelliJ Configuration
+### 4.2. IntelliJ Configuration
 On the IntelliJ Welcome Screen, select `Open` and select the `{GIT}/dialoguebranch/dlb-web` 
 folder.
 
@@ -128,7 +144,7 @@ the following settings in IntelliJ:
   * Go to `Build, Execution, Deployment` -> `Build Tools` -> `Gradle`
     * Make sure the Gradle JVM is set to a JVM of version 17 or higher.
 
-### 3.3. Configuration files
+### 4.3. Configuration files
 Before deploying, create the following configuration files:
 
 * dlb-web/dlb-external-var-service/gradle.properties
