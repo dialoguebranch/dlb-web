@@ -135,7 +135,7 @@ public class ControllerFunctions {
 		for (String name : parameterNames) {
 			if (params.containsKey(name)) {
 				throw new BadRequestException(
-						"Query parameters not accepted, parameters must be set in the request body.");
+					"Query parameters not accepted, parameters must be set in the request body.");
 			}
 		}
 	}

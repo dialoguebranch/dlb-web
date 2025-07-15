@@ -164,8 +164,7 @@ ApplicationListener<ApplicationEvent> {
                 logger.info("===== External Variable Service API Version: {}",
 						config.getExternalVariableServiceAPIVersion());
 			}
-			logger.info("=== Keycloak Authentication Enabled: {}",
-					config.getKeycloakEnabled());
+			logger.info("=== Keycloak Authentication Enabled: {}", config.getKeycloakEnabled());
 			if(config.getKeycloakEnabled()) {
 				logger.info("===== Keycloak URL: {}", config.getKeycloakBaseUrl());
 				logger.info("===== Keycloak Realm: {}", config.getKeycloakRealm());

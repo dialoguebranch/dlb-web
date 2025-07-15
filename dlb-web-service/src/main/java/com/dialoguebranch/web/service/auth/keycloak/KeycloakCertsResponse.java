@@ -54,11 +54,11 @@ public class KeycloakCertsResponse extends JsonObject {
 
     @Override
     public String toString() {
-        String result = "KeycloakCertsResponse{";
+        StringBuilder result = new StringBuilder("KeycloakCertsResponse{");
         for(KeycloakKey key : keys) {
-            result += key.toString() + "\n";
+            result.append(key.toString()).append("\n");
         }
-        result += "}";
-        return result;
+        result.append("}");
+        return result.toString();
     }
 }

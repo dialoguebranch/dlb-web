@@ -180,7 +180,7 @@ public class AuthController {
 			logger.info("Keycloak authentication enabled.");
 			return doLoginKeycloak(loginParametersPayload);
 		} else {
-			logger.info("Keycloak authentication disabled - using native user management.");
+			logger.info("Keycloak authentication disabled - using basic user management.");
 			return doLoginNative(loginParametersPayload);
 		}
 

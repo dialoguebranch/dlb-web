@@ -191,6 +191,7 @@ public class QueryRunner {
 			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_INVALID,
 					"Authentication token invalid");
 		}
+
 		if (authenticationInfo.getExpiration() != null &&
 				authenticationInfo.getExpiration().getTime() < System.currentTimeMillis()) {
 			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_EXPIRED,
