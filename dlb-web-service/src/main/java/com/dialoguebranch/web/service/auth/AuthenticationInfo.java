@@ -25,7 +25,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.dialoguebranch.web.service;
+package com.dialoguebranch.web.service.auth;
 
 import java.util.Date;
 
@@ -36,22 +36,27 @@ import java.util.Date;
  * 
  * @author Dennis Hofs (RRD)
  */
-public class AuthDetails {
-	private final String subject;
+public class AuthenticationInfo {
+
+	private final String username;
+	private final String[] roles;
 	private final Date issuedAt;
 	private final Date expiration;
 
 	/**
-	 * Constructs a new instance.
+	 * Constructs a new instance of an {@link AuthenticationInfo} object, containing the information
+	 * resulting from a successful authentication of a user to the Dialogue Branch Web Service.
 	 * 
-	 * @param subject the username of the authenticated user
-	 * @param issuedAt the date/time when the JWT token was issued, with
-	 * precision of seconds. Any milliseconds are discarded.
-	 * @param expiration the date/time when the JWT token expires, with
-	 * precision of seconds. Any milliseconds are discarded.
+	 * @param username the username of the authenticated user
+	 * @param roles a list of roles associated with this user
+	 * @param issuedAt the date/time when the JWT token was issued, with precision of seconds. Any
+	 *                 milliseconds are discarded.
+	 * @param expiration the date/time when the JWT token expires, with precision of seconds. Any
+	 *                   milliseconds are discarded.
 	 */
-	public AuthDetails(String subject, Date issuedAt, Date expiration) {
-		this.subject = subject;
+	public AuthenticationInfo(String username, String[] roles, Date issuedAt, Date expiration) {
+		this.username = username;
+		this.roles = roles;
 		long seconds = issuedAt.getTime() / 1000;
 		this.issuedAt = new Date(seconds * 1000);
 		if (expiration == null) {
@@ -67,12 +72,51 @@ public class AuthDetails {
 	 * 
 	 * @return the username of the authenticated user
 	 */
-	public String getSubject() {
-		return subject;
+	public String getUsername() {
+		return username;
+	}
+
+	/**
+	 * Returns the roles associated with this user as a {@link String} array.
+	 *
+	 * @return the roles associated with this user as a {@link String} array.
+	 */
+	public String[] getRoles() {
+		return roles;
+	}
+
+	/**
+	 * Returns the roles associated with this user as a comma-separated String.
+	 *
+	 * @return the roles associated with this user as a comma-separated String.
+	 */
+	public String getCommaSeparatedRolesString() {
+		StringBuilder result = new StringBuilder();
+
+		for(int i=0; i<roles.length; i++) {
+			result.append(roles[i]);
+			if(i+1 < roles.length) result.append(",");
+		}
+
+		return result.toString();
+	}
+
+	/**
+	 * Returns true if the givem {@code role} is in the list of roles for this {@link
+	 * AuthenticationInfo}, false otherwise.
+	 *
+	 * @param role the name of the role for which we want to check its existence
+	 * @return true if the role exists, false otherwise
+	 */
+	public boolean hasRole(String role) {
+		for(String s : roles) {
+			if(s.equals(role)) return true;
+		}
+		return false;
 	}
 	
 	/**
-	 * The date/time when the JWT token was issued, with precision of seconds.
+	 * Returns the date/time when the JWT token was issued, with precision of seconds.
 	 * 
 	 * @return the date/time when the JWT token was issued, with precision of
 	 * seconds
@@ -91,4 +135,5 @@ public class AuthDetails {
 	public Date getExpiration() {
 		return expiration;
 	}
+
 }

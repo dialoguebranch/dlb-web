@@ -27,6 +27,8 @@
 
 package com.dialoguebranch.web.service;
 
+import com.dialoguebranch.web.service.auth.AuthenticationInfo;
+import com.dialoguebranch.web.service.auth.basic.BasicUserCredentials;
 import com.dialoguebranch.web.service.auth.jwt.JWTUtils;
 import com.dialoguebranch.web.service.exception.*;
 import nl.rrd.utils.AppComponents;
@@ -57,7 +59,7 @@ public class QueryRunner {
 	 * @param response the HTTP response to add header WWW-Authenticate in case of 401 Unauthorized
 	 * @param delegateUser the "DialogueBranch user" for which this query should be run, or ""
 	 *                     if this should be for the currently authenticated user
-	 * @param application the {@link Application} context used to access {@link UserCredentials}
+	 * @param application the {@link Application} context used to access {@link BasicUserCredentials}
 	 *                    in a non-static way.
 	 * @return the query result
 	 * @throws HttpException if the query should return an HTTP error status
@@ -74,30 +76,34 @@ public class QueryRunner {
 			throw new BadRequestException("Unknown protocol version: " + versionName);
 		}
 		try {
-			UserCredentials user = null;
+			AuthenticationInfo authenticationInfo = null;
 
 			if (request != null)
-				user = validateToken(request, application);
+				authenticationInfo = validateToken(request, application);
 
 			// If the request was made for "this" (authenticated) user
 			if(delegateUser == null || delegateUser.isEmpty()) {
 				String queryUserName = "";
-				if(user != null) queryUserName = user.getUsername();
+				if(authenticationInfo != null) queryUserName = authenticationInfo.getUsername();
 				return query.runQuery(version, queryUserName);
 
 			// If the request was made for a specific delegateUser that happens to be "this"
 			// (authenticated) user
-			} else if((user != null) && delegateUser.equals(user.getUsername())) {
-				return query.runQuery(version, user.getUsername());
+			} else if((authenticationInfo != null) && delegateUser.equals(
+					authenticationInfo.getUsername())) {
+				return query.runQuery(version, authenticationInfo.getUsername());
 
 			// If "this" user is an admin
-			} else if((user != null) && (user.getRole().equals(UserCredentials.USER_ROLE_ADMIN))) {
-				return query.runQuery(version, user.getUsername());
+			} else if((authenticationInfo != null) && (authenticationInfo.hasRole(
+					BasicUserCredentials.USER_ROLE_ADMIN))) {
+				return query.runQuery(version, authenticationInfo.getUsername());
 
 			// Otherwise, something is wrong
 			} else {
+				String userIdentifier = "Unknown";
+				if(authenticationInfo != null) userIdentifier = authenticationInfo.getUsername();
 				throw new UnauthorizedException("Attempting to run query for delegateUser '"
-						+ delegateUser + "', but currently logged in user '" + user
+						+ delegateUser + "', but currently logged in user '" + userIdentifier
 						+ "' is not an admin.");
 			}
 		} catch (UnauthorizedException ex) {
@@ -115,15 +121,17 @@ public class QueryRunner {
 	/**
 	 * Validates the authentication token in the specified HTTP request. If no token is specified,
 	 * or the token is empty or invalid, it will throw an HttpException with 401 Unauthorized.
-	 * Otherwise, it will return the {@link UserCredentials} for the authenticated user.
+	 * Otherwise, it will return the {@link AuthenticationInfo} object representing the information
+	 * of the authenticated user.
 	 *
 	 * @param request the HTTP request
-	 * @param application the {@link Application} context used to access {@link UserCredentials} in
-	 *                    a non-static way.
-	 * @return the {@link UserCredentials} for the authenticated user
+	 * @param application the {@link Application} context used to access {@link
+	 *                    BasicUserCredentials} in a non-static way.
+	 * @return the {@link AuthenticationInfo} for the authenticated user
 	 * @throws UnauthorizedException if no token is specified, or the token is empty or invalid
 	 */
-	public static UserCredentials validateToken(HttpServletRequest request, Application application)
+	public static AuthenticationInfo validateToken(HttpServletRequest request,
+												  Application application)
 			throws UnauthorizedException {
 		Logger logger = AppComponents.getLogger(QueryRunner.class.getSimpleName());
 
@@ -150,21 +158,22 @@ public class QueryRunner {
 	/**
 	 * Validates the given token from request header, using the built-in user management and token
 	 * system. If it's empty or invalid, it will throw an HttpException with 401 Unauthorized.
-	 * Otherwise, it will return the user object for the authenticated user.
+	 * Otherwise, it will return an {@link AuthenticationInfo} object representing the information
+	 * of the authenticated user.
 	 *
 	 * @param token the authentication token (not null)
-	 * @param application the {@link Application} context used to access {@link UserCredentials} in
-	 *                    a non-static way.
-	 * @return the authenticated user
+	 * @param application the {@link Application} context used to access {@link
+	 *                    BasicUserCredentials} in a non-static way.
+	 * @return the {@link AuthenticationInfo}, representing the authenticated user
 	 * @throws UnauthorizedException if the token is empty or invalid
 	 */
-	private static UserCredentials validateDefaultToken(String token, Application application)
+	private static AuthenticationInfo validateDefaultToken(String token, Application application)
 			throws UnauthorizedException {
 		Logger logger = AppComponents.getLogger(QueryRunner.class.getSimpleName());
 
-		AuthDetails details;
+		AuthenticationInfo authenticationInfo;
 		try {
-			details = JWTUtils.isTokenValid(token);
+			authenticationInfo = JWTUtils.isTokenValid(token);
 		} catch (ExpiredJwtException ex) {
 			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_EXPIRED,
 					"Authentication token expired");
@@ -174,19 +183,21 @@ public class QueryRunner {
 					"Authentication token invalid");
 		}
 
-		UserCredentials user = application.getApplicationManager()
-				.getUserCredentialsForUsername(details.getSubject());
-		if (user == null) {
-            logger.info("Invalid authentication token: user not found: {}", details.getSubject());
+		BasicUserCredentials userCredentials = application.getApplicationManager()
+				.getUserCredentialsForUsername(authenticationInfo.getUsername());
+		if (userCredentials == null) {
+            logger.info("Invalid authentication token: user not found: {}",
+					authenticationInfo.getUsername());
 			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_INVALID,
 					"Authentication token invalid");
 		}
-		if (details.getExpiration() != null &&
-				details.getExpiration().getTime() < System.currentTimeMillis()) {
+		if (authenticationInfo.getExpiration() != null &&
+				authenticationInfo.getExpiration().getTime() < System.currentTimeMillis()) {
 			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_EXPIRED,
 					"Authentication token expired");
 		}
-		return user;
+
+		return authenticationInfo;
 	}
 
 	/**
@@ -195,16 +206,14 @@ public class QueryRunner {
 	 * the authenticated user.
 	 *
 	 * @param token the authentication token (not null)
-	 * @param application the {@link Application} context used to access {@link UserCredentials} in
-	 *                    a non-static way.
-	 * @return the authenticated user
+	 * @param application the {@link Application} context used to access the Keycloak manager in a
+	 *                    non-static way.
+	 * @return the {@link AuthenticationInfo} object representing the authenticated user
 	 * @throws UnauthorizedException if the token is empty or invalid
 	 */
-	private static UserCredentials validateKeycloakToken(String token, Application application)
+	private static AuthenticationInfo validateKeycloakToken(String token, Application application)
 			throws UnauthorizedException{
-		AuthDetails details;
-		details = application.getApplicationManager().getKeycloakManager().validateToken(token);
-		return new UserCredentials(details.getSubject(),"user");
-		// TODO: Get actual roles from Keycloak
+		return application.getApplicationManager().getKeycloakManager().validateToken(token);
 	}
+
 }

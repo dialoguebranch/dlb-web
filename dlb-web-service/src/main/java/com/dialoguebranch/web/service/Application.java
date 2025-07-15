@@ -105,8 +105,8 @@ ApplicationListener<ApplicationEvent> {
 			applicationManager = new ApplicationManager(
 					new ResourceFileLoader("dialogues"));
 		} catch(DLBServiceConfigurationException e) {
-			logger.error("Unable to initialize DialogueBranch Web Service " +
-					"due to configuration errors.");
+			logger.error("Unable to initialize DialogueBranch Web Service due to configuration " +
+					"errors.");
 			System.exit(1);
 		}
 	}

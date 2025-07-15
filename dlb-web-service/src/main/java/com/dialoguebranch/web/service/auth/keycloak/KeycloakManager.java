@@ -28,8 +28,9 @@
 
 package com.dialoguebranch.web.service.auth.keycloak;
 
-import com.dialoguebranch.web.service.AuthDetails;
+import com.dialoguebranch.web.service.auth.AuthenticationInfo;
 import com.dialoguebranch.web.service.Configuration;
+import com.dialoguebranch.web.service.exception.InvalidRoleException;
 import com.dialoguebranch.web.service.exception.UnauthorizedException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,9 +48,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -107,6 +106,10 @@ public class KeycloakManager {
             logger.info(" - Response OK.");
             KeycloakCertsResponse keyCloakResponse = response.getBody();
 
+            if(keyCloakResponse == null)
+                throw new InvalidKeySpecException("Unable to get key information " +
+                        "from response body.");
+
             for(KeycloakKey key : keyCloakResponse.getKeys()) {
                 BigInteger modulus = new BigInteger(
                         1, Base64.getUrlDecoder().decode(key.getN()));
@@ -123,7 +126,7 @@ public class KeycloakManager {
         }
     }
 
-    public AuthDetails validateToken(String token) throws UnauthorizedException {
+    public AuthenticationInfo validateToken(String token) throws UnauthorizedException {
 
         // Only on first time use, make sure the KeycloakManager is initialized (retrieved its
         // public keys).
@@ -171,8 +174,53 @@ public class KeycloakManager {
                 .parseSignedClaims(token)
                 .getPayload();
 
-        return new AuthDetails(
+        // Obtain the roles from token claims
+        String[] roles;
+        try {
+            @SuppressWarnings("unchecked")
+            LinkedHashMap<Object,Object> resourceAccessMap
+                    = (LinkedHashMap<Object, Object>) claims.get("resource_access");
+
+            if(resourceAccessMap == null)
+                throw new InvalidRoleException("Unable to extract role information from JWT " +
+                        "claims. No 'resource_access' found.");
+
+            @SuppressWarnings("unchecked")
+            LinkedHashMap<Object,Object> rolesMap
+                    = (LinkedHashMap<Object,Object>) resourceAccessMap.get("dlb-web-service");
+
+            if(rolesMap == null)
+                throw new InvalidRoleException(
+                        "Unable to extract role information from JWT claims. No 'roles' found.");
+
+            Set<Object> keys = rolesMap.keySet();
+            String rolesString = "";
+
+            // printing the elements of LinkedHashMap
+            for (Object key : keys) {
+                if (key.toString().equals("roles")) {
+                    rolesString = rolesMap.get(key).toString();
+                }
+            }
+
+            if(rolesString.isEmpty()) {
+                throw new InvalidRoleException(
+                        "Unable to extract role information from JWT claims. Empty roles.");
+            } else {
+                rolesString = rolesString.substring(1, rolesString.length() - 1);
+                rolesString = rolesString.replaceAll("\\s+", "");
+                roles = rolesString.split(",");
+            }
+
+        } catch(InvalidRoleException e) {
+            logger.warn("Unable to extract role information from Keycloak generated JWT. " +
+                    "Assuming single role: 'client'.");
+            roles = new String[]{"client"};
+        }
+
+        return new AuthenticationInfo(
                 claims.get("preferred_username",String.class),
+                roles,
                 claims.getIssuedAt(),
                 claims.getExpiration());
     }

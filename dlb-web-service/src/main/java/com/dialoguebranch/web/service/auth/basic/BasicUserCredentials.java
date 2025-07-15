@@ -25,26 +25,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.dialoguebranch.web.service;
+package com.dialoguebranch.web.service.auth.basic;
 
-public class UserCredentials {
+public class BasicUserCredentials {
 
-	public static final String USER_ROLE_USER = "user";
+	public static final String USER_ROLE_CLIENT = "client";
+	public static final String USER_ROLE_EDITOR = "editor";
 	public static final String USER_ROLE_ADMIN = "admin";
 
 	private final String username;
 	private String password = null;
-	private final String role;
+	private final String[] roles;
 
-	public UserCredentials(String username, String password, String role) {
+	public BasicUserCredentials(String username, String password, String[] roles) {
 		this.username = username;
 		this.password = password;
-		this.role = role;
+		this.roles = roles;
 	}
 
-	public UserCredentials(String username, String role) {
+	public BasicUserCredentials(String username, String[] roles) {
 		this.username = username;
-		this.role = role;
+		this.roles = roles;
 	}
 
 	public String getUsername() {
@@ -55,7 +56,24 @@ public class UserCredentials {
 		return password;
 	}
 
-	public String getRole() {
-		return role;
+	public String[] getRoles() {
+		return roles;
 	}
+
+	/**
+	 * Returns the roles associated with this user as a comma-separated String.
+	 *
+	 * @return the roles associated with this user as a comma-separated String.
+	 */
+	public String getCommaSeparatedRolesString() {
+		StringBuilder result = new StringBuilder();
+
+		for(int i=0; i<roles.length; i++) {
+			result.append(roles[i]);
+			if(i+1 < roles.length) result.append(",");
+		}
+
+		return result.toString();
+	}
+
 }

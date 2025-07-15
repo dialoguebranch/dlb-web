@@ -50,9 +50,9 @@ public class LoginResultPayload {
 			example = "john")
 	private String user;
 
-	@Schema(description = "The role of the authenticated user",
+	@Schema(description = "The roles of the authenticated user",
 			example = "admin")
-	private String role;
+	private String roles;
 
 	@Schema(description = "The JSON Web Token that was generated for the user",
 			example = "See https://jwt.io/")
@@ -72,12 +72,12 @@ public class LoginResultPayload {
 	 * token}.
 	 *
 	 * @param user the username of the user that performed a successful login.
-	 * @param role the role of the user associated with this {@link LoginResultPayload}.
+	 * @param roles the roles of the user associated with this {@link LoginResultPayload}.
 	 * @param token the JSON Web Token generated for the user as a {@link String}.
 	 */
-	public LoginResultPayload(String user, String role, String token) {
+	public LoginResultPayload(String user, String roles, String token) {
 		this.user = user;
-		this.role = role;
+		this.roles = roles;
 		this.token = token;
 	}
 
@@ -87,6 +87,7 @@ public class LoginResultPayload {
 
 	/**
 	 * Returns the username of the user that performed a successful login.
+	 *
 	 * @return the username of the user that performed a successful login.
 	 */
 	public String getUser() {
@@ -95,6 +96,7 @@ public class LoginResultPayload {
 
 	/**
 	 * Sets the username of the user that performed a successful login.
+	 *
 	 * @param user the username of the user that performed a successful login.
 	 */
 	public void setUser(String user) {
@@ -102,23 +104,27 @@ public class LoginResultPayload {
 	}
 
 	/**
-	 * Returns the role of the user associated with this {@link LoginResultPayload}.
-	 * @return the role of the user associated with this {@link LoginResultPayload}.
+	 * Returns the roles of the user associated with this {@link LoginResultPayload}.
+	 *
+	 * @return the roles of the user associated with this {@link LoginResultPayload}.
 	 */
-	public String getRole() {
-		return this.role;
+	public String getRoles() {
+		return this.roles;
 	}
 
 	/**
-	 * Sets the role of the user associated with this {@link LoginResultPayload}.
-	 * @param role the role of the user associated with this {@link LoginResultPayload}.
+	 * Sets the roles of the user associated with this {@link LoginResultPayload} as a comma
+	 * separated String.
+	 *
+	 * @param roles the role of the user associated with this {@link LoginResultPayload}.
 	 */
-	public void setRole(String role) {
-		this.role = role;
+	public void setRoles(String roles) {
+		this.roles = roles;
 	}
 
 	/**
 	 * Returns the JSON Web Token generated for the user as a {@link String}.
+	 *
 	 * @return the JSON Web Token generated for the user as a {@link String}.
 	 */
 	public String getToken() {
@@ -127,6 +133,7 @@ public class LoginResultPayload {
 
 	/**
 	 * Sets the JSON Web Token generated for the user as a {@link String}.
+	 *
 	 * @param token the JSON Web Token generated for the user as a {@link String}.
 	 */
 	public void setToken(String token) {

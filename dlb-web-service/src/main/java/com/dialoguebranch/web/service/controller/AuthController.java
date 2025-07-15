@@ -28,6 +28,9 @@
 package com.dialoguebranch.web.service.controller;
 
 import com.dialoguebranch.web.service.*;
+import com.dialoguebranch.web.service.auth.AuthenticationInfo;
+import com.dialoguebranch.web.service.auth.basic.BasicUserCredentials;
+import com.dialoguebranch.web.service.auth.basic.BasicUserFile;
 import com.dialoguebranch.web.service.controller.schema.AccessTokenResponse;
 import com.dialoguebranch.web.service.controller.schema.LoginParametersPayload;
 import com.dialoguebranch.web.service.controller.schema.LoginResultPayload;
@@ -236,35 +239,35 @@ public class AuthController {
 		String password = loginParametersPayload.getPassword();
 		Integer tokenExpiration = loginParametersPayload.getTokenExpiration();
 
-		UserCredentials userCredentials = UserFile.findUser(user);
+		BasicUserCredentials basicUserCredentials = BasicUserFile.findUser(user);
 		String invalidError = "Username or password is invalid";
-		if (userCredentials == null) {
+		if (basicUserCredentials == null) {
 			logger.info("Failed login attempt for user {}: user unknown.", user);
 			throw new UnauthorizedException(ErrorCode.INVALID_CREDENTIALS, invalidError);
 		}
-		if (!userCredentials.getPassword().equals(password)) {
+		if (!basicUserCredentials.getPassword().equals(password)) {
 			logger.info("Failed login attempt for user {}: invalid credentials.", user);
 			throw new UnauthorizedException(ErrorCode.INVALID_CREDENTIALS, invalidError);
 		}
-		logger.info("User {} logged in.", userCredentials.getUsername());
+		logger.info("User {} logged in.", basicUserCredentials.getUsername());
 
 		Date expiration = null;
 
 		ZonedDateTime now = DateTimeUtils.nowMs();
 
 		if (tokenExpiration != null) {
-			expiration = Date.from(now.plusMinutes(
-					loginParametersPayload.getTokenExpiration()).toInstant());
+			expiration = Date.from(now.plusMinutes(loginParametersPayload.getTokenExpiration())
+					.toInstant());
 		}
 
-		AuthDetails details = new AuthDetails(user, Date.from(now.toInstant()), expiration);
+		AuthenticationInfo authenticationInfo = new AuthenticationInfo(
+				user, basicUserCredentials.getRoles(), Date.from(now.toInstant()), expiration);
 
-		//String token = AuthToken.createToken(details);
-		String token = JWTUtils.generateToken(details);
+		String token = JWTUtils.generateToken(authenticationInfo);
 
 		return new LoginResultPayload(
-				userCredentials.getUsername(),
-				userCredentials.getRole(),
+				basicUserCredentials.getUsername(),
+				basicUserCredentials.getCommaSeparatedRolesString(),
 				token);
 	}
 
@@ -310,10 +313,16 @@ public class AuthController {
             logger.info("Call to Keycloak token end-point successful.");
             AccessTokenResponse keyCloakResponse = response.getBody();
             if (keyCloakResponse != null) {
+				// Validate the received token, in order to get the roles.
+				String accessToken = keyCloakResponse.getAccessToken();
+				AuthenticationInfo authenticationInfo =
+						application.getApplicationManager().getKeycloakManager()
+								.validateToken(accessToken);
+
                 LoginResultPayload loginResultPayload = new LoginResultPayload();
                 loginResultPayload.setToken(keyCloakResponse.getAccessToken());
                 loginResultPayload.setUser(loginParametersPayload.getUser());
-                loginResultPayload.setRole("user"); // TODO: Get actual Keycloak roles
+                loginResultPayload.setRoles(authenticationInfo.getCommaSeparatedRolesString());
                 return loginResultPayload;
             } else {
                 logger.warn("Failed login attempt (empty response) for user {}.",

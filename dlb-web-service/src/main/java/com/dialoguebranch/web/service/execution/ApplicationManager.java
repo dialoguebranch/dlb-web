@@ -34,12 +34,12 @@ import com.dialoguebranch.model.FileDescriptor;
 import com.dialoguebranch.parser.FileLoader;
 import com.dialoguebranch.parser.ProjectParser;
 import com.dialoguebranch.parser.ProjectParserResult;
+import com.dialoguebranch.web.service.auth.basic.BasicUserCredentials;
 import com.dialoguebranch.web.service.controller.schema.LoginParametersPayload;
 import com.dialoguebranch.web.service.controller.schema.LoginResultPayload;
 import com.dialoguebranch.web.service.exception.DLBServiceConfigurationException;
 import com.dialoguebranch.web.service.Configuration;
-import com.dialoguebranch.web.service.UserCredentials;
-import com.dialoguebranch.web.service.UserFile;
+import com.dialoguebranch.web.service.auth.basic.BasicUserFile;
 import com.dialoguebranch.web.service.auth.keycloak.KeycloakManager;
 import com.dialoguebranch.web.service.storage.AzureDataLakeStore;
 import com.dialoguebranch.model.Project;
@@ -69,7 +69,7 @@ public class ApplicationManager {
 	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
 	private final Project project;
 	private final List<UserService> activeUserServices = new ArrayList<>();
-	private final List<UserCredentials> userCredentials;
+	private final List<BasicUserCredentials> basicUserCredentials;
 	private String externalVariableServiceAPIToken;
 	private AzureDataLakeStore azureDataLakeStore = null;
 	private KeycloakManager keycloakManager = null;
@@ -125,11 +125,11 @@ public class ApplicationManager {
 		// Initialize User Manager
 		if(config.getKeycloakEnabled()) {
 			keycloakManager = new KeycloakManager();
-			userCredentials = new ArrayList<>(); // This is the (now unused) built-in list
+			basicUserCredentials = new ArrayList<>(); // This is the (now unused) built-in list
 		} else {
-			// Read all UserCredentials from users.xml
+			// Read all BasicUserCredentials from users.xml
 			try {
-				userCredentials = UserFile.read();
+				basicUserCredentials = BasicUserFile.read();
 			} catch (ParseException | IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -164,23 +164,23 @@ public class ApplicationManager {
 	}
 
 	/**
-	 * Returns the list of {@link UserCredentials} available for this {@link ApplicationManager}.
+	 * Returns the list of {@link BasicUserCredentials} available for this {@link ApplicationManager}.
 	 *
-	 * @return the list of {@link UserCredentials} available for this {@link ApplicationManager}.
+	 * @return the list of {@link BasicUserCredentials} available for this {@link ApplicationManager}.
 	 */
-	public List<UserCredentials> getUserCredentials() {
-		return userCredentials;
+	public List<BasicUserCredentials> getUserCredentials() {
+		return basicUserCredentials;
 	}
 
 	/**
-	 * Returns the {@link UserCredentials} object associated with the given {@code username}, or
+	 * Returns the {@link BasicUserCredentials} object associated with the given {@code username}, or
 	 * {@code null} if no such user is known.
 	 *
 	 * @param username the username of the user to look for.
-	 * @return the {@link UserCredentials} object or {@code null}.
+	 * @return the {@link BasicUserCredentials} object or {@code null}.
 	 */
-	public UserCredentials getUserCredentialsForUsername(String username) {
-		for(UserCredentials uc : userCredentials) {
+	public BasicUserCredentials getUserCredentialsForUsername(String username) {
+		for(BasicUserCredentials uc : basicUserCredentials) {
 			if(uc.getUsername().equals(username)) return uc;
 		}
 		return null;

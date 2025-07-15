@@ -33,7 +33,8 @@ import com.dialoguebranch.model.ResourceType;
 import com.dialoguebranch.web.service.Application;
 import com.dialoguebranch.web.service.ProtocolVersion;
 import com.dialoguebranch.web.service.QueryRunner;
-import com.dialoguebranch.web.service.UserCredentials;
+import com.dialoguebranch.web.service.auth.AuthenticationInfo;
+import com.dialoguebranch.web.service.auth.basic.BasicUserCredentials;
 import com.dialoguebranch.web.service.controller.schema.DialogueListPayload;
 import com.dialoguebranch.web.service.exception.ErrorCode;
 import com.dialoguebranch.web.service.exception.UnauthorizedException;
@@ -103,7 +104,8 @@ public class AdminController {
     @Operation(
         summary = "Retrieve a list of all available dialogues in the Web Service.",
         description = "This method returns a JSON object encapsulating a list of all dialogue " +
-            "names that are hosted by the running instance of this Dialogue Branch Web Service")
+            "names that are hosted by the running instance of this Dialogue Branch Web Service. " +
+            "Only accessible for users with the 'admin' role.")
     @RequestMapping(value="/list-dialogues", method=RequestMethod.GET)
     public DialogueListPayload listDialogues(
         HttpServletRequest request,
@@ -123,8 +125,8 @@ public class AdminController {
         String logInfo = "GET /v" + version + "/admin/list-dialogues";
         logger.info(logInfo);
 
-        UserCredentials userCredentials = QueryRunner.validateToken(request,application);
-        if(userCredentials.getRole().equals(UserCredentials.USER_ROLE_ADMIN)) {
+        AuthenticationInfo authenticationInfo = QueryRunner.validateToken(request,application);
+        if(authenticationInfo.hasRole(BasicUserCredentials.USER_ROLE_ADMIN)) {
             return doListDialogues();
         } else {
             throw new UnauthorizedException(ErrorCode.INSUFFICIENT_PRIVILEGES,
