@@ -3,5 +3,5 @@
 /.idea/
 /gradle.properties
 /src/main/resources/service.properties
-/config/users.xml
+/config/service-users.xml
 

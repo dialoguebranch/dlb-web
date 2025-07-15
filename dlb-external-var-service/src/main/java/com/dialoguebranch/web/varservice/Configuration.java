@@ -67,6 +67,22 @@ public class Configuration extends LinkedHashMap<String,String> {
 	/** Key name for the "dataDir" parameter. */
 	public static final String DATA_DIR = "dataDir";
 
+	// ---------- KeyCloak Configuration
+
+	/**
+	 * Name of the config parameter indicating whether the service should use an external Keycloak
+	 * service for handling user authorization.
+	 */
+	public static final String KEYCLOAK_ENABLED = "keycloakEnabled";
+
+	public static final String KEYCLOAK_BASEURL = "keycloakBaseUrl";
+
+	public static final String KEYCLOAK_REALM = "keycloakRealm";
+
+	public static final String KEYCLOAK_CLIENT_ID = "keycloakClientId";
+
+	public static final String KEYCLOAK_CLIENT_SECRET = "keycloakClientSecret";
+
 	private static final Object LOCK = new Object();
 	private static Configuration instance = null;
 
@@ -131,4 +147,43 @@ public class Configuration extends LinkedHashMap<String,String> {
 		}
 		return "";
 	}
+
+	/**
+	 * Returns the secret key used for encoding/decoding the JSON Web Tokens.
+	 *
+	 * @return the secret key used for encoding/decoding the JSON Web Tokens.
+	 */
+	public String getJwtSecretKey() {
+		if(get(JWT_SECRET_KEY) == null) return "";
+		else return get(JWT_SECRET_KEY);
+	}
+
+	// -------------------------------------------------------------------------
+	// -------------------- Getters: Keycloak Configuration --------------------
+	// -------------------------------------------------------------------------
+
+	public boolean getKeycloakEnabled() {
+		return Boolean.parseBoolean(get(KEYCLOAK_ENABLED));
+	}
+
+	public String getKeycloakBaseUrl() {
+		if(get(KEYCLOAK_BASEURL) == null) return "";
+		else return get(KEYCLOAK_BASEURL);
+	}
+
+	public String getKeycloakRealm() {
+		if(get(KEYCLOAK_REALM) == null) return "";
+		else return get(KEYCLOAK_REALM);
+	}
+
+	public String getKeycloakClientId() {
+		if(get(KEYCLOAK_CLIENT_ID) == null) return "";
+		else return get(KEYCLOAK_CLIENT_ID);
+	}
+
+	public String getKeycloakClientSecret() {
+		if(get(KEYCLOAK_CLIENT_SECRET) == null) return "";
+		else return get(KEYCLOAK_CLIENT_SECRET);
+	}
+
 }

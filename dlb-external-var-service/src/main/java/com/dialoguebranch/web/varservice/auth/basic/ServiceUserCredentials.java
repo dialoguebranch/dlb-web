@@ -1,6 +1,6 @@
 /*
  *
- *                Copyright (c) 2023-2024 Fruit Tree Labs (www.fruittreelabs.com)
+ *                Copyright (c) 2023-2025 Fruit Tree Labs (www.fruittreelabs.com)
  *
  *     This material is part of the DialogueBranch Platform, and is covered by the MIT License
  *      as outlined below. Based on original source code licensed under the following terms:
@@ -25,19 +25,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.dialoguebranch.web.varservice;
+package com.dialoguebranch.web.varservice.auth.basic;
 
 /**
- * A {@link UserCredentials} object models the information associated with a user of the service.
+ * A {@link ServiceUserCredentials} object models the information associated with a service-user of
+ * the service (i.e. the credentials for a software service, such as the Dialogue Branch Web Service
+ * to authenticate on behalf of any real user to this Dialogue Branch External Variable Service).
  *
- * @param username the username of the user.
- * @param password the password of the user.
- * @param role the role of the user (admin/user).
  * @author Harm op den Akker (Fruit Tree Labs)
  */
-public record UserCredentials(String username, String password, String role) {
+public class ServiceUserCredentials {
 
-	public static final String USER_ROLE_USER = "user";
-	public static final String USER_ROLE_ADMIN = "admin";
+	private final String username;
+	private String password = null;
+
+	public ServiceUserCredentials(String username, String password) {
+		this.username = username;
+		this.password = password;
+	}
+
+	public ServiceUserCredentials(String username) {
+		this.username = username;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
 
 }

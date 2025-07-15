@@ -27,6 +27,10 @@
 
 package com.dialoguebranch.web.varservice;
 
+import com.dialoguebranch.web.varservice.auth.AuthenticationInfo;
+import com.dialoguebranch.web.varservice.auth.basic.ServiceUserCredentials;
+import com.dialoguebranch.web.varservice.auth.basic.ServiceUserFile;
+import com.dialoguebranch.web.varservice.auth.jwt.JWTUtils;
 import com.dialoguebranch.web.varservice.exception.*;
 import nl.rrd.utils.AppComponents;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -39,7 +43,8 @@ import jakarta.servlet.http.HttpServletResponse;
 /**
  * This class can run queries. It can validate an authentication token.
  * 
- * @author Dennis Hofs (Roessingh Research and Development)
+ * @author Dennis Hofs
+ * @author Harm op den Akker
  */
 public class QueryRunner {
 
@@ -49,11 +54,10 @@ public class QueryRunner {
 	public QueryRunner() { }
 
 	/**
-	 * Runs a query on the authentication database. If the HTTP request is
-	 * specified, it will validate the authentication token. If there is no
-	 * token in the request, or the token is empty or invalid, it throws an
-	 * HttpException with 401 Unauthorized. If the request is null, it will not
-	 * validate anything. This can be used for a login or signup.
+	 * Runs a query on the authentication database. If the HTTP request is specified, it will
+	 * validate the authentication token. If there is no token in the request, or the token is empty
+	 * or invalid, it throws an HttpException with 401 Unauthorized. If the request is null, it will
+	 * not validate anything. This can be used for a login or signup.
 	 *
 	 * @param <T> the type of the query to be executed
 	 * @param query the query
@@ -62,39 +66,62 @@ public class QueryRunner {
 	 * @param request the HTTP request or null
 	 * @param response the HTTP response (to add header WWW-Authenticate in
 	 *                 case of 401 Unauthorized)
-	 * @param dlbUserId the "DialogueBranch user" for which this query should be run, or ""
+	 * @param requestUser the "DialogueBranch user" for which this query should be run, or ""
 	 *                   if this should be for the currently authenticated user
 	 * @return the query result
 	 * @throws HttpException if the query should return an HTTP error status
 	 * @throws Exception if an unexpected error occurs. This results in HTTP
 	 * error status 500 Internal Server Error.
 	 */
-	public static <T> T runQuery(AuthQuery<T> query,
-			String versionName, HttpServletRequest request,
-			HttpServletResponse response, String dlbUserId) throws HttpException, Exception {
+	public static <T> T runQuery(AuthQuery<T> query, String versionName, HttpServletRequest request,
+			HttpServletResponse response, String requestUser, Application application)
+			throws HttpException, Exception {
+
+		// Verify the protocol version
 		ProtocolVersion version;
 		try {
 			version = ProtocolVersion.forVersionName(versionName);
 		} catch (IllegalArgumentException ex) {
-			throw new BadRequestException("Unknown protocol version: " +
-					versionName);
+			throw new BadRequestException("Unknown protocol version: " + versionName);
 		}
+
 		try {
-			String user = null;
-			if (request != null)
-				user = validateToken(request);
-			// If the request was made for "this" (authenticated) user
-			// OR If the request was made for a specific dlbUserId that happens to be "this"
-			//   (authenticated) user
-			// OR If "this" user is an admin
-			if(dlbUserId.isEmpty()
-				|| (dlbUserId.equals(user)) //
-				|| UserFile.findUser(user).role().equals(UserCredentials.USER_ROLE_ADMIN)) {
-				return query.runQuery(version, user);
+			AuthenticationInfo authenticationInfo;
+
+			// In case of a login call
+			if(request == null) {
+				return query.runQuery(version, "");
 			} else {
-				throw new UnauthorizedException("Attempting to run query for dlbUserId '" +
-						dlbUserId + "', but currently logged in user '" +
-						user + "' is not an admin.");
+				authenticationInfo = validateToken(request, application);
+			}
+
+			if(requestUser == null || requestUser.isEmpty()) {
+				throw new BadRequestException("No user id specified for the request");
+
+			// For the next cases, we need the authentication info to not be null
+			} else if(authenticationInfo != null) {
+
+				// If Keycloak is enabled, the authenticated user can only request data of himself
+				// So, the "requestUser" must be the same as the username in the authentication
+				// details
+				if(application.getConfiguration().getKeycloakEnabled()) {
+					if (authenticationInfo.getUsername().equals(requestUser)) {
+						return query.runQuery(version, authenticationInfo.getUsername());
+					} else {
+						throw new UnauthorizedException("Authenticated user '" +
+							authenticationInfo.getUsername() + "' is not authorized to access " +
+							"data of requested user '"+requestUser+"'.");
+					}
+				} else {
+
+					// Otherwise, the authenticated user is a "service-user" as specified in the
+					// service-users.xml and he/she/it has access to any real user data
+					return query.runQuery(version, authenticationInfo.getUsername());
+				}
+
+			// Otherwise, something is wrong
+			} else {
+				throw new UnauthorizedException("Unknown user.");
 			}
 		} catch (UnauthorizedException ex) {
 			response.addHeader("WWW-Authenticate", "None");
@@ -102,9 +129,8 @@ public class QueryRunner {
 		} catch (HttpException ex) {
 			throw ex;
 		} catch (Exception ex) {
-			Logger logger = AppComponents.getLogger(
-					QueryRunner.class.getSimpleName());
-			logger.error("Internal Server Error: " + ex.getMessage(), ex);
+			Logger logger = AppComponents.getLogger(QueryRunner.class.getSimpleName());
+			logger.error("Internal Server Error: {}", ex.getMessage(), ex);
 			throw new InternalServerErrorException();
 		}
 	}
@@ -112,68 +138,98 @@ public class QueryRunner {
 	/**
 	 * Validates the authentication token in the specified HTTP request. If no token is specified,
 	 * or the token is empty or invalid, it will throw an HttpException with 401 Unauthorized.
-	 * Otherwise, it will return the username for the authenticated user.
-	 * 
+	 * Otherwise, it will return the {@link AuthenticationInfo} object representing the information
+	 * of the authenticated user.
+	 *
 	 * @param request the HTTP request
-	 * @return the authenticated user
-	 * @throws UnauthorizedException if no token is specified, or the token is
-	 * empty or invalid
-	 * @throws DatabaseException if a database error occurs
+	 * @param application the {@link Application} context used to access {@link
+	 *                    ServiceUserCredentials} in a non-static way.
+	 * @return the {@link AuthenticationInfo} for the authenticated user
+	 * @throws UnauthorizedException if no token is specified, or the token is empty or invalid
 	 */
-	private static String validateToken(HttpServletRequest request)
-			throws UnauthorizedException, DatabaseException {
+	public static AuthenticationInfo validateToken(HttpServletRequest request,
+												   Application application)
+			throws UnauthorizedException {
+		Logger logger = AppComponents.getLogger(QueryRunner.class.getSimpleName());
+
 		String token = request.getHeader("X-Auth-Token");
-		if (token != null)
-			return validateDefaultToken(token);
+
+		if (token != null) {
+
+			if (token.trim().isEmpty()) {
+				logger.info("Invalid authentication token: token empty");
+				throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_INVALID,
+						"Authentication token invalid");
+			}
+
+			if(application.getConfiguration().getKeycloakEnabled())
+				return validateKeycloakToken(token, application);
+			else
+				return validateDefaultToken(token);
+		}
+
 		throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_NOT_FOUND,
 				"Authentication token not found");
 	}
-	
+
 	/**
-	 * Validates a token from request header X-Auth-Token. If it's empty or invalid, it will throw
-	 * an HttpException with 401 Unauthorized. Otherwise, it will return the user object for the
-	 * authenticated user.
-	 * 
+	 * Validates the given token from request header, using the built-in user management and token
+	 * system. If it's empty or invalid, it will throw an HttpException with 401 Unauthorized.
+	 * Otherwise, it will return an {@link AuthenticationInfo} object representing the information
+	 * of the authenticated user.
+	 *
 	 * @param token the authentication token (not null)
-	 * @return the authenticated user
+	 * @return the {@link AuthenticationInfo}, representing the authenticated user
 	 * @throws UnauthorizedException if the token is empty or invalid
-	 * @throws DatabaseException if a database error occurs
 	 */
-	private static String validateDefaultToken(String token)
-			throws UnauthorizedException, DatabaseException {
-		Logger logger = AppComponents.getLogger(
-				QueryRunner.class.getSimpleName());
-		if (token.trim().isEmpty()) {
-			logger.info("Invalid authentication token: token empty");
-			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_INVALID,
-					"Authentication token invalid");
-		}
-		AuthDetails details;
+	private static AuthenticationInfo validateDefaultToken(String token)
+			throws UnauthorizedException {
+		Logger logger = AppComponents.getLogger(QueryRunner.class.getSimpleName());
+
+		AuthenticationInfo authenticationInfo;
 		try {
-			details = AuthToken.parseToken(token);
+			authenticationInfo = JWTUtils.isTokenValid(token);
 		} catch (ExpiredJwtException ex) {
 			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_EXPIRED,
 					"Authentication token expired");
 		} catch (JwtException ex) {
-			logger.info("Invalid authentication token: failed to parse: " +
-					ex.getMessage());
+			logger.info("Invalid authentication token: failed to parse: {}", ex.getMessage());
 			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_INVALID,
 					"Authentication token invalid");
 		}
-		UserCredentials user = UserFile.findUser(details.getSubject());
-		long now = System.currentTimeMillis();
-		if (user == null) {
-			logger.info("Invalid authentication token: user not found: " +
-					details.getSubject());
+
+		ServiceUserCredentials userCredentials = ServiceUserFile.findUser(
+				authenticationInfo.getUsername());
+		if (userCredentials == null) {
+			logger.info("Invalid authentication token: user not found: {}",
+					authenticationInfo.getUsername());
 			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_INVALID,
 					"Authentication token invalid");
 		}
-		if (details.getExpiration() != null &&
-				details.getExpiration().getTime() < now) {
+
+		if (authenticationInfo.getExpiration() != null &&
+				authenticationInfo.getExpiration().getTime() < System.currentTimeMillis()) {
 			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_EXPIRED,
 					"Authentication token expired");
 		}
-		return user.username();
+
+		return authenticationInfo;
+	}
+
+	/**
+	 * Validates the given Keycloak token from request header. If it's empty or invalid, it will
+	 * throw an HttpException with 401 Unauthorized. Otherwise, it will return the user object for
+	 * the authenticated user.
+	 *
+	 * @param token the authentication token (not null)
+	 * @param application the {@link Application} context used to access the Keycloak manager in a
+	 *                    non-static way.
+	 * @return the {@link AuthenticationInfo} object representing the authenticated user
+	 * @throws UnauthorizedException if the token is empty or invalid
+	 */
+	private static AuthenticationInfo validateKeycloakToken(String token, Application application)
+			throws UnauthorizedException{
+		return application.getKeycloakManager().validateToken(token);
 	}
 
 }

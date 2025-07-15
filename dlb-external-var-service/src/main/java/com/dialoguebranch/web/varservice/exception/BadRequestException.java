@@ -188,4 +188,23 @@ public class BadRequestException extends HttpException {
 		return new BadRequestException(error);
 	}
 
+	/**
+	 * Generate a {@link BadRequestException} with a specific error message and a {@link List} of
+	 * {@link HttpFieldError}s. The resulting {@link BadRequestException} will be a wrapper around a
+	 * {@link HttpError} with error code {@link ErrorCode#INVALID_INPUT}, and the given error
+	 * message.
+	 * @param errorMessage The (human-readable) error message.
+	 * @param fieldErrors the list of {@link HttpFieldError}s that make up the {@link
+	 *                    BadRequestException}
+	 * @return a new {@link BadRequestException} object.
+	 */
+	public static BadRequestException withMessageAndInvalidInput(String errorMessage,
+																 List<HttpFieldError> fieldErrors) {
+		HttpError error = new HttpError(ErrorCode.INVALID_INPUT, errorMessage);
+		for (HttpFieldError fieldError : fieldErrors) {
+			error.addFieldError(fieldError);
+		}
+		return new BadRequestException(error);
+	}
+
 }

@@ -27,6 +27,7 @@
 
 package com.dialoguebranch.web.varservice.controller;
 
+import com.dialoguebranch.web.varservice.Application;
 import com.dialoguebranch.web.varservice.ProtocolVersion;
 import com.dialoguebranch.web.varservice.QueryRunner;
 import nl.rrd.utils.AppComponents;
@@ -42,6 +43,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -69,6 +71,9 @@ import java.util.Random;
 @Tag(name = "2. Variables",
 	 description = "End-points for retrieving variables from- and sending to the service")
 public class VariablesController {
+
+	@Autowired
+	Application application;
 
 	/** The logger used for logging (debug) info to log files. */
 	private final Logger logger = AppComponents.getLogger(getClass().getSimpleName());
@@ -114,16 +119,16 @@ public class VariablesController {
 	 * @return A list of {@link DLBVariablePayload}s representing all updated variables.
 	 * @throws Exception in case of a network or service error.
 	 */
-	@Operation(summary = "Retrieve updates for a given list of DialogueBranch Variables",
+	@Operation(summary = "Retrieve updates for a given list of Dialogue Branch Variables",
 		description = "The use case for this end-point is as follows. Before executing a " +
-			"DialogueBranch Dialogue, you (or e.g. the DialogueBranch Web Service) may gather a " +
-			"list of all the DialogueBranch Variables used in its execution. Before starting the " +
-			"execution, you may call this end-point with the list of DialogueBranch Variables in " +
-			"order to verify that you have the latest values for all variables. In return, you " +
-			"will receive a list - which is a subset of the list you provided - that contains " +
-			"all DialogueBranch Variables for which an updated value is available. You are " +
-			"basically asking: 'Hey, I have this list of DialogueBranch Variables for this user, " +
-			"is this up-to-date?'." +
+			"Dialogue Branch Dialogue, you (or e.g. the Dialogue Branch Web Service) may gather " +
+			"a list of all the DialogueBranch Variables used in its execution. Before starting " +
+			"the execution, you may call this end-point with the list of Dialogue Branch " +
+			"Variables in order to verify that you have the latest values for all variables. In " +
+			"return, you will receive a list - which is a subset of the list you provided - " +
+			"that contains all Dialogue Branch Variables for which an updated value is " +
+			"available. You are basically asking: 'Hey, I have this list of Dialogue Branch " +
+			"Variables for this user, is this up-to-date?'." +
 			"<br/><br/>You must pass along the current timezone of the user (client) so that " +
 			"certain time sensitive variables may be correctly set according to the timezone of " +
 			"the user." +
@@ -167,18 +172,16 @@ public class VariablesController {
 		if(version == null) version = ProtocolVersion.getLatestVersion().versionName();
 
 		// Log this call to the service log
-		logger.info("POST /v"+version+"/variables/retrieve-updates?userId=" + userId +
-				"&timeZone=" + timeZone + " with the following variables:");
+        logger.info("POST /v{}/variables/retrieve-updates?userId={}&timeZone={} " +
+				"with the following variables:", version, userId, timeZone);
 
-		// Execute either for the provided userId or for the currently logged-in user
+		// Execute the request if a userId was provided.
 		if(userId.isEmpty()) {
-			return QueryRunner.runQuery(
-				(protocolVersion, user) -> executeRetrieveUpdates(user, timeZone, dlbVariables),
-				version, request, response, userId);
+			throw new BadRequestException("Missing 'userId' in request.");
 		} else {
 			return QueryRunner.runQuery(
 				(protocolVersion, user) -> executeRetrieveUpdates(userId, timeZone, dlbVariables),
-				version, request, response, userId);
+				version, request, response, userId, application);
 		}
 	}
 
@@ -231,15 +234,15 @@ public class VariablesController {
 				DateTimeFormatter formatter =
 						DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss Z");
 				String readableTimeString = paramZonedDateTime.format(formatter);
-				logger.info("The DialogueBranch Variable '"+parameterToUpdate.getName()+"' " +
-						"with value '"+parameterToUpdate.getValue()+"' " +
-						"was last updated at '"+parameterToUpdate.getUpdatedTime()+"', " +
-						"which was '"+readableTimeString+"' " +
-						"in time zone: '"+parameterToUpdate.getUpdatedTimeZone()+"'.");
+                logger.info("The Dialogue Branch Variable '{}' with value '{}' for user '{}' " +
+						"was last updated at '{}', which was '{}' in time zone: '{}'.",
+						parameterToUpdate.getName(), parameterToUpdate.getValue(), userId,
+						parameterToUpdate.getUpdatedTime(), readableTimeString,
+						parameterToUpdate.getUpdatedTimeZone());
 			} else {
-				logger.info("The DialogueBranch Variable '"+parameterToUpdate.getName()+"' " +
-						"with value '"+parameterToUpdate.getValue()+"' " +
-						"was last updated at an unknown time.");
+                logger.info("The DialogueBranch Variable '{}' with value '{}' for user '{}' " +
+						"was last updated at an unknown time.", parameterToUpdate.getName(),
+						parameterToUpdate.getValue(), userId);
 			}
 
 			// Handle the 'currentDate' case
@@ -355,22 +358,19 @@ public class VariablesController {
 		if(version == null) version = ProtocolVersion.getLatestVersion().versionName();
 
 		// Log this call to the service log
-		logger.info("POST /v"+version+"/variables/notify-updated?userId=" + userId +
-				"&timeZone=" + timeZone + " with the following variables:");
+        logger.info("POST /v{}/variables/notify-updated?userId={}&timeZone={} " +
+				"with the following variables:", version, userId, timeZone);
 		for(DLBVariablePayload dlbVariableResultParam : dlbVariables) {
 			logger.info(dlbVariableResultParam.toString());
 		}
 
-		// Execute either for the provided userId or for the currently logged-in user
-		// TODO: Not correct, an error should be thrown on an empty userId
+		// Execute the request if a userId was provided.
 		if(userId.isEmpty()) {
-			return QueryRunner.runQuery(
-				(protocolVersion, user) -> executeNotifyUpdated(user, timeZone, dlbVariables),
-				version, request, response, userId);
+			throw new BadRequestException("Missing 'userId' in request.");
 		} else {
 			return QueryRunner.runQuery(
 				(protocolVersion, user) -> executeNotifyUpdated(userId, timeZone, dlbVariables),
-				version, request, response, userId);
+				version, request, response, userId, application);
 		}
 
 	}
@@ -394,6 +394,13 @@ public class VariablesController {
 
 		// Parse the timeZone String into a ZoneId to verify it was given in the right format
 		ControllerFunctions.parseTimeZone(timeZone);
+
+        logger.info("The following parameters, for user '{}' in timeZone '{}' " +
+				"have been successfully updated: ", userId, timeZone);
+
+		for(DLBVariablePayload dlbVariableResultParam : params) {
+			logger.info(dlbVariableResultParam.toString());
+		}
 
 		return new ResponseEntity<ResponseEntity<?>>(HttpStatus.OK);
 	}
@@ -453,19 +460,16 @@ public class VariablesController {
 		if(version == null) version = ProtocolVersion.getLatestVersion().versionName();
 
 		// Log this call to the service log
-		logger.info("POST /v"+version+"/variables/notify-cleared?userId=" + userId +
-				"&timeZone=" + timeZone);
+        logger.info("POST /v{}/variables/notify-cleared?userId={}&timeZone={}",
+				version, userId, timeZone);
 
-		// Execute either for the provided userId or for the currently logged-in user
-		// TODO: Not correct, an error should be thrown on an empty userId
+		// Execute the request if a userId was provided.
 		if(userId.isEmpty()) {
-			return QueryRunner.runQuery(
-					(protocolVersion, user) -> executeNotifyCleared(user, timeZone),
-					version, request, response, userId);
+			throw new BadRequestException("Missing 'userId' in request.");
 		} else {
 			return QueryRunner.runQuery(
 					(protocolVersion, user) -> executeNotifyCleared(userId, timeZone),
-					version, request, response, userId);
+					version, request, response, userId, application);
 		}
 
 	}
@@ -487,6 +491,9 @@ public class VariablesController {
 
 		// Parse the timeZone String into a ZoneId to verify it was given in the right format
 		ControllerFunctions.parseTimeZone(timeZone);
+
+        logger.info("Variable information for user '{}' in timeZone '{}' " +
+				"was successfully cleared.", userId, timeZone);
 
 		return new ResponseEntity<ResponseEntity<?>>(HttpStatus.OK);
 	}

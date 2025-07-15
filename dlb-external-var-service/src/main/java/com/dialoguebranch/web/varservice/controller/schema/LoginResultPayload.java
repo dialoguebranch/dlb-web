@@ -47,16 +47,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class LoginResultPayload {
 
 	@Schema(description = "Username associated with this authentication token",
-			example = "user")
+			example = "john")
 	private String user;
 
 	@Schema(description = "The JSON Web Token that was generated for the user",
 			example = "See https://jwt.io/")
 	private String token;
 
-	// -------------------------------------------------------- //
-	// -------------------- Constructor(s) -------------------- //
-	// -------------------------------------------------------- //
+	// --------------------------------------------------------
+	// -------------------- Constructor(s) --------------------
+	// --------------------------------------------------------
 
 	/**
 	 * Creates an empty instance of a {@link LoginResultPayload}.
@@ -64,8 +64,9 @@ public class LoginResultPayload {
 	public LoginResultPayload() { }
 
 	/**
-	 * Creates an instance of a {@link LoginResultPayload} with a given {@code user} and
-	 * {@code token}.
+	 * Creates an instance of a {@link LoginResultPayload} with a given {@code user} and {@code
+	 * token}.
+	 *
 	 * @param user the username of the user that performed a successful login.
 	 * @param token the JSON Web Token generated for the user as a {@link String}.
 	 */
@@ -74,20 +75,22 @@ public class LoginResultPayload {
 		this.token = token;
 	}
 
-	// ------------------------------------------------------------- //
-	// -------------------- Getters and Setters -------------------- //
-	// ------------------------------------------------------------- //
+	// -------------------------------------------------------------
+	// -------------------- Getters and Setters --------------------
+	// -------------------------------------------------------------
 
 	/**
 	 * Returns the username of the user that performed a successful login.
+	 *
 	 * @return the username of the user that performed a successful login.
 	 */
 	public String getUser() {
-		return user;
+		return this.user;
 	}
 
 	/**
 	 * Sets the username of the user that performed a successful login.
+	 *
 	 * @param user the username of the user that performed a successful login.
 	 */
 	public void setUser(String user) {
@@ -96,6 +99,7 @@ public class LoginResultPayload {
 
 	/**
 	 * Returns the JSON Web Token generated for the user as a {@link String}.
+	 *
 	 * @return the JSON Web Token generated for the user as a {@link String}.
 	 */
 	public String getToken() {
@@ -104,6 +108,7 @@ public class LoginResultPayload {
 
 	/**
 	 * Sets the JSON Web Token generated for the user as a {@link String}.
+	 *
 	 * @param token the JSON Web Token generated for the user as a {@link String}.
 	 */
 	public void setToken(String token) {

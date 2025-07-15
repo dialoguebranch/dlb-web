@@ -29,12 +29,16 @@ package com.dialoguebranch.web.varservice.controller;
 
 import com.dialoguebranch.web.varservice.exception.BadRequestException;
 import com.dialoguebranch.web.varservice.exception.HttpFieldError;
+import jakarta.servlet.http.HttpServletRequest;
+import nl.rrd.utils.exception.ParseException;
+import nl.rrd.utils.http.URLParameters;
 
 import java.time.DateTimeException;
 import java.time.ZoneId;
 import java.time.zone.ZoneRulesException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The {@link ControllerFunctions} class offers a set of public, static methods
@@ -94,6 +98,34 @@ public class ControllerFunctions {
 			return result;
 		}
 
+	}
+
+	/**
+	 * Checks if the given {@code parameterNames} appear within the query string of the given {@link
+	 * HttpServletRequest} object, and throws an {@link BadRequestException} if that is the case.
+	 *
+	 * @param request the HTTPRequest object (to retrieve authentication headers and optional body
+	 *                parameters).
+	 * @param parameterNames a list of parameter names for which to check their appearance.
+	 * @throws BadRequestException if any of the given parameter names appear in the query string.
+	 */
+	public static void validateForbiddenQueryParams(HttpServletRequest request,
+													String... parameterNames)
+			throws BadRequestException {
+		if (request.getQueryString() == null)
+			return;
+		Map<String,String> params;
+		try {
+			params = URLParameters.parseParameterString(request.getQueryString());
+		} catch (ParseException ex) {
+			throw new BadRequestException(ex.getMessage());
+		}
+		for (String name : parameterNames) {
+			if (params.containsKey(name)) {
+				throw new BadRequestException(
+						"Query parameters not accepted, parameters must be set in the request body.");
+			}
+		}
 	}
 
 }

@@ -25,7 +25,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.dialoguebranch.web.varservice;
+package com.dialoguebranch.web.varservice.auth;
 
 import java.util.Date;
 
@@ -36,26 +36,24 @@ import java.util.Date;
  * 
  * @author Dennis Hofs (Roessingh Research and Development)
  */
-public class AuthDetails {
-	private final String subject;
+public class AuthenticationInfo {
+
+	private final String username;
 	private final Date issuedAt;
 	private final Date expiration;
 
-	// -------------------------------------------------------- //
-	// -------------------- Constructor(s) -------------------- //
-	// -------------------------------------------------------- //
-
 	/**
-	 * Constructs a new instance.
-	 * 
-	 * @param subject the username of the authenticated user
-	 * @param issuedAt the date/time when the JWT token was issued, with precision of seconds.
-	 *                 Any milliseconds are discarded.
-	 * @param expiration the date/time when the JWT token expires, with
-	 * precision of seconds. Any milliseconds are discarded.
+	 * Constructs a new instance of an {@link AuthenticationInfo} object, containing the information
+	 * resulting from a successful authentication of a user to the Dialogue Branch Web Service.
+	 *
+	 * @param username the username of the authenticated user
+	 * @param issuedAt the date/time when the JWT token was issued, with precision of seconds. Any
+	 *                 milliseconds are discarded.
+	 * @param expiration the date/time when the JWT token expires, with precision of seconds. Any
+	 *                   milliseconds are discarded.
 	 */
-	public AuthDetails(String subject, Date issuedAt, Date expiration) {
-		this.subject = subject;
+	public AuthenticationInfo(String username, Date issuedAt, Date expiration) {
+		this.username = username;
 		long seconds = issuedAt.getTime() / 1000;
 		this.issuedAt = new Date(seconds * 1000);
 		if (expiration == null) {
@@ -66,22 +64,18 @@ public class AuthDetails {
 		}
 	}
 
-	// ----------------------------------------------------------- //
-	// -------------------- Getters & Setters -------------------- //
-	// ----------------------------------------------------------- //
-
 	/**
 	 * Returns the username of the authenticated user.
-	 * 
+	 *
 	 * @return the username of the authenticated user
 	 */
-	public String getSubject() {
-		return subject;
+	public String getUsername() {
+		return username;
 	}
-	
+
 	/**
-	 * The date/time when the JWT token was issued, with precision of seconds.
-	 * 
+	 * Returns the date/time when the JWT token was issued, with precision of seconds.
+	 *
 	 * @return the date/time when the JWT token was issued, with precision of
 	 * seconds
 	 */
@@ -92,7 +86,7 @@ public class AuthDetails {
 	/**
 	 * Returns the date/time when the JWT token expires, with precision of
 	 * seconds.
-	 * 
+	 *
 	 * @return the date/time when the JWT token expires, with precision of
 	 * seconds
 	 */

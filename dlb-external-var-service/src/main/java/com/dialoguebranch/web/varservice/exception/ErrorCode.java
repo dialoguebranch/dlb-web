@@ -55,4 +55,7 @@ public class ErrorCode {
 	/** In case a wrong username/password combination is provided upon login. */
 	public static final String INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
 
+	/** In case an error occurred related to the Keycloak service. */
+	public static final String KEYCLOAK_ERROR = "KEYCLOAK_ERROR";
+
 }

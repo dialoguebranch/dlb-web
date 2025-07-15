@@ -27,6 +27,7 @@
 
 package com.dialoguebranch.web.varservice;
 
+import com.dialoguebranch.web.varservice.auth.keycloak.KeycloakManager;
 import nl.rrd.utils.AppComponents;
 import org.slf4j.Logger;
 import org.springframework.boot.SpringApplication;
@@ -61,6 +62,8 @@ ApplicationListener<ApplicationEvent> {
 
 	private final Long launchedTime = Instant.now().toEpochMilli();
 
+	private KeycloakManager keycloakManager = null;
+
 	// -------------------------------------------------------- //
 	// -------------------- Constructor(s) -------------------- //
 	// -------------------------------------------------------- //
@@ -92,8 +95,14 @@ ApplicationListener<ApplicationEvent> {
 
 		// By default, log uncaught exceptions to this logger
 		Thread.setDefaultUncaughtExceptionHandler((t, e) ->
-				logger.error("Uncaught exception: " + e.getMessage(), e)
+                logger.error("Uncaught exception: {}", e.getMessage(), e)
 		);
+
+		// Initialize User Manager
+		if(config.getKeycloakEnabled()) {
+			keycloakManager = new KeycloakManager();
+		}
+
 	}
 
 	// ----------------------------------------------------------- //
@@ -106,6 +115,14 @@ ApplicationListener<ApplicationEvent> {
 	 */
 	public Long getLaunchedTime() {
 		return launchedTime;
+	}
+
+	public KeycloakManager getKeycloakManager() {
+		return keycloakManager;
+	}
+
+	public Configuration getConfiguration() {
+		return config;
 	}
 
 	// ------------------------------------------------------- //
@@ -133,12 +150,18 @@ ApplicationListener<ApplicationEvent> {
 
 		if(event instanceof ContextRefreshedEvent) {
 			logger.info("========== DialogueBranch External Variable Service Dummy Startup Info ==========");
-			logger.info("=== Version: " + config.get(Configuration.VERSION));
-			logger.info("=== API Version: " + ProtocolVersion.getLatestVersion().versionName());
-			logger.info("=== Build: " + config.getBuildTime());
-			logger.info("=== Spring Version: "+ SpringVersion.getVersion());
-			logger.info("=== JDK Version: "+System.getProperty("java.version"));
-			logger.info("=== Java Version: "+ JavaVersion.getJavaVersion().toString());
+            logger.info("=== Version: {}", config.get(Configuration.VERSION));
+            logger.info("=== API Version: {}", ProtocolVersion.getLatestVersion().versionName());
+            logger.info("=== Build: {}", config.getBuildTime());
+            logger.info("=== Spring Version: {}", SpringVersion.getVersion());
+            logger.info("=== JDK Version: {}", System.getProperty("java.version"));
+            logger.info("=== Java Version: {}", JavaVersion.getJavaVersion().toString());
+			logger.info("=== Keycloak Authentication Enabled: {}", config.getKeycloakEnabled());
+			if(config.getKeycloakEnabled()) {
+				logger.info("===== Keycloak URL: {}", config.getKeycloakBaseUrl());
+				logger.info("===== Keycloak Realm: {}", config.getKeycloakRealm());
+				logger.info("===== Keycloak Client ID: {}", config.getKeycloakClientId());
+			}
 			logger.info("=======================================================================");
 		}
 	}
