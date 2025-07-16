@@ -164,6 +164,14 @@ public class AuthController {
 
 	}
 
+	/**
+	 * Handle the request to /auth/login using the native built-in, simple user authentication
+	 * system.
+	 *
+	 * @param loginParametersPayload the login parameters provided on the api end-point call.
+	 * @return a {@link LoginResultPayload} object containing the results of the login attempt.
+	 * @throws UnauthorizedException in case of an invalid user/pass or other issues.
+	 */
 	private LoginResultPayload doLoginNative(LoginParametersPayload loginParametersPayload)
 			throws UnauthorizedException {
 
@@ -200,6 +208,13 @@ public class AuthController {
 		return new LoginResultPayload(serviceUserCredentials.getUsername(), token);
 	}
 
+	/**
+	 * Handle the request to /auth/login using the Keycloak integration.
+	 *
+	 * @param loginParametersPayload the login parameters provided on the api end-point call.
+	 * @return a {@link LoginResultPayload} object containing the results of the login attempt.
+	 * @throws UnauthorizedException in case of an invalid user/pass or other issues.
+	 */
 	private LoginResultPayload doLoginKeycloak(LoginParametersPayload loginParametersPayload)
 			throws UnauthorizedException {
 

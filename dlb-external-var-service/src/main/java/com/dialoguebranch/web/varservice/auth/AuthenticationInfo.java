@@ -30,11 +30,12 @@ package com.dialoguebranch.web.varservice.auth;
 import java.util.Date;
 
 /**
- * The authentication details that are included in a JWT token. It contains the
- * username of the authenticated user, the date/time when the JWT token was
- * issued, and the date/time when the JWT token expires.
+ * The authentication details that are included in a JWT token. It contains the username of the
+ * authenticated user, the date/time when the JWT token was issued, and the date/time when the JWT
+ * token expires.
  * 
- * @author Dennis Hofs (Roessingh Research and Development)
+ * @author Dennis Hofs
+ * @author Harm op den Akker
  */
 public class AuthenticationInfo {
 
@@ -67,7 +68,7 @@ public class AuthenticationInfo {
 	/**
 	 * Returns the username of the authenticated user.
 	 *
-	 * @return the username of the authenticated user
+	 * @return the username of the authenticated user.
 	 */
 	public String getUsername() {
 		return username;
@@ -76,19 +77,16 @@ public class AuthenticationInfo {
 	/**
 	 * Returns the date/time when the JWT token was issued, with precision of seconds.
 	 *
-	 * @return the date/time when the JWT token was issued, with precision of
-	 * seconds
+	 * @return the date/time when the JWT token was issued, with precision of seconds.
 	 */
 	public Date getIssuedAt() {
 		return issuedAt;
 	}
 
 	/**
-	 * Returns the date/time when the JWT token expires, with precision of
-	 * seconds.
+	 * Returns the date/time when the JWT token expires, with precision of seconds.
 	 *
-	 * @return the date/time when the JWT token expires, with precision of
-	 * seconds
+	 * @return the date/time when the JWT token expires, with precision of seconds.
 	 */
 	public Date getExpiration() {
 		return expiration;

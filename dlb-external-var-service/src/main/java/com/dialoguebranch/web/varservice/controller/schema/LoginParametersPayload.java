@@ -44,16 +44,16 @@ import java.io.IOException;
 
 /**
  * A {@link LoginParametersPayload} object models the information that is sent in the request body
- * of a call to the /auth/login end-point as handled by the
- * {@link AuthController}, which can be serialized /
- * deserialized to the following JSON Format:
+ * of a call to the /auth/login end-point as handled by the {@link AuthController}, which can be
+ * serialized / deserialized to the following JSON Format:
  *
  * <pre>
  * {
  *   "user": "string",
  *   "password": "string",
  *   "tokenExpiration": 0
- * }</pre>
+ * }
+ * </pre>
  *
  * Note that the "tokenExpiration" parameter can either be an integer value of 0 or greater,
  * indicating the expiration time in minutes, or it can be the string "never" which means (similar
