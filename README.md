@@ -74,7 +74,7 @@ openssl req -x509 -out keycloakcert.pem -keyout keycloakkey.pem \
   panel. Your browser will probably show a warning about an insecure connection, because you are
   using a self-signed certificate. Log in with the default username and password (admin/admin), and do the following:
   * Make sure that the currently selected Realm is `dialoguebranch`.
-  * Create a user with e.g. username `user` and set a fixed password (e.g. `user`).
+  * Create a user with e.g. username `user`, fill in an email address, first name and last name, check "email verified" and set a fixed password (e.g. `user`).
 * Open in another tab: http://localhost:8089/dlb-web-service/. This should open up the Swagger pages
   for Dialogue Branch Web Service. Do the following:
   * Select the `/auth/login/` end-point, and click on "Try it out".
