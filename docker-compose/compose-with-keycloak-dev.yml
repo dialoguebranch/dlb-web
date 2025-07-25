@@ -5,6 +5,18 @@ name: dlb-web-service-keycloak-dev
 services:
 
   ###############################
+  # MariaDB #
+  ###############################
+
+  mariadb:
+    image: mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: password
+    volumes:
+      - mariadb:/var/lib/mysql
+      - ./import/mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+
+  ###############################
   # Dialogue Branch Web Service #
   ###############################
 
@@ -40,6 +52,10 @@ services:
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin 
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_DB: mariadb
+      KC_DB_URL_HOST: mariadb
+      KC_DB_USERNAME: root
+      KC_DB_PASSWORD: password
     command: 
       - start-dev 
       - --import-realm
@@ -49,3 +65,7 @@ services:
 networks:
   local_network:
     driver: bridge
+
+volumes:
+  mariadb:
+
