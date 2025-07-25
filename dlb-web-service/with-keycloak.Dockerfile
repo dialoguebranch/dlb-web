@@ -42,19 +42,3 @@ WORKDIR /usr/local/tomcat
 
 # Run Tomcat server
 CMD ["catalina.sh", "run"]
-
-### Install the SSL Certificate used by the Keycloack service
-
-# - Open a terminal and enter the {GIT}/dialoguebranch/dlb-web/docker-compose/certs/ folder.
-# - Run the following command to generate a certificate and key file for your localhost (see https://letsencrypt.org/docs/certificates-for-localhost/):
-#
-# openssl req -x509 -out keycloakcert.pem -keyout keycloakkey.pem \
-#  -newkey rsa:2048 -nodes -sha256 \
-#  -subj '/CN=keycloak' -extensions EXT -config <( \
-#   printf "[dn]\nCN=keycloak\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:keycloak\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
-
-# Take the keycloak SSL certificate and add it to the trusted keystore of the JVM running in this container
-# This will allow this DLB Web Service to communicate to a Keycloak instance over HTTPS
-COPY ./dlb-web/docker-compose/certs/keycloakcert.pem /usr/local/share/ca-certificates/keycloakcert.crt
-RUN keytool -noprompt -import -alias keycloak -file /usr/local/share/ca-certificates/keycloakcert.crt -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -trustcacerts
-

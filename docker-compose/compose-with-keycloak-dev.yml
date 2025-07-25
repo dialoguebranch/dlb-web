@@ -36,19 +36,15 @@ services:
     container_name: keycloak
     image: quay.io/keycloak/keycloak
     ports:
-      - "8081:8081"
-      - "8443:8443"
+      - "8080:8080"
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin 
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-      KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/dialoguebranch/certs/keycloakcert.pem
-      KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/dialoguebranch/certs/keycloakkey.pem
     command: 
       - start-dev 
       - --import-realm
     volumes:
       - ./import/dialoguebranch-realm.json:/opt/keycloak/data/import/dialoguebranch-realm.json
-      - ./certs:/opt/keycloak/dialoguebranch/certs
 
 networks:
   local_network:
