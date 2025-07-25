@@ -42,22 +42,6 @@ on your local machine follow these steps.
 ### 2.1. Prepare configuration
 * Create a `gradle.properties` file in the `dlb-web/dlb-web-service/` folder by copying the existing 
 `gradle.docker-with-keycloak.properties`. This contains workable default configuration values.
-* Generate local SSL certificates that will be used to secure the communication between the 
-  Dialogue Branch Web Service and the Keycloak server. 
-  * Open a terminal and enter the `{GIT}/dialoguebranch/dlb-web/docker-compose/certs/` folder (create it if it does not exist).
-  * Run the following command to generate a certificate and key file for your localhost (see 
-    https://letsencrypt.org/docs/certificates-for-localhost/):
-
-```
-openssl req -x509 -out keycloakcert.pem -keyout keycloakkey.pem \
- -newkey rsa:2048 -nodes -sha256 \
- -subj '/CN=keycloak' -extensions EXT -config <( \
-  printf "[dn]\nCN=keycloak\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:keycloak\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
-```
-  * If you are using Windows, you need to install OpenSSL first. You can find binaries at
-    https://github.com/openssl/openssl/wiki/Binaries or you can use Cygwin (https://www.cygwin.com).
-    If you open the Cygwin terminal, you can find your C: drive in /cygdrive/c. Navigate to
-    `{GIT}/dialoguebranch/dlb-web/docker-compose/certs/` and run the command above.
 
 ### 2.2. Build DLB Web Service Image
 * Make sure that Docker is running. You can install Docker Desktop on your computer.
@@ -65,12 +49,20 @@ openssl req -x509 -out keycloakcert.pem -keyout keycloakkey.pem \
 `/dlb-core-java/` repositories)
 * Enter the following command to build the Docker image: `docker build --no-cache -t dlb-web-service -f ./dlb-web/dlb-web-service/with-keycloak.Dockerfile .`
 
+For faster development, you may build the web service and its WAR file separately outside the Docker image and then bind to it from the Docker container.
+Then you don't need to rebuild the image at every change in your code.
+
+* Open a terminal and enter the `{GIT}/dialoguebranch/dlb-web/dlb-web-service` folder.
+* Build the dev image once with: `docker build --no-cache -t dlb-web-service:dev -f ./dlb-web/dlb-web-service/with-keycloak-dev.Dockerfile .`
+* Build the WAR file with this command: `./gradlew clean updateConfig build`. You can repeat this command when you want to deploy your code changes.
+
 ### 2.3. Running DLB Web Service and Keycloak using Docker Compose
 * In your terminal, navigate to the `{GIT}/dialoguebranch/dlb-web/docker-compose/` folder.
-* Run using `docker compose -f compose-with-keycloak.yml up`.
+* Run using `docker compose -f compose-with-keycloak.yml up`
+* Or, if you built the dev image, run `docker compose -f compose-with-keycloak-dev.yml up -d`, and then you can close this terminal.
 
 ### 2.4. Test the Setup
-* Open a web-browser in https://localhost:8443/. This should bring up the Keycloak administration
+* Open a web-browser in http://localhost:8080/. This should bring up the Keycloak administration
   panel. Your browser will probably show a warning about an insecure connection, because you are
   using a self-signed certificate. Log in with the default username and password (admin/admin), and do the following:
   * Make sure that the currently selected Realm is `dialoguebranch`.
