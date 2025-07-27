@@ -68,6 +68,15 @@ tasks.register('dockerComposeDown') {
     }
 }
 
+tasks.register('dockerComposeDownDev') {
+    doLast() {
+        def cmd = ['docker', 'compose', '-f', 'dlb-web/docker-compose/compose-with-keycloak-dev.yml', '--project-directory', '.', 'down']
+        def dir = file('..');
+
+        runShell(cmd, dir)
+    }
+}
+
 /**
  * Runs a shell command from the specified working directory, possibly with
  * extra environment variables. This function works on Linux, Windows and MacOS.
