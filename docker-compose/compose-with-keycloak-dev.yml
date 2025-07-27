@@ -14,7 +14,7 @@ services:
       MARIADB_ROOT_PASSWORD: ${mariadb_root_password}
     volumes:
       - mariadb:/var/lib/mysql
-      - ./import/mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./dlb-web/docker-compose/import/mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
   ##############
   # phpMyAdmin #
@@ -40,7 +40,7 @@ services:
       jwtSecretKey: ${dlb_web_service_jwt_secret_key}
       keycloakClientSecret: ${keycloak_client_secret}
     volumes:
-      - ../dlb-web-service/build/libs/dlb-web-service-1.2.5.war:/usr/local/tomcat/webapps/dlb-web-service.war
+      - ./dlb-web/dlb-web-service/build/libs/dlb-web-service-1.2.5.war:/usr/local/tomcat/webapps/dlb-web-service.war
 
   ########################################
   # Keycloak Identity Management Service #
