@@ -14,7 +14,7 @@ services:
       MARIADB_ROOT_PASSWORD: ${mariadb_root_password}
     volumes:
       - mariadb:/var/lib/mysql
-      - ./import/mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./dlb-web/docker-compose/import/mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
   ##############
   # phpMyAdmin #
