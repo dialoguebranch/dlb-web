@@ -56,13 +56,23 @@ Then you don't need to rebuild the image at every change in your code.
 * Open a terminal and enter the `{GIT}/dialoguebranch/dlb-web/dlb-web-service` folder.
 * Build the WAR file with this command: `./gradlew clean updateConfig build`. You can repeat this command when you want to deploy your code changes.
 
+### 2.2. Build DLB Web Client Image
+* Still in the terminal in your `{GIT}/dialoguebranch/` folder, enter the following command to build the Docker image: `docker build --no-cache -t dlb-web-client -f ./dlb-web/dlb-web-client-vuejs/Dockerfile .`
+
+In the development environment, this image will not be used. You can run the client in development mode with these steps:
+
+* Open a terminal and enter the `{GIT}/dialoguebranch/dlb-web/dlb-web-client-vuejs` folder.
+* Start the client with these commands: \
+  `npm install` (only the first time or when you change dependencies)\
+  `npm run dev`
+
 ### 2.3. Running DLB Web Service and Keycloak using Docker Compose
 * In your terminal, navigate to the `{GIT}/dialoguebranch/dlb-web/docker-compose/` folder.
 * Run using `docker compose -f compose-with-keycloak.yml up`
 * Or, if you built the dev image, run `docker compose -f compose-with-keycloak-dev.yml up -d`, and then you can close this terminal.
 
 ### 2.4. Test the Setup
-* Open a web-browser in http://localhost:8080/. This should bring up the Keycloak administration
+* Open a web-browser in http://localhost:8081/. This should bring up the Keycloak administration
   panel. Log in with the default username and password (admin/admin), and do the following:
   * Make sure that the currently selected Realm is `dialoguebranch` (click Manage realms).
   * Create a user with e.g. username `user`, fill in an email address, first name and last name, check "email verified".
@@ -81,6 +91,9 @@ Then you don't need to rebuild the image at every change in your code.
   "token": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIi..."
 }
 ```
+
+* Open in another tab: http://localhost:8080/. This should open the web client where you can log in with user / user.
+* Open in another tab: http://localhost:8100/. This should open phpMyAdmin where you can access the MariaDB database. Log in with root / password.
 
 ## 3. Deploying a standalone DLB External Variable Service using Docker
 

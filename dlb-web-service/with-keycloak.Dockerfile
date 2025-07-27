@@ -1,5 +1,5 @@
 ### From your GIT\dialoguebranch folder (containing dlb-web and dlb-core-java repositories)
-### docker build --no-cache -t dlb-web-service:1.2.5 -f dlb-web/Dockerfile .
+### docker build --no-cache -t dlb-web-service:1.2.5 -f dlb-web/dlb-web-service/with-keycloak.Dockerfile .
 ### docker run -itd -p 8089:8089 --name DLB_Web_Service dlb-web-service:1.2.5
 ### (User 'docker system prune -a') to clean up the cache and free up disk space
 

@@ -1,12 +1,12 @@
 # Run using: "docker compose -f compose-with-keycloak.yml up" from the {GIT}/dialoguebranch/dlb-web/docker-compose/ folder
 
-name: dlb-web-service-keycloak
+name: dlb-web-keycloak
 
 services:
 
-  ###############################
+  ###########
   # MariaDB #
-  ###############################
+  ###########
 
   mariadb:
     image: mariadb
@@ -15,6 +15,17 @@ services:
     volumes:
       - mariadb:/var/lib/mysql
       - ./import/mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+
+  ##############
+  # phpMyAdmin #
+  ##############
+
+  phpmyadmin:
+    image: phpmyadmin
+    environment:
+      PMA_HOST: mariadb
+    ports:
+      - "8100:80"
 
   ###############################
   # Dialogue Branch Web Service #
@@ -30,13 +41,10 @@ services:
   # Dialogue Branch Web Client #
   ##############################
 
-  #dlb-web-client:
-  #  container_name: dlb-web-client
-  #  image: httpd:2.4
-  #  ports:
-  #    - 127.0.0.1:8080:80
-  #  volumes:
-  #    - ../dlb-web-client:/usr/local/apache2/htdocs
+  dlb-web-client:
+   image: dlb-web-client
+   ports:
+     - "8080:80"
 
   ########################################
   # Keycloak Identity Management Service #
@@ -46,7 +54,7 @@ services:
     container_name: keycloak
     image: quay.io/keycloak/keycloak
     ports:
-      - "8080:8080"
+      - "8081:8080"
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin 
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
