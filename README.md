@@ -57,7 +57,8 @@ Then you don't need to rebuild the image at every change in your code.
 * Build the WAR file with this command: `./gradlew clean updateConfig build`. You can repeat this command when you want to deploy your code changes.
 
 ### 2.2. Build DLB Web Client Image
-* Still in the terminal in your `{GIT}/dialoguebranch/` folder, enter the following command to build the Docker image: `docker build --no-cache -t dlb-web-client -f ./dlb-web/dlb-web-client-vuejs/Dockerfile .`
+* Make sure that you are still in the terminal in your `{GIT}/dialoguebranch/` folder.
+* Enter the following command to build the Docker image: `docker build --no-cache -t dlb-web-client -f ./dlb-web/dlb-web-client-vuejs/Dockerfile .`
 
 In the development environment, this image will not be used. You can run the client in development mode with these steps:
 
@@ -67,9 +68,11 @@ In the development environment, this image will not be used. You can run the cli
   `npm run dev`
 
 ### 2.3. Running DLB Web Service and Keycloak using Docker Compose
-* In your terminal, navigate to the `{GIT}/dialoguebranch/dlb-web/docker-compose/` folder.
-* Run using `docker compose -f compose-with-keycloak.yml up`
-* Or, if you built the dev image, run `docker compose -f compose-with-keycloak-dev.yml up -d`, and then you can close this terminal.
+* Make sure that you are still in the terminal in your `{GIT}/dialoguebranch/` folder.
+* Run using `docker compose -f dlb-web/docker-compose/compose-with-keycloak.yml up -d`
+* Or, if you built the dev image, run `docker compose -f dlb-web/docker-compose/compose-with-keycloak-dev.yml up -d`.
+
+The first time it may take a while until Keycloak is fully initialized and running.
 
 ### 2.4. Test the Setup
 * Open a web-browser in http://localhost:8081/. This should bring up the Keycloak administration
