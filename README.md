@@ -96,7 +96,8 @@ The first time it may take a while until Keycloak is fully initialized and runni
 ```
 
 * Open in another tab: http://localhost:8080/. This should open the web client where you can log in with user / user.
-* Open in another tab: http://localhost:8100/. This should open phpMyAdmin where you can access the MariaDB database. Log in with root / password.
+* Open in another tab: http://localhost:8100/. This should open phpMyAdmin where you can access the MariaDB database. Log in with root / password. \
+  You can complete its configuration by creating a `phpmyadmin` database. Check the warning on the home page and click "Find out why".
 
 ## 3. Deploying a standalone DLB External Variable Service using Docker
 
