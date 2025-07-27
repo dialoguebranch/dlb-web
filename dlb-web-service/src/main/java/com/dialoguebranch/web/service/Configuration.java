@@ -27,6 +27,8 @@
 
 package com.dialoguebranch.web.service;
 
+import nl.rrd.utils.AppComponent;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -34,9 +36,8 @@ import java.io.Serial;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Properties;
-
-import nl.rrd.utils.AppComponent;
 
 /**
  * Configuration of the Dialogue Branch Web Service. This is initialized from resources {@code
@@ -490,4 +491,18 @@ public class Configuration extends LinkedHashMap<String,String> {
 		return DIRECTORY_NAME_VARIABLES;
 	}
 
+	@Override
+	public String get(Object key) {
+		// first try to find the key in the environment variables
+		if (key instanceof String stringKey) {
+			Map<String, String> env = System.getenv();
+			for (String envKey : env.keySet()) {
+				if (envKey.equalsIgnoreCase(stringKey)) {
+					return env.get(envKey);
+				}
+			}
+		}
+
+		return super.get(key);
+	}
 }

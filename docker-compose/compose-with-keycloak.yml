@@ -36,6 +36,9 @@ services:
     image: dlb-web-service
     ports:
       - 127.0.0.1:8089:8089
+    environment:
+      jwtSecretKey: ${dlb_web_service_jwt_secret_key}
+      keycloakClientSecret: ${keycloak_client_secret}
 
   ##############################
   # Dialogue Branch Web Client #
