@@ -42,25 +42,21 @@ on your local machine follow these steps.
 ### 2.1. Prepare configuration
 * Create a `gradle.properties` file in the `dlb-web/dlb-web-service/` folder by copying the existing 
 `gradle.docker-with-keycloak.properties`. This contains workable default configuration values.
+* Create a `secrets.properties` file in the `dlb-web` folder by copying the existing `secrets.example.properties`.
 
-### 2.2. Build DLB Web Service Image
+### 2.2. Build Docker images
 * Make sure that Docker is running. You can install Docker Desktop on your computer.
-* Open a terminal and enter your `{GIT}/dialoguebranch/` folder (containing `/dlb-web/` and 
-`/dlb-core-java/` repositories)
-* Enter the following command to build the Docker image: `docker build --no-cache -t dlb-web-service -f ./dlb-web/dlb-web-service/with-keycloak.Dockerfile .`
+* Open a terminal and enter your `{GIT}/dialoguebranch/dlb-web` folder.
+* Enter the following command to build the Docker image: `./gradlew dockerBuild`
 
 For faster development, you may build the web service and its WAR file separately outside the Docker image and then bind to it from the Docker container.
 Then you don't need to rebuild the image at every change in your code.
 
-* Build the dev image once with: `docker build --no-cache -t dlb-web-service:dev -f ./dlb-web/dlb-web-service/with-keycloak-dev.Dockerfile .`
+* Build the dev image once with: `./gradlew dockerBuildDev`
 * Open a terminal and enter the `{GIT}/dialoguebranch/dlb-web/dlb-web-service` folder.
 * Build the WAR file with this command: `./gradlew clean updateConfig build`. You can repeat this command when you want to deploy your code changes.
 
-### 2.2. Build DLB Web Client Image
-* Make sure that you are still in the terminal in your `{GIT}/dialoguebranch/` folder.
-* Enter the following command to build the Docker image: `docker build --no-cache -t dlb-web-client -f ./dlb-web/dlb-web-client-vuejs/Dockerfile .`
-
-In the development environment, this image will not be used. You can run the client in development mode with these steps:
+You can run the client in development mode with these steps:
 
 * Open a terminal and enter the `{GIT}/dialoguebranch/dlb-web/dlb-web-client-vuejs` folder.
 * Start the client with these commands: \
@@ -68,9 +64,9 @@ In the development environment, this image will not be used. You can run the cli
   `npm run dev`
 
 ### 2.3. Running DLB Web Service and Keycloak using Docker Compose
-* Make sure that you are still in the terminal in your `{GIT}/dialoguebranch/` folder.
-* Run using `docker compose -f dlb-web/docker-compose/compose-with-keycloak.yml up -d`
-* Or, if you built the dev image, run `docker compose -f dlb-web/docker-compose/compose-with-keycloak-dev.yml up -d`.
+* Make sure that you are still in the terminal in your `{GIT}/dialoguebranch/dlb-web` folder.
+* Run using `./gradlew dockerComposeUp`
+* Or, if you built the dev image, run `./gradlew dockerComposeUpDev`.
 
 The first time it may take a while until Keycloak is fully initialized and running.
 

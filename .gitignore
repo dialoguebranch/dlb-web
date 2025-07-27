@@ -2,3 +2,8 @@
 /.gradle/
 /.idea/
 /docker-compose/certs/*.pem
+build
+secrets.properties
+
+# Ignore Gradle project-specific cache directory
+.gradle
