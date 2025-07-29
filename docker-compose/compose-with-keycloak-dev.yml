@@ -62,7 +62,7 @@ services:
     entrypoint:
       - /bin/sh
       - -c
-      - mkdir /opt/keycloak/data/import && sed -e "s/\(\"secret\"\s*:\s*\)\"[^\"]*\"/\1\"${KEYCLOAK_CLIENT_SECRET}\"/" /opt/keycloak/data/import-source/dialoguebranch-realm.json > /opt/keycloak/data/import/dialoguebranch-realm.json && /opt/keycloak/bin/kc.sh start-dev --import-realm
+      - mkdir /opt/keycloak/data/import && sed -e "s/\(\"secret\"\s*:\s*\)\"[^\"]*\"/\1\"${keycloak_client_secret}\"/" /opt/keycloak/data/import-source/dialoguebranch-realm.json > /opt/keycloak/data/import/dialoguebranch-realm.json && /opt/keycloak/bin/kc.sh start-dev --import-realm
     volumes:
       - ./dlb-web/docker-compose/import/dialoguebranch-realm.json:/opt/keycloak/data/import-source/dialoguebranch-realm.json
 
