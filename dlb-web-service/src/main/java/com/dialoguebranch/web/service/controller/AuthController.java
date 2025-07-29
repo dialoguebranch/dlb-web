@@ -51,6 +51,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.ZonedDateTime;
@@ -303,9 +304,14 @@ public class AuthController {
 					HttpMethod.POST,
 					entity,
 					AccessTokenResponse.class);
-		} catch(Exception ex) {
+		} catch(ResourceAccessException rae) {
+			logger.error("Unable to reach keycloak service.",rae);
 			throw new UnauthorizedException(ErrorCode.KEYCLOAK_ERROR,
-					"Error contacting Keycloak service.");
+					"Unable to process login request. Unable to reach Keycloak service.");
+		} catch(Exception ex) {
+			logger.error("Exception while forwarding login attempt to keycloak.",ex);
+			throw new UnauthorizedException(ErrorCode.KEYCLOAK_ERROR,
+					"Unable to process login request. An unknown error has occurred.");
 			// TODO: Catch additional details and add as fieldErrors to the UnauthorizedException
 		}
 
