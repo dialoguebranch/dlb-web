@@ -80,11 +80,10 @@ services:
       KC_DB_URL_HOST: mariadb
       KC_DB_USERNAME: root
       KC_DB_PASSWORD: ${mariadb_root_password}
-      KEYCLOAK_CLIENT_SECRET: ${keycloak_client_secret}
     entrypoint:
       - /bin/sh
       - -c
-      - mkdir /opt/keycloak/data/import && sed -e "s/\(\"secret\"\s*:\s*\)\"[^\"]*\"/\1\"${KEYCLOAK_CLIENT_SECRET}\"/" /opt/keycloak/data/import-source/dialoguebranch-realm.json > /opt/keycloak/data/import/dialoguebranch-realm.json && /opt/keycloak/bin/kc.sh start-dev --import-realm
+      - mkdir -p /opt/keycloak/data/import && sed -e "s/\(\"secret\"\s*:\s*\)\"[^\"]*\"/\1\"${keycloak_client_secret}\"/" /opt/keycloak/data/import-source/dialoguebranch-realm.json > /opt/keycloak/data/import/dialoguebranch-realm.json && /opt/keycloak/bin/kc.sh start-dev --import-realm
     volumes:
       - ./dlb-web/docker-compose/import/dialoguebranch-realm.json:/opt/keycloak/data/import-source/dialoguebranch-realm.json
 
