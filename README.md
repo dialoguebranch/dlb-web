@@ -52,9 +52,13 @@ on your local machine follow these steps.
 For faster development, you may build the web service and its WAR file separately outside the Docker image and then bind to it from the Docker container.
 Then you don't need to rebuild the image at every change in your code.
 
-* Build the dev image once with: `./gradlew dockerBuildDev`
+* Build the dev image once with: \
+  `./gradlew dockerBuildDev`
 * Open a terminal and enter the `{GIT}/dialoguebranch/dlb-web/dlb-web-service` folder.
-* Build the WAR file with this command: `./gradlew clean updateConfig build -PbuildEnv=dev`. You can repeat this command when you want to deploy your code changes.
+* Build the WAR file with this command: \
+  `./gradlew clean updateConfig build -PbuildEnv=dev`.
+* When you want to deploy code changes afterwards, you only need to run this command: \
+  `./gradlew build -PbuildEnv=dev`.
 
 You can run the client in development mode with these steps:
 
@@ -65,8 +69,10 @@ You can run the client in development mode with these steps:
 
 ### 2.3. Running DLB Web Service and Keycloak using Docker Compose
 * Make sure that you are still in the terminal in your `{GIT}/dialoguebranch/dlb-web` folder.
-* Run using `./gradlew dockerComposeUp`
-* Or, if you built the dev image, run `./gradlew dockerComposeUpDev`.
+* Run using: \
+  `./gradlew dockerComposeUp`
+* Or, if you built the dev image, run: \
+  `./gradlew dockerComposeUpDev`.
 
 The first time it may take a while until Keycloak is fully initialized and running.
 
