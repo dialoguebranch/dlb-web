@@ -39,6 +39,7 @@ services:
     environment:
       jwtSecretKey: ${dlb_web_service_jwt_secret_key}
       keycloakClientSecret: ${keycloak_client_secret}
+      mariadbPassword: ${mariadb_root_password}
     volumes:
       - ./dlb-web/dlb-web-service/build/libs/dlb-web-service-1.2.5.war:/usr/local/tomcat/webapps/dlb-web-service.war
 

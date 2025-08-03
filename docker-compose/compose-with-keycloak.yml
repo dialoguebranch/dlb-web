@@ -39,6 +39,7 @@ services:
     environment:
       jwtSecretKey: ${dlb_web_service_jwt_secret_key}
       keycloakClientSecret: ${keycloak_client_secret}
+      mariadbPassword: ${mariadb_root_password}
 
   ##############################
   # Dialogue Branch Web Client #

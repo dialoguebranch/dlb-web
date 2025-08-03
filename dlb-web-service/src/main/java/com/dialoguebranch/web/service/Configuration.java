@@ -86,6 +86,18 @@ public class Configuration extends LinkedHashMap<String,String> {
 	 */
 	public static final String ALLOW_ANONYMOUS_USERS = "allowAnonymousUsers";
 
+	// ---------- Database Configuration
+
+	public static final String MARIADB_HOST = "mariadbHost";
+
+	public static final String MARIADB_PORT = "mariadbPort";
+
+	public static final String MARIADB_USER = "mariadbUser";
+
+	public static final String MARIADB_PASSWORD = "mariadbPassword";
+
+	public static final String MARIADB_DATABASE = "mariadbDatabase";
+
 	// ---------- KeyCloak Configuration
 
 	/**
@@ -294,6 +306,39 @@ public class Configuration extends LinkedHashMap<String,String> {
 	 */
 	public boolean getAllowAnonymousUsers() {
 		return Boolean.parseBoolean(get(ALLOW_ANONYMOUS_USERS));
+	}
+
+	// -------------------------------------------------------------------------
+	// -------------------- Getters: Database Configuration --------------------
+	// -------------------------------------------------------------------------
+
+	public String getMariadbHost() {
+		if (get(MARIADB_HOST) == null) return "";
+		return get(MARIADB_HOST);
+	}
+
+	public int getMariadbPort() {
+		if (get(MARIADB_PORT) == null) return 3306;
+		try {
+			return Integer.parseInt(get(MARIADB_PORT));
+		} catch (NumberFormatException ex) {
+			return 3306;
+		}
+	}
+
+	public String getMariadbUser() {
+		if (get(MARIADB_USER) == null) return "";
+		return get(MARIADB_USER);
+	}
+
+	public String getMariadbPassword() {
+		if (get(MARIADB_PASSWORD) == null) return "";
+		return get(MARIADB_PASSWORD);
+	}
+
+	public String getMariadbDatabase() {
+		if (get(MARIADB_DATABASE) == null) return "";
+		return get(MARIADB_DATABASE);
 	}
 
 	// -------------------------------------------------------------------------
