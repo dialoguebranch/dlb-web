@@ -29,7 +29,7 @@ public class DatabaseService {
 				com.dialoguebranch.web.service.Configuration.getInstance();
 
 		return new HibernatePersistenceConfiguration("DialogueBranch")
-				.managedClass(DBVariable.class)
+//				.managedClass(DBVariable.class)
 				.jdbcUrl("jdbc:mariadb://" + cfg.getMariadbHost() + ":" + cfg.getMariadbPort() +
 						"/" + cfg.getMariadbDatabase())
 				.jdbcCredentials(cfg.getMariadbUser(), cfg.getMariadbPassword())
