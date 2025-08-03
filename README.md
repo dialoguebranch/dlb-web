@@ -52,6 +52,7 @@ on your local machine follow these steps.
 For faster development, you may build the web service and its WAR file separately outside the Docker image and then bind to it from the Docker container.
 Then you don't need to rebuild the image at every change in your code.
 
+* Open `{GIT}/dialoguebranch/dlb-web/dlb-web-service/gradle.properties` and set `buildEnv` to `dev`. This disables compiling Javadoc and sources, so the build is faster.
 * Build the dev image once with: `./gradlew dockerBuildDev`
 * Open a terminal and enter the `{GIT}/dialoguebranch/dlb-web/dlb-web-service` folder.
 * Build the WAR file with this command: `./gradlew clean updateConfig build`. You can repeat this command when you want to deploy your code changes.
