@@ -1,12 +1,12 @@
-package com.dialoguebranch.web.service.entities;
+package com.dialoguebranch.web.service.models;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-@Entity
-@Table(name = "variables")
+//@Entity
+//@Table(name = "variables")
 public class DBVariable {
 	@Id
 	@GeneratedValue
