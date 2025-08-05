@@ -6,7 +6,6 @@ import jakarta.annotation.PostConstruct;
 import nl.rrd.utils.AppComponents;
 import nl.rrd.utils.json.JsonMapper;
 import org.hibernate.SessionFactory;
-import org.hibernate.query.criteria.HibernateCriteriaBuilder;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,10 +21,8 @@ public class DatabaseTestService {
 	@PostConstruct
 	public void start() {
 		sessionFactory.inTransaction(session -> {
-			HibernateCriteriaBuilder builder = session.getCriteriaBuilder();
-
-			session.createMutationQuery(builder.createCriteriaDelete(DBUser.class));
-			session.createMutationQuery(builder.createCriteriaDelete(DBVariable.class));
+			session.createMutationQuery("delete from DBVariable").executeUpdate();
+			session.createMutationQuery("delete from DBUser").executeUpdate();
 
 			DBUser user = new DBUser("user");
 			session.persist(user);
@@ -35,15 +32,25 @@ public class DatabaseTestService {
 				variable.setUser(user);
 				session.persist(variable);
 			}
+		});
 
+		sessionFactory.inTransaction(session -> {
 			Logger logger = AppComponents.getLogger(getClass().getSimpleName());
 
 			List<DBVariable> variables = session.createSelectionQuery(
-					"from DBVariable v where v.user.id = :user", DBVariable.class)
-					.setParameter("user", user.getId())
+					"from DBVariable v where v.user.username = :username", DBVariable.class)
+					.setParameter("username", "user")
 					.getResultList();
 			for (DBVariable readVariable : variables) {
 				logger.info("VARIABLE: " + JsonMapper.generate(readVariable));
+			}
+
+			List<DBUser> users = session.createSelectionQuery(
+					"from DBUser u join fetch u.variables where u.username = :username", DBUser.class)
+					.setParameter("username", "user")
+					.getResultList();
+			for (DBVariable readVariable : users.get(0).getVariables()) {
+				logger.info("USER VARIABLE: " + JsonMapper.generate(readVariable));
 			}
 		});
 	}

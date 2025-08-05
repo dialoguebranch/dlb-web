@@ -1,17 +1,26 @@
 package com.dialoguebranch.web.service.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.UUID;
 
 @Entity
-@Table(name = "variables")
+@Table(
+	name = "variables",
+	uniqueConstraints = {
+		@UniqueConstraint(
+			name = "user_name",
+			columnNames = { "user, name" }
+		)
+	})
 public class DBVariable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JsonIgnore
 	private DBUser user;
 
 	private String name;

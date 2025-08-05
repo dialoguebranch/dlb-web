@@ -1,15 +1,20 @@
 package com.dialoguebranch.web.service.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
 @Entity
 @Table(
 	name = "users",
-	indexes = {
-		@Index(columnList = "username")
+	uniqueConstraints = {
+		@UniqueConstraint(
+			name = "username",
+			columnNames = "username"
+		)
 	}
 )
 public class DBUser {
@@ -20,7 +25,8 @@ public class DBUser {
 	private String username;
 
 	@OneToMany(mappedBy = "user")
-	private Set<DBVariable> variables;
+	@JsonIgnore
+	private Set<DBVariable> variables = new HashSet<>();
 
 	public DBUser() {
 	}
