@@ -78,14 +78,20 @@ configurations {
 	compile.exclude group: 'org.slf4j', module: 'slf4j-jdk14'
 }
 
-tasks.register('updateConfig') {
-	group = "configuration"
-	description = "Generates an updated version of service.properties that includes values from 'gradle.properties' starting with 'dlb-config'."
+class UpdateConfigTask extends DefaultTask {
+	private ProviderFactory providerFactory
 
-	doLast() {
+	@Inject
+	UpdateConfigTask(ProviderFactory providerFactory) {
+		this.providerFactory = providerFactory
+	}
+
+	@TaskAction
+	void doTaskAction() {
 		Properties props = new Properties()
 		def propPrefix = 'dlb-config'
-		project.properties.each { key, value ->
+
+		providerFactory.gradlePropertiesPrefixedBy(propPrefix).get().each { key, value ->
 			if (!key.startsWith(propPrefix))
 				return
 			key = key.substring(propPrefix.length())
@@ -96,7 +102,7 @@ tasks.register('updateConfig') {
 		// Add the current time as buildTime property
 		props['buildTime'] = new Date().format("MM/dd/yyyy HH:mm:ss")
 
-		def resDir = file('src/main/resources')
+		def resDir = new File('src/main/resources')
 		resDir.mkdirs()
 		def out = new File(resDir, 'service.properties')
 		out.withWriter('UTF-8') {
@@ -105,34 +111,37 @@ tasks.register('updateConfig') {
 	}
 }
 
-def listDirFiles(dir, writer) {
-	writer.write('[')
-	def first = true
-	dir.eachFile() { child ->
-		if (!child.name.startsWith('.')) {
-			if (!first)
-				writer.write(',')
-			if (child.isDirectory()) {
-				writer.write('{"' + child.name + '":')
-				listDirFiles(child, writer)
-				writer.write('}')
-				first = false
-			} else if (child.name.endsWith('.json') || child.name.endsWith('.dlb')) {
-				writer.write('"' + child.name + '"')
-				first = false
-			}
-		}
-	}
-	writer.write(']')
+tasks.register('updateConfig', UpdateConfigTask) {
+	group = "configuration"
+	description = "Generates an updated version of service.properties that includes values from 'gradle.properties' starting with 'dlb-config'."
 }
 
-tasks.register('listDialogueFiles') {
-	group = 'configuration'
-	description = 'Lists dialogue files and writes them to dialogues.json'
+class ListDialogueFilesTask extends DefaultTask {
+	def listDirFiles(dir, writer) {
+		writer.write('[')
+		def first = true
+		dir.eachFile() { child ->
+			if (!child.name.startsWith('.')) {
+				if (!first)
+					writer.write(',')
+				if (child.isDirectory()) {
+					writer.write('{"' + child.name + '":')
+					listDirFiles(child, writer)
+					writer.write('}')
+					first = false
+				} else if (child.name.endsWith('.json') || child.name.endsWith('.dlb')) {
+					writer.write('"' + child.name + '"')
+					first = false
+				}
+			}
+		}
+		writer.write(']')
+	}
 
-	doLast() {
-		def dlgDir = file('src/main/resources/dialogues')
-		def dlgFile = file('src/main/resources/dialogues/dialogues.json')
+	@TaskAction
+	void doTaskAction() {
+		def dlgDir = new File('src/main/resources/dialogues')
+		def dlgFile = new File('src/main/resources/dialogues/dialogues.json')
 		dlgFile.withWriter('UTF-8') { writer ->
 			writer.write('{')
 			def first = true
@@ -147,6 +156,11 @@ tasks.register('listDialogueFiles') {
 			writer.write('}')
 		}
 	}
+}
+
+tasks.register('listDialogueFiles', ListDialogueFilesTask) {
+	group = 'configuration'
+	description = 'Lists dialogue files and writes them to dialogues.json'
 }
 
 tasks.register('updateVersion') {
