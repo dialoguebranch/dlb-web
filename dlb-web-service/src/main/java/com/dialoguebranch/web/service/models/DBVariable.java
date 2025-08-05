@@ -1,16 +1,18 @@
 package com.dialoguebranch.web.service.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
-//@Entity
-//@Table(name = "variables")
+import java.util.UUID;
+
+@Entity
+@Table(name = "variables")
 public class DBVariable {
 	@Id
-	@GeneratedValue
-	private Long id;
+	@GeneratedValue(strategy = GenerationType.UUID)
+	private UUID id;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private DBUser user;
 
 	private String name;
 
@@ -24,12 +26,20 @@ public class DBVariable {
 		this.value = value;
 	}
 
-	public Long getId() {
+	public UUID getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(UUID id) {
 		this.id = id;
+	}
+
+	public DBUser getUser() {
+		return user;
+	}
+
+	public void setUser(DBUser user) {
+		this.user = user;
 	}
 
 	public String getName() {
