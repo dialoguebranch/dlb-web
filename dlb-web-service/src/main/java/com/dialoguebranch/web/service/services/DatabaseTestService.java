@@ -3,9 +3,6 @@ package com.dialoguebranch.web.service.services;
 import com.dialoguebranch.web.service.models.DBUser;
 import com.dialoguebranch.web.service.models.DBVariable;
 import jakarta.annotation.PostConstruct;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Root;
 import nl.rrd.utils.AppComponents;
 import nl.rrd.utils.json.JsonMapper;
 import org.hibernate.SessionFactory;
@@ -15,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
