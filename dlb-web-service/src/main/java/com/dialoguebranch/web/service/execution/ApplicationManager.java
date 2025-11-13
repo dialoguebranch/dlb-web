@@ -31,19 +31,19 @@ import com.dialoguebranch.exception.ExecutionException;
 import com.dialoguebranch.i18n.TranslationContext;
 import com.dialoguebranch.model.Dialogue;
 import com.dialoguebranch.model.FileDescriptor;
+import com.dialoguebranch.model.Project;
 import com.dialoguebranch.parser.FileLoader;
 import com.dialoguebranch.parser.ProjectParser;
 import com.dialoguebranch.parser.ProjectParserResult;
+import com.dialoguebranch.web.service.Configuration;
 import com.dialoguebranch.web.service.auth.basic.BasicUserCredentials;
+import com.dialoguebranch.web.service.auth.basic.BasicUserFile;
+import com.dialoguebranch.web.service.auth.keycloak.KeycloakManager;
 import com.dialoguebranch.web.service.controller.schema.LoginParametersPayload;
 import com.dialoguebranch.web.service.controller.schema.LoginResultPayload;
 import com.dialoguebranch.web.service.exception.DLBServiceConfigurationException;
-import com.dialoguebranch.web.service.Configuration;
-import com.dialoguebranch.web.service.auth.basic.BasicUserFile;
-import com.dialoguebranch.web.service.auth.keycloak.KeycloakManager;
 import com.dialoguebranch.web.service.storage.AzureDataLakeStore;
-import com.dialoguebranch.model.Project;
-import com.dialoguebranch.web.service.storage.VariableStoreJSONStorageHandler;
+import com.dialoguebranch.web.service.storage.VariableStoreDatabaseStorageHandler;
 import nl.rrd.utils.AppComponents;
 import nl.rrd.utils.exception.DatabaseException;
 import nl.rrd.utils.exception.ParseException;
@@ -114,9 +114,7 @@ public class ApplicationManager {
 		project = readResult.getProject();
 
 		this.userServiceFactory = new UserServiceFactory(this,
-				new VariableStoreJSONStorageHandler(
-						AppComponents.get(Configuration.class).
-						getDataDir()+"/variables")); //TODO: This "variables" shouldn't be hardcoded here
+				new VariableStoreDatabaseStorageHandler());
 
 
 		// Load in configuration values

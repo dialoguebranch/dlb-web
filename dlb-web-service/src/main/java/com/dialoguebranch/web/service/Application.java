@@ -30,8 +30,11 @@ package com.dialoguebranch.web.service;
 import com.dialoguebranch.web.service.exception.DLBServiceConfigurationException;
 import com.dialoguebranch.web.service.execution.ApplicationManager;
 import com.dialoguebranch.parser.ResourceFileLoader;
+import jakarta.annotation.PostConstruct;
 import nl.rrd.utils.AppComponents;
+import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -65,6 +68,9 @@ ApplicationListener<ApplicationEvent> {
 	private final Configuration config;
 	private ApplicationManager applicationManager = null;
 	private final Long launchedTime = Instant.now().toEpochMilli();
+
+	@Autowired
+	private SessionFactory sessionFactory;
 
 	// -------------------------------------------------------- //
 	// -------------------- Constructor(s) -------------------- //
@@ -109,6 +115,11 @@ ApplicationListener<ApplicationEvent> {
 					"errors.");
 			System.exit(1);
 		}
+	}
+
+	@PostConstruct
+	private void initApp() {
+		AppComponents.getInstance().addComponent(sessionFactory);
 	}
 
 	// ----------------------------------------------------------- //
