@@ -34,6 +34,7 @@ import com.dialoguebranch.execution.VariableStoreChange;
 import com.dialoguebranch.web.service.models.DBUser;
 import com.dialoguebranch.web.service.models.DBVariable;
 import nl.rrd.utils.AppComponents;
+import nl.rrd.utils.datetime.DateTimeUtils;
 import nl.rrd.utils.exception.ParseException;
 import nl.rrd.utils.json.JsonMapper;
 import org.hibernate.Session;
@@ -42,7 +43,11 @@ import org.slf4j.Logger;
 import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class VariableStoreDatabaseStorageHandler implements VariableStoreStorageHandler {
 
@@ -51,18 +56,27 @@ public class VariableStoreDatabaseStorageHandler implements VariableStoreStorage
 
     @Override
     public VariableStore read(User user) throws IOException, ParseException {
+		final List<DBVariable> dbVariables = new ArrayList<>();
+
 		getSessionFactory().inTransaction(session -> {
 			DBUser dbUser = getDBUser(session, user.getId());
 
-			List<DBVariable> variables = session.createSelectionQuery(
-					"from DBVariable where user_id = :userId", DBVariable.class)
+			dbVariables.addAll(session.createSelectionQuery(
+					"from DBVariable where user.id = :userId", DBVariable.class)
 					.setParameter("userId", dbUser.getId())
-					.getResultList();
+					.getResultList());
 		});
 
-		Variable[] variables = new Variable[0];
+		List<Variable> variables = new ArrayList<>();
+		for (DBVariable dbVariable : dbVariables) {
+			ZonedDateTime now = DateTimeUtils.nowMs();
+			variables.add(new Variable(dbVariable.getName(),
+					JsonMapper.parse(dbVariable.getValue(), Object.class),
+					now.toInstant().toEpochMilli(),
+					now.getZone().getId()));
+		}
 
-		return new VariableStore(user, variables);
+		return new VariableStore(user, variables.toArray(new Variable[0]));
     }
 
     @Override
@@ -70,20 +84,35 @@ public class VariableStoreDatabaseStorageHandler implements VariableStoreStorage
 		getSessionFactory().inTransaction(session -> {
 			DBUser dbUser = getDBUser(session, variableStore.getUser().getId());
 
+			List<DBVariable> prevDbVariables = session.createSelectionQuery(
+					"from DBVariable where user.id = :userId", DBVariable.class)
+					.setParameter("userId", dbUser.getId())
+					.getResultList();
+
+			// create or update current variables
 			for (Variable variable : variableStore.getVariables()) {
-				DBVariable dbVariable = session.createSelectionQuery(
-						"from DBVariable where user_id = :userId and name = :name", DBVariable.class)
-						.setParameter("userId", dbUser.getId())
-						.setParameter("name", variable.getName())
-						.getSingleResultOrNull();
-
-				if (dbVariable == null) {
-					dbVariable = new DBVariable(variable.getName(), null);
-					dbVariable.setUser(dbUser);
-				}
-
+				DBVariable dbVariable = prevDbVariables.stream()
+						.filter(prevDbVariable -> prevDbVariable.getName().equals(variable.getName()))
+						.findFirst()
+						.orElseGet(() -> {
+							DBVariable newDbVariable = new DBVariable(variable.getName(), null);
+							newDbVariable.setUser(dbUser);
+							return newDbVariable;
+						});
 				dbVariable.setValue(JsonMapper.generate(variable.getValue()));
 				session.persist(dbVariable);
+			}
+
+			// delete old variables
+			List<String> varNames = Arrays.stream(variableStore.getVariables())
+					.map(Variable::getName)
+					.toList();
+			for (DBVariable prevDbVariable : prevDbVariables) {
+				if (!varNames.contains(prevDbVariable.getName())) {
+					session.createMutationQuery("delete from DBVariable where id = :id")
+							.setParameter("id", prevDbVariable.getId())
+							.executeUpdate();
+				}
 			}
 		});
     }
