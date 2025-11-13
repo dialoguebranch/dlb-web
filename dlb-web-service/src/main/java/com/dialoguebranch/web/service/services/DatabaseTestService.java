@@ -12,10 +12,10 @@ public class DatabaseTestService {
 
 	@PostConstruct
 	public void start() {
-		sessionFactory.inTransaction(session -> {
+//		sessionFactory.inTransaction(session -> {
 //			session.createMutationQuery("delete from DBVariable").executeUpdate();
 //			session.createMutationQuery("delete from DBUser").executeUpdate();
-
+//
 //			DBUser user = new DBUser("user");
 //			session.persist(user);
 //
@@ -24,8 +24,8 @@ public class DatabaseTestService {
 //				variable.setUser(user);
 //				session.persist(variable);
 //			}
-		});
-
+//		});
+//
 //		sessionFactory.inTransaction(session -> {
 //			Logger logger = AppComponents.getLogger(getClass().getSimpleName());
 //
