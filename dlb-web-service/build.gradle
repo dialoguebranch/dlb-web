@@ -163,18 +163,34 @@ tasks.register('listDialogueFiles', ListDialogueFilesTask) {
 	description = 'Lists dialogue files and writes them to dialogues.json'
 }
 
-tasks.register('updateVersion') {
-	group = 'versioning'
-	description = 'Writes the current version to files containing the version number.'
+abstract class UpdateVersionTask extends DefaultTask {
+	private ProviderFactory providerFactory
 
-	doLast() {
+	@Input
+	abstract Property<String> getVersion()
+
+	@Inject
+	UpdateVersionTask(ProviderFactory providerFactory) {
+		this.providerFactory = providerFactory
+	}
+
+	@TaskAction
+	void doTaskAction() {
 		ant.replaceregexp(file: 'src/main/webapp/WEB-INF/web.xml',
 			match: "<display-name>DialogueBranch Web Service .+</display-name>",
-			replace: "<display-name>DialogueBranch Web Service ${version}</display-name>")
+			replace: "<display-name>DialogueBranch Web Service ${version.get()}</display-name>")
 		ant.replaceregexp(file: 'src/main/resources/deployment.properties',
 			match: "version=.+",
-			replace: "version=${version}")
+			replace: "version=${version.get()}")
 	}
+}
+
+Provider<String> versionProvider = project.provider { project.version }
+
+tasks.register('updateVersion', UpdateVersionTask) {
+	group = 'versioning'
+	description = 'Writes the current version to files containing the version number.'
+	version = versionProvider
 }
 
 tasks.register('checkResources') {
