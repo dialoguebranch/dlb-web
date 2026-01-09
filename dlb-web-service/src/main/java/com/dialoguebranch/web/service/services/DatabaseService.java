@@ -1,9 +1,12 @@
 package com.dialoguebranch.web.service.services;
 
 import jakarta.persistence.Entity;
+import nl.rrd.utils.AppComponents;
 import org.hibernate.SessionFactory;
 import org.hibernate.jpa.HibernatePersistenceConfiguration;
+import org.hibernate.service.spi.ServiceException;
 import org.hibernate.tool.schema.Action;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
@@ -29,12 +32,39 @@ public class DatabaseService {
 			hibernateConfig.managedClass(entityClass);
 		}
 
-		return hibernateConfig
-				.jdbcUrl("jdbc:mariadb://" + cfg.getMariadbHost() + ":" + cfg.getMariadbPort() +
-						"/" + cfg.getMariadbDatabase() + "?createDatabaseIfNotExist=true")
-				.jdbcCredentials(cfg.getMariadbUser(), cfg.getMariadbPassword())
-				.schemaToolingAction(Action.UPDATE)
-				.createEntityManagerFactory();
+		Logger logger = AppComponents.getLogger(getClass().getSimpleName());
+		int retryCount = 0;
+		while (true) {
+			try {
+				return hibernateConfig
+						.jdbcUrl("jdbc:mariadb://" + cfg.getMariadbHost() + ":" + cfg.getMariadbPort() +
+								"/" + cfg.getMariadbDatabase() + "?createDatabaseIfNotExist=true")
+						.jdbcCredentials(cfg.getMariadbUser(), cfg.getMariadbPassword())
+						.schemaToolingAction(Action.UPDATE)
+						.createEntityManagerFactory();
+			} catch (ServiceException ex) {
+				if (retryCount < 30) {
+					logger.warn("Failed to connect to database; retrying in 10 seconds ...");
+					wait(10000);
+				} else {
+					throw ex;
+				}
+				retryCount++;
+			}
+		}
+	}
+
+	private void wait(int ms) {
+		long now = System.currentTimeMillis();
+		long end = now + ms;
+		try {
+			while (now < end) {
+				Thread.sleep(end - now);
+				now = System.currentTimeMillis();
+			}
+		} catch (InterruptedException ex) {
+			throw new RuntimeException(ex);
+		}
 	}
 
 	private List<? extends Class<?>> findEntityClasses() {
