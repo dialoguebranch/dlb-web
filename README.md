@@ -5,7 +5,13 @@ Branch scripts in a server environment.
 For additional information please refer to www.dialoguebranch.com and specifically the
 documentation available at www.dialoguebranch.com/docs
 
-## First Things First
+## 0. Requirements
+To get started using Dialogue Branch, you need the following set of tools installed:
+* An IDE and Git Client
+* Java
+* Docker & Docker Compose
+
+## 1. Obtaining Sources
 Whether you want to deploy or develop on this code, first make sure you have pulled both this 
 `dlb-web` repository and the `dlb-core-java` repository to your local machine. If your git folder is
  `${GIT}`, your folder structure should look like this:
@@ -13,36 +19,15 @@ Whether you want to deploy or develop on this code, first make sure you have pul
 * `${GIT}`/dialoguebranch/dlb-core-java/
 * `${GIT}`/dialoguebranch/dlb-web/
 
-## 1. Deploying a Standalone Dialogue Branch Web Service using Docker
-The quickest way to start playing with a Dialogue Branch Web Service is to deploy a simple, stand-
-alone instance as a Docker container. To do so, follow these steps:
+**Note:** Additionally, you may want to clone the `dlb-examples` repository to have access to more example Dialogue Branch scripts (add them to the `/dlb-web/dlb-web-service/src/main/resources/dialogues` folder to be included in your builds).
 
-### 1.1. Prepare configurations
-* Create a `gradle.properties` file in the `dlb-web/dlb-web-service/` folder by copying the existing 
-`gradle.docker-standalone.properties`. This contains workable default configuration values. 
-* Prepare a `users.xml` file in the `dlb-web/dlb-web-service/config/` folder (copy the existing 
-`users-example.xml` file).
-  * You can define your own users here, or simply keep the example `client::client`, 
-  `editor::editor`, and `admin::admin` users.
-
-### 1.2. Build and Run Docker Image
-* Open a terminal and enter your `{GIT}/dialoguebranch/` folder (containing `/dlb-web/` and 
-`/dlb-core-java/` repositories)
-* Enter the following command to build the Docker image: `docker build --no-cache -t
-dlb-web-service -f ./dlb-web/dlb-web-service/standalone.Dockerfile .`
-* Enter the following command to run the Docker image: `docker run -itd -p 8089:8089 --name dlb-web-service dlb-web-service`
-* Open a Web Browser and navigate to `http://localhost:8089/dlb-web-service/` (you should see 
-the Swagger documentation page of your running Web Service).
-
-## 2. Deploying DLB Web Service with Keycloak using Docker (experimental)
-Instead of using the built-in user management (i.e. with user credentials as defined in the 
-users.xml file), you can choose to delegate account management to a Keycloak server. To set this up
-on your local machine follow these steps.
+## 2. Deploying DLB Web Service with Keycloak using Docker
+The preferred way of using Dialogue Branch is by using its integration with Keycloak. To set this up on your local machine follow these steps.
 
 ### 2.1. Prepare configuration
 * Create a `gradle.properties` file in the `dlb-web/dlb-web-service/` folder by copying the existing 
 `gradle.docker-with-keycloak.properties`. This contains workable default configuration values.
-* Create a `secrets.properties` file in the `dlb-web` folder by copying the existing `secrets.example.properties`.
+* Create a `secrets.properties` file in the `dlb-web` folder by copying the existing `secrets.example.properties` (has insecure, but workable default values).
 
 ### 2.2. Build Docker images
 * Make sure that Docker is running. You can install Docker Desktop on your computer.
@@ -101,16 +86,37 @@ The first time it may take a while until Keycloak is fully initialized and runni
 * Open in another tab: http://localhost:8100/. This should open phpMyAdmin where you can access the MariaDB database. Log in with root / password. \
   You can complete its configuration by creating a `phpmyadmin` database. Check the warning on the home page and click "Find out why".
 
-## 3. Deploying a standalone DLB External Variable Service using Docker
+## 3. Deploying a Standalone Dialogue Branch Web Service using Docker
+An alternative way of playing with a Dialogue Branch Web Service is to deploy a simple, stand-alone instance as a Docker container, using its built-in rudimentary user-account management system. To do so, follow these steps:
 
 ### 3.1. Prepare configurations
+* Create a `gradle.properties` file in the `dlb-web/dlb-web-service/` folder by copying the existing
+  `gradle.docker-standalone.properties`. This contains workable default configuration values.
+* Prepare a `users.xml` file in the `dlb-web/dlb-web-service/config/` folder (copy the existing
+  `users-example.xml` file).
+  * You can define your own users here, or simply keep the example `client::client`,
+    `editor::editor`, and `admin::admin` users.
+
+### 3.2. Build and Run Docker Image
+* Open a terminal and enter your `{GIT}/dialoguebranch/` folder (containing `/dlb-web/` and
+  `/dlb-core-java/` repositories)
+* Enter the following command to build the Docker image: `docker build --no-cache -t
+dlb-web-service -f ./dlb-web/dlb-web-service/standalone.Dockerfile .`
+* Enter the following command to run the Docker image: `docker run -itd -p 8089:8089 --name dlb-web-service dlb-web-service`
+* Open a Web Browser and navigate to `http://localhost:8089/dlb-web-service/` (you should see
+  the Swagger documentation page of your running Web Service).
+* Check out the [Exploring the API](https://dialoguebranch.com/docs/dialogue-branch/dev/tutorials/tutorial-webservice-exploringapi.html) tutorial for further notes on how to navigate the API through Swagger.
+
+## 4. Deploying a standalone DLB External Variable Service using Docker
+
+### 4.1. Prepare configurations
 * Create a `gradle.properties` file in the `dlb-web/dlb-external-var-service/` folder by copying the existing 
 `gradle.docker-standalone.properties`. This contains workable default configuration values. 
 * Prepare a `service-users.xml` file in the `dlb-web/dlb-web-service/config/` folder (copy the existing 
 `service-users-example.xml` file).
   * You can define your own users here, or simply keep the example `dlb-web-service::dlb-web-service` user.
 
-### 3.2. Build and Run Docker Image
+### 4.2. Build and Run Docker Image
 * Open a terminal and enter your `{GIT}/dialoguebranch/` folder (containing the `/dlb-web/` 
   repository).
 * Enter the following command to build the Docker image: `docker build --no-cache -t dlb-external-var-service -f ./dlb-web/dlb-external-var-service/standalone.Dockerfile .`
@@ -118,33 +124,25 @@ The first time it may take a while until Keycloak is fully initialized and runni
 * Open a Web Browser and navigate to `http://localhost:8090/dlb-external-var-service/` (you should see 
   the Swagger documentation page of your running External Variable Service).
 
-## 4. Development Setup
-Getting started with development on the Dialogue Branch Web Service tools should be relatively 
-straightforward. If you run into issues after following the guide below, please contact 
-`info@dialoguebranch.com`
+## 5. Development Setup
+Getting started with development on the Dialogue Branch Web Service tools should be relatively straightforward. If you run into issues after following the guide below, please contact `info@dialoguebranch.com` or post an Issue on the GitHub Issue tracker.
 
-### 4.1. File Structure
-Let's assume that `{GIT}` is your local git folder (e.g. `/Users/johnny/git/`). Then, make 
-sure you have the following file structure:
+### 5.1. File Structure
+Let's assume that `{GIT}` is your local git folder. Then, make sure you have the following file structure:
 
 * `{GIT}/dialoguebranch/dlb-web` (this repository)
-* `{GIT}/dialoguebranch/dlb-core-java` (the core Java Library, which can be found here: 
-https://github.com/dialoguebranch/dlb-core-java) - the Dialogue Branch Web Service operates
-mostly as a server-wrapper around the core Java Library that is used for parsing and executing
-dialogue scripts.
+* `{GIT}/dialoguebranch/dlb-core-java` (the core Java Library, which can be found here: [dlb-core-java](
+https://github.com/dialoguebranch/dlb-core-java) - the Dialogue Branch Web Service operates mostly as a server-wrapper around the core Java Library that is used for parsing and executing dialogue scripts.
 
-### 4.2. IntelliJ Configuration
-On the IntelliJ Welcome Screen, select `Open` and select the `{GIT}/dialoguebranch/dlb-web` 
-folder.
+### 5.2. IntelliJ Configuration
+On the IntelliJ Welcome Screen, select `Open` and select the `{GIT}/dialoguebranch/dlb-web` folder.
 
 This will import the following three modules in your IDEA:
 * dlb-core-java
-* dlb-external-web-service (this is an optional stand-alone server component that allows you to 
-easily integrate Dialogue Branch data (Variables) with other existing server components)
+* dlb-external-web-service (this is an optional stand-alone server component that allows you to easily integrate Dialogue Branch data (Variables) with other existing server components)
 * dlb-web-service
 
-If all goes well, the project should compile without issue. If something is wrong, please verify
-the following settings in IntelliJ:
+If all goes well, the project should compile without issue. If something is wrong, please verify the following settings in IntelliJ:
 
 * Under `File` -> `Project Structure` make sure the following settings are correct:
   * `Project Settings` -> `Project`
@@ -156,7 +154,7 @@ the following settings in IntelliJ:
   * Go to `Build, Execution, Deployment` -> `Build Tools` -> `Gradle`
     * Make sure the Gradle JVM is set to a JVM of version 17 or higher.
 
-### 4.3. Configuration files
+### 5.3. Configuration files
 Before deploying, create the following configuration files:
 
 * dlb-web/dlb-external-var-service/gradle.properties
