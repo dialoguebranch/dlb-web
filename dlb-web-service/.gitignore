@@ -5,5 +5,7 @@
 /src/main/resources/service.properties
 /src/main/resources/dialogues/*
 !/src/main/resources/dialogues/README.md
+!/src/main/resources/dialogues/en/basic.dlb
+!/src/main/resources/dialogues/nl/basic.dlb
 /config/users.xml
 
