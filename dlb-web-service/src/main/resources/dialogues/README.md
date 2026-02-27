@@ -4,14 +4,9 @@ the source code:
 
  - en/basic.dlb
 
-And translations to some languages:
+And the matching translation file to Dutch:
 
- - bg/basic.json
- - es/basic.json
- - et/basic.json
- - it/basic.json
  - nl/basic.json
- - zh/basic.json
 
 These files are specifically excluded from the ignore rule in the git ignore
 file located here:
