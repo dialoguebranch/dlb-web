@@ -1,0 +1,16 @@
+opencollection: 1.0.0
+info:
+  name: "bruno-dlb-web-service"
+  type: workspace
+
+collections:
+  - name: "authentication"
+    path: "collections/authentication"
+  - name: "admin"
+    path: "collections/admin"
+  - name: "keycloak"
+    path: "collections/keycloak"
+
+specs:
+
+docs: ''

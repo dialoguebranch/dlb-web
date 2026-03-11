@@ -1,0 +1,28 @@
+info:
+  name: openid-connect/token (New Token)
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: http://localhost:8081/realms/dialoguebranch/protocol/openid-connect/token
+  body:
+    type: form-urlencoded
+    data:
+      - name: grant_type
+        value: password
+      - name: username
+        value: user
+      - name: password
+        value: user
+      - name: client_secret
+        value: "**********"
+      - name: client_id
+        value: dlb-web-service
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

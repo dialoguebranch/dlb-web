@@ -1,0 +1,15 @@
+info:
+  name: openid-connect/certs
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: http://localhost:8081/realms/dialoguebranch/protocol/openid-connect/certs
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,26 @@
+info:
+  name: openid-connect/token (Refresh)
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: http://localhost:8081/realms/dialoguebranch/protocol/openid-connect/token
+  body:
+    type: form-urlencoded
+    data:
+      - name: grant_type
+        value: refresh_token
+      - name: client_secret
+        value: "**********"
+      - name: client_id
+        value: dlb-web-service
+      - name: refresh_token
+        value: eysdfjksfjksdfjsdk
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
