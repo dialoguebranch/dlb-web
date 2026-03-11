@@ -345,7 +345,7 @@ public class ApplicationManager {
 		if (response.getStatusCode() == HttpStatus.OK) {
 			LoginResultPayload loginResultPayload = response.getBody();
 			if(loginResultPayload != null) {
-				this.setExternVariableServiceAPIToken(loginResultPayload.getToken());
+				this.setExternVariableServiceAPIToken(loginResultPayload.getAccessToken());
                 logger.info("User '{}' logged in successfully to external variable service.",
 						config.getExternalVariableServiceUsername());
 			} else {

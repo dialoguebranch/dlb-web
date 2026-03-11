@@ -87,6 +87,7 @@ public class LoginParametersPayload extends JsonObject {
 	/**
 	 * Creates an instance of a {@link LoginParametersPayload} with the given {@code user}, {@code
 	 * password}, and {@code tokenExpiration} value.
+	 *
 	 * @param user the user who is trying to perform a login.
 	 * @param password the password provided by the user performing a login.
 	 * @param tokenExpiration the time in minutes after which the token should expire, or {@code
@@ -104,6 +105,7 @@ public class LoginParametersPayload extends JsonObject {
 
 	/**
 	 * Returns the user who is trying to perform a login.
+	 *
 	 * @return the user who is trying to perform a login.
 	 */
 	public String getUser() {
@@ -112,6 +114,7 @@ public class LoginParametersPayload extends JsonObject {
 
 	/**
 	 * Sets the user who is trying to perform a login.
+	 *
 	 * @param user the user who is trying to perform a login.
 	 */
 	public void setUser(String user) {
@@ -120,6 +123,7 @@ public class LoginParametersPayload extends JsonObject {
 
 	/**
 	 * Returns the password provided by the user performing a login.
+	 *
 	 * @return the password provided by the user performing a login.
 	 */
 	public String getPassword() {
@@ -128,6 +132,7 @@ public class LoginParametersPayload extends JsonObject {
 
 	/**
 	 * Sets the password provided by the user performing a login.
+	 *
 	 * @param password the password provided by the user performing a login.
 	 */
 	public void setPassword(String password) {
@@ -137,6 +142,7 @@ public class LoginParametersPayload extends JsonObject {
 	/**
 	 * Returns the time (in minutes) after which the auth token should expire. When set to {@code
 	 * null} this means that the token should never expire.
+	 *
 	 * @return the time (in minutes) after which the auth token should expire.
 	 */
 	@JsonSerialize(using = TokenExpirationSerializer.class)
@@ -147,6 +153,7 @@ public class LoginParametersPayload extends JsonObject {
 	/**
 	 * Sets the time (in minutes) after which the auth token should expire. When set to {@code null}
 	 * this means that the token should never expire.
+	 *
 	 * @param tokenExpiration the time (in minutes) after which the auth token should expire.
 	 */
 	@JsonDeserialize(using = TokenExpirationDeserializer.class)
