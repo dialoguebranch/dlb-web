@@ -137,6 +137,18 @@ public class QueryRunner {
 
 		String token = request.getHeader("X-Auth-Token");
 
+		// If we don't have the custom "X-Auth-Token", check if we have a standard authentication
+		// token in the "Authorization" header.
+		if(token == null || token.trim().isEmpty()) {
+			String standardToken = request.getHeader("Authorization");
+			if(standardToken != null) {
+				if (standardToken.startsWith("Bearer ")) {
+					standardToken = standardToken.substring(7);
+					if(!standardToken.isEmpty()) token = standardToken;
+				}
+			}
+		}
+
 		if (token != null) {
 
 			if (token.trim().isEmpty()) {
