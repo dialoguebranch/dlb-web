@@ -272,6 +272,15 @@ public class AuthController {
 				token);
 	}
 
+	/**
+	 * Private method for handling the login procedure when the use of Keycloak is enabled in the
+	 * Web Service.
+	 *
+	 * @param loginParametersPayload the JSON payload containing the username, password and token
+	 * 	      expiration values provided at login.
+	 * @return a {@link LoginResultPayload} object containing the results of the login attempt.
+	 * @throws UnauthorizedException
+	 */
 	private LoginResultPayload doLoginKeycloak(LoginParametersPayload loginParametersPayload)
 			throws UnauthorizedException {
 
@@ -282,8 +291,8 @@ public class AuthController {
 		String keycloakLoginUrl = config.getKeycloakBaseUrl();
 		if(!keycloakLoginUrl.endsWith("/")) keycloakLoginUrl += "/";
 		keycloakLoginUrl += "realms/"
-		+ config.getKeycloakRealm()
-		+ "/protocol/openid-connect/token";
+				+ config.getKeycloakRealm()
+				+ "/protocol/openid-connect/token";
 
         logger.info("Redirecting login attempt to: {}", keycloakLoginUrl);
 
