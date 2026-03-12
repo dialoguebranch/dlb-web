@@ -1,6 +1,6 @@
 /*
  *
- *                Copyright (c) 2023-2025 Fruit Tree Labs (www.fruittreelabs.com)
+ *                Copyright (c) 2023-2026 Fruit Tree Labs (www.fruittreelabs.com)
  *
  *     This material is part of the DialogueBranch Platform, and is covered by the MIT License
  *      as outlined below. Based on original source code licensed under the following terms:
@@ -44,9 +44,9 @@ import java.util.Properties;
  * service.properties} and {@code deployment.properties}. Known property keys are defined as
  * constants in this class.
  *
- * @author Harm op den Akker (Fruit Tree Labs)
- * @author Dennis Hofs (Roessingh Research and Development)
- * @author Tessa Beinema (University of Twente)
+ * @author Harm op den Akker
+ * @author Dennis Hofs
+ * @author Tessa Beinema
  */
 @AppComponent
 public class Configuration extends LinkedHashMap<String,String> {
@@ -70,10 +70,16 @@ public class Configuration extends LinkedHashMap<String,String> {
 	public static final String BASE_URL = "baseUrl";
 
 	/**
-	 * Name of the config parameter that defines the JSON Web Token 'secret' use to encrypt
-	 * the JSON Web Tokens generated after a successful login
+	 * Name of the config parameter that defines the JSON Web Token (JWT) 'secret' used to encrypt
+	 * and decrypt ACCESS TOKENS.
 	 */
-	public static final String JWT_SECRET_KEY = "jwtSecretKey";
+	public static final String JWT_ACCESS_TOKEN_SECRET = "jwtAccessTokenSecret";
+
+	/**
+	 * Name of the config parameter that defines the JSON Web Token (JWT) 'secret' used to encrypt
+	 * and decrypt REFRESH TOKENS.
+	 */
+	public static final String JWT_REFRESH_TOKEN_SECRET = "jwtRefreshTokenSecret";
 
 	/** Name of the config parameter that defines the data directory for the Web Service */
 	public static final String DATA_DIR = "dataDir";
@@ -276,13 +282,23 @@ public class Configuration extends LinkedHashMap<String,String> {
 	}
 
 	/**
-	 * Returns the secret key used for encoding/decoding the JSON Web Tokens.
+	 * Returns the secret key used for encoding/decoding JWT Access Tokens.
 	 *
-	 * @return the secret key used for encoding/decoding the JSON Web Tokens.
+	 * @return the secret key used for encoding/decoding JWT Access Tokens.
 	 */
-	public String getJwtSecretKey() {
-		if(get(JWT_SECRET_KEY) == null) return "";
-		else return get(JWT_SECRET_KEY);
+	public String getJwtAccessTokenSecret() {
+		if(get(JWT_ACCESS_TOKEN_SECRET) == null) return "";
+		else return get(JWT_ACCESS_TOKEN_SECRET);
+	}
+
+	/**
+	 * Returns the secret key used for encoding/decoding JWT Refresh Tokens.
+	 *
+	 * @return the secret key used for encoding/decoding JWT Refresh Tokens.
+	 */
+	public String getJwtRefreshTokenSecret() {
+		if(get(JWT_REFRESH_TOKEN_SECRET) == null) return "";
+		else return get(JWT_REFRESH_TOKEN_SECRET);
 	}
 
 	/**

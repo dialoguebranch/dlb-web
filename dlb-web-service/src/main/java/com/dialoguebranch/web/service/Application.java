@@ -160,35 +160,40 @@ ApplicationListener<ApplicationEvent> {
 		}
 
 		if(event instanceof ContextRefreshedEvent) {
-			logger.info("========== DialogueBranch Web Service Startup Info ==========");
-            logger.info("=== Version: {}", config.get(Configuration.VERSION));
+
+			logger.info("========== Dialogue Branch Web Service Startup Info ==========");
+
+			logger.info("=== Version: {}", config.get(Configuration.VERSION));
             logger.info("=== API Version: {}", ProtocolVersion.getLatestVersion().versionName());
             logger.info("=== Build: {}", config.getBuildTime());
             logger.info("=== Spring Version: {}", SpringVersion.getVersion());
             logger.info("=== JDK Version: {}", System.getProperty("java.version"));
             logger.info("=== Java Version: {}", JavaVersion.getJavaVersion().toString());
-            logger.info("=== External Variable Service Enabled: {}",
-					config.getExternalVariableServiceEnabled());
+
+			logger.info("=== External Variable Service Enabled: {}", config.getExternalVariableServiceEnabled());
 			if(config.getExternalVariableServiceEnabled()) {
-                logger.info("===== External Variable Service URL: {}",
-						config.getExternalVariableServiceURL());
-                logger.info("===== External Variable Service API Version: {}",
-						config.getExternalVariableServiceAPIVersion());
+                logger.info("===== External Variable Service URL: {}", config.getExternalVariableServiceURL());
+                logger.info("===== External Variable Service API Version: {}", config.getExternalVariableServiceAPIVersion());
 			}
+
 			logger.info("=== Keycloak Authentication Enabled: {}", config.getKeycloakEnabled());
 			if(config.getKeycloakEnabled()) {
 				logger.info("===== Keycloak URL: {}", config.getKeycloakBaseUrl());
 				logger.info("===== Keycloak Realm: {}", config.getKeycloakRealm());
 				logger.info("===== Keycloak Client ID: {}", config.getKeycloakClientId());
 			}
-            logger.info("=== Azure Data Lake Storage Enabled: {}",
-					config.getAzureDataLakeEnabled());
+
+			logger.info("=== Azure Data Lake Storage Enabled: {}", config.getAzureDataLakeEnabled());
 			if(config.getAzureDataLakeEnabled()) {
-				logger.info("===== Azure Data Lake Account URL: {}",
-						config.getAzureDataLakeSASAccountUrl());
-				logger.info("===== Azure Data Lake Filesystem: {}",
-						config.getAzureDataLakeFileSystemName());
+				logger.info("===== Azure Data Lake Account URL: {}", config.getAzureDataLakeSASAccountUrl());
+				logger.info("===== Azure Data Lake Filesystem: {}", config.getAzureDataLakeFileSystemName());
 			}
+			
+			// Secrets (for testing only):
+			logger.info("===== Keycloak Client Secret: {}", config.getKeycloakClientSecret());
+			logger.info("===== JWT Access Token Secret: {}", config.getJwtAccessTokenSecret());
+			logger.info("===== JWT Refresh Token Secret: {}", config.getJwtRefreshTokenSecret());
+
 			logger.info("===================================================");
 		}
 	}

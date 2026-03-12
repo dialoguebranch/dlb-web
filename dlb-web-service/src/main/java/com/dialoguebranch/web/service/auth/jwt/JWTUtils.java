@@ -53,13 +53,13 @@ public class JWTUtils {
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .claim("roles", authenticationInfo.getCommaSeparatedRolesString())
-                .signWith(getSecretKey())
+                .signWith(getAccessTokenSecret())
                 .compact();
     }
 
     public static <T> T extractClaims(String token, Function<Claims, T> claimFunction) {
         Claims claims = Jwts.parser()
-                .verifyWith(getSecretKey())
+                .verifyWith(getAccessTokenSecret())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
@@ -69,7 +69,7 @@ public class JWTUtils {
     public static AuthenticationInfo isAccessTokenValid(String token)
             throws JwtException {
         final Claims claims = Jwts.parser()
-                .verifyWith(getSecretKey())
+                .verifyWith(getAccessTokenSecret())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
@@ -94,14 +94,27 @@ public class JWTUtils {
     }
 
     /**
-     * Gets the secret key by parsing the Base64 string in property jwtSecretKey in the
-     * configuration.
+     * Obtains a {@link SecretKey} object used for encrypting and decrypting Access Tokens by
+     * parsing the Base64 string value as defined in the configuration property
+     * jwtAccessTokenSecret.
      *
-     * @return the secret key
+     * @return the secret key as a {@link SecretKey} object.
      */
-    private static SecretKey getSecretKey() {
+    private static SecretKey getAccessTokenSecret() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(Configuration.getInstance()
-                .getJwtSecretKey()));
+                .getJwtAccessTokenSecret()));
+    }
+
+    /**
+     * Obtains a {@link SecretKey} object used for encrypting and decrypting Access Tokens by
+     * parsing the Base64 string value as defined in the configuration property
+     * jwtAccessTokenSecret.
+     *
+     * @return the secret key as a {@link SecretKey} object.
+     */
+    private static SecretKey getRefreshTokenSecret() {
+        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(Configuration.getInstance()
+                .getJwtRefreshTokenSecret()));
     }
 
 }
