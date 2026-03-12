@@ -37,6 +37,7 @@ import com.dialoguebranch.web.service.controller.schema.LoginResultPayload;
 import com.dialoguebranch.web.service.controller.schema.RefreshParametersPayload;
 import com.dialoguebranch.web.service.exception.*;
 import com.dialoguebranch.web.service.auth.jwt.JWTUtils;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import nl.rrd.utils.AppComponents;
@@ -525,9 +526,12 @@ public class AuthController {
 
 		try {
 			authInfo = JWTUtils.isRefreshTokenValid(refreshParametersPayload.getRefreshToken());
-		} catch(JwtException e) {
-			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_INVALID, "The provided refresh" +
-					"token was not valid.");
+		} catch (ExpiredJwtException ex) {
+			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_EXPIRED,
+					"Refresh token expired");
+		} catch (JwtException ex) {
+			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_INVALID,
+					"Refresh token invalid");
 		}
 
 		// If the refresh token was valid, issue a bunch of new tokens
