@@ -37,9 +37,9 @@ import com.dialoguebranch.web.service.controller.schema.LoginResultPayload;
 import com.dialoguebranch.web.service.controller.schema.RefreshParametersPayload;
 import com.dialoguebranch.web.service.exception.*;
 import com.dialoguebranch.web.service.auth.jwt.JWTUtils;
+import io.jsonwebtoken.JwtException;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import nl.rrd.utils.AppComponents;
-import nl.rrd.utils.datetime.DateTimeUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -55,9 +55,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -243,7 +241,6 @@ public class AuthController {
 
 		String user = loginParametersPayload.getUser();
 		String password = loginParametersPayload.getPassword();
-		Integer tokenExpiration = loginParametersPayload.getTokenExpiration();
 
 		BasicUserCredentials basicUserCredentials = BasicUserFile.findUser(user);
 		String invalidError = "Username or password is invalid";
@@ -260,22 +257,17 @@ public class AuthController {
 
 		logger.info("User {} logged in successfully.", basicUserCredentials.getUsername());
 
-		Date expiration = null;
-		ZonedDateTime now = DateTimeUtils.nowMs();
-		if (tokenExpiration != null) {
-			expiration = Date.from(now.plusSeconds(loginParametersPayload.getTokenExpiration())
-					.toInstant());
-		}
-
-		AuthenticationInfo authenticationInfo = new AuthenticationInfo(
-				user, basicUserCredentials.getRoles(), Date.from(now.toInstant()), expiration);
-
-		String token = JWTUtils.generateAccessToken(authenticationInfo);
+		String accessToken = JWTUtils.generateAccessToken(basicUserCredentials);
+		String refreshToken = JWTUtils.generateRefreshToken(basicUserCredentials);
 
 		return new LoginResultPayload(
 				basicUserCredentials.getUsername(),
 				basicUserCredentials.getCommaSeparatedRolesString(),
-				token);
+				accessToken,
+				config.getAccessTokenExpirationSeconds(),
+				refreshToken,
+				config.getRefreshTokenExpirationSeconds()
+				);
 	}
 
 	/**
@@ -338,7 +330,7 @@ public class AuthController {
 				String accessToken = keyCloakResponse.getAccessToken();
 				AuthenticationInfo authenticationInfo =
 						application.getApplicationManager().getKeycloakManager()
-								.validateToken(accessToken);
+								.validateAccessToken(accessToken);
 
                 return new LoginResultPayload(
 						loginParametersPayload.getUser(),
@@ -408,7 +400,7 @@ public class AuthController {
         logger.info("POST /v{}/auth/validate", version);
 
 		synchronized (AUTH_LOCK) {
-			QueryRunner.validateToken(request,application);
+			QueryRunner.validateAccessToken(request,application);
 			return true;
 		}
 	}
@@ -457,8 +449,7 @@ public class AuthController {
 		if(config.getAuthService().equals(Configuration.AUTH_SERVICE_KEYCLOAK)) {
 			return doRefreshKeycloak(refreshParametersPayload);
 		} else {
-			// TODO: Implement internal refresh token mechanism
-			return null;
+			return doRefreshNative(refreshParametersPayload);
 		}
 
 	}
@@ -514,7 +505,7 @@ public class AuthController {
 				String accessToken = keyCloakResponse.getAccessToken();
 				AuthenticationInfo authenticationInfo =
 						application.getApplicationManager().getKeycloakManager()
-								.validateToken(accessToken);
+								.validateAccessToken(accessToken);
 
 				return new LoginResultPayload(
 						authenticationInfo.getUsername(),
@@ -536,6 +527,41 @@ public class AuthController {
 			throw new UnauthorizedException(ErrorCode.KEYCLOAK_ERROR,
 					"Keycloak service returned status code " + response.getStatusCode() + ".");
 		}
+	}
+
+	private LoginResultPayload doRefreshNative(RefreshParametersPayload refreshParametersPayload)
+			throws UnauthorizedException {
+
+		AuthenticationInfo authInfo;
+
+		try {
+			authInfo = JWTUtils.isRefreshTokenValid(refreshParametersPayload.getRefreshToken());
+		} catch(JwtException e) {
+			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_INVALID, "The provided refresh" +
+					"token was not valid.");
+		}
+
+		// If the refresh token was valid, issue a bunch of new tokens
+
+		// First we retrieve the roles of this user, because it should be supplied with the
+		// new LoginResultPayload
+		BasicUserCredentials basicUserCredentials = BasicUserFile.findUser(authInfo.getUsername());
+		String invalidError = "User '"+ authInfo.getUsername() +"' does not exist";
+
+		if (basicUserCredentials == null) {
+			logger.info("Failed to refresh access token for user {}: user unknown.", authInfo.getUsername());
+			throw new UnauthorizedException(ErrorCode.UNKNOWN_USER, invalidError);
+		}
+
+		return new LoginResultPayload(
+				authInfo.getUsername(),
+				basicUserCredentials.getCommaSeparatedRolesString(),
+				JWTUtils.generateAccessToken(basicUserCredentials),
+				config.getAccessTokenExpirationSeconds(),
+				JWTUtils.generateRefreshToken(basicUserCredentials),
+				config.getRefreshTokenExpirationSeconds()
+		);
+
 	}
 
 }

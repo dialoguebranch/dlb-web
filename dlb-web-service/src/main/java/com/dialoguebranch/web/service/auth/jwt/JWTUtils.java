@@ -30,6 +30,7 @@ package com.dialoguebranch.web.service.auth.jwt;
 
 import com.dialoguebranch.web.service.auth.AuthenticationInfo;
 import com.dialoguebranch.web.service.Configuration;
+import com.dialoguebranch.web.service.auth.basic.BasicUserCredentials;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -48,13 +49,29 @@ public class JWTUtils {
     /** Used to access configuration parameters */
     private static final Configuration config = Configuration.getInstance();
 
-    public static String generateAccessToken(AuthenticationInfo authenticationInfo) {
+    public static String generateAccessToken(BasicUserCredentials basicUserCredentials) {
         return Jwts.builder()
-                .subject(authenticationInfo.getUsername())
-                .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + config.getAccessTokenExpirationSeconds() * 1000L))
-                .claim("roles", authenticationInfo.getCommaSeparatedRolesString())
+                .issuedAt(new Date())
+                .issuer(config.getBaseUrl())
+                .subject(basicUserCredentials.getUsername())
+                .claim("typ","Bearer") // Type of Token
+                .claim("azp","dlb-web-service") // Authorized party
+                .claim("roles", basicUserCredentials.getCommaSeparatedRolesString())
                 .signWith(getAccessTokenSecret())
+                .compact();
+    }
+
+    public static String generateRefreshToken(BasicUserCredentials basicUserCredentials) {
+        return Jwts.builder()
+                .expiration(new Date(System.currentTimeMillis() + config.getRefreshTokenExpirationSeconds() * 1000L))
+                .issuedAt(new Date())
+                .issuer(config.getBaseUrl())
+                .audience().add(config.getBaseUrl()).and()
+                .subject(basicUserCredentials.getUsername())
+                .claim("typ","Refresh") // Type of Token
+                .claim("azp","dlb-web-service") // Authorized party
+                .signWith(getRefreshTokenSecret())
                 .compact();
     }
 
@@ -84,14 +101,19 @@ public class JWTUtils {
                 claims.getExpiration());
     }
 
-    /**
-     * Returns {@code true} if the given JWT is still valid.
-     *
-     * @param token the JSON Web Token for which to check the expiration time.
-     * @return {@code true} if the token is still valid, false otherwise.
-     */
-    public static boolean isTokenExpired(String token) {
-        return extractClaims(token, Claims::getExpiration).before(new Date());
+    public static AuthenticationInfo isRefreshTokenValid(String refreshToken)
+            throws JwtException {
+        final Claims claims = Jwts.parser()
+                .verifyWith(getRefreshTokenSecret())
+                .build()
+                .parseSignedClaims(refreshToken)
+                .getPayload();
+
+        return new AuthenticationInfo(
+                claims.getSubject(),
+                null,
+                claims.getIssuedAt(),
+                claims.getExpiration());
     }
 
     /**

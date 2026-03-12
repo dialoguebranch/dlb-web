@@ -126,7 +126,7 @@ public class KeycloakManager {
         }
     }
 
-    public AuthenticationInfo validateToken(String token) throws UnauthorizedException {
+    public AuthenticationInfo validateAccessToken(String accessToken) throws UnauthorizedException {
 
         // Only on first time use, make sure the KeycloakManager is initialized (retrieved its
         // public keys).
@@ -135,23 +135,23 @@ public class KeycloakManager {
                 this.initialize();
             } catch(NoSuchAlgorithmException noSuchAlgorithmException) {
                 throw new UnauthorizedException(
-                        "NoSuchAlgorithmException while validating token: "
+                        "NoSuchAlgorithmException while validating accessToken: "
                                 + noSuchAlgorithmException.getMessage());
             } catch(InvalidKeySpecException invalidKeySpecException) {
                 throw new UnauthorizedException(
-                        "InvalidKeySpecException while validating token: "
+                        "InvalidKeySpecException while validating accessToken: "
                                 + invalidKeySpecException.getMessage());
             }
         }
 
-        // We need to extract the "key id" ("kid") from the header of the token.
+        // We need to extract the "key id" ("kid") from the header of the accessToken.
         // Based on the "kid", we should use the correct, corresponding Public Key that we
         // obtained from the Keycloak service.
 
         // Split the JWT into its parts (header . payload . signature)
-        String[] parts = token.split("\\.");
+        String[] parts = accessToken.split("\\.");
         if (parts.length != 3) {
-            throw new UnauthorizedException("Invalid JWT token.");
+            throw new UnauthorizedException("Invalid JWT accessToken.");
         }
 
         // Extract the keyID ("kid") from the header.
@@ -171,10 +171,10 @@ public class KeycloakManager {
         final Claims claims = Jwts.parser()
                 .verifyWith(this.publicKeys.get(keyId)) // Use the public key that matches this kid
                 .build()
-                .parseSignedClaims(token)
+                .parseSignedClaims(accessToken)
                 .getPayload();
 
-        // Obtain the roles from token claims
+        // Obtain the roles from accessToken claims
         String[] roles;
         try {
             @SuppressWarnings("unchecked")

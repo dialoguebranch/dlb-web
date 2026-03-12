@@ -44,6 +44,9 @@ public class ErrorCode {
 	/** In case the provided authentication token has expired. */
 	public static final String AUTH_TOKEN_EXPIRED = "AUTH_TOKEN_EXPIRED";
 
+	/** In case a valid refresh token is provided for an unknown user (weird...) */
+	public static final String UNKNOWN_USER = "UNKNOWN_USER";
+
 	/** In case a required input parameter is missing, or an invalid value was provided. */
 	public static final String INVALID_INPUT = "INVALID_INPUT";
 

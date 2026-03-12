@@ -79,7 +79,7 @@ public class QueryRunner {
 			AuthenticationInfo authenticationInfo = null;
 
 			if (request != null)
-				authenticationInfo = validateToken(request, application);
+				authenticationInfo = validateAccessToken(request, application);
 
 			// If the request was made for "this" (authenticated) user
 			if(delegateUser == null || delegateUser.isEmpty()) {
@@ -119,7 +119,7 @@ public class QueryRunner {
 	}
 
 	/**
-	 * Validates the authentication token in the specified HTTP request. If no token is specified,
+	 * Validates the access token in the specified HTTP request. If no token is specified,
 	 * or the token is empty or invalid, it will throw an HttpException with 401 Unauthorized.
 	 * Otherwise, it will return the {@link AuthenticationInfo} object representing the information
 	 * of the authenticated user.
@@ -130,8 +130,8 @@ public class QueryRunner {
 	 * @return the {@link AuthenticationInfo} for the authenticated user
 	 * @throws UnauthorizedException if no token is specified, or the token is empty or invalid
 	 */
-	public static AuthenticationInfo validateToken(HttpServletRequest request,
-												  Application application)
+	public static AuthenticationInfo validateAccessToken(HttpServletRequest request,
+														 Application application)
 			throws UnauthorizedException {
 		Logger logger = AppComponents.getLogger(QueryRunner.class.getSimpleName());
 
@@ -158,9 +158,9 @@ public class QueryRunner {
 			}
 
 			if(application.getConfiguration().getAuthService().equals(Configuration.AUTH_SERVICE_KEYCLOAK))
-				return validateKeycloakToken(token, application);
+				return validateKeycloakAccessToken(token, application);
 			else
-				return validateDefaultToken(token, application);
+				return validateNativeAccessToken(token, application);
 		}
 
 		throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_NOT_FOUND,
@@ -179,7 +179,7 @@ public class QueryRunner {
 	 * @return the {@link AuthenticationInfo}, representing the authenticated user
 	 * @throws UnauthorizedException if the token is empty or invalid
 	 */
-	private static AuthenticationInfo validateDefaultToken(String token, Application application)
+	private static AuthenticationInfo validateNativeAccessToken(String token, Application application)
 			throws UnauthorizedException {
 		Logger logger = AppComponents.getLogger(QueryRunner.class.getSimpleName());
 
@@ -224,9 +224,9 @@ public class QueryRunner {
 	 * @return the {@link AuthenticationInfo} object representing the authenticated user
 	 * @throws UnauthorizedException if the token is empty or invalid
 	 */
-	private static AuthenticationInfo validateKeycloakToken(String token, Application application)
+	private static AuthenticationInfo validateKeycloakAccessToken(String token, Application application)
 			throws UnauthorizedException{
-		return application.getApplicationManager().getKeycloakManager().validateToken(token);
+		return application.getApplicationManager().getKeycloakManager().validateAccessToken(token);
 	}
 
 }
