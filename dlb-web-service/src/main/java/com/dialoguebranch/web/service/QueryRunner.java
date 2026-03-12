@@ -185,7 +185,7 @@ public class QueryRunner {
 
 		AuthenticationInfo authenticationInfo;
 		try {
-			authenticationInfo = JWTUtils.isTokenValid(token);
+			authenticationInfo = JWTUtils.isAccessTokenValid(token);
 		} catch (ExpiredJwtException ex) {
 			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_EXPIRED,
 					"Authentication token expired");

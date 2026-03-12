@@ -31,9 +31,10 @@ import com.dialoguebranch.web.service.*;
 import com.dialoguebranch.web.service.auth.AuthenticationInfo;
 import com.dialoguebranch.web.service.auth.basic.BasicUserCredentials;
 import com.dialoguebranch.web.service.auth.basic.BasicUserFile;
-import com.dialoguebranch.web.service.controller.schema.AccessTokenResponse;
+import com.dialoguebranch.web.service.controller.schema.KeycloakTokenResponse;
 import com.dialoguebranch.web.service.controller.schema.LoginParametersPayload;
 import com.dialoguebranch.web.service.controller.schema.LoginResultPayload;
+import com.dialoguebranch.web.service.controller.schema.RefreshParametersPayload;
 import com.dialoguebranch.web.service.exception.*;
 import com.dialoguebranch.web.service.auth.jwt.JWTUtils;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -194,7 +195,7 @@ public class AuthController {
 	 * @param request the HTTPRequest object (to retrieve authentication headers and optional body
 	 * 	              parameters).
 	 * @param loginParametersPayload the JSON payload containing the username, password and token
-	 * 	 * 	                         expiration values.
+	 * 	                             expiration values.
 	 * @throws BadRequestException in case of any error in the given {@link LoginParametersPayload}.
 	 */
 	private void validateLoginParameters(HttpServletRequest request,
@@ -225,12 +226,16 @@ public class AuthController {
 			}
 
 		}
+
 		if (!fieldErrors.isEmpty()) {
+
 			logger.info("Failed login attempt: {}", fieldErrors);
 			throw BadRequestException.withMessageAndInvalidInput(
 					"One or more login parameters were not correctly provided.",
 					fieldErrors);
+
 		}
+
 	}
 
 	private LoginResultPayload doLoginNative(LoginParametersPayload loginParametersPayload)
@@ -242,29 +247,30 @@ public class AuthController {
 
 		BasicUserCredentials basicUserCredentials = BasicUserFile.findUser(user);
 		String invalidError = "Username or password is invalid";
+
 		if (basicUserCredentials == null) {
 			logger.info("Failed login attempt for user {}: user unknown.", user);
 			throw new UnauthorizedException(ErrorCode.INVALID_CREDENTIALS, invalidError);
 		}
+
 		if (!basicUserCredentials.getPassword().equals(password)) {
 			logger.info("Failed login attempt for user {}: invalid credentials.", user);
 			throw new UnauthorizedException(ErrorCode.INVALID_CREDENTIALS, invalidError);
 		}
-		logger.info("User {} logged in.", basicUserCredentials.getUsername());
+
+		logger.info("User {} logged in successfully.", basicUserCredentials.getUsername());
 
 		Date expiration = null;
-
 		ZonedDateTime now = DateTimeUtils.nowMs();
-
 		if (tokenExpiration != null) {
-			expiration = Date.from(now.plusMinutes(loginParametersPayload.getTokenExpiration())
+			expiration = Date.from(now.plusSeconds(loginParametersPayload.getTokenExpiration())
 					.toInstant());
 		}
 
 		AuthenticationInfo authenticationInfo = new AuthenticationInfo(
 				user, basicUserCredentials.getRoles(), Date.from(now.toInstant()), expiration);
 
-		String token = JWTUtils.generateToken(authenticationInfo);
+		String token = JWTUtils.generateAccessToken(authenticationInfo);
 
 		return new LoginResultPayload(
 				basicUserCredentials.getUsername(),
@@ -279,7 +285,7 @@ public class AuthController {
 	 * @param loginParametersPayload the JSON payload containing the username, password and token
 	 * 	      expiration values provided at login.
 	 * @return a {@link LoginResultPayload} object containing the results of the login attempt.
-	 * @throws UnauthorizedException
+	 * @throws UnauthorizedException in case of any issue with the login parameters provided
 	 */
 	private LoginResultPayload doLoginKeycloak(LoginParametersPayload loginParametersPayload)
 			throws UnauthorizedException {
@@ -303,7 +309,7 @@ public class AuthController {
 		requestParameters.add("password",loginParametersPayload.getPassword());
 		requestParameters.add("grant_type","password");
 
-		ResponseEntity<AccessTokenResponse> response;
+		ResponseEntity<KeycloakTokenResponse> response;
 
 		try {
 			HttpEntity<MultiValueMap<String,String>> entity = new HttpEntity<>(requestParameters,
@@ -312,7 +318,7 @@ public class AuthController {
 					keycloakLoginUrl,
 					HttpMethod.POST,
 					entity,
-					AccessTokenResponse.class);
+					KeycloakTokenResponse.class);
 		} catch(ResourceAccessException rae) {
 			logger.error("Unable to reach keycloak service.",rae);
 			throw new UnauthorizedException(ErrorCode.KEYCLOAK_ERROR,
@@ -326,7 +332,7 @@ public class AuthController {
 
         if (response.getStatusCode() == HttpStatus.OK) {
             logger.info("Call to Keycloak token end-point successful.");
-            AccessTokenResponse keyCloakResponse = response.getBody();
+            KeycloakTokenResponse keyCloakResponse = response.getBody();
             if (keyCloakResponse != null) {
 				// Validate the received token, in order to get the roles.
 				String accessToken = keyCloakResponse.getAccessToken();
@@ -334,11 +340,14 @@ public class AuthController {
 						application.getApplicationManager().getKeycloakManager()
 								.validateToken(accessToken);
 
-                LoginResultPayload loginResultPayload = new LoginResultPayload();
-                loginResultPayload.setToken(keyCloakResponse.getAccessToken());
-                loginResultPayload.setUser(loginParametersPayload.getUser());
-                loginResultPayload.setRoles(authenticationInfo.getCommaSeparatedRolesString());
-                return loginResultPayload;
+                return new LoginResultPayload(
+						loginParametersPayload.getUser(),
+						authenticationInfo.getCommaSeparatedRolesString(),
+						keyCloakResponse.getAccessToken(),
+						keyCloakResponse.getExpiresIn(),
+						keyCloakResponse.getRefreshToken(),
+						keyCloakResponse.getRefreshExpiresIn()
+				);
             } else {
                 logger.warn("Failed login attempt (empty response) for user {}.",
                         loginParametersPayload.getUser());
@@ -387,9 +396,10 @@ public class AuthController {
 		@Parameter(hidden = true, description = "API Version to use, e.g. '1'")
 		@PathVariable(value = "version")
 		String version
+
 	) throws UnauthorizedException {
 
-		// If no versionName is provided, or versionName is empty, assume the latest version
+		// If no version is provided, or version is empty, assume the latest version
 		if (version == null || version.isEmpty()) {
 			version = ProtocolVersion.getLatestVersion().versionName();
 		}
@@ -400,6 +410,131 @@ public class AuthController {
 		synchronized (AUTH_LOCK) {
 			QueryRunner.validateToken(request,application);
 			return true;
+		}
+	}
+
+	// -------------------------------------------------------------------- //
+	// -------------------- END-POINT: "/auth/refresh" -------------------- //
+	// -------------------------------------------------------------------- //
+
+	/**
+	 * Generate a new access token and refresh token pair from a given refresh token.
+	 *
+	 * @param request the HTTPRequest object (to retrieve authentication headers and optional body
+	 *                parameters).
+	 * @param response the HTTP response (to add header WWW-Authenticate in case of a 401
+	 *                 Unauthorized error).
+	 * @param version The API Version to use, e.g. '1'.
+	 * @return 'true' if the token is correct, otherwise it will throw an exception.
+	 * @throws UnauthorizedException if the given authentication token is not (or no longer) valid.
+	 */
+	@SecurityRequirement(name = "X-Auth-Token")
+	@Operation(summary = "Use a refresh token to generate a new access token.",
+			description = "If your client's access token has expired, it may use the refresh" +
+					"token to generate a new access token (if the refresh token has not expired" +
+					"itself).'")
+	@RequestMapping(value="/refresh", method= RequestMethod.POST)
+	public LoginResultPayload refresh(
+			HttpServletRequest request,
+			HttpServletResponse response,
+
+			@Parameter(hidden = true, description = "API Version to use, e.g. '1'")
+			@PathVariable(value = "version")
+			String version,
+
+			@RequestBody
+			RefreshParametersPayload refreshParametersPayload
+	) throws UnauthorizedException {
+
+		// If no versionName is provided, or versionName is empty, assume the latest version
+		if (version == null || version.isEmpty()) {
+			version = ProtocolVersion.getLatestVersion().versionName();
+		}
+
+		// Log this call to the service log
+		logger.info("POST /v{}/auth/refresh", version);
+
+		if(config.getKeycloakEnabled()) {
+			return doRefreshKeycloak(refreshParametersPayload);
+		} else {
+			// TODO: Implement internal refresh token mechanism
+			return null;
+		}
+
+	}
+
+	private LoginResultPayload doRefreshKeycloak(RefreshParametersPayload refreshParametersPayload)
+			throws UnauthorizedException {
+
+		RestTemplate restTemplate = new RestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+		String keycloakLoginUrl = config.getKeycloakBaseUrl();
+		if(!keycloakLoginUrl.endsWith("/")) keycloakLoginUrl += "/";
+		keycloakLoginUrl += "realms/"
+				+ config.getKeycloakRealm()
+				+ "/protocol/openid-connect/token";
+
+		logger.info("Redirecting token refresh attempt to: {}", keycloakLoginUrl);
+
+		MultiValueMap<String, String> requestParameters = new LinkedMultiValueMap<>();
+		requestParameters.add("client_id",config.getKeycloakClientId());
+		requestParameters.add("client_secret",config.getKeycloakClientSecret());
+		requestParameters.add("refresh_token",refreshParametersPayload.getRefreshToken());
+		requestParameters.add("grant_type","refresh_token");
+
+		ResponseEntity<KeycloakTokenResponse> response;
+
+		try {
+			HttpEntity<MultiValueMap<String,String>> entity = new HttpEntity<>(requestParameters,
+					headers);
+			response = restTemplate.exchange(
+					keycloakLoginUrl,
+					HttpMethod.POST,
+					entity,
+					KeycloakTokenResponse.class);
+		} catch(ResourceAccessException rae) {
+			logger.error("Unable to reach keycloak service.",rae);
+			throw new UnauthorizedException(ErrorCode.KEYCLOAK_ERROR,
+					"Unable to process login request. Unable to reach Keycloak service.");
+		} catch(Exception ex) {
+			logger.error("Exception while forwarding login attempt to keycloak.",ex);
+			throw new UnauthorizedException(ErrorCode.KEYCLOAK_ERROR,
+					"Unable to process login request. An unknown error has occurred.");
+			// TODO: Catch additional details and add as fieldErrors to the UnauthorizedException
+		}
+
+		if (response.getStatusCode() == HttpStatus.OK) {
+			logger.info("Call to Keycloak token end-point requesting access token refresh" +
+					" successful.");
+			KeycloakTokenResponse keyCloakResponse = response.getBody();
+			if (keyCloakResponse != null) {
+				// Validate the received token, in order to get the roles.
+				String accessToken = keyCloakResponse.getAccessToken();
+				AuthenticationInfo authenticationInfo =
+						application.getApplicationManager().getKeycloakManager()
+								.validateToken(accessToken);
+
+				return new LoginResultPayload(
+						keyCloakResponse.getAccessToken(),
+						authenticationInfo.getUsername(),
+						authenticationInfo.getCommaSeparatedRolesString(),
+						keyCloakResponse.getExpiresIn(),
+						keyCloakResponse.getRefreshToken(),
+						keyCloakResponse.getRefreshExpiresIn()
+				);
+			} else {
+				logger.warn("Failed to refresh access token (empty response).");
+				throw new UnauthorizedException(ErrorCode.KEYCLOAK_ERROR,
+						"Invalid response from Keycloak service.");
+			}
+
+		} else {
+			logger.warn("Failed to refresh access token: invalid request, status code {}.",
+					response.getStatusCode());
+			throw new UnauthorizedException(ErrorCode.KEYCLOAK_ERROR,
+					"Keycloak service returned status code " + response.getStatusCode() + ".");
 		}
 	}
 

@@ -30,7 +30,7 @@ package com.dialoguebranch.web.service.controller.schema;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import nl.rrd.utils.json.JsonObject;
 
-public class AccessTokenResponse extends JsonObject {
+public class KeycloakTokenResponse extends JsonObject {
 
     @JsonProperty("access_token")
     private String accessToken;
@@ -60,9 +60,9 @@ public class AccessTokenResponse extends JsonObject {
     // -------------------- Constructor(s) ----------------------- //
     // ----------------------------------------------------------- //
 
-    public AccessTokenResponse(String accessToken, String tokenType, Integer expiresIn,
-                               String refreshToken, Integer refreshExpiresIn,
-                               Integer notBeforePolicy, String sessionState, String scope) {
+    public KeycloakTokenResponse(String accessToken, String tokenType, Integer expiresIn,
+                                 String refreshToken, Integer refreshExpiresIn,
+                                 Integer notBeforePolicy, String sessionState, String scope) {
         this.accessToken = accessToken;
         this.tokenType = tokenType;
         this.expiresIn = expiresIn;

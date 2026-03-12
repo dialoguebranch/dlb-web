@@ -1,6 +1,6 @@
 /*
  *
- *                Copyright (c) 2023-2025 Fruit Tree Labs (www.fruittreelabs.com)
+ *                Copyright (c) 2023-2026 Fruit Tree Labs (www.fruittreelabs.com)
  *
  *
  *     This material is part of the DialogueBranch Platform, and is covered by the MIT License
@@ -40,11 +40,14 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.function.Function;
 
+/**
+ * Collection of static methods for creating and verifying JSON Web Tokens (JWTs).
+ */
 public class JWTUtils {
 
     private static final long EXPIRATION_TIME = 86400000; // 24 hours
 
-    public static String generateToken(AuthenticationInfo authenticationInfo) {
+    public static String generateAccessToken(AuthenticationInfo authenticationInfo) {
         return Jwts.builder()
                 .subject(authenticationInfo.getUsername())
                 .issuedAt(new Date())
@@ -63,7 +66,7 @@ public class JWTUtils {
         return claimFunction.apply(claims);
     }
 
-    public static AuthenticationInfo isTokenValid(String token)
+    public static AuthenticationInfo isAccessTokenValid(String token)
             throws JwtException {
         final Claims claims = Jwts.parser()
                 .verifyWith(getSecretKey())
@@ -80,6 +83,12 @@ public class JWTUtils {
                 claims.getExpiration());
     }
 
+    /**
+     * Returns {@code true} if the given JWT is still valid.
+     *
+     * @param token the JSON Web Token for which to check the expiration time.
+     * @return {@code true} if the token is still valid, false otherwise.
+     */
     public static boolean isTokenExpired(String token) {
         return extractClaims(token, Claims::getExpiration).before(new Date());
     }
