@@ -517,9 +517,9 @@ public class AuthController {
 								.validateToken(accessToken);
 
 				return new LoginResultPayload(
-						keyCloakResponse.getAccessToken(),
 						authenticationInfo.getUsername(),
 						authenticationInfo.getCommaSeparatedRolesString(),
+						keyCloakResponse.getAccessToken(),
 						keyCloakResponse.getExpiresIn(),
 						keyCloakResponse.getRefreshToken(),
 						keyCloakResponse.getRefreshExpiresIn()
