@@ -121,7 +121,7 @@ public class ApplicationManager {
 		Configuration config = AppComponents.get(Configuration.class);
 
 		// Initialize User Manager
-		if(config.getKeycloakEnabled()) {
+		if(config.getAuthService().equals(Configuration.AUTH_SERVICE_KEYCLOAK)) {
 			keycloakManager = new KeycloakManager();
 			basicUserCredentials = new ArrayList<>(); // This is the (now unused) built-in list
 		} else {

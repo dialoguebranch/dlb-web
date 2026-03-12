@@ -178,7 +178,7 @@ public class AuthController {
 		// BadRequestException in case of errors
 		validateLoginParameters(request, loginParametersPayload);
 
-		if(config.getKeycloakEnabled()) {
+		if(config.getAuthService().equals(Configuration.AUTH_SERVICE_KEYCLOAK)) {
 			logger.info("Keycloak authentication enabled.");
 			return doLoginKeycloak(loginParametersPayload);
 		} else {
@@ -218,7 +218,7 @@ public class AuthController {
 
 		// If Keycloak is used for authentication, a specific token expiration can not actually be
 		// set, so we're not going to complain about it here.
-		if(!config.getKeycloakEnabled()) {
+		if(config.getAuthService().equals(Configuration.AUTH_SERVICE_NATIVE)) {
 
 			if (tokenExpiration != null && tokenExpiration <= 0) {
 				fieldErrors.add(new HttpFieldError("tokenExpiration",
@@ -454,7 +454,7 @@ public class AuthController {
 		// Log this call to the service log
 		logger.info("POST /v{}/auth/refresh", version);
 
-		if(config.getKeycloakEnabled()) {
+		if(config.getAuthService().equals(Configuration.AUTH_SERVICE_KEYCLOAK)) {
 			return doRefreshKeycloak(refreshParametersPayload);
 		} else {
 			// TODO: Implement internal refresh token mechanism

@@ -54,6 +54,10 @@ public class Configuration extends LinkedHashMap<String,String> {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+	private static final Object LOCK = new Object();
+
+	private static Configuration instance = null;
+
 	// -------------------------------------------------------------
 	// -------------------- Known property keys --------------------
 	// -------------------------------------------------------------
@@ -68,18 +72,6 @@ public class Configuration extends LinkedHashMap<String,String> {
 
 	/** Name of the config parameter that defines the base URL where this service is running */
 	public static final String BASE_URL = "baseUrl";
-
-	/**
-	 * Name of the config parameter that defines the JSON Web Token (JWT) 'secret' used to encrypt
-	 * and decrypt ACCESS TOKENS.
-	 */
-	public static final String JWT_ACCESS_TOKEN_SECRET = "jwtAccessTokenSecret";
-
-	/**
-	 * Name of the config parameter that defines the JSON Web Token (JWT) 'secret' used to encrypt
-	 * and decrypt REFRESH TOKENS.
-	 */
-	public static final String JWT_REFRESH_TOKEN_SECRET = "jwtRefreshTokenSecret";
 
 	/** Name of the config parameter that defines the data directory for the Web Service */
 	public static final String DATA_DIR = "dataDir";
@@ -104,21 +96,56 @@ public class Configuration extends LinkedHashMap<String,String> {
 
 	public static final String MARIADB_DATABASE = "mariadbDatabase";
 
-	// ---------- KeyCloak Configuration
+	// ---------- Authentication Configuration
 
 	/**
-	 * Name of the config parameter indicating whether the service should use an external Keycloak
-	 * service for handling user authorization.
+	 * Name of the config parameter indicating the authentication service to use, which can be set
+	 * to either "keycloak", or "native".
 	 */
-	public static final String KEYCLOAK_ENABLED = "keycloakEnabled";
+	public static final String AUTH_SERVICE = "authService";
 
-	public static final String KEYCLOAK_BASEURL = "keycloakBaseUrl";
+	/**
+	 * Constant defining the value of AUTH_SERVICE indicating that Keycloak should be used.
+	 */
+	public static final String AUTH_SERVICE_KEYCLOAK = "keycloak";
 
-	public static final String KEYCLOAK_REALM = "keycloakRealm";
+	/**
+	 * Constant defining the value of AUTH_SERVICE indicating that the Native auth system should be
+	 * used.
+	 */
+	public static final String AUTH_SERVICE_NATIVE = "native";
 
-	public static final String KEYCLOAK_CLIENT_ID = "keycloakClientId";
+	/**
+	 * Name of the config parameter to define the Keycloak base url.
+	 */
+	public static final String AUTH_KEYCLOAK_BASEURL = "authKeycloakBaseUrl";
 
-	public static final String KEYCLOAK_CLIENT_SECRET = "keycloakClientSecret";
+	/**
+	 * Name of the config parameter to define the Keycloak realm.
+	 */
+	public static final String AUTH_KEYCLOAK_REALM = "authKeycloakRealm";
+
+	/**
+	 * Name of the config parameter to define the Keycloak client ID.
+	 */
+	public static final String AUTH_KEYCLOAK_CLIENT_ID = "authKeycloakClientId";
+
+	/**
+	 * Name of the config parameter to define the Keycloak Client Secret.
+	 */
+	public static final String AUTH_KEYCLOAK_CLIENT_SECRET = "authKeycloakClientSecret";
+
+	/**
+	 * Name of the config parameter that defines the JSON Web Token (JWT) 'secret' used to encrypt
+	 * and decrypt ACCESS TOKENS.
+	 */
+	public static final String AUTH_NATIVE_JWT_ACCESS_TOKEN_SECRET = "authNativeJwtAccessTokenSecret";
+
+	/**
+	 * Name of the config parameter that defines the JSON Web Token (JWT) 'secret' used to encrypt
+	 * and decrypt REFRESH TOKENS.
+	 */
+	public static final String AUTH_NATIVE_JWT_REFRESH_TOKEN_SECRET = "authNativeJwtRefreshTokenSecret";
 
 	// ---------- External Variable Service
 
@@ -197,10 +224,6 @@ public class Configuration extends LinkedHashMap<String,String> {
 
 	/** Hardcoded folder name for storing the user-specific Variable Stores */
 	public static final String DIRECTORY_NAME_VARIABLES = "variables";
-
-	private static final Object LOCK = new Object();
-
-	private static Configuration instance = null;
 
 	// -------------------------------------------------------------------------
 	// -------------------- Constructor(s) & Initialization --------------------
@@ -282,26 +305,6 @@ public class Configuration extends LinkedHashMap<String,String> {
 	}
 
 	/**
-	 * Returns the secret key used for encoding/decoding JWT Access Tokens.
-	 *
-	 * @return the secret key used for encoding/decoding JWT Access Tokens.
-	 */
-	public String getJwtAccessTokenSecret() {
-		if(get(JWT_ACCESS_TOKEN_SECRET) == null) return "";
-		else return get(JWT_ACCESS_TOKEN_SECRET);
-	}
-
-	/**
-	 * Returns the secret key used for encoding/decoding JWT Refresh Tokens.
-	 *
-	 * @return the secret key used for encoding/decoding JWT Refresh Tokens.
-	 */
-	public String getJwtRefreshTokenSecret() {
-		if(get(JWT_REFRESH_TOKEN_SECRET) == null) return "";
-		else return get(JWT_REFRESH_TOKEN_SECRET);
-	}
-
-	/**
 	 * Returns the location of the data directory used by the web service as a String.
 	 *
 	 * @return the location of the data directory used by the web service as a String.
@@ -357,32 +360,53 @@ public class Configuration extends LinkedHashMap<String,String> {
 		return get(MARIADB_DATABASE);
 	}
 
-	// -------------------------------------------------------------------------
-	// -------------------- Getters: Keycloak Configuration --------------------
-	// -------------------------------------------------------------------------
+	// -----------------------------------------------------------------
+	// -------------------- Getters: Authentication --------------------
+	// -----------------------------------------------------------------
 
-	public boolean getKeycloakEnabled() {
-		return Boolean.parseBoolean(get(KEYCLOAK_ENABLED));
+	public String getAuthService() {
+		if(get(AUTH_SERVICE) == null) return "";
+		else return get(AUTH_SERVICE);
 	}
 
 	public String getKeycloakBaseUrl() {
-		if(get(KEYCLOAK_BASEURL) == null) return "";
-		else return get(KEYCLOAK_BASEURL);
+		if(get(AUTH_KEYCLOAK_BASEURL) == null) return "";
+		else return get(AUTH_KEYCLOAK_BASEURL);
 	}
 
 	public String getKeycloakRealm() {
-		if(get(KEYCLOAK_REALM) == null) return "";
-		else return get(KEYCLOAK_REALM);
+		if(get(AUTH_KEYCLOAK_REALM) == null) return "";
+		else return get(AUTH_KEYCLOAK_REALM);
 	}
 
 	public String getKeycloakClientId() {
-		if(get(KEYCLOAK_CLIENT_ID) == null) return "";
-		else return get(KEYCLOAK_CLIENT_ID);
+		if(get(AUTH_KEYCLOAK_CLIENT_ID) == null) return "";
+		else return get(AUTH_KEYCLOAK_CLIENT_ID);
 	}
 
 	public String getKeycloakClientSecret() {
-		if(get(KEYCLOAK_CLIENT_SECRET) == null) return "";
-		else return get(KEYCLOAK_CLIENT_SECRET);
+		if(get(AUTH_KEYCLOAK_CLIENT_SECRET) == null) return "";
+		else return get(AUTH_KEYCLOAK_CLIENT_SECRET);
+	}
+
+	/**
+	 * Returns the secret key used for encoding/decoding JWT Access Tokens.
+	 *
+	 * @return the secret key used for encoding/decoding JWT Access Tokens.
+	 */
+	public String getJwtAccessTokenSecret() {
+		if(get(AUTH_NATIVE_JWT_ACCESS_TOKEN_SECRET) == null) return "";
+		else return get(AUTH_NATIVE_JWT_ACCESS_TOKEN_SECRET);
+	}
+
+	/**
+	 * Returns the secret key used for encoding/decoding JWT Refresh Tokens.
+	 *
+	 * @return the secret key used for encoding/decoding JWT Refresh Tokens.
+	 */
+	public String getJwtRefreshTokenSecret() {
+		if(get(AUTH_NATIVE_JWT_REFRESH_TOKEN_SECRET) == null) return "";
+		else return get(AUTH_NATIVE_JWT_REFRESH_TOKEN_SECRET);
 	}
 
 	// ----------------------------------------------------------------------------

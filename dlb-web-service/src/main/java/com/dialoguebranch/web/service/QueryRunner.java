@@ -157,7 +157,7 @@ public class QueryRunner {
 						"Authentication token invalid");
 			}
 
-			if(application.getConfiguration().getKeycloakEnabled())
+			if(application.getConfiguration().getAuthService().equals(Configuration.AUTH_SERVICE_KEYCLOAK))
 				return validateKeycloakToken(token, application);
 			else
 				return validateDefaultToken(token, application);
