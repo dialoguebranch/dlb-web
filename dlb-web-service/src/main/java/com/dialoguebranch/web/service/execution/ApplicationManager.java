@@ -171,8 +171,8 @@ public class ApplicationManager {
 	}
 
 	/**
-	 * Returns the {@link BasicUserCredentials} object associated with the given {@code username}, or
-	 * {@code null} if no such user is known.
+	 * Returns the {@link BasicUserCredentials} object associated with the given {@code username},
+	 * or {@code null} if no such user is known.
 	 *
 	 * @param username the username of the user to look for.
 	 * @return the {@link BasicUserCredentials} object or {@code null}.

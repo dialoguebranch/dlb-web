@@ -232,7 +232,8 @@ public class AuthController {
 		String user = loginParametersPayload.getUser();
 		String password = loginParametersPayload.getPassword();
 
-		BasicUserCredentials basicUserCredentials = BasicUserFile.findUser(user);
+		BasicUserCredentials basicUserCredentials
+				= application.getApplicationManager().getUserCredentialsForUsername(user);
 		String invalidError = "Username or password is invalid";
 
 		if (basicUserCredentials == null) {
@@ -538,7 +539,9 @@ public class AuthController {
 
 		// First we retrieve the roles of this user, because it should be supplied with the
 		// new LoginResultPayload
-		BasicUserCredentials basicUserCredentials = BasicUserFile.findUser(authInfo.getUsername());
+		BasicUserCredentials basicUserCredentials
+				= application.getApplicationManager()
+				.getUserCredentialsForUsername(authInfo.getUsername());
 		String invalidError = "User '"+ authInfo.getUsername() +"' does not exist";
 
 		if (basicUserCredentials == null) {
