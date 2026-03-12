@@ -258,21 +258,19 @@ public class AuthController {
 			throw new UnauthorizedException(ErrorCode.INVALID_CREDENTIALS, invalidError);
 		}
 
-		logger.info("User {} logged in.", basicUserCredentials.getUsername());
+		logger.info("User {} logged in successfully.", basicUserCredentials.getUsername());
 
 		Date expiration = null;
-
 		ZonedDateTime now = DateTimeUtils.nowMs();
-
 		if (tokenExpiration != null) {
-			expiration = Date.from(now.plusMinutes(loginParametersPayload.getTokenExpiration())
+			expiration = Date.from(now.plusSeconds(loginParametersPayload.getTokenExpiration())
 					.toInstant());
 		}
 
 		AuthenticationInfo authenticationInfo = new AuthenticationInfo(
 				user, basicUserCredentials.getRoles(), Date.from(now.toInstant()), expiration);
 
-		String token = JWTUtils.generateToken(authenticationInfo);
+		String token = JWTUtils.generateAccessToken(authenticationInfo);
 
 		return new LoginResultPayload(
 				basicUserCredentials.getUsername(),
