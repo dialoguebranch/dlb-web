@@ -416,9 +416,13 @@ public class Configuration extends LinkedHashMap<String,String> {
 	 *
 	 * @return the access token expiration time in seconds.
 	 */
-	public String getAccessTokenExpirationSeconds() {
-		if(get(AUTH_NATIVE_ACCESS_TOKEN_EXPIRATION_SECONDS) == null) return "";
-		else return get(AUTH_NATIVE_ACCESS_TOKEN_EXPIRATION_SECONDS);
+	public int getAccessTokenExpirationSeconds() {
+		if (get(AUTH_NATIVE_ACCESS_TOKEN_EXPIRATION_SECONDS) == null) return 300;
+		try {
+			return Integer.parseInt(get(AUTH_NATIVE_ACCESS_TOKEN_EXPIRATION_SECONDS));
+		} catch (NumberFormatException ex) {
+			return 300;
+		}
 	}
 
 	/**
@@ -437,9 +441,13 @@ public class Configuration extends LinkedHashMap<String,String> {
 	 *
 	 * @return the refresh token expiration time in seconds.
 	 */
-	public String getRefreshTokenExpirationSeconds() {
-		if(get(AUTH_NATIVE_REFRESH_TOKEN_EXPIRATION_SECONDS) == null) return "";
-		else return get(AUTH_NATIVE_REFRESH_TOKEN_EXPIRATION_SECONDS);
+	public int getRefreshTokenExpirationSeconds() {
+		if (get(AUTH_NATIVE_REFRESH_TOKEN_EXPIRATION_SECONDS) == null) return 1800;
+		try {
+			return Integer.parseInt(get(AUTH_NATIVE_REFRESH_TOKEN_EXPIRATION_SECONDS));
+		} catch (NumberFormatException ex) {
+			return 1800;
+		}
 	}
 
 	// ----------------------------------------------------------------------------

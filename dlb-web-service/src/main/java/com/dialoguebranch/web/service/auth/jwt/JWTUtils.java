@@ -45,13 +45,14 @@ import java.util.function.Function;
  */
 public class JWTUtils {
 
-    private static final long EXPIRATION_TIME = 86400000; // 24 hours
+    /** Used to access configuration parameters */
+    private static final Configuration config = Configuration.getInstance();
 
     public static String generateAccessToken(AuthenticationInfo authenticationInfo) {
         return Jwts.builder()
                 .subject(authenticationInfo.getUsername())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .expiration(new Date(System.currentTimeMillis() + config.getAccessTokenExpirationSeconds() * 1000L))
                 .claim("roles", authenticationInfo.getCommaSeparatedRolesString())
                 .signWith(getAccessTokenSecret())
                 .compact();
