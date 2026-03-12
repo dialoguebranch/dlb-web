@@ -203,7 +203,7 @@ public class AuthController {
 				"password");
 		String user = loginParametersPayload.getUser();
 		String password = loginParametersPayload.getPassword();
-		Integer tokenExpiration = loginParametersPayload.getTokenExpiration();
+
 		List<HttpFieldError> fieldErrors = new ArrayList<>();
 		if (user == null || user.isEmpty()) {
 			fieldErrors.add(new HttpFieldError("user",
@@ -212,17 +212,6 @@ public class AuthController {
 		if (password == null || password.isEmpty()) {
 			fieldErrors.add(new HttpFieldError("password",
 					"Parameter 'password' not defined."));
-		}
-
-		// If Keycloak is used for authentication, a specific token expiration can not actually be
-		// set, so we're not going to complain about it here.
-		if(config.getAuthService().equals(Configuration.AUTH_SERVICE_NATIVE)) {
-
-			if (tokenExpiration != null && tokenExpiration <= 0) {
-				fieldErrors.add(new HttpFieldError("tokenExpiration",
-						"Parameter 'tokenExpiration' must be greater than 0 or 'never'."));
-			}
-
 		}
 
 		if (!fieldErrors.isEmpty()) {

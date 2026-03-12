@@ -335,7 +335,7 @@ public class ApplicationManager {
 		LoginParametersPayload loginParametersPayload = new LoginParametersPayload();
 		loginParametersPayload.setUser(config.getExternalVariableServiceUsername());
 		loginParametersPayload.setPassword(config.getExternalVariableServicePassword());
-		loginParametersPayload.setTokenExpiration(null);
+		
 		HttpEntity<LoginParametersPayload> request =
 				new HttpEntity<>(loginParametersPayload, headers);
 
