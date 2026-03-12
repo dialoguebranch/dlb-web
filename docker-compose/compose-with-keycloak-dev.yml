@@ -37,7 +37,8 @@ services:
     ports:
       - 127.0.0.1:8089:8089
     environment:
-      jwtSecretKey: ${dlb_web_service_jwt_secret_key}
+      jwtAccessTokenSecret: ${dlb_web_service_jwt_access_token_secret}
+      jwtRefreshTokenSecret: ${dlb_web_service_jwt_refresh_token_secret}
       keycloakClientSecret: ${keycloak_client_secret}
       mariadbPassword: ${mariadb_root_password}
     volumes:
