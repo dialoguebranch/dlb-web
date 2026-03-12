@@ -142,10 +142,21 @@ public class Configuration extends LinkedHashMap<String,String> {
 	public static final String AUTH_NATIVE_JWT_ACCESS_TOKEN_SECRET = "authNativeJwtAccessTokenSecret";
 
 	/**
+	 * Name of the config parameter that indicates how long access tokens should be active.
+	 */
+	public static final String AUTH_NATIVE_ACCESS_TOKEN_EXPIRATION_SECONDS = "authNativeAccessTokenExpirationSeconds";
+
+	/**
 	 * Name of the config parameter that defines the JSON Web Token (JWT) 'secret' used to encrypt
 	 * and decrypt REFRESH TOKENS.
 	 */
 	public static final String AUTH_NATIVE_JWT_REFRESH_TOKEN_SECRET = "authNativeJwtRefreshTokenSecret";
+
+	/**
+	 * Name of the config parameter that indicates how long refresh tokens should be active
+	 * (typically much longer).
+	 */
+	public static final String AUTH_NATIVE_REFRESH_TOKEN_EXPIRATION_SECONDS = "authNativeRefreshTokenExpirationSeconds";
 
 	// ---------- External Variable Service
 
@@ -400,6 +411,17 @@ public class Configuration extends LinkedHashMap<String,String> {
 	}
 
 	/**
+	 * Returns the number of seconds a newly generated access token should be valid for under the
+	 * native authentication service.
+	 *
+	 * @return the access token expiration time in seconds.
+	 */
+	public String getAccessTokenExpirationSeconds() {
+		if(get(AUTH_NATIVE_ACCESS_TOKEN_EXPIRATION_SECONDS) == null) return "";
+		else return get(AUTH_NATIVE_ACCESS_TOKEN_EXPIRATION_SECONDS);
+	}
+
+	/**
 	 * Returns the secret key used for encoding/decoding JWT Refresh Tokens.
 	 *
 	 * @return the secret key used for encoding/decoding JWT Refresh Tokens.
@@ -407,6 +429,17 @@ public class Configuration extends LinkedHashMap<String,String> {
 	public String getJwtRefreshTokenSecret() {
 		if(get(AUTH_NATIVE_JWT_REFRESH_TOKEN_SECRET) == null) return "";
 		else return get(AUTH_NATIVE_JWT_REFRESH_TOKEN_SECRET);
+	}
+
+	/**
+	 * Returns the number of seconds a newly generated refresh token should be valid for under the
+	 * native authentication service.
+	 *
+	 * @return the refresh token expiration time in seconds.
+	 */
+	public String getRefreshTokenExpirationSeconds() {
+		if(get(AUTH_NATIVE_REFRESH_TOKEN_EXPIRATION_SECONDS) == null) return "";
+		else return get(AUTH_NATIVE_REFRESH_TOKEN_EXPIRATION_SECONDS);
 	}
 
 	// ----------------------------------------------------------------------------
