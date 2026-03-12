@@ -102,9 +102,9 @@ public class QueryRunner {
 			} else {
 				String userIdentifier = "Unknown";
 				if(authenticationInfo != null) userIdentifier = authenticationInfo.getUsername();
-				throw new UnauthorizedException("Attempting to run query for delegateUser '"
-						+ delegateUser + "', but currently logged in user '" + userIdentifier
-						+ "' is not an admin.");
+				throw new UnauthorizedException(ErrorCode.INSUFFICIENT_PRIVILEGES,
+					"Attempting to run query for delegateUser '" + delegateUser +
+					"', but currently logged in user '" + userIdentifier + "' is not an admin.");
 			}
 		} catch (UnauthorizedException ex) {
 			response.addHeader("WWW-Authenticate", "None");
