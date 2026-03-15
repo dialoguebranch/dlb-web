@@ -39,7 +39,7 @@ services:
     environment:
       authNativeJwtAccessTokenSecret: ${dlb_web_service_auth_native_jwt_access_token_secret}
       authNativeJwtRefreshTokenSecret: ${dlb_web_service_auth_native_jwt_refresh_token_secret}
-      keycloakClientSecret: ${keycloak_client_secret}
+      authKeycloakClientSecret: ${keycloak_client_secret}
       mariadbPassword: ${mariadb_root_password}
 
   ##############################
