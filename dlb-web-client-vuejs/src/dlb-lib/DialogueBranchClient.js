@@ -34,9 +34,13 @@ import { Statement } from "./model/Statement";
 import { Variable } from "./model/Variable";
 
 export class DialogueBranchClient {
-    constructor(baseUrl, authToken) {
+
+    // TODO: Create a generic "call protected end-point" function that will inject the accessToken
+    // in the header, and will automatically attempt access token refresh upon "expired token" errors.
+
+    constructor(baseUrl, accessToken) {
         this._baseUrl = baseUrl;
-        this._authToken = authToken;
+        this._accessToken = accessToken;
         this._timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     }
 
@@ -44,7 +48,7 @@ export class DialogueBranchClient {
         this._onUnauthorized = onUnauthorized;
     }
 
-    login(user, password, tokenExpiration) {
+    login(user, password) {
         const loginUrl = this._baseUrl + "/auth/login";
 
         return fetch(loginUrl, {
@@ -54,8 +58,7 @@ export class DialogueBranchClient {
             },
             body: JSON.stringify({
                 user: user,
-                password: password,
-                tokenExpiration: tokenExpiration
+                password: password
             }),
         })
         .then((response) => {
@@ -73,7 +76,7 @@ export class DialogueBranchClient {
         return fetch(url, {
             method: "GET",
             headers: {
-                'X-Auth-Token': this._authToken,
+                'Authorization': 'Bearer ' + this._accessToken,
                 "Content-Type": "application/json",
             }
         })
@@ -90,7 +93,7 @@ export class DialogueBranchClient {
         return fetch(url, {
             method: "POST",
             headers: {
-                'X-Auth-Token': this._authToken,
+                'Authorization': 'Bearer ' + this._accessToken,
                 "Content-Type": "application/json",
             }
         })
@@ -108,7 +111,7 @@ export class DialogueBranchClient {
         return fetch(url, {
             method: "POST",
             headers: {
-                'X-Auth-Token': this._authToken,
+                'Authorization': 'Bearer ' + this._accessToken,
                 "Content-Type": "application/json",
             }
         })
@@ -125,7 +128,7 @@ export class DialogueBranchClient {
         return fetch(url, {
             method: "POST",
             headers: {
-                'X-Auth-Token': this._authToken,
+                'Authorization': 'Bearer ' + this._accessToken,
                 "Content-Type": "application/json",
             }
         })
@@ -150,7 +153,7 @@ export class DialogueBranchClient {
         return fetch(url, {
             method: "GET",
             headers: {
-                'X-Auth-Token': this._authToken,
+                'Authorization': 'Bearer ' + this._accessToken,
                 "Content-Type": "application/json",
             }
         })
@@ -185,7 +188,7 @@ export class DialogueBranchClient {
         return fetch(url, {
             method: "POST",
             headers: {
-                'X-Auth-Token': this._authToken,
+                'Authorization': 'Bearer ' + this._accessToken,
                 "Content-Type": "application/json",
             }
         })

@@ -28,7 +28,7 @@ function onLoginClick() {
     if (input === false) {
         return;
     }
-    client.login(input.username, input.password, 0)
+    client.login(input.username, input.password)
     .then((json) => {
         onLoginSuccess(json);
     })
@@ -65,11 +65,26 @@ function validateInput() {
 }
 
 function onLoginSuccess(responseJson) {
-    const user = new User(responseJson.user, responseJson.role, responseJson.token);
-    const expireDays = remember.value ? 365 : null;
-    DocumentFunctions.setCookie('user.name', user.name, expireDays);
-    DocumentFunctions.setCookie('user.authToken', user.authToken, expireDays);
-    DocumentFunctions.setCookie('user.role', user.role, expireDays);
+    console.log("The onLoginSuccess function has been called.");
+    
+    const user = new User(
+        responseJson.user, 
+        responseJson.roles, 
+        responseJson.accessToken, 
+        responseJson.accessTokenExpiresIn, 
+        responseJson.refreshToken,
+        responseJson.refreshTokenExpiresIn
+    );
+    
+    const cookieExpiration = remember.value ? 365 : null;
+    DocumentFunctions.setCookie('user.name', user.name, cookieExpiration);
+    DocumentFunctions.setCookie('user.roles', user.roles, cookieExpiration);
+    DocumentFunctions.setCookie('user.accessToken', user.accessToken, cookieExpiration);
+    DocumentFunctions.setCookie('user.accessTokenExpiresIn', user.accessTokenExpiresIn, cookieExpiration);
+    DocumentFunctions.setCookie('user.refreshToken', user.refreshToken, cookieExpiration);
+    DocumentFunctions.setCookie('user.refreshTokenExpiresIn', user.refreshTokenExpiresIn, cookieExpiration);
+    
+    // App.vue defines that if state.user is set, switch to the MainPage.vue
     state.value.user = user;
 }
 </script>

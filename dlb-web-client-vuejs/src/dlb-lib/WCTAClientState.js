@@ -167,12 +167,22 @@ export class WCTAClientState extends ClientState {
         }
 
         var cookieUserName = DocumentFunctions.getCookie('user.name');
-        var cookieUserRole = DocumentFunctions.getCookie('user.role');
-        var cookieUserAuthToken = DocumentFunctions.getCookie('user.authToken');
+        var cookieUserRoles = DocumentFunctions.getCookie('user.roles');
+        var cookieUserAccessToken = DocumentFunctions.getCookie('user.accessToken');
+        var cookieUserAccessTokenExpiresIn = DocumentFunctions.getCookie('user.accessTokenExpiresIn')
+        var cookieUserRefreshToken = DocumentFunctions.getCookie('user.refreshToken');
+        var cookieUserRefreshTokenExpiresIn = DocumentFunctions.getCookie('user.refreshTokenExpiresIn')
 
-        // All variables are non-empty / non-null
-        if(cookieUserName && cookieUserRole && cookieUserAuthToken) {
-            var user = new User(cookieUserName, cookieUserRole, cookieUserAuthToken);
+        // Only if all variables are non-empty / non-null
+        if(cookieUserName && cookieUserRoles && cookieUserAccessToken && cookieUserAccessTokenExpiresIn && cookieUserRefreshToken && cookieUserRefreshTokenExpiresIn) {
+            var user = new User(
+                cookieUserName,
+                cookieUserRoles,
+                cookieUserAccessToken,
+                cookieUserAccessTokenExpiresIn,
+                cookieUserRefreshToken,
+                cookieUserRefreshTokenExpiresIn
+            );
             this._user = user;
         }
     }
