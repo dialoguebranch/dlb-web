@@ -30,11 +30,14 @@ package com.dialoguebranch.web.service.auth.keycloak;
 
 import com.dialoguebranch.web.service.auth.AuthenticationInfo;
 import com.dialoguebranch.web.service.Configuration;
+import com.dialoguebranch.web.service.exception.ErrorCode;
 import com.dialoguebranch.web.service.exception.InvalidRoleException;
 import com.dialoguebranch.web.service.exception.UnauthorizedException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import nl.rrd.utils.AppComponents;
 import org.slf4j.Logger;
@@ -80,7 +83,7 @@ public class KeycloakManager {
     }
 
     private void initialize() throws NoSuchAlgorithmException, InvalidKeySpecException {
-        logger.info("Attempting to initialize KeycloakManager...");
+        logger.info("Starting to initialize KeycloakManager...");
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -92,7 +95,7 @@ public class KeycloakManager {
                 + config.getKeycloakRealm()
                 + "/protocol/openid-connect/certs";
 
-        logger.info(" - Retrieving public Keycloak certificate data from: {} ...",
+        logger.info("   * Retrieving public Keycloak certificate data from: {} ...",
                 keyCloakCertsUrl);
 
         HttpEntity<MultiValueMap<String,String>> entity = new HttpEntity<>(headers);
@@ -103,12 +106,14 @@ public class KeycloakManager {
                 KeycloakCertsResponse.class);
 
         if(response.getStatusCode() == HttpStatus.OK) {
-            logger.info(" - Response OK.");
+            logger.info("   * Response OK.");
             KeycloakCertsResponse keyCloakResponse = response.getBody();
 
-            if(keyCloakResponse == null)
+            if(keyCloakResponse == null) {
+                logger.warn("   x Unable to get key information from response.");
                 throw new InvalidKeySpecException("Unable to get key information " +
                         "from response body.");
+            }
 
             for(KeycloakKey key : keyCloakResponse.getKeys()) {
                 BigInteger modulus = new BigInteger(
@@ -120,9 +125,9 @@ public class KeycloakManager {
                 this.publicKeys.put(key.getKeyId(),keyFactory.generatePublic(rsaPublicKeySpec));
             }
             this.setInitialized();
-            logger.info(" - KeycloakManager initialized successfully.");
+            logger.info("   * KeycloakManager initialized successfully.");
         } else {
-            logger.warn(" - Call to Keycloak token end-point failed.");
+            logger.warn("   x Call to Keycloak token end-point failed.");
         }
     }
 
@@ -151,7 +156,7 @@ public class KeycloakManager {
         // Split the JWT into its parts (header . payload . signature)
         String[] parts = accessToken.split("\\.");
         if (parts.length != 3) {
-            throw new UnauthorizedException("Invalid JWT accessToken.");
+            throw new UnauthorizedException("Invalid JWT access token while parsing header.");
         }
 
         // Extract the keyID ("kid") from the header.
@@ -168,11 +173,30 @@ public class KeycloakManager {
             throw new UnauthorizedException("Unable to parse JWT header.");
         }
 
-        final Claims claims = Jwts.parser()
-                .verifyWith(this.publicKeys.get(keyId)) // Use the public key that matches this kid
-                .build()
-                .parseSignedClaims(accessToken)
-                .getPayload();
+        Claims claims = null;
+
+        try {
+            claims = Jwts.parser()
+                    .verifyWith(this.publicKeys.get(keyId)) // Use the public key that matches this kid
+                    .build()
+                    .parseSignedClaims(accessToken)
+                    .getPayload();
+        } catch(IllegalArgumentException iae) {
+            logger.warn("Invalid JWT access token while validating.");
+            throw new UnauthorizedException("Invalid JWT access token while validating.");
+        } catch(JwtException jwte) {
+
+            if(jwte instanceof ExpiredJwtException) {
+                logger.warn("The provided access token has expired.");
+                throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_EXPIRED,
+                        "The provided access token has expired.");
+            }
+
+            // In all other cases, just throw a generic "keycloak error"
+            logger.warn("A JwtException occurred while parsing access token.");
+            throw new UnauthorizedException(ErrorCode.KEYCLOAK_ERROR,
+                    "A JwtException occurred while parsing access token.");
+        }
 
         // Obtain the roles from accessToken claims
         String[] roles;
