@@ -27,7 +27,7 @@ RUN mkdir -p /usr/local/dialogue-branch/data/
 RUN mkdir /usr/local/dialogue-branch/data/dlb-web-service/
 
 # Copy the users.xml file into the data folder (not for the keycloak version!)
-# RUN cp /usr/local/dialogue-branch/source/dlb-web/dlb-web-service/config/users.xml /usr/local/dialogue-branch/data/dlb-web-service/
+COPY ./dlb-web/dlb-web-service/config/users.xml /usr/local/dialogue-branch/data/dlb-web-service/
 
 # Set the working directory in the container
 WORKDIR /usr/local/tomcat

@@ -258,6 +258,39 @@ export class DialogueBranchClient {
                 return response.text();
             }
         } else if (response.status == 401) {
+
+            // Unauthorized could simply mean that the access token has expired
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.startsWith('application/json')) {
+                console.log("Response 401 received with content of type json");
+                console.log("Response JSON:");
+
+                var jsonResponse = response.json();
+
+                jsonResponse.then((data) => { 
+                    if(data == null || data.length == 0) {
+                        return new Array();
+                    } else {
+
+                        console.log(data.code);
+
+                        var variables = new Array();
+
+                        data.forEach(entry => {
+                            var variable = new Variable();
+                            variable.name = entry.name;
+                            variable.value = entry.value;
+                            variable.updatedTime = entry.updatedTime;
+                            variable.updatedTimeZone = entry.updatedTimeZone;
+                            variables.push(variable);
+                        });
+
+                        return variables;
+                    }
+                })
+
+            }
+
             if (this._onUnauthorized) {
                 this._onUnauthorized(response);
             }

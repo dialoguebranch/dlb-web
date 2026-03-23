@@ -37,7 +37,7 @@ export const INTERACTION_TESTER_STYLE_BALLOONS = "BALLOONS";
  * The WCTAClientState is the client-specific ClientState object for the Dialogue Branch Web Client Test Application.
  *
  * @extends ClientState
- * @author Harm op den Akker (Fruit Tree Labs)
+ * @author Harm op den Akker
  */
 export class WCTAClientState extends ClientState {
 
