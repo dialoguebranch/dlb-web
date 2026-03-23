@@ -51,7 +51,7 @@ import java.util.Map;
  * A collection of various Beans used to configure various aspects of the OpenAPI 3.0 documentation
  * and the automatically generated Swagger pages.
  *
- * @author Harm op den Akker (Fruit Tree Labs)
+ * @author Harm op den Akker
  */
 @Configuration
 @OpenAPIDefinition
@@ -98,9 +98,9 @@ public class OpenApiSwaggerConfig {
 		openAPI.addServersItem(server);
 
 		// Add the security scheme
-		openAPI.components(new Components().addSecuritySchemes("X-Auth-Token",
+		openAPI.components(new Components().addSecuritySchemes("X-API-Key",
 			new SecurityScheme()
-				.name("X-Auth-Token")
+				.name("X-API-Key")
 				.scheme("basic")
 				.type(SecurityScheme.Type.APIKEY)
 				.in(SecurityScheme.In.HEADER)
@@ -110,15 +110,16 @@ public class OpenApiSwaggerConfig {
 		// Add API documentation
 		openAPI.info(
 			new Info()
-				.title("DialogueBranch External Variable Service Dummy API")
-				.description("The DialogueBranch External Variable Service Dummy API can be used " +
-					"to test the integration of a DialogueBranch Web Service with an external " +
-					"variable service that is used to provide up-to-date information on user's " +
-					"DialogueBranch Variable data. Any real implementation of an 'External " +
-					"Variable Service' should provide the same API and behaviour as this service.")
+				.title("Dialogue Branch External Variable Service Dummy API")
+				.description("The Dialogue Branch External Variable Service Dummy API can be " +
+					"used to test the integration of a Dialogue Branch Web Service with an " +
+					"external variable service that is used to provide up-to-date information on " +
+					"user's Dialogue Branch Variable data. Any real implementation of an " +
+					"'External Variable Service' should provide the same API as this dummy " +
+					"service.")
 				.version("v"+ProtocolVersion.getLatestVersion().versionName())
 				.contact(new Contact().email("info@dialoguebranch.com")
-						.name("DialogueBranch Platform Support"))
+						.name("Dialogue Branch Platform Support"))
 				.license(new License().name("MIT").url("https://opensource.org/licenses/MIT")));
 
 		return openAPI;
@@ -133,8 +134,7 @@ public class OpenApiSwaggerConfig {
 	public GroupedOpenApi withoutVersioning() {
 		return GroupedOpenApi.builder().group("API End-Points without Versioning")
 			.pathsToExclude("/v{version}/info/*",
-				"/v{version}/variables/*",
-				"/v{version}/auth/*")
+				"/v{version}/variables/*")
 			.build();
 	}
 

@@ -30,7 +30,8 @@ package com.dialoguebranch.web.varservice.controller;
 
 import com.dialoguebranch.web.varservice.Application;
 import com.dialoguebranch.web.varservice.ProtocolVersion;
-import com.dialoguebranch.web.varservice.QueryRunner;
+import com.dialoguebranch.web.varservice.exception.ErrorCode;
+import com.dialoguebranch.web.varservice.exception.UnauthorizedException;
 import nl.rrd.utils.AppComponents;
 import com.dialoguebranch.web.varservice.controller.schema.DLBVariablePayload;
 import com.dialoguebranch.web.varservice.exception.BadRequestException;
@@ -61,15 +62,16 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Controller for the /variables/ -end-points of the DialogueBranch External Variable Service Dummy.
+ * Controller for the /variables/ -end-points of the Dialogue Branch External Variable Service
+ * dummy implementation.
  *
- * @author Harm op den Akker (Fruit Tree Labs)
- * @author Tessa Beinema (University of Twente)
+ * @author Harm op den Akker
+ * @author Tessa Beinema
  */
 @RestController
-@SecurityRequirement(name = "X-Auth-Token")
+@SecurityRequirement(name = "X-API-Key")
 @RequestMapping(value = {"/v{version}/variables", "/variables"})
-@Tag(name = "2. Variables",
+@Tag(name = "1. Variables",
 	 description = "End-points for retrieving variables from- and sending to the service")
 public class VariablesController {
 
@@ -114,7 +116,7 @@ public class VariablesController {
 	 * @param request the {@link HttpServletRequest} that generated the request.
 	 * @param response the {@link HttpServletResponse} that generated the request.
 	 * @param version the API Version to use, e.g. '1'.
-	 * @param userId the userId of the DialogueBranch user.
+	 * @param userId the userId of the Dialogue Branch user.
 	 * @param timeZone the current time zone of the DialogueBranch user (e.g. "Europe/Lisbon").
 	 * @param dlbVariables the List of DialogueBranch Variables for which to check for updates.
 	 * @return A list of {@link DLBVariablePayload}s representing all updated variables.
@@ -154,7 +156,7 @@ public class VariablesController {
 		@PathVariable(value = "version")
 		String version,
 
-		@Parameter(description = "The userId of the DialogueBranch user")
+		@Parameter(description = "The userId of the Dialogue Branch user")
 		@RequestParam(value="userId")
 		String userId,
 
@@ -180,9 +182,13 @@ public class VariablesController {
 		if(userId.isEmpty()) {
 			throw new BadRequestException("Missing 'userId' in request.");
 		} else {
-			return QueryRunner.runQuery(
-				(protocolVersion, user) -> executeRetrieveUpdates(userId, timeZone, dlbVariables),
-				version, request, response, userId, application);
+			String providedAPIKey = ControllerFunctions.extractAPIKey(request);
+			if(application.getConfiguration().getAuthAPIKey().equals(providedAPIKey)) {
+				return executeRetrieveUpdates(userId, timeZone, dlbVariables);
+			} else {
+				throw new UnauthorizedException(ErrorCode.API_KEY_INVALID,
+						"Invalid API Key provided.");
+			}
 		}
 	}
 
@@ -294,8 +300,8 @@ public class VariablesController {
 	// ---------------------------------------------------------------------
 
 	/**
-	 * Inform that the given list of DialogueBranch Variables have been updated. With this end-point
-	 * you can inform this DialogueBranch External Variable Service that a list of DialogueBranch
+	 * Inform that the given list of Dialogue Branch Variables have been updated. With this end-point
+	 * you can inform this Dialogue Branch External Variable Service that a list of Dialogue Branch
 	 * Variables have been updated (e.g. during dialogue execution) for a particular user.
 	 *
 	 * <p>You must pass along the current timezone of the user (client) so that certain time
@@ -307,7 +313,7 @@ public class VariablesController {
 	 * @param request the {@link HttpServletRequest} that generated the request.
 	 * @param response the {@link HttpServletResponse} that generated the request.
 	 * @param version the API Version to use, e.g. '1'.
-	 * @param userId the userId of the DialogueBranch user.
+	 * @param userId the userId of the Dialogue Branch user.
 	 * @param timeZone the current time zone of the DialogueBranch user (e.g. "Europe/Lisbon").
 	 * @param dlbVariables the List of DialogueBranch Variables for which to check for updates.
 	 * @return A status code of 200 (OK).
@@ -369,9 +375,13 @@ public class VariablesController {
 		if(userId.isEmpty()) {
 			throw new BadRequestException("Missing 'userId' in request.");
 		} else {
-			return QueryRunner.runQuery(
-				(protocolVersion, user) -> executeNotifyUpdated(userId, timeZone, dlbVariables),
-				version, request, response, userId, application);
+			String providedAPIKey = ControllerFunctions.extractAPIKey(request);
+			if(application.getConfiguration().getAuthAPIKey().equals(providedAPIKey)) {
+				return executeNotifyUpdated(userId, timeZone, dlbVariables);
+			} else {
+				throw new UnauthorizedException(ErrorCode.API_KEY_INVALID,
+						"Invalid API Key provided.");
+			}
 		}
 
 	}
@@ -468,9 +478,13 @@ public class VariablesController {
 		if(userId.isEmpty()) {
 			throw new BadRequestException("Missing 'userId' in request.");
 		} else {
-			return QueryRunner.runQuery(
-					(protocolVersion, user) -> executeNotifyCleared(userId, timeZone),
-					version, request, response, userId, application);
+			String providedAPIKey = ControllerFunctions.extractAPIKey(request);
+			if(application.getConfiguration().getAuthAPIKey().equals(providedAPIKey)) {
+				return executeNotifyCleared(userId, timeZone);
+			} else {
+				throw new UnauthorizedException(ErrorCode.API_KEY_INVALID,
+						"Invalid API Key provided.");
+			}
 		}
 
 	}

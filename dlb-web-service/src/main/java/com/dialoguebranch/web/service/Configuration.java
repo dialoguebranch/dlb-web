@@ -181,18 +181,10 @@ public class Configuration extends LinkedHashMap<String,String> {
 			= "externalVariableServiceAPIVersion";
 
 	/**
-	 * Name of the config parameter that defines the username used to authenticate with the External
+	 * Name of the config parameter that defines the API Key used to authenticate with the External
 	 * Variable Service
 	 */
-	public static final String EXTERNAL_VARIABLE_SERVICE_USERNAME
-			= "externalVariableServiceUsername";
-
-	/**
-	 * Name of the config parameter that defines the password used to authenticate with the External
-	 * Variable Service
-	 */
-	public static final String EXTERNAL_VARIABLE_SERVICE_PASSWORD
-			= "externalVariableServicePassword";
+	public static final String EXTERNAL_VARIABLE_SERVICE_API_KEY = "externalVariableServiceAPIKey";
 
 	// ---------- Azure Data Lake
 
@@ -489,27 +481,15 @@ public class Configuration extends LinkedHashMap<String,String> {
 	}
 
 	/**
-	 * Returns the username for the External Variable Service as a String, or an empty string if
-	 * incorrectly configured.
+	 * Returns the API Key used to authenticate with the External Variable Service as a String, or
+	 * an empty string if incorrectly configured.
 	 *
-	 * @return the username for the External Variable Service as a String, or an empty string if
-	 *         incorrectly configured.
+	 * @return the API Key used to authenticate with the External Variable Service as a String, or
+	 * an empty string if incorrectly configured.
 	 */
-	public String getExternalVariableServiceUsername() {
-		if(get(EXTERNAL_VARIABLE_SERVICE_USERNAME) == null) return "";
-		else return get(EXTERNAL_VARIABLE_SERVICE_USERNAME);
-	}
-
-	/**
-	 * Returns the password for the External Variable Service as a String, or an empty string if
-	 * incorrectly configured.
-	 *
-	 * @return the password for the External Variable Service as a String, or an empty string if
-	 *         incorrectly configured.
-	 */
-	public String getExternalVariableServicePassword() {
-		if(get(EXTERNAL_VARIABLE_SERVICE_PASSWORD) == null) return "";
-		else return get(EXTERNAL_VARIABLE_SERVICE_PASSWORD);
+	public String getExternalVariableServiceAPIKey() {
+		if(get(EXTERNAL_VARIABLE_SERVICE_API_KEY) == null) return "";
+		else return get(EXTERNAL_VARIABLE_SERVICE_API_KEY);
 	}
 
 	// ------------------------------------------------------------------

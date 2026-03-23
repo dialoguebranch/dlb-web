@@ -33,9 +33,6 @@ RUN ./gradlew clean updateVersion build
 # Copy the generated .war file into the tomcat webapps
 RUN cp /usr/local/dialogue-branch/source/dlb-web/dlb-external-var-service/build/libs/dlb-external-var-service-1.2.5.war /usr/local/tomcat/webapps/dlb-external-var-service.war
 
-# Copy the service-users.xml file into the data folder
-RUN cp /usr/local/dialogue-branch/source/dlb-web/dlb-external-var-service/config/service-users.xml /usr/local/dialogue-branch/data/dlb-external-var-service/
-
 # Set the working directory in the container
 WORKDIR /usr/local/tomcat
 

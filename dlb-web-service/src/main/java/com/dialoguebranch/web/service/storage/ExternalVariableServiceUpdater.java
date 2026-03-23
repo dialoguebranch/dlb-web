@@ -51,40 +51,11 @@ public class ExternalVariableServiceUpdater implements VariableStoreOnChangeList
 			AppComponents.getLogger(ClassUtils.getUserClass(getClass()).getSimpleName());
 	private final Configuration config = AppComponents.get(Configuration.class);
 
-	// When using the 'native' authentication management, use this as access token
-	final String externalVariableServiceAccessToken;
-
-	// When using Keycloak as authentication management, get an access token from the user service
-	final UserService userService;
-
-	public ExternalVariableServiceUpdater(String externalVariableServiceAccessToken) {
-		this.externalVariableServiceAccessToken = externalVariableServiceAccessToken;
-		this.userService = null;
-	}
-
-	public ExternalVariableServiceUpdater(UserService userService) {
-		this.userService = userService;
-		this.externalVariableServiceAccessToken = null;
-	}
-
 	@Override
 	public void onChange(VariableStore variableStore, List<VariableStoreChange> changes) {
 
 		String userId = variableStore.getUser().getId();
-		String userTimeZoneString
-				= variableStore.getUser().getTimeZone().toString();
-
-		String accessToken;
-
-		if(config.getAuthService().equals(Configuration.AUTH_SERVICE_NATIVE)) {
-			accessToken = this.externalVariableServiceAccessToken;
-		} else if(config.getAuthService().equals(Configuration.AUTH_SERVICE_KEYCLOAK)) {
-            assert this.userService != null;
-            accessToken = this.userService.getLatestAccessToken();
-		} else {
-			// There is no other valid config as of now, so this shouldn't happen
-			accessToken = null;
-		}
+		String userTimeZoneString = variableStore.getUser().getTimeZone().toString();
 
 		List<Variable> variablesToUpdate = new ArrayList<>();
 
@@ -103,7 +74,7 @@ public class ExternalVariableServiceUpdater implements VariableStoreOnChangeList
 					if(change instanceof VariableStoreChange.Clear) {
 						RestTemplate restTemplate = new RestTemplate();
 						HttpHeaders requestHeaders = new HttpHeaders();
-						requestHeaders.set("Authorization", "Bearer " + accessToken);
+						requestHeaders.set("X-API-Key", config.getExternalVariableServiceAPIKey());
 
 						String notifyClearedUrl = config.getExternalVariableServiceURL()
 							+ "/v" + config.getExternalVariableServiceAPIVersion()
@@ -168,7 +139,7 @@ public class ExternalVariableServiceUpdater implements VariableStoreOnChangeList
 			RestTemplate restTemplate = new RestTemplate();
 			HttpHeaders requestHeaders = new HttpHeaders();
 			requestHeaders.setContentType(MediaType.valueOf("application/json"));
-			requestHeaders.set("Authorization", "Bearer " + accessToken);
+			requestHeaders.set("X-API-Key", config.getExternalVariableServiceAPIKey());
 
 			String notifyUpdatesUrl = config.getExternalVariableServiceURL()
 					+ "/v" + config.getExternalVariableServiceAPIVersion()

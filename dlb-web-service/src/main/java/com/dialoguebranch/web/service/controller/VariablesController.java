@@ -162,11 +162,11 @@ public class VariablesController {
 
 		if(delegateUser == null || delegateUser.isEmpty()) {
 			return QueryRunner.runQuery(
-				(protocolVersion, user) -> doGetVariables(user, variableNameList, timeZone, accessToken),
+				(protocolVersion, user) -> doGetVariables(user, variableNameList, timeZone),
 				version, accessToken, response, delegateUser, application);
 		} else {
 			return QueryRunner.runQuery(
-				(protocolVersion, user) -> doGetVariables(delegateUser, variableNameList, timeZone, accessToken),
+				(protocolVersion, user) -> doGetVariables(delegateUser, variableNameList, timeZone),
 				version, accessToken, response, delegateUser, application);
 		}
 	}
@@ -181,21 +181,18 @@ public class VariablesController {
 	 * @param variableNames a space-separated list of variable names, or the empty string
 	 * @param timeZone The current time zone of the Dialogue Branch user (presented as an IANA
 	 *                 String, e.g. 'Europe/Lisbon').
-	 * @param accessToken the accessToken that was used in the valid request to the web service,
-	 *                    which will be passed on to the request for an active {@link UserService}
 	 * @return a mapping of variable names to variable values
 	 * @throws IOException in case of an error in generating the UserService.
 	 * @throws DatabaseException in case of an error in generating the UserService.
 	 * @throws BadRequestException in case of a malformed or unknown {@code timeZone}.
 	 */
-	private List<Variable> doGetVariables(String userId, String variableNames, String timeZone,
-										  String accessToken)
+	private List<Variable> doGetVariables(String userId, String variableNames, String timeZone)
             throws IOException, DatabaseException, BadRequestException {
 
 		// Get or create a UserService for the user in the given time zone
 		ZoneId timeZoneId = ControllerFunctions.parseTimeZone(timeZone);
 		UserService userService = application.getApplicationManager()
-				.getOrCreateActiveUserService(userId,timeZoneId,accessToken);
+				.getOrCreateActiveUserService(userId,timeZoneId);
 		userService.getDialogueBranchUser().setTimeZone(timeZoneId);
 
 		VariableStore variableStore = userService.getVariableStore();
@@ -305,11 +302,11 @@ public class VariablesController {
 
 		if(delegateUser == null || delegateUser.isEmpty()) {
 			QueryRunner.runQuery((protocolVersion, user) ->
-				doSetVariable(user, name, value, timeZone, accessToken),
+				doSetVariable(user, name, value, timeZone),
 				version, accessToken, response, delegateUser, application);
 		} else {
 			QueryRunner.runQuery((protocolVersion, user) ->
-				doSetVariable(delegateUser, name, value, timeZone, accessToken),
+				doSetVariable(delegateUser, name, value, timeZone),
 				version, accessToken, response, delegateUser, application);
 		}
 	}
@@ -327,7 +324,7 @@ public class VariablesController {
 	 * 					 accessing the variable store.
 	 */
 	private Object doSetVariable(String userId, String name, String value,
-								 String timeZone, String accessToken) throws Exception {
+								 String timeZone) throws Exception {
 		List<HttpFieldError> errors = new ArrayList<>();
 
 		if (!name.matches("[A-Za-z]\\w*")) {
@@ -339,7 +336,7 @@ public class VariablesController {
 		// Get or create a UserService for the user in the given time zone
 		ZoneId timeZoneId = ControllerFunctions.parseTimeZone(timeZone);
 		UserService userService = application.getApplicationManager()
-				.getOrCreateActiveUserService(userId,timeZoneId,accessToken);
+				.getOrCreateActiveUserService(userId,timeZoneId);
 		userService.getDialogueBranchUser().setTimeZone(timeZoneId);
 
 		ZonedDateTime eventTime = DateTimeUtils.nowMs(timeZoneId);
@@ -425,11 +422,11 @@ public class VariablesController {
 
 		if(delegateUser == null || delegateUser.isEmpty()) {
 			QueryRunner.runQuery((protocolVersion, user) ->
-							doSetVariables(user, variables, timeZone, accessToken),
+							doSetVariables(user, variables, timeZone),
 				version, accessToken, response, delegateUser, application);
 		} else {
 			QueryRunner.runQuery((protocolVersion, user) ->
-							doSetVariables(delegateUser, variables, timeZone, accessToken),
+							doSetVariables(delegateUser, variables, timeZone),
 				version, accessToken, response, delegateUser, application);
 		}
 	}
@@ -447,7 +444,7 @@ public class VariablesController {
 	 * 					 database.
 	 */
 	private Object doSetVariables(String userId, Map<String,Object> variables,
-								  String timeZone, String accessToken) throws Exception {
+								  String timeZone) throws Exception {
 
 		List<String> invalidNames = new ArrayList<>();
 		for (String name : variables.keySet()) {
@@ -464,7 +461,7 @@ public class VariablesController {
 		// Get or create a UserService for the user in the given time zone
 		ZoneId timeZoneId = ControllerFunctions.parseTimeZone(timeZone);
 		UserService userService = application.getApplicationManager()
-				.getOrCreateActiveUserService(userId,timeZoneId,accessToken);
+				.getOrCreateActiveUserService(userId,timeZoneId);
 		userService.getDialogueBranchUser().setTimeZone(timeZoneId);
 
 		VariableStore variableStore = userService.getVariableStore();

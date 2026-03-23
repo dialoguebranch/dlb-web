@@ -28,7 +28,6 @@
 
 package com.dialoguebranch.web.varservice;
 
-import com.dialoguebranch.web.varservice.auth.keycloak.KeycloakManager;
 import nl.rrd.utils.AppComponents;
 import org.slf4j.Logger;
 import org.springframework.boot.SpringApplication;
@@ -62,8 +61,6 @@ ApplicationListener<ApplicationEvent> {
 	private final Configuration config;
 
 	private final Long launchedTime = Instant.now().toEpochMilli();
-
-	private KeycloakManager keycloakManager = null;
 
 	// -------------------------------------------------------- //
 	// -------------------- Constructor(s) -------------------- //
@@ -99,11 +96,6 @@ ApplicationListener<ApplicationEvent> {
                 logger.error("Uncaught exception: {}", e.getMessage(), e)
 		);
 
-		// Initialize User Manager
-		if(config.getAuthService().equals(Configuration.AUTH_SERVICE_KEYCLOAK)) {
-			keycloakManager = new KeycloakManager();
-		}
-
 	}
 
 	// ----------------------------------------------------------- //
@@ -116,10 +108,6 @@ ApplicationListener<ApplicationEvent> {
 	 */
 	public Long getLaunchedTime() {
 		return launchedTime;
-	}
-
-	public KeycloakManager getKeycloakManager() {
-		return keycloakManager;
 	}
 
 	public Configuration getConfiguration() {
@@ -157,17 +145,6 @@ ApplicationListener<ApplicationEvent> {
             logger.info("=== Spring Version: {}", SpringVersion.getVersion());
             logger.info("=== JDK Version: {}", System.getProperty("java.version"));
             logger.info("=== Java Version: {}", JavaVersion.getJavaVersion().toString());
-
-			logger.info("=== Authentication Service: {}", config.getAuthService());
-			if(config.getAuthService().equals(Configuration.AUTH_SERVICE_KEYCLOAK)) {
-				logger.info("===== Keycloak URL: {}", config.getKeycloakBaseUrl());
-				logger.info("===== Keycloak Realm: {}", config.getKeycloakRealm());
-				logger.info("===== Keycloak Client ID: {}", config.getKeycloakClientId());
-			} else if(config.getAuthService().equals(Configuration.AUTH_SERVICE_NATIVE)) {
-				logger.info("===== JWT Access Token Secret: {}", config.getJwtAccessTokenSecret());
-				logger.info("===== JWT Refresh Token Secret: {}", config.getJwtRefreshTokenSecret());
-			}
-
 			logger.info("=======================================================================");
 		}
 	}

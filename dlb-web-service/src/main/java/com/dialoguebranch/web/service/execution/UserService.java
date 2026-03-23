@@ -64,9 +64,6 @@ public class UserService {
 	/** The dialogue branch user associated with this UserService */
 	private final User dialogueBranchUser;
 
-	/** The latest, validated access token for this user */
-	private String latestAccessToken;
-
 	/** The general ApplicationManager object that governs this UserService */
 	private final ApplicationManager applicationManager;
 	private final VariableStore variableStore;
@@ -109,7 +106,13 @@ public class UserService {
 					+ dialogueBranchUser.getId() + "': " + ex.getMessage(), ex);
 		}
 
-		registerVariableStoreChangeListeners(onVarChangeListener);
+		Configuration config = AppComponents.get(Configuration.class);
+
+		this.variableStore.addOnChangeListener(onVarChangeListener);
+
+		if(config.getExternalVariableServiceEnabled()) {
+			this.variableStore.addOnChangeListener(new ExternalVariableServiceUpdater());
+		}
 
 		dialogueExecutor = new DialogueExecutor(this);
 
@@ -125,27 +128,6 @@ public class UserService {
 		}
 	}
 
-	private void registerVariableStoreChangeListeners(VariableStoreOnChangeListener onVarChangeListener) {
-
-		Configuration config = AppComponents.get(Configuration.class);
-
-		this.variableStore.addOnChangeListener(onVarChangeListener);
-		if(config.getExternalVariableServiceEnabled()) {
-
-			// When using the "native" authentication service, the updater service will use a
-			// system-wide "API key" as access token
-			if(config.getAuthService().equals(Configuration.AUTH_SERVICE_NATIVE)) {
-				this.variableStore.addOnChangeListener(new ExternalVariableServiceUpdater(
-						applicationManager.getExternalVariableServiceAPIToken()));
-
-				// When using Keycloak as the authentication service, the updater service must pass
-				// along a valid access token for this specific user, therefore we pass along an
-				// instance of this UserService where the latest valid access token is stored
-			} else if(config.getAuthService().equals(Configuration.AUTH_SERVICE_KEYCLOAK)) {
-				this.variableStore.addOnChangeListener(new ExternalVariableServiceUpdater(this));
-			}
-		}
-	}
 
 	// -----------------------------------------------------------
 	// -------------------- Getters & Setters --------------------
@@ -377,20 +359,10 @@ public class UserService {
 				}
 			}
 
-			String accessToken;
-			if(config.getAuthService().equals(Configuration.AUTH_SERVICE_NATIVE)) {
-				accessToken = applicationManager.getExternalVariableServiceAPIToken();
-			} else if(config.getAuthService().equals(Configuration.AUTH_SERVICE_KEYCLOAK)) {
-				accessToken = this.getLatestAccessToken();
-			} else {
-				// There is no other valid config as of now, so this shouldn't happen
-				accessToken = null;
-			}
-
 			RestTemplate restTemplate = new RestTemplate();
 			HttpHeaders requestHeaders = new HttpHeaders();
 			requestHeaders.setContentType(MediaType.valueOf("application/json"));
-			requestHeaders.set("Authorization", "Bearer " + accessToken);
+			requestHeaders.set("X-API-Key", config.getExternalVariableServiceAPIKey());
 
 			String retrieveUpdatesUrl = config.getExternalVariableServiceURL()
 					+ "/v"+config.getExternalVariableServiceAPIVersion()
@@ -421,16 +393,12 @@ public class UserService {
 				response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST,
 						entity, Variable[].class);
 
-				// If call not successful, retry once after login
+				// If call not successful
 				if (response.getStatusCode() != HttpStatus.OK) {
-					applicationManager.loginToExternalVariableService();
-
-					response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST,
-							entity, Variable[].class);
-
+					logger.warn("Error retrieving updates from external variable service.");
 				}
 			} catch (Exception e) {
-				logger.error("Critical Error retrieving updates for DialogueBranch Variables. " +
+				logger.error("Critical Error retrieving updates for Dialogue Branch Variables. " +
 						"Continuing operation while assuming no updates were needed.",e);
 			}
 
@@ -606,14 +574,6 @@ public class UserService {
         logger.info("Getting dialogue log session data for user '{}' and sessionId '{}'.",
 				dialogueBranchUser.getId(), sessionId);
 		return loggedDialogueStore.readSession(sessionId);
-	}
-
-	public String getLatestAccessToken() {
-		return this.latestAccessToken;
-	}
-
-	public void setLatestAccessToken(String accessToken) {
-		this.latestAccessToken = accessToken;
 	}
 
 }

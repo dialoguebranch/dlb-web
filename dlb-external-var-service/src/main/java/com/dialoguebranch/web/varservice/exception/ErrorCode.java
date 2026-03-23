@@ -31,8 +31,8 @@ package com.dialoguebranch.web.varservice.exception;
 /**
  * Possible error codes that may be returned by the Dialogue Branch External Variable Service Dummy.
  *
- * @author Dennis Hofs (Roessingh Research and Development)
- * @author Harm op den Akker (Fruit Tree Labs)
+ * @author Dennis Hofs
+ * @author Harm op den Akker
  */
 public class ErrorCode {
 
@@ -41,22 +41,13 @@ public class ErrorCode {
 	 */
 	public ErrorCode() { }
 
-	/** In case no authentication token was provided in the header of a request. */
-	public static final String AUTH_TOKEN_NOT_FOUND = "AUTH_TOKEN_NOT_FOUND";
+	/** In case no API Key was provided in the header of a request ('X-API-Key'). */
+	public static final String API_KEY_NOT_FOUND = "API_KEY_NOT_FOUND";
 
-	/** In case the provided authentication token was not valid. */
-	public static final String AUTH_TOKEN_INVALID = "AUTH_TOKEN_INVALID";
-
-	/** In case the provided authentication token has expired. */
-	public static final String AUTH_TOKEN_EXPIRED = "AUTH_TOKEN_EXPIRED";
+	/** In case the provided API Key was not valid. */
+	public static final String API_KEY_INVALID = "API_KEY_INVALID";
 
 	/** In case a required input parameter is missing, or an invalid value was provided. */
 	public static final String INVALID_INPUT = "INVALID_INPUT";
-
-	/** In case a wrong username/password combination is provided upon login. */
-	public static final String INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
-
-	/** In case an error occurred related to the Keycloak service. */
-	public static final String KEYCLOAK_ERROR = "KEYCLOAK_ERROR";
 
 }

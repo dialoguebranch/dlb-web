@@ -108,21 +108,21 @@ public class LogController {
 
 		if(delegateUser == null || delegateUser.isEmpty()) {
 			return QueryRunner.runQuery(
-					(protocolVersion, user) -> doGetSession(user, sessionId, accessToken),
+					(protocolVersion, user) -> doGetSession(user, sessionId),
 					version, accessToken, response, delegateUser, application);
 		} else {
 			return QueryRunner.runQuery(
-					(protocolVersion, user) -> doGetSession(delegateUser, sessionId, accessToken),
+					(protocolVersion, user) -> doGetSession(delegateUser, sessionId),
 					version, accessToken, response, delegateUser, application);
 		}
 	}
 
-	private List<ServerLoggedDialogue> doGetSession(String userId, String sessionId, String accessToken)
+	private List<ServerLoggedDialogue> doGetSession(String userId, String sessionId)
             throws DatabaseException, IOException {
 
 		// Get or create a UserService for the user in the default time zone
 		UserService userService = application.getApplicationManager()
-				.getOrCreateActiveUserService(userId, accessToken);
+				.getOrCreateActiveUserService(userId);
 
 		return userService.getDialogueSessionLog(sessionId);
 	}
@@ -173,21 +173,22 @@ public class LogController {
 
 		if(delegateUser == null || delegateUser.isEmpty()) {
 			return QueryRunner.runQuery(
-					(protocolVersion, user) -> doVerifyId(user, sessionId, accessToken),
+					(protocolVersion, user) -> doVerifyId(user, sessionId),
 					version, accessToken, response, delegateUser, application);
 		} else {
 			return QueryRunner.runQuery(
-					(protocolVersion, user) -> doVerifyId(delegateUser, sessionId, accessToken),
+					(protocolVersion, user) -> doVerifyId(delegateUser, sessionId),
 					version, accessToken, response, delegateUser, application);
 		}
 
 	}
 
-	private Boolean doVerifyId(String userId, String sessionId, String accessToken) throws DatabaseException, IOException {
+	private Boolean doVerifyId(String userId, String sessionId)
+			throws DatabaseException, IOException {
 
 		// Get or create a UserService for the user in the default time zone
 		UserService userService = application.getApplicationManager()
-				.getOrCreateActiveUserService(userId, accessToken);
+				.getOrCreateActiveUserService(userId);
 
 		return userService.existsSessionId(sessionId);
 	}

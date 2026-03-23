@@ -73,83 +73,16 @@ public class Configuration extends LinkedHashMap<String,String> {
 	/** Key name for the "baseUrl" parameter. */
 	public static final String BASE_URL = "baseUrl";
 
-	/** Key name for the "jwtSecretKey" parameter. */
-	public static final String JWT_SECRET_KEY = "jwtSecretKey";
-
 	/** Key name for the "dataDir" parameter. */
 	public static final String DATA_DIR = "dataDir";
 
 	// ---------- Authentication Configuration
 
 	/**
-	 * Name of the config parameter indicating the authentication service to use, which can be set
-	 * to either "keycloak", or "native".
+	 * Name of the config parameter that defines the API Key for authentication between Web Service
+	 * and this External Variable Service.
 	 */
-	public static final String AUTH_SERVICE = "authService";
-
-	/**
-	 * Constant defining the value of AUTH_SERVICE indicating that Keycloak should be used.
-	 */
-	public static final String AUTH_SERVICE_KEYCLOAK = "keycloak";
-
-	/**
-	 * Constant defining the value of AUTH_SERVICE indicating that the Native auth system should be
-	 * used.
-	 */
-	public static final String AUTH_SERVICE_NATIVE = "native";
-
-	/**
-	 * Name of the config parameter to define the Keycloak base url.
-	 */
-	public static final String AUTH_KEYCLOAK_BASEURL = "authKeycloakBaseUrl";
-
-	/**
-	 * Name of the config parameter to define the Keycloak realm.
-	 */
-	public static final String AUTH_KEYCLOAK_REALM = "authKeycloakRealm";
-
-	/**
-	 * Name of the config parameter to define the Keycloak client ID.
-	 */
-	public static final String AUTH_KEYCLOAK_CLIENT_ID = "authKeycloakClientId";
-
-	/**
-	 * Name of the config parameter to define the Keycloak Client Secret.
-	 */
-	public static final String AUTH_KEYCLOAK_CLIENT_SECRET = "authKeycloakClientSecret";
-
-	/**
-	 * Name of the config parameter to define the Native "Service User" name.
-	 */
-	public static final String AUTH_NATIVE_SERVICE_USER = "authNativeServiceUser";
-
-	/**
-	 * Name of the config parameter to define the Native "Service User" password.
-	 */
-	public static final String AUTH_NATIVE_SERVICE_PASSWORD = "authNativeServicePassword";
-
-	/**
-	 * Name of the config parameter that defines the JSON Web Token (JWT) 'secret' used to encrypt
-	 * and decrypt ACCESS TOKENS.
-	 */
-	public static final String AUTH_NATIVE_JWT_ACCESS_TOKEN_SECRET = "authNativeJwtAccessTokenSecret";
-
-	/**
-	 * Name of the config parameter that indicates how long access tokens should be active.
-	 */
-	public static final String AUTH_NATIVE_ACCESS_TOKEN_EXPIRATION_SECONDS = "authNativeAccessTokenExpirationSeconds";
-
-	/**
-	 * Name of the config parameter that defines the JSON Web Token (JWT) 'secret' used to encrypt
-	 * and decrypt REFRESH TOKENS.
-	 */
-	public static final String AUTH_NATIVE_JWT_REFRESH_TOKEN_SECRET = "authNativeJwtRefreshTokenSecret";
-
-	/**
-	 * Name of the config parameter that indicates how long refresh tokens should be active
-	 * (typically much longer).
-	 */
-	public static final String AUTH_NATIVE_REFRESH_TOKEN_EXPIRATION_SECONDS = "authNativeRefreshTokenExpirationSeconds";
+	public static final String AUTH_API_KEY = "authAPIKey";
 
 	// ------------------------------------------------------------------------- //
 	// -------------------- Constructor(s) & Initialization -------------------- //
@@ -229,89 +162,9 @@ public class Configuration extends LinkedHashMap<String,String> {
 	// -------------------- Getters: Authentication -------------------- //
 	// ----------------------------------------------------------------- //
 
-	public String getAuthService() {
-		if(get(AUTH_SERVICE) == null) return "";
-		else return get(AUTH_SERVICE);
-	}
-
-	public String getKeycloakBaseUrl() {
-		if(get(AUTH_KEYCLOAK_BASEURL) == null) return "";
-		else return get(AUTH_KEYCLOAK_BASEURL);
-	}
-
-	public String getKeycloakRealm() {
-		if(get(AUTH_KEYCLOAK_REALM) == null) return "";
-		else return get(AUTH_KEYCLOAK_REALM);
-	}
-
-	public String getKeycloakClientId() {
-		if(get(AUTH_KEYCLOAK_CLIENT_ID) == null) return "";
-		else return get(AUTH_KEYCLOAK_CLIENT_ID);
-	}
-
-	public String getKeycloakClientSecret() {
-		if(get(AUTH_KEYCLOAK_CLIENT_SECRET) == null) return "";
-		else return get(AUTH_KEYCLOAK_CLIENT_SECRET);
-	}
-
-	public String getNativeServiceUser() {
-		if(get(AUTH_NATIVE_SERVICE_USER) == null) return "";
-		else return get(AUTH_NATIVE_SERVICE_USER);
-	}
-
-	public String getNativeServicePassword() {
-		if(get(AUTH_NATIVE_SERVICE_PASSWORD) == null) return "";
-		else return get(AUTH_NATIVE_SERVICE_PASSWORD);
-	}
-
-	/**
-	 * Returns the secret key used for encoding/decoding JWT Access Tokens.
-	 *
-	 * @return the secret key used for encoding/decoding JWT Access Tokens.
-	 */
-	public String getJwtAccessTokenSecret() {
-		if(get(AUTH_NATIVE_JWT_ACCESS_TOKEN_SECRET) == null) return "";
-		else return get(AUTH_NATIVE_JWT_ACCESS_TOKEN_SECRET);
-	}
-
-	/**
-	 * Returns the number of seconds a newly generated access token should be valid for under the
-	 * native authentication service.
-	 *
-	 * @return the access token expiration time in seconds.
-	 */
-	public int getAccessTokenExpirationSeconds() {
-		if (get(AUTH_NATIVE_ACCESS_TOKEN_EXPIRATION_SECONDS) == null) return 300;
-		try {
-			return Integer.parseInt(get(AUTH_NATIVE_ACCESS_TOKEN_EXPIRATION_SECONDS));
-		} catch (NumberFormatException ex) {
-			return 300;
-		}
-	}
-
-	/**
-	 * Returns the secret key used for encoding/decoding JWT Refresh Tokens.
-	 *
-	 * @return the secret key used for encoding/decoding JWT Refresh Tokens.
-	 */
-	public String getJwtRefreshTokenSecret() {
-		if(get(AUTH_NATIVE_JWT_REFRESH_TOKEN_SECRET) == null) return "";
-		else return get(AUTH_NATIVE_JWT_REFRESH_TOKEN_SECRET);
-	}
-
-	/**
-	 * Returns the number of seconds a newly generated refresh token should be valid for under the
-	 * native authentication service.
-	 *
-	 * @return the refresh token expiration time in seconds.
-	 */
-	public int getRefreshTokenExpirationSeconds() {
-		if (get(AUTH_NATIVE_REFRESH_TOKEN_EXPIRATION_SECONDS) == null) return 1800;
-		try {
-			return Integer.parseInt(get(AUTH_NATIVE_REFRESH_TOKEN_EXPIRATION_SECONDS));
-		} catch (NumberFormatException ex) {
-			return 1800;
-		}
+	public String getAuthAPIKey() {
+		if(get(AUTH_API_KEY) == null) return "";
+		else return get(AUTH_API_KEY);
 	}
 
 	@Override

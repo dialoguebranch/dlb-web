@@ -40,8 +40,6 @@ import com.dialoguebranch.web.service.Configuration;
 import com.dialoguebranch.web.service.auth.basic.BasicUserCredentials;
 import com.dialoguebranch.web.service.auth.basic.BasicUserFile;
 import com.dialoguebranch.web.service.auth.keycloak.KeycloakManager;
-import com.dialoguebranch.web.service.controller.schema.LoginParametersPayload;
-import com.dialoguebranch.web.service.controller.schema.LoginResultPayload;
 import com.dialoguebranch.web.service.exception.DLBServiceConfigurationException;
 import com.dialoguebranch.web.service.storage.AzureDataLakeStore;
 import com.dialoguebranch.web.service.storage.VariableStoreDatabaseStorageHandler;
@@ -49,8 +47,6 @@ import nl.rrd.utils.AppComponents;
 import nl.rrd.utils.exception.DatabaseException;
 import nl.rrd.utils.exception.ParseException;
 import org.slf4j.Logger;
-import org.springframework.http.*;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.time.ZoneId;
@@ -71,7 +67,6 @@ public class ApplicationManager {
 	private final Project project;
 	private final List<UserService> activeUserServices = new ArrayList<>();
 	private final List<BasicUserCredentials> basicUserCredentials;
-	private String externalVariableServiceAPIToken;
 	private AzureDataLakeStore azureDataLakeStore = null;
 	private KeycloakManager keycloakManager = null;
 	private final UserServiceFactory userServiceFactory;
@@ -131,19 +126,6 @@ public class ApplicationManager {
 				basicUserCredentials = BasicUserFile.read();
 			} catch (ParseException | IOException e) {
 				throw new RuntimeException(e);
-			}
-		}
-
-		// login to external variable service
-		if(config.getExternalVariableServiceEnabled()) {
-			// Only when using the "native" authentication management service
-			if(config.getAuthService().equals(Configuration.AUTH_SERVICE_NATIVE)) {
-				try {
-					this.loginToExternalVariableService();
-				} catch (Exception e) {
-					logger.info(e.toString());
-					throw new RuntimeException(e);
-				}
 			}
 		}
 
@@ -207,22 +189,17 @@ public class ApplicationManager {
 	 *
 	 * @param userId the identifier of the user for which to retrieve a {@link UserService}.
 	 * @param timeZone the time zone as {@link ZoneId} in which the user resides.
-	 * @param accessToken the accessToken that was used in the valid request to the web service,
-	 *                    and resulting in this call for an active UserService. This access token
-	 *                    will be stored with the UserService object to be used for future calls to
-	 *                    an External Variable Store.
 	 * @return a {@link UserService} object that can handle the communication with the user.
 	 * @throws IOException In case of an error loading in the known variables for the User.
 	 * @throws DatabaseException In case of an error loading in the known variables for the User.
 	 */
-	public UserService getOrCreateActiveUserService(String userId, ZoneId timeZone,
-													String accessToken)
+	public UserService getOrCreateActiveUserService(String userId, ZoneId timeZone)
 			throws IOException, DatabaseException {
-		UserService result = getActiveUserService(userId, accessToken);
+		UserService result = getActiveUserService(userId);
 		if(result != null) {
 			return result;
 		} else {
-			return createActiveUserService(userId, timeZone, accessToken);
+			return createActiveUserService(userId, timeZone);
 		}
 	}
 
@@ -233,20 +210,16 @@ public class ApplicationManager {
 	 * user.
 	 *
 	 * @param userId the identifier of the user for which to retrieve a {@link UserService}.
-	 * @param accessToken the accessToken that was used in the valid request to the web service,
-	 * 	                  and resulting in this call for an active UserService. This access token
-	 * 	                  will be stored with the UserService object to be used for future calls to
-	 * 	                  an External Variable Store.
 	 * @return a {@link UserService} object that can handle the communication with the user.
 	 * @throws IOException In case of an error loading in the known variables for the User.
 	 * @throws DatabaseException In case of an error loading in the known variables for the User.
 	 */
-	public UserService getOrCreateActiveUserService(String userId, String accessToken)
+	public UserService getOrCreateActiveUserService(String userId)
 			throws IOException, DatabaseException {
-		UserService result = getActiveUserService(userId, accessToken);
+		UserService result = getActiveUserService(userId);
 		if(result != null) return result;
 		else {
-			return createActiveUserService(userId,null, accessToken);
+			return createActiveUserService(userId,null);
 		}
 	}
 
@@ -257,10 +230,9 @@ public class ApplicationManager {
 	 * @param userId the identifier of the user for which to retrieve a {@link UserService}.
 	 * @return a {@link UserService} object, or {@code null} if none exists.
 	 */
-	public UserService getActiveUserService(String userId, String accessToken) {
+	public UserService getActiveUserService(String userId) {
 		for(UserService userService : activeUserServices) {
 			if(userService.getDialogueBranchUser().getId().equals(userId)) {
-				userService.setLatestAccessToken(accessToken);
 				return userService;
 			}
 		}
@@ -273,15 +245,11 @@ public class ApplicationManager {
 	 *
 	 * @param userId the identifier of the user for which to create a {@link UserService}.
 	 * @param timeZone the time zone as {@link ZoneId} in which the user resides.
-	 * @param accessToken the accessToken that was used in the valid request to the web service,
-	 *                    and resulting in this call for an active UserService. This access token
-	 *                    will be stored with the UserService object to be used for future calls to
-	 *                    an External Variable Store.
 	 * @return the newly created {@link UserService} object.
 	 * @throws IOException In case of an error loading in the known variables for the User.
 	 * @throws DatabaseException In case of an error loading in the known variables for the User.
 	 */
-	private UserService createActiveUserService(String userId, ZoneId timeZone, String accessToken)
+	private UserService createActiveUserService(String userId, ZoneId timeZone)
 			throws IOException, DatabaseException {
 
 		UserService newUserService;
@@ -291,8 +259,6 @@ public class ApplicationManager {
 		} else {
 			newUserService = userServiceFactory.createUserService(userId, timeZone);
 		}
-
-		newUserService.setLatestAccessToken(accessToken);
 
 		activeUserServices.add(newUserService);
 
@@ -336,57 +302,4 @@ public class ApplicationManager {
 		return new ArrayList<>(project.getDialogues().keySet());
 	}
 
-	public String getExternalVariableServiceAPIToken() {
-		return externalVariableServiceAPIToken;
-	}
-
-	public void setExternVariableServiceAPIToken(String externalVariableServiceAPIToken) {
-		this.externalVariableServiceAPIToken = externalVariableServiceAPIToken;
-	}
-
-	public void loginToExternalVariableService() {
-
-		// Fire-and-forget: login to external variable service
-		new Thread(() -> {
-
-			Configuration config = AppComponents.get(Configuration.class);
-
-			String loginUrl = config.getExternalVariableServiceURL()
-					+ "/v" + config.getExternalVariableServiceAPIVersion()
-					+ "/auth/login";
-
-			logger.info("Attempting login to external variable service at {}", loginUrl);
-
-			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.valueOf("application/json"));
-
-			RestTemplate restTemplate = new RestTemplate();
-
-			LoginParametersPayload loginParametersPayload = new LoginParametersPayload();
-			loginParametersPayload.setUser(config.getExternalVariableServiceUsername());
-			loginParametersPayload.setPassword(config.getExternalVariableServicePassword());
-
-			logger.info("Using username {}, and password {}", config.getExternalVariableServiceUsername(), config.getExternalVariableServicePassword());
-
-			HttpEntity<LoginParametersPayload> request =
-					new HttpEntity<>(loginParametersPayload, headers);
-
-			ResponseEntity<LoginResultPayload> response = restTemplate.postForEntity(
-					loginUrl, request, LoginResultPayload.class);
-
-			if (response.getStatusCode() == HttpStatus.OK) {
-				LoginResultPayload loginResultPayload = response.getBody();
-				if (loginResultPayload != null) {
-					this.setExternVariableServiceAPIToken(loginResultPayload.getAccessToken());
-					logger.info("User '{}' logged in successfully to external variable service.",
-							config.getExternalVariableServiceUsername());
-				} else {
-					logger.error("Login to External Variable Service failed with status code: {}",
-							response.getStatusCode());
-				}
-			} else {
-				logger.info("Login failed: {}", response.getStatusCode());
-			}
-		}).start(); // Start the thread
-	}
 }
