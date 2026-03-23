@@ -392,7 +392,8 @@ public class AuthController {
         logger.info("POST /v{}/auth/validate", version);
 
 		synchronized (AUTH_LOCK) {
-			QueryRunner.validateAccessToken(request,application);
+			QueryRunner.validateAccessToken(
+					ControllerFunctions.extractAccessToken(request),application);
 			return true;
 		}
 	}

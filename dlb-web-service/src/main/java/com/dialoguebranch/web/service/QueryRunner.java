@@ -37,7 +37,6 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import org.slf4j.Logger;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
@@ -56,7 +55,7 @@ public class QueryRunner {
 	 * 
 	 * @param query the query
 	 * @param versionName the protocol version name (see {@link ProtocolVersion})
-	 * @param request the HTTP request or null
+	 * @param providedAccessToken the provided JWT access token
 	 * @param response the HTTP response to add header WWW-Authenticate in case of 401 Unauthorized
 	 * @param delegateUser the "DialogueBranch user" for which this query should be run, or ""
 	 *                     if this should be for the currently authenticated user
@@ -67,7 +66,7 @@ public class QueryRunner {
 	 * @throws HttpException if an unexpected error occurs. This results in HTTP error status 500
 	 *                   Internal Server Error.
 	 */
-	public static <T> T runQuery(AuthQuery<T> query, String versionName, HttpServletRequest request,
+	public static <T> T runQuery(AuthQuery<T> query, String versionName, String providedAccessToken,
 			HttpServletResponse response, String delegateUser, Application application)
 			throws HttpException {
 		ProtocolVersion version;
@@ -79,8 +78,8 @@ public class QueryRunner {
 		try {
 			AuthenticationInfo authenticationInfo = null;
 
-			if (request != null)
-				authenticationInfo = validateAccessToken(request, application);
+			if (providedAccessToken != null)
+				authenticationInfo = validateAccessToken(providedAccessToken, application);
 
 			// If the request was made for "this" (authenticated) user
 			if(delegateUser == null || delegateUser.isEmpty()) {
@@ -125,47 +124,20 @@ public class QueryRunner {
 	 * Otherwise, it will return the {@link AuthenticationInfo} object representing the information
 	 * of the authenticated user.
 	 *
-	 * @param request the HTTP request
 	 * @param application the {@link Application} context used to access {@link
 	 *                    BasicUserCredentials} in a non-static way.
 	 * @return the {@link AuthenticationInfo} for the authenticated user
 	 * @throws UnauthorizedException if no token is specified, or the token is empty or invalid
 	 */
-	public static AuthenticationInfo validateAccessToken(HttpServletRequest request,
+	public static AuthenticationInfo validateAccessToken(String providedAccessToken,
 														 Application application)
 			throws UnauthorizedException {
-		Logger logger = AppComponents.getLogger(QueryRunner.class.getSimpleName());
 
-		String token = request.getHeader("X-Auth-Token");
+		if(application.getConfiguration().getAuthService().equals(Configuration.AUTH_SERVICE_KEYCLOAK))
+			return validateKeycloakAccessToken(providedAccessToken, application);
+		else
+			return validateNativeAccessToken(providedAccessToken, application);
 
-		// If we don't have the custom "X-Auth-Token", check if we have a standard authentication
-		// token in the "Authorization" header.
-		if(token == null || token.trim().isEmpty()) {
-			String standardToken = request.getHeader("Authorization");
-			if(standardToken != null) {
-				if (standardToken.startsWith("Bearer ")) {
-					standardToken = standardToken.substring(7);
-					if(!standardToken.isEmpty()) token = standardToken;
-				}
-			}
-		}
-
-		if (token != null) {
-
-			if (token.trim().isEmpty()) {
-				logger.info("Invalid authentication token: token empty");
-				throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_INVALID,
-						"Authentication token invalid");
-			}
-
-			if(application.getConfiguration().getAuthService().equals(Configuration.AUTH_SERVICE_KEYCLOAK))
-				return validateKeycloakAccessToken(token, application);
-			else
-				return validateNativeAccessToken(token, application);
-		}
-
-		throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_NOT_FOUND,
-				"Authentication token not found");
 	}
 	
 	/**

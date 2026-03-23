@@ -181,16 +181,19 @@ public class DialogueController {
 		if(sessionId != null && !sessionId.isEmpty()) logInfo += "&sessionId=" + sessionId;
 		logger.info(logInfo);
 
+		// Extract the access token, and throw an exception if it is not provided correctly
+		String accessToken = ControllerFunctions.extractAccessToken(request);
+
 		if(delegateUser == null || delegateUser.isEmpty()) {
 			return QueryRunner.runQuery(
 					(protocolVersion, user) -> doStartDialogue(user, dialogueName,
-							language, timeZone, sessionId),
-					version, request, response, delegateUser, application);
+							language, timeZone, sessionId, accessToken),
+					version, accessToken, response, delegateUser, application);
 		} else {
 			return QueryRunner.runQuery(
 					(protocolVersion, user) -> doStartDialogue(delegateUser, dialogueName,
-							language, timeZone, sessionId),
-					version, request, response, delegateUser, application);
+							language, timeZone, sessionId, accessToken),
+					version, accessToken, response, delegateUser, application);
 		}
 	}
 
@@ -204,19 +207,21 @@ public class DialogueController {
 	 *                 (IANA Codes)
 	 * @param sessionId the (optional) identifier that should be added to the logging of dialogues
 	 *                  for this started dialogue session (which may be {@code null}).
+	 * @param accessToken the accessToken that was used in the valid request to the web service,
+	 *                    which will be passed on to the request for an active {@link UserService}
 	 * @return the {@link DialogueMessage} that represents the start node of the dialogue.
 	 * @throws HttpException in case of an error in the dialogue execution.
 	 * @throws DatabaseException in case of an error in retrieving the current active user.
 	 * @throws IOException in case of any network error.
 	 */
 	private DialogueMessage doStartDialogue(String userId, String dialogueName, String language,
-			String timeZone, String sessionId)
+			String timeZone, String sessionId, String accessToken)
 			throws HttpException, IOException, DatabaseException {
 
 		// Get or create a UserService for the user in the given time zone
 		ZoneId timeZoneId = ControllerFunctions.parseTimeZone(timeZone);
 		UserService userService = application.getApplicationManager()
-				.getOrCreateActiveUserService(userId, timeZoneId);
+				.getOrCreateActiveUserService(userId, timeZoneId, accessToken);
 		userService.getDialogueBranchUser().setTimeZone(timeZoneId);
 
 		// If no sessionId was provided, generate a unique one now
@@ -321,16 +326,19 @@ public class DialogueController {
 			logInfo += "&delegateUser="+delegateUser;
 		logger.info(logInfo);
 
+		// Extract the access token, and throw an exception if it is not provided correctly
+		String accessToken = ControllerFunctions.extractAccessToken(request);
+
 		if(delegateUser == null || delegateUser.isEmpty()) {
 			return QueryRunner.runQuery(
 				(protocolVersion, user) -> doProgressDialogue(user, request,
-						loggedDialogueId, loggedInteractionIndex, replyId),
-				version, request, response, delegateUser, application);
+						loggedDialogueId, loggedInteractionIndex, replyId, accessToken),
+				version, accessToken, response, delegateUser, application);
 		} else {
 			return QueryRunner.runQuery(
 				(protocolVersion, user) -> doProgressDialogue(delegateUser, request,
-					loggedDialogueId, loggedInteractionIndex, replyId),
-				version, request, response, delegateUser, application);
+					loggedDialogueId, loggedInteractionIndex, replyId, accessToken),
+				version, accessToken, response, delegateUser, application);
 		}
 	}
 
@@ -353,7 +361,7 @@ public class DialogueController {
 	 */
 	private NullableResponse<DialogueMessage> doProgressDialogue(String userId,
 			HttpServletRequest request, String loggedDialogueId,
-			int loggedInteractionIndex, int replyId) throws HttpException, DatabaseException,
+			int loggedInteractionIndex, int replyId, String accessToken) throws HttpException, DatabaseException,
 			IOException {
 
 		String body;
@@ -373,7 +381,7 @@ public class DialogueController {
 		}
 		try {
 			UserService userService
-					= application.getApplicationManager().getActiveUserService(userId);
+					= application.getApplicationManager().getActiveUserService(userId, accessToken);
 			if(userService == null) {
 				throw new BadRequestException("Attempting to progress a dialogue for a user ('" +
 					userId + "') that isn't active. A session of interaction should start with a " +
@@ -468,15 +476,18 @@ public class DialogueController {
 			logInfo += "&delegateUser="+delegateUser;
 		logger.info(logInfo);
 
+		// Extract the access token, and throw an exception if it is not provided correctly
+		String accessToken = ControllerFunctions.extractAccessToken(request);
+
 		if(delegateUser == null || delegateUser.isEmpty()) {
 			return QueryRunner.runQuery(
-					(protocolVersion, user) -> doContinueDialogue(user, dialogueName, timeZone),
-					version, request, response, delegateUser, application);
+					(protocolVersion, user) -> doContinueDialogue(user, dialogueName, timeZone, accessToken),
+					version, accessToken, response, delegateUser, application);
 		} else {
 			return QueryRunner.runQuery(
 					(protocolVersion, user) ->
-							doContinueDialogue(delegateUser, dialogueName, timeZone),
-					version, request, response, delegateUser, application);
+							doContinueDialogue(delegateUser, dialogueName, timeZone, accessToken),
+					version, accessToken, response, delegateUser, application);
 		}
 	}
 
@@ -488,6 +499,8 @@ public class DialogueController {
 	 * @param dialogueName name of the DialogueBranch Dialogue to continue (excluding .dlb).
 	 * @param timeZone the current time zone of the DialogueBranch user (as IANA, e.g.
 	 *                 'Europe/Lisbon').
+	 * @param accessToken the accessToken that was used in the valid request to the web service,
+	 *                    which will be passed on to the request for an active {@link UserService}
 	 * @return a {@link NullableResponse} object containing the {@link DialogueMessage} or {@code
 	 *         null}.
 	 * @throws HttpException in case of a network error.
@@ -496,13 +509,13 @@ public class DialogueController {
 	 * @throws IOException in case of a file io error.
 	 */
 	private NullableResponse<DialogueMessage> doContinueDialogue(String userId, String dialogueName,
-																 String timeZone)
+																 String timeZone, String accessToken)
 			throws HttpException, DatabaseException, IOException {
 
 		// Get or create a UserService for the user in the given time zone
 		ZoneId timeZoneId = ControllerFunctions.parseTimeZone(timeZone);
 		UserService userService = application.getApplicationManager()
-				.getOrCreateActiveUserService(userId,timeZoneId);
+				.getOrCreateActiveUserService(userId,timeZoneId, accessToken);
 		userService.getDialogueBranchUser().setTimeZone(timeZoneId);
 
 		// Determine the event timestamp
@@ -594,12 +607,15 @@ public class DialogueController {
 				+ delegateUser;
 		logger.info(logInfo);
 
+		// Extract the access token, and throw an exception if it is not provided correctly
+		String accessToken = ControllerFunctions.extractAccessToken(request);
+
 		if(delegateUser == null || delegateUser.isEmpty()) {
 			QueryRunner.runQuery((protocolVersion, user) -> doCancelDialogue(user,
-				loggedDialogueId), version, request, response, delegateUser, application);
+				loggedDialogueId, accessToken), version, accessToken, response, delegateUser, application);
 		} else {
 			QueryRunner.runQuery((protocolVersion, user) -> doCancelDialogue(delegateUser,
-				loggedDialogueId), version, request, response, delegateUser, application);
+				loggedDialogueId, accessToken), version, accessToken, response, delegateUser, application);
 		}
 	}
 
@@ -614,11 +630,11 @@ public class DialogueController {
 	 * @throws IOException in case of any network error.
 	 * @throws BadRequestException if attempting to cancel a dialogue for a user that isn't active
 	 */
-	private Object doCancelDialogue(String userId, String loggedDialogueId)
+	private Object doCancelDialogue(String userId, String loggedDialogueId, String accessToken)
             throws DatabaseException, IOException, BadRequestException {
 
 		UserService userService
-				= application.getApplicationManager().getActiveUserService(userId);
+				= application.getApplicationManager().getActiveUserService(userId, accessToken);
 		if(userService == null) {
 			throw new BadRequestException("Attempting to cancel a dialogue for a user ('" +
 					userId + "') that isn't active. A session of interaction should start with a " +
@@ -709,16 +725,19 @@ public class DialogueController {
 				+ delegateUser;
 		logger.info(logInfo);
 
+		// Extract the access token, and throw an exception if it is not provided correctly
+		String accessToken = ControllerFunctions.extractAccessToken(request);
+
 		if(delegateUser == null || delegateUser.isEmpty()) {
 			return QueryRunner.runQuery(
 				(protocolVersion, user) -> doBackDialogue(user, loggedDialogueId,
-						loggedInteractionIndex),
-				version, request, response, delegateUser, application);
+						loggedInteractionIndex, accessToken),
+				version, accessToken, response, delegateUser, application);
 		} else {
 			return QueryRunner.runQuery(
 				(protocolVersion, user) -> doBackDialogue(delegateUser, loggedDialogueId,
-						loggedInteractionIndex),
-				version, request, response, delegateUser, application);
+						loggedInteractionIndex, accessToken),
+				version, accessToken, response, delegateUser, application);
 		}
 	}
 
@@ -738,12 +757,12 @@ public class DialogueController {
 	 * @throws IOException in case of a file IO error.
 	 */
 	private DialogueMessage doBackDialogue(String userId, String loggedDialogueId,
-										   int loggedInteractionIndex)
+										   int loggedInteractionIndex, String accessToken)
 			throws HttpException, DatabaseException, IOException {
 
 		try {
 			UserService userService
-					= application.getApplicationManager().getActiveUserService(userId);
+					= application.getApplicationManager().getActiveUserService(userId, accessToken);
 			if(userService == null) {
 				throw new BadRequestException("Attempting to take a step back a dialogue for a " +
 					"user ('" + userId + "') that isn't active. A session of interaction should " +
@@ -832,14 +851,17 @@ public class DialogueController {
 				+ delegateUser;
 		logger.info(logInfo);
 
+		// Extract the access token, and throw an exception if it is not provided correctly
+		String accessToken = ControllerFunctions.extractAccessToken(request);
+
 		if(delegateUser == null || delegateUser.isEmpty()) {
 			return QueryRunner.runQuery(
-					(protocolVersion, user) -> doGetOngoingDialogue(user, timeZone),
-					version, request, response, delegateUser, application);
+					(protocolVersion, user) -> doGetOngoingDialogue(user, timeZone, accessToken),
+					version, accessToken, response, delegateUser, application);
 		} else {
 			return QueryRunner.runQuery(
-					(protocolVersion, user) -> doGetOngoingDialogue(delegateUser, timeZone),
-					version, request, response, delegateUser, application);
+					(protocolVersion, user) -> doGetOngoingDialogue(delegateUser, timeZone, accessToken),
+					version, accessToken, response, delegateUser, application);
 		}
 	}
 
@@ -850,6 +872,8 @@ public class DialogueController {
 	 *               (leave empty if retrieving for the currently authenticated user).
 	 * @param timeZone the timeZone of the client as one of {@code TimeZone.getAvailableIDs()}
 	 * 	               (IANA Codes)
+	 * @param accessToken the accessToken that was used in the valid request to the web service,
+	 *                    which will be passed on to the request for an active {@link UserService}
 	 * @return a {@link NullableResponse} containing either a {@link OngoingDialoguePayload} object
 	 *         or {@code null}.
 	 * @throws DatabaseException in case of an error retrieving logged dialogues from the database.
@@ -857,13 +881,13 @@ public class DialogueController {
 	 * @throws BadRequestException in case of a malformed or unknown {@code timeZone}
 	 */
 	private NullableResponse<OngoingDialoguePayload> doGetOngoingDialogue(String userId,
-																		  String timeZone)
+																		  String timeZone, String accessToken)
             throws DatabaseException, IOException, BadRequestException {
 
 		// Get or create a UserService for the user in the given time zone
 		ZoneId timeZoneId = ControllerFunctions.parseTimeZone(timeZone);
 		UserService userService = application.getApplicationManager()
-				.getOrCreateActiveUserService(userId,timeZoneId);
+				.getOrCreateActiveUserService(userId,timeZoneId,accessToken);
 		userService.getDialogueBranchUser().setTimeZone(timeZoneId);
 
 		ServerLoggedDialogue latestOngoingDialogue =

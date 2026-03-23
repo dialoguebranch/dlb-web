@@ -33,6 +33,7 @@ import com.dialoguebranch.execution.VariableStore;
 import com.dialoguebranch.execution.VariableStoreChange;
 import com.dialoguebranch.execution.VariableStoreOnChangeListener;
 import com.dialoguebranch.web.service.Configuration;
+import com.dialoguebranch.web.service.execution.UserService;
 import nl.rrd.utils.AppComponents;
 import org.slf4j.Logger;
 import org.springframework.http.*;
@@ -49,10 +50,21 @@ public class ExternalVariableServiceUpdater implements VariableStoreOnChangeList
 	private final Logger logger =
 			AppComponents.getLogger(ClassUtils.getUserClass(getClass()).getSimpleName());
 	private final Configuration config = AppComponents.get(Configuration.class);
-	private final String externalVariableServiceAPIToken;
 
-	public ExternalVariableServiceUpdater(String externalVariableServiceAPIToken) {
-		this.externalVariableServiceAPIToken = externalVariableServiceAPIToken;
+	// When using the 'native' authentication management, use this as access token
+	final String externalVariableServiceAccessToken;
+
+	// When using Keycloak as authentication management, get an access token from the user service
+	final UserService userService;
+
+	public ExternalVariableServiceUpdater(String externalVariableServiceAccessToken) {
+		this.externalVariableServiceAccessToken = externalVariableServiceAccessToken;
+		this.userService = null;
+	}
+
+	public ExternalVariableServiceUpdater(UserService userService) {
+		this.userService = userService;
+		this.externalVariableServiceAccessToken = null;
 	}
 
 	@Override
@@ -61,6 +73,18 @@ public class ExternalVariableServiceUpdater implements VariableStoreOnChangeList
 		String userId = variableStore.getUser().getId();
 		String userTimeZoneString
 				= variableStore.getUser().getTimeZone().toString();
+
+		String accessToken;
+
+		if(config.getAuthService().equals(Configuration.AUTH_SERVICE_NATIVE)) {
+			accessToken = this.externalVariableServiceAccessToken;
+		} else if(config.getAuthService().equals(Configuration.AUTH_SERVICE_KEYCLOAK)) {
+            assert this.userService != null;
+            accessToken = this.userService.getLatestAccessToken();
+		} else {
+			// There is no other valid config as of now, so this shouldn't happen
+			accessToken = null;
+		}
 
 		List<Variable> variablesToUpdate = new ArrayList<>();
 
@@ -72,15 +96,14 @@ public class ExternalVariableServiceUpdater implements VariableStoreOnChangeList
 				// external variable service, so the external variable service should be notified
 
 				if(config.getExternalVariableServiceEnabled()) {
-					logger.info("An external DialogueBranch Variable Service is configured to be enabled, " +
-						"with parameters:");
-					logger.info("URL: " + config.getExternalVariableServiceURL());
-					logger.info("API Version: " + config.getExternalVariableServiceAPIVersion());
+					logger.info("An external Dialogue Branch Variable Service is enabled at {}/v{}/",
+							config.getExternalVariableServiceURL(),
+							config.getExternalVariableServiceAPIVersion());
 
 					if(change instanceof VariableStoreChange.Clear) {
 						RestTemplate restTemplate = new RestTemplate();
 						HttpHeaders requestHeaders = new HttpHeaders();
-						requestHeaders.set("X-Auth-Token", externalVariableServiceAPIToken);
+						requestHeaders.set("Authorization", "Bearer " + accessToken);
 
 						String notifyClearedUrl = config.getExternalVariableServiceURL()
 							+ "/v" + config.getExternalVariableServiceAPIVersion()
@@ -140,12 +163,12 @@ public class ExternalVariableServiceUpdater implements VariableStoreOnChangeList
 		}
 
 		// Perform the actual REST call
-		if(variablesToUpdate.size() > 0) {
+		if(!variablesToUpdate.isEmpty()) {
 
 			RestTemplate restTemplate = new RestTemplate();
 			HttpHeaders requestHeaders = new HttpHeaders();
 			requestHeaders.setContentType(MediaType.valueOf("application/json"));
-			requestHeaders.set("X-Auth-Token", externalVariableServiceAPIToken);
+			requestHeaders.set("Authorization", "Bearer " + accessToken);
 
 			String notifyUpdatesUrl = config.getExternalVariableServiceURL()
 					+ "/v" + config.getExternalVariableServiceAPIVersion()

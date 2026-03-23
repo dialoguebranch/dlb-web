@@ -125,7 +125,8 @@ public class AdminController {
         String logInfo = "GET /v" + version + "/admin/list-dialogues";
         logger.info(logInfo);
 
-        AuthenticationInfo authenticationInfo = QueryRunner.validateAccessToken(request,application);
+        AuthenticationInfo authenticationInfo = QueryRunner.validateAccessToken(
+                ControllerFunctions.extractAccessToken(request),application);
         if(authenticationInfo.hasRole(BasicUserCredentials.USER_ROLE_ADMIN)) {
             return doListDialogues();
         } else {

@@ -64,6 +64,9 @@ public class UserService {
 	/** The dialogue branch user associated with this UserService */
 	private final User dialogueBranchUser;
 
+	/** The latest, validated access token for this user */
+	private String latestAccessToken;
+
 	/** The general ApplicationManager object that governs this UserService */
 	private final ApplicationManager applicationManager;
 	private final VariableStore variableStore;
@@ -98,9 +101,7 @@ public class UserService {
 		this.dialogueBranchUser = dialogueBranchUser;
 		this.applicationManager = applicationManager;
 
-		Configuration config = AppComponents.get(Configuration.class);
-		VariableStoreStorageHandler storageHandler =
-				new VariableStoreDatabaseStorageHandler();
+		VariableStoreStorageHandler storageHandler = new VariableStoreDatabaseStorageHandler();
 		try {
 			this.variableStore = storageHandler.read(dialogueBranchUser);
 		} catch (ParseException ex) {
@@ -108,11 +109,7 @@ public class UserService {
 					+ dialogueBranchUser.getId() + "': " + ex.getMessage(), ex);
 		}
 
-		this.variableStore.addOnChangeListener(onVarChangeListener);
-		if(config.getExternalVariableServiceEnabled()) {
-			this.variableStore.addOnChangeListener(new ExternalVariableServiceUpdater(
-					applicationManager.getExternalVariableServiceAPIToken()));
-		}
+		registerVariableStoreChangeListeners(onVarChangeListener);
 
 		dialogueExecutor = new DialogueExecutor(this);
 
@@ -125,6 +122,28 @@ public class UserService {
 				dialogueLanguageMap.computeIfAbsent(dialogue.getDialogueName(),
 						k -> new LinkedHashMap<>());
 			langMap.put(dialogue.getLanguage(), dialogue);
+		}
+	}
+
+	private void registerVariableStoreChangeListeners(VariableStoreOnChangeListener onVarChangeListener) {
+
+		Configuration config = AppComponents.get(Configuration.class);
+
+		this.variableStore.addOnChangeListener(onVarChangeListener);
+		if(config.getExternalVariableServiceEnabled()) {
+
+			// When using the "native" authentication service, the updater service will use a
+			// system-wide "API key" as access token
+			if(config.getAuthService().equals(Configuration.AUTH_SERVICE_NATIVE)) {
+				this.variableStore.addOnChangeListener(new ExternalVariableServiceUpdater(
+						applicationManager.getExternalVariableServiceAPIToken()));
+
+				// When using Keycloak as the authentication service, the updater service must pass
+				// along a valid access token for this specific user, therefore we pass along an
+				// instance of this UserService where the latest valid access token is stored
+			} else if(config.getAuthService().equals(Configuration.AUTH_SERVICE_KEYCLOAK)) {
+				this.variableStore.addOnChangeListener(new ExternalVariableServiceUpdater(this));
+			}
 		}
 	}
 
@@ -261,9 +280,8 @@ public class UserService {
 		ActiveDialogue dialogue = state.getActiveDialogue();
 		String dialogueName = dialogue.getDialogueFileDescription().getDialogueName();
 		String nodeName = dialogue.getCurrentNode().getTitle();
-		logger.info(String.format(
-				"User %s progresses dialogue with reply %s.%s.%s",
-				dialogueBranchUser.getId(), dialogueName, nodeName, replyId));
+		logger.info("User {} progresses dialogue with reply {}.{}.{}",
+				dialogueBranchUser.getId(), dialogueName, nodeName, replyId);
 		return dialogueExecutor.progressDialogue(state, replyId);
 	}
 
@@ -272,9 +290,8 @@ public class UserService {
 		ActiveDialogue dialogue = state.getActiveDialogue();
 		String dialogueName = dialogue.getDialogueDefinition().getDialogueName();
 		String nodeName = dialogue.getCurrentNode().getTitle();
-		logger.info(String.format(
-				"User %s goes back in dialogue from node %s.%s",
-				dialogueBranchUser.getId(), dialogueName, nodeName));
+		logger.info("User {} goes back in dialogue from node {}.{}",
+				dialogueBranchUser.getId(), dialogueName, nodeName);
 		return dialogueExecutor.backDialogue(state, eventTime);
 	}
 
@@ -339,10 +356,9 @@ public class UserService {
 		Configuration config = AppComponents.get(Configuration.class);
 
 		if(config.getExternalVariableServiceEnabled()) {
-			logger.info("An external Dialogue Branch Variable Service is configured to be " +
-					"enabled, with the following parameters:");
-            logger.info("URL: {}", config.getExternalVariableServiceURL());
-            logger.info("API Version: {}", config.getExternalVariableServiceAPIVersion());
+			logger.info("An external Dialogue Branch Variable Service is enabled at {}/v{}/",
+					config.getExternalVariableServiceURL(),
+					config.getExternalVariableServiceAPIVersion());
 
 			List<Variable> varsToUpdate = new ArrayList<>();
 			for(String variableName : variableNames) {
@@ -361,11 +377,20 @@ public class UserService {
 				}
 			}
 
+			String accessToken;
+			if(config.getAuthService().equals(Configuration.AUTH_SERVICE_NATIVE)) {
+				accessToken = applicationManager.getExternalVariableServiceAPIToken();
+			} else if(config.getAuthService().equals(Configuration.AUTH_SERVICE_KEYCLOAK)) {
+				accessToken = this.getLatestAccessToken();
+			} else {
+				// There is no other valid config as of now, so this shouldn't happen
+				accessToken = null;
+			}
+
 			RestTemplate restTemplate = new RestTemplate();
 			HttpHeaders requestHeaders = new HttpHeaders();
 			requestHeaders.setContentType(MediaType.valueOf("application/json"));
-			requestHeaders.set("X-Auth-Token",
-					applicationManager.getExternalVariableServiceAPIToken());
+			requestHeaders.set("Authorization", "Bearer " + accessToken);
 
 			String retrieveUpdatesUrl = config.getExternalVariableServiceURL()
 					+ "/v"+config.getExternalVariableServiceAPIVersion()
@@ -581,6 +606,14 @@ public class UserService {
         logger.info("Getting dialogue log session data for user '{}' and sessionId '{}'.",
 				dialogueBranchUser.getId(), sessionId);
 		return loggedDialogueStore.readSession(sessionId);
+	}
+
+	public String getLatestAccessToken() {
+		return this.latestAccessToken;
+	}
+
+	public void setLatestAccessToken(String accessToken) {
+		this.latestAccessToken = accessToken;
 	}
 
 }

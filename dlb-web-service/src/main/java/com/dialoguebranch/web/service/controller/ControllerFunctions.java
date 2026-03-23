@@ -29,10 +29,8 @@
 package com.dialoguebranch.web.service.controller;
 
 import com.dialoguebranch.exception.ExecutionException;
-import com.dialoguebranch.web.service.exception.BadRequestException;
-import com.dialoguebranch.web.service.exception.HttpException;
-import com.dialoguebranch.web.service.exception.HttpFieldError;
-import com.dialoguebranch.web.service.exception.NotFoundException;
+import com.dialoguebranch.web.service.Configuration;
+import com.dialoguebranch.web.service.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
 import nl.rrd.utils.exception.ParseException;
 import nl.rrd.utils.http.URLParameters;
@@ -139,6 +137,37 @@ public class ControllerFunctions {
 					"Query parameters not accepted, parameters must be set in the request body.");
 			}
 		}
+	}
+
+	public static String extractAccessToken(HttpServletRequest request) throws UnauthorizedException {
+		String token = request.getHeader("X-Auth-Token");
+
+		// If we don't have the custom "X-Auth-Token", check if we have a standard authentication
+		// token in the "Authorization" header.
+		if(token == null || token.trim().isEmpty()) {
+			String standardToken = request.getHeader("Authorization");
+			if(standardToken != null) {
+				if (standardToken.startsWith("Bearer ")) {
+					standardToken = standardToken.substring(7);
+					if(!standardToken.isEmpty()) token = standardToken;
+				}
+			}
+		}
+
+		if (token != null) {
+
+			if (token.trim().isEmpty()) {
+				throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_INVALID,
+						"Authentication token invalid");
+			} else {
+
+				return token;
+			}
+
+		}
+
+		throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_NOT_FOUND,
+				"Authentication token not found");
 	}
 
 }

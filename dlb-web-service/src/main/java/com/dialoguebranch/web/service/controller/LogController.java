@@ -103,23 +103,26 @@ public class LogController {
 			logInfo += "&delegateUser=" + delegateUser;
 		logger.info(logInfo);
 
+		// Extract the access token, and throw an exception if it is not provided correctly
+		String accessToken = ControllerFunctions.extractAccessToken(request);
+
 		if(delegateUser == null || delegateUser.isEmpty()) {
 			return QueryRunner.runQuery(
-					(protocolVersion, user) -> doGetSession(user, sessionId),
-					version, request, response, delegateUser, application);
+					(protocolVersion, user) -> doGetSession(user, sessionId, accessToken),
+					version, accessToken, response, delegateUser, application);
 		} else {
 			return QueryRunner.runQuery(
-					(protocolVersion, user) -> doGetSession(delegateUser, sessionId),
-					version, request, response, delegateUser, application);
+					(protocolVersion, user) -> doGetSession(delegateUser, sessionId, accessToken),
+					version, accessToken, response, delegateUser, application);
 		}
 	}
 
-	private List<ServerLoggedDialogue> doGetSession(String userId, String sessionId)
+	private List<ServerLoggedDialogue> doGetSession(String userId, String sessionId, String accessToken)
             throws DatabaseException, IOException {
 
 		// Get or create a UserService for the user in the default time zone
 		UserService userService = application.getApplicationManager()
-				.getOrCreateActiveUserService(userId);
+				.getOrCreateActiveUserService(userId, accessToken);
 
 		return userService.getDialogueSessionLog(sessionId);
 	}
@@ -165,23 +168,26 @@ public class LogController {
 			logInfo += "&delegateUser=" + delegateUser;
 		logger.info(logInfo);
 
+		// Extract the access token, and throw an exception if it is not provided correctly
+		String accessToken = ControllerFunctions.extractAccessToken(request);
+
 		if(delegateUser == null || delegateUser.isEmpty()) {
 			return QueryRunner.runQuery(
-					(protocolVersion, user) -> doVerifyId(user, sessionId),
-					version, request, response, delegateUser, application);
+					(protocolVersion, user) -> doVerifyId(user, sessionId, accessToken),
+					version, accessToken, response, delegateUser, application);
 		} else {
 			return QueryRunner.runQuery(
-					(protocolVersion, user) -> doVerifyId(delegateUser, sessionId),
-					version, request, response, delegateUser, application);
+					(protocolVersion, user) -> doVerifyId(delegateUser, sessionId, accessToken),
+					version, accessToken, response, delegateUser, application);
 		}
 
 	}
 
-	private Boolean doVerifyId(String userId, String sessionId) throws DatabaseException, IOException {
+	private Boolean doVerifyId(String userId, String sessionId, String accessToken) throws DatabaseException, IOException {
 
 		// Get or create a UserService for the user in the default time zone
 		UserService userService = application.getApplicationManager()
-				.getOrCreateActiveUserService(userId);
+				.getOrCreateActiveUserService(userId, accessToken);
 
 		return userService.existsSessionId(sessionId);
 	}

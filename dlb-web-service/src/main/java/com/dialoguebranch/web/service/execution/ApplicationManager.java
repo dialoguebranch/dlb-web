@@ -50,7 +50,6 @@ import nl.rrd.utils.exception.DatabaseException;
 import nl.rrd.utils.exception.ParseException;
 import org.slf4j.Logger;
 import org.springframework.http.*;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -59,12 +58,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The DialogueBranch Web Service maintains one instance of a {@link ApplicationManager}. This class
- * keeps track of the different active {@link UserService} instances that are needed to serve
- * individual user's of the DialogueBranch Web Service, as well as other application wide objects.
+ * The Dialogue Branch Web Service maintains one instance of an {@link ApplicationManager}. This
+ * class keeps track of the different active {@link UserService} instances that are needed to serve
+ * individual user's of the Dialogue Branch Web Service, as well as other application wide objects.
  *
- * @author Harm op den Akker (Fruit Tree Labs)
- * @author Tessa Beinema (University of Twente)
+ * @author Harm op den Akker
+ * @author Tessa Beinema
  */
 public class ApplicationManager {
 
@@ -137,11 +136,14 @@ public class ApplicationManager {
 
 		// login to external variable service
 		if(config.getExternalVariableServiceEnabled()) {
-			try {
-				this.loginToExternalVariableService();
-			} catch (Exception e) {
-				logger.info(e.toString());
-				throw new RuntimeException(e);
+			// Only when using the "native" authentication management service
+			if(config.getAuthService().equals(Configuration.AUTH_SERVICE_NATIVE)) {
+				try {
+					this.loginToExternalVariableService();
+				} catch (Exception e) {
+					logger.info(e.toString());
+					throw new RuntimeException(e);
+				}
 			}
 		}
 
@@ -205,16 +207,22 @@ public class ApplicationManager {
 	 *
 	 * @param userId the identifier of the user for which to retrieve a {@link UserService}.
 	 * @param timeZone the time zone as {@link ZoneId} in which the user resides.
+	 * @param accessToken the accessToken that was used in the valid request to the web service,
+	 *                    and resulting in this call for an active UserService. This access token
+	 *                    will be stored with the UserService object to be used for future calls to
+	 *                    an External Variable Store.
 	 * @return a {@link UserService} object that can handle the communication with the user.
 	 * @throws IOException In case of an error loading in the known variables for the User.
 	 * @throws DatabaseException In case of an error loading in the known variables for the User.
 	 */
-	public UserService getOrCreateActiveUserService(String userId, ZoneId timeZone)
+	public UserService getOrCreateActiveUserService(String userId, ZoneId timeZone,
+													String accessToken)
 			throws IOException, DatabaseException {
-		UserService result = getActiveUserService(userId);
-		if(result != null) return result;
-		else {
-			return createActiveUserService(userId, timeZone);
+		UserService result = getActiveUserService(userId, accessToken);
+		if(result != null) {
+			return result;
+		} else {
+			return createActiveUserService(userId, timeZone, accessToken);
 		}
 	}
 
@@ -225,16 +233,20 @@ public class ApplicationManager {
 	 * user.
 	 *
 	 * @param userId the identifier of the user for which to retrieve a {@link UserService}.
+	 * @param accessToken the accessToken that was used in the valid request to the web service,
+	 * 	                  and resulting in this call for an active UserService. This access token
+	 * 	                  will be stored with the UserService object to be used for future calls to
+	 * 	                  an External Variable Store.
 	 * @return a {@link UserService} object that can handle the communication with the user.
 	 * @throws IOException In case of an error loading in the known variables for the User.
 	 * @throws DatabaseException In case of an error loading in the known variables for the User.
 	 */
-	public UserService getOrCreateActiveUserService(String userId)
+	public UserService getOrCreateActiveUserService(String userId, String accessToken)
 			throws IOException, DatabaseException {
-		UserService result = getActiveUserService(userId);
+		UserService result = getActiveUserService(userId, accessToken);
 		if(result != null) return result;
 		else {
-			return createActiveUserService(userId,null);
+			return createActiveUserService(userId,null, accessToken);
 		}
 	}
 
@@ -245,9 +257,10 @@ public class ApplicationManager {
 	 * @param userId the identifier of the user for which to retrieve a {@link UserService}.
 	 * @return a {@link UserService} object, or {@code null} if none exists.
 	 */
-	public UserService getActiveUserService(String userId) {
+	public UserService getActiveUserService(String userId, String accessToken) {
 		for(UserService userService : activeUserServices) {
 			if(userService.getDialogueBranchUser().getId().equals(userId)) {
+				userService.setLatestAccessToken(accessToken);
 				return userService;
 			}
 		}
@@ -260,21 +273,32 @@ public class ApplicationManager {
 	 *
 	 * @param userId the identifier of the user for which to create a {@link UserService}.
 	 * @param timeZone the time zone as {@link ZoneId} in which the user resides.
+	 * @param accessToken the accessToken that was used in the valid request to the web service,
+	 *                    and resulting in this call for an active UserService. This access token
+	 *                    will be stored with the UserService object to be used for future calls to
+	 *                    an External Variable Store.
 	 * @return the newly created {@link UserService} object.
 	 * @throws IOException In case of an error loading in the known variables for the User.
 	 * @throws DatabaseException In case of an error loading in the known variables for the User.
 	 */
-	private UserService createActiveUserService(String userId, ZoneId timeZone)
+	private UserService createActiveUserService(String userId, ZoneId timeZone, String accessToken)
 			throws IOException, DatabaseException {
+
 		UserService newUserService;
+
 		if(timeZone == null) {
 			newUserService = userServiceFactory.createUserService(userId);
 		} else {
 			newUserService = userServiceFactory.createUserService(userId, timeZone);
 		}
+
+		newUserService.setLatestAccessToken(accessToken);
+
 		activeUserServices.add(newUserService);
+
 		logger.info("Created a new UserService for userId '{}' (total active users: {}).",
 				userId,activeUserServices.size());
+
 		return newUserService;
 	}
 	
