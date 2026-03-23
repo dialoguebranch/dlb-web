@@ -29,19 +29,8 @@
 package com.dialoguebranch.web.varservice.controller.schema;
 
 import com.dialoguebranch.web.varservice.controller.AuthController;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import nl.rrd.utils.json.JsonObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-
-import java.io.IOException;
 
 /**
  * A {@link LoginParametersPayload} object models the information that is sent in the request body
@@ -52,15 +41,10 @@ import java.io.IOException;
  * {
  *   "user": "string",
  *   "password": "string",
- *   "tokenExpiration": 0
  * }
  * </pre>
  *
- * Note that the "tokenExpiration" parameter can either be an integer value of 0 or greater,
- * indicating the expiration time in minutes, or it can be the string "never" which means (similar
- * to an expiration time of 0 minutes) that the token will not expire.
- *
- * @author Harm op den Akker (Fruit Tree Labs)
+ * @author Harm op den Akker
  */
 public class LoginParametersPayload extends JsonObject {
 
@@ -71,11 +55,6 @@ public class LoginParametersPayload extends JsonObject {
 	@Schema(description = "Password for the given user",
 			example = "password")
 	private String password = null;
-
-	@Schema(description = "Number of minutes (>=0) after which the authentication token should " +
-			"expire, or 'never'",
-			example = "0")
-	private Integer tokenExpiration = 0;
 
 	// -------------------------------------------------------- //
 	// -------------------- Constructor(s) -------------------- //
@@ -91,13 +70,10 @@ public class LoginParametersPayload extends JsonObject {
 	 * password}, and {@code tokenExpiration}.
 	 * @param user the user who is trying to perform a login.
 	 * @param password the password provided by the user performing a login.
-	 * @param tokenExpiration the time in minutes after which the token should expire, or
-	 *                        {@code null}.
 	 */
-	public LoginParametersPayload(String user, String password, Integer tokenExpiration) {
+	public LoginParametersPayload(String user, String password) {
 		this.user = user;
 		this.password = password;
-		this.tokenExpiration = tokenExpiration;
 	}
 
 	// ----------------------------------------------------------- //
@@ -134,80 +110,6 @@ public class LoginParametersPayload extends JsonObject {
 	 */
 	public void setPassword(String password) {
 		this.password = password;
-	}
-
-	/**
-	 * Returns the time (in minutes) after which the auth token should expire. When set to
-	 * {@code null} this means that the token should never expire.
-	 * @return the time (in minutes) after which the auth token should expire.
-	 */
-	@JsonSerialize(using = TokenExpirationSerializer.class)
-	public Integer getTokenExpiration() {
-		return tokenExpiration;
-	}
-
-	/**
-	 * Sets the time (in minutes) after which the auth token should expire. When set to {@code null}
-	 * this means that the token should never expire.
-	 * @param tokenExpiration the time (in minutes) after which the auth token should expire.
-	 */
-	@JsonDeserialize(using = TokenExpirationDeserializer.class)
-	public void setTokenExpiration(Integer tokenExpiration) {
-		this.tokenExpiration = tokenExpiration;
-	}
-
-	// ------------------------------------------------------------------------- //
-	// -------------------- Serialization / Deserialization -------------------- //
-	// ------------------------------------------------------------------------- //
-
-	/**
-	 * Inner class used to convert the {@code tokenExpiration} to JSON string format, as either a
-	 * number, or the String "never".
-	 */
-	public static class TokenExpirationSerializer extends JsonSerializer<Integer> {
-
-		/**
-		 * Creates an instance of a {@link TokenExpirationSerializer}.
-		 */
-		public TokenExpirationSerializer() { }
-
-		@Override
-		public void serialize(Integer value, JsonGenerator gen,
-				SerializerProvider serializers) throws IOException {
-			if (value == null)
-				gen.writeString("never");
-			else
-				gen.writeNumber(value);
-		}
-	}
-
-	/**
-	 * Inner class used to convert the {@code tokenExpiration} from JSON string format, as either
-	 * a number, or the String "never". The number 0 will be treated as never. Any other string
-	 * besides "never" will generate an error.
-	 */
-	public static class TokenExpirationDeserializer extends JsonDeserializer<Integer> {
-
-		/**
-		 * Creates an instance of a {@link TokenExpirationDeserializer}.
-		 */
-		public TokenExpirationDeserializer() { }
-
-		@Override
-		public Integer deserialize(JsonParser p, DeserializationContext context)
-				throws IOException {
-			String s = p.getValueAsString();
-			if (s.equalsIgnoreCase("never"))
-				return null;
-			try {
-				int value = Integer.parseInt(s);
-				if(value == 0) return null;
-				else return Integer.parseInt(s);
-			} catch (NumberFormatException ex) {
-				throw new JsonParseException(p, "Invalid int value: " + s,
-						p.getCurrentLocation(), ex);
-			}
-		}
 	}
 
 }

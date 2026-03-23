@@ -50,6 +50,7 @@ import nl.rrd.utils.exception.DatabaseException;
 import nl.rrd.utils.exception.ParseException;
 import org.slf4j.Logger;
 import org.springframework.http.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -320,41 +321,48 @@ public class ApplicationManager {
 	}
 
 	public void loginToExternalVariableService() {
-		Configuration config = AppComponents.get(Configuration.class);
 
-		String loginUrl = config.getExternalVariableServiceURL()
-				+ "/v" + config.getExternalVariableServiceAPIVersion()
-				+ "/auth/login";
+		// Fire-and-forget: login to external variable service
+		new Thread(() -> {
 
-        logger.info("Attempting login to external variable service at {}", loginUrl);
+			Configuration config = AppComponents.get(Configuration.class);
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.valueOf("application/json"));
+			String loginUrl = config.getExternalVariableServiceURL()
+					+ "/v" + config.getExternalVariableServiceAPIVersion()
+					+ "/auth/login";
 
-		RestTemplate restTemplate = new RestTemplate();
+			logger.info("Attempting login to external variable service at {}", loginUrl);
 
-		LoginParametersPayload loginParametersPayload = new LoginParametersPayload();
-		loginParametersPayload.setUser(config.getExternalVariableServiceUsername());
-		loginParametersPayload.setPassword(config.getExternalVariableServicePassword());
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.valueOf("application/json"));
 
-		HttpEntity<LoginParametersPayload> request =
-				new HttpEntity<>(loginParametersPayload, headers);
+			RestTemplate restTemplate = new RestTemplate();
 
-		ResponseEntity<LoginResultPayload> response = restTemplate.postForEntity(
-				loginUrl, request, LoginResultPayload.class);
+			LoginParametersPayload loginParametersPayload = new LoginParametersPayload();
+			loginParametersPayload.setUser(config.getExternalVariableServiceUsername());
+			loginParametersPayload.setPassword(config.getExternalVariableServicePassword());
 
-		if (response.getStatusCode() == HttpStatus.OK) {
-			LoginResultPayload loginResultPayload = response.getBody();
-			if(loginResultPayload != null) {
-				this.setExternVariableServiceAPIToken(loginResultPayload.getAccessToken());
-                logger.info("User '{}' logged in successfully to external variable service.",
-						config.getExternalVariableServiceUsername());
+			logger.info("Using username {}, and password {}", config.getExternalVariableServiceUsername(), config.getExternalVariableServicePassword());
+
+			HttpEntity<LoginParametersPayload> request =
+					new HttpEntity<>(loginParametersPayload, headers);
+
+			ResponseEntity<LoginResultPayload> response = restTemplate.postForEntity(
+					loginUrl, request, LoginResultPayload.class);
+
+			if (response.getStatusCode() == HttpStatus.OK) {
+				LoginResultPayload loginResultPayload = response.getBody();
+				if (loginResultPayload != null) {
+					this.setExternVariableServiceAPIToken(loginResultPayload.getAccessToken());
+					logger.info("User '{}' logged in successfully to external variable service.",
+							config.getExternalVariableServiceUsername());
+				} else {
+					logger.error("Login to External Variable Service failed with status code: {}",
+							response.getStatusCode());
+				}
 			} else {
-                logger.error("Login to External Variable Service failed with status code: {}",
-						response.getStatusCode());
+				logger.info("Login failed: {}", response.getStatusCode());
 			}
-		} else {
-            logger.info("Login failed: {}", response.getStatusCode());
-		}
+		}).start(); // Start the thread
 	}
 }

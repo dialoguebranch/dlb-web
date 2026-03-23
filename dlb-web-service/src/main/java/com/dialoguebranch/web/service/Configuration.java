@@ -372,9 +372,9 @@ public class Configuration extends LinkedHashMap<String,String> {
 		return get(MARIADB_DATABASE);
 	}
 
-	// -----------------------------------------------------------------
-	// -------------------- Getters: Authentication --------------------
-	// -----------------------------------------------------------------
+	// ----------------------------------------------------------------- //
+	// -------------------- Getters: Authentication -------------------- //
+	// ----------------------------------------------------------------- //
 
 	public String getAuthService() {
 		if(get(AUTH_SERVICE) == null) return "";

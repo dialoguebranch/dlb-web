@@ -42,30 +42,49 @@ import java.util.function.Function;
 
 public class JWTUtils {
 
-    private static final long EXPIRATION_TIME = 86400000; // 24 hours
+    /** Used to access configuration parameters */
+    private static final Configuration config = Configuration.getInstance();
 
-    public static String generateToken(AuthenticationInfo authenticationInfo) {
+    public static String generateAccessToken(String user) {
         return Jwts.builder()
-                .subject(authenticationInfo.getUsername())
+                .expiration(new Date(System.currentTimeMillis()
+                        + config.getAccessTokenExpirationSeconds() * 1000L))
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(getSecretKey())
+                .issuer(config.getBaseUrl())
+                .subject(user)
+                .claim("typ","Bearer") // Type of Token
+                .claim("azp","dlb-external-var-service") // Authorized party
+                .signWith(getAccessTokenSecret())
+                .compact();
+    }
+
+    public static String generateRefreshToken(String user) {
+        return Jwts.builder()
+                .expiration(new Date(System.currentTimeMillis()
+                        + config.getRefreshTokenExpirationSeconds() * 1000L))
+                .issuedAt(new Date())
+                .issuer(config.getBaseUrl())
+                .audience().add(config.getBaseUrl()).and()
+                .subject(user)
+                .claim("typ","Refresh") // Type of Token
+                .claim("azp","dlb-web-service") // Authorized party
+                .signWith(getRefreshTokenSecret())
                 .compact();
     }
 
     public static <T> T extractClaims(String token, Function<Claims, T> claimFunction) {
         Claims claims = Jwts.parser()
-                .verifyWith(getSecretKey())
+                .verifyWith(getAccessTokenSecret())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
         return claimFunction.apply(claims);
     }
 
-    public static AuthenticationInfo isTokenValid(String token)
+    public static AuthenticationInfo isAccessTokenValid(String token)
             throws JwtException {
         final Claims claims = Jwts.parser()
-                .verifyWith(getSecretKey())
+                .verifyWith(getAccessTokenSecret())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
@@ -76,19 +95,42 @@ public class JWTUtils {
                 claims.getExpiration());
     }
 
-    public static boolean isTokenExpired(String token) {
-        return extractClaims(token, Claims::getExpiration).before(new Date());
+    public static AuthenticationInfo isRefreshTokenValid(String refreshToken)
+            throws JwtException {
+        final Claims claims = Jwts.parser()
+                .verifyWith(getRefreshTokenSecret())
+                .build()
+                .parseSignedClaims(refreshToken)
+                .getPayload();
+
+        return new AuthenticationInfo(
+                claims.getSubject(),
+                claims.getIssuedAt(),
+                claims.getExpiration());
     }
 
     /**
-     * Gets the secret key by parsing the Base64 string in property jwtSecretKey in the
-     * configuration.
+     * Obtains a {@link SecretKey} object used for encrypting and decrypting Access Tokens by
+     * parsing the Base64 string value as defined in the configuration property
+     * jwtAccessTokenSecret.
      *
-     * @return the secret key
+     * @return the secret key as a {@link SecretKey} object.
      */
-    private static SecretKey getSecretKey() {
+    private static SecretKey getAccessTokenSecret() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(Configuration.getInstance()
-                .getJwtSecretKey()));
+                .getJwtAccessTokenSecret()));
+    }
+
+    /**
+     * Obtains a {@link SecretKey} object used for encrypting and decrypting Access Tokens by
+     * parsing the Base64 string value as defined in the configuration property
+     * jwtAccessTokenSecret.
+     *
+     * @return the secret key as a {@link SecretKey} object.
+     */
+    private static SecretKey getRefreshTokenSecret() {
+        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(Configuration.getInstance()
+                .getJwtRefreshTokenSecret()));
     }
 
 }

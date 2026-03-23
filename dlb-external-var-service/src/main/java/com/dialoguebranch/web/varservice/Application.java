@@ -100,7 +100,7 @@ ApplicationListener<ApplicationEvent> {
 		);
 
 		// Initialize User Manager
-		if(config.getKeycloakEnabled()) {
+		if(config.getAuthService().equals(Configuration.AUTH_SERVICE_KEYCLOAK)) {
 			keycloakManager = new KeycloakManager();
 		}
 
@@ -157,12 +157,17 @@ ApplicationListener<ApplicationEvent> {
             logger.info("=== Spring Version: {}", SpringVersion.getVersion());
             logger.info("=== JDK Version: {}", System.getProperty("java.version"));
             logger.info("=== Java Version: {}", JavaVersion.getJavaVersion().toString());
-			logger.info("=== Keycloak Authentication Enabled: {}", config.getKeycloakEnabled());
-			if(config.getKeycloakEnabled()) {
+
+			logger.info("=== Authentication Service: {}", config.getAuthService());
+			if(config.getAuthService().equals(Configuration.AUTH_SERVICE_KEYCLOAK)) {
 				logger.info("===== Keycloak URL: {}", config.getKeycloakBaseUrl());
 				logger.info("===== Keycloak Realm: {}", config.getKeycloakRealm());
 				logger.info("===== Keycloak Client ID: {}", config.getKeycloakClientId());
+			} else if(config.getAuthService().equals(Configuration.AUTH_SERVICE_NATIVE)) {
+				logger.info("===== JWT Access Token Secret: {}", config.getJwtAccessTokenSecret());
+				logger.info("===== JWT Refresh Token Secret: {}", config.getJwtRefreshTokenSecret());
 			}
+
 			logger.info("=======================================================================");
 		}
 	}

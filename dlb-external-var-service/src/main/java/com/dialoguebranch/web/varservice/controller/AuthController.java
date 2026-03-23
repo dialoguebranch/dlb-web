@@ -29,16 +29,12 @@
 package com.dialoguebranch.web.varservice.controller;
 
 import com.dialoguebranch.web.varservice.*;
-import com.dialoguebranch.web.varservice.auth.AuthenticationInfo;
-import com.dialoguebranch.web.varservice.auth.basic.ServiceUserCredentials;
-import com.dialoguebranch.web.varservice.auth.basic.ServiceUserFile;
 import com.dialoguebranch.web.varservice.auth.jwt.JWTUtils;
-import com.dialoguebranch.web.varservice.controller.schema.AccessTokenResponse;
+import com.dialoguebranch.web.varservice.controller.schema.KeycloakTokenResponse;
 import com.dialoguebranch.web.varservice.controller.schema.LoginParametersPayload;
 import com.dialoguebranch.web.varservice.controller.schema.LoginResultPayload;
 import com.dialoguebranch.web.varservice.exception.UnauthorizedException;
 import nl.rrd.utils.AppComponents;
-import nl.rrd.utils.datetime.DateTimeUtils;
 import com.dialoguebranch.web.varservice.exception.BadRequestException;
 import com.dialoguebranch.web.varservice.exception.ErrorCode;
 import com.dialoguebranch.web.varservice.exception.HttpFieldError;
@@ -54,11 +50,10 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -98,23 +93,18 @@ public class AuthController {
 	// ------------------------------------------------------------------ //
 
 	/**
-	 * Obtain an authentication token by logging in. Log in to the service by providing a username,
-	 * password and indicating the desired duration of the authentication token in minutes. If you
-	 * want to obtain an authentication token that does not expire, either provide '0' or 'never'
-	 * as the value for '*tokenExpiration*'.
+	 * Obtain an access token by logging in. Log in to the service by providing a username and
+	 * password.
 	 *
 	 * @param request the {@link HttpServletRequest} that generated the call.
 	 * @param response the {@link HttpServletResponse} that generated the call.
 	 * @param version the API Version to use, e.g. '1'.
 	 * @param loginParametersPayload the JSON payload containing the login parameters.
-	 * @return a {@link LoginResultPayload} object after a successful login
+	 * @return a {@link LoginResultPayload} object after a successful login.
 	 * @throws Exception in case of a network error or unsuccessful login attempt.
 	 */
-	@Operation(summary = "Obtain an authentication token by logging in",
-		description = "Log in to the service by providing a username, password and indicating " +
-			"the desired duration of the authentication token in minutes. If you want to obtain " +
-			"an authentication token that does not expire, either provide '0' or 'never' as the " +
-			"value for '*tokenExpiration*'.")
+	@Operation(summary = "Obtain an access token by logging in",
+		description = "Log in to the service by providing a username and password")
 	@RequestMapping(value="/login", method= RequestMethod.POST, consumes={
 			MediaType.APPLICATION_JSON_VALUE })
 	public LoginResultPayload login(
@@ -147,6 +137,14 @@ public class AuthController {
 		}
 	}
 
+	/**
+	 * Private method for performing the actual login action.
+	 *
+	 * @param request the {@link HttpServletRequest} that generated the call.
+	 * @param loginParametersPayload the JSON payload containing the login parameters.
+	 * @return a {@link LoginResultPayload} object after a successful login.
+	 * @throws Exception in case of a network error or unsuccessful login attempt.
+	 */
 	private LoginResultPayload doLogin(HttpServletRequest request,
 									   LoginParametersPayload loginParametersPayload)
 			throws Exception {
@@ -155,11 +153,11 @@ public class AuthController {
 		// BadRequestException in case of errors
 		validateLoginParameters(request, loginParametersPayload);
 
-		if(config.getKeycloakEnabled()) {
+		if(config.getAuthService().equals(Configuration.AUTH_SERVICE_KEYCLOAK)) {
 			logger.info("Keycloak authentication enabled.");
 			return doLoginKeycloak(loginParametersPayload);
 		} else {
-			logger.info("Keycloak authentication disabled - using basic user management.");
+			logger.info("Keycloak authentication disabled - using native user authentication.");
 			return doLoginNative(loginParametersPayload);
 		}
 
@@ -178,35 +176,29 @@ public class AuthController {
 
 		String user = loginParametersPayload.getUser();
 		String password = loginParametersPayload.getPassword();
-		Integer tokenExpiration = loginParametersPayload.getTokenExpiration();
 
-		ServiceUserCredentials serviceUserCredentials = ServiceUserFile.findUser(user);
 		String invalidError = "Username or password is invalid";
-		if (serviceUserCredentials == null) {
+
+		if (!user.equals(config.getNativeServiceUser())) {
 			logger.info("Failed login attempt for user {}: user unknown.", user);
 			throw new UnauthorizedException(ErrorCode.INVALID_CREDENTIALS, invalidError);
 		}
-		if (!serviceUserCredentials.getPassword().equals(password)) {
+		if (!password.equals(config.getNativeServicePassword())) {
 			logger.info("Failed login attempt for user {}: invalid credentials.", user);
 			throw new UnauthorizedException(ErrorCode.INVALID_CREDENTIALS, invalidError);
 		}
-		logger.info("User {} logged in.", serviceUserCredentials.getUsername());
+		logger.info("User {} logged in.", user);
 
-		Date expiration = null;
+		String accessToken = JWTUtils.generateAccessToken(user);
+		String refreshToken = JWTUtils.generateRefreshToken(user);
 
-		ZonedDateTime now = DateTimeUtils.nowMs();
-
-		if (tokenExpiration != null) {
-			expiration = Date.from(now.plusMinutes(loginParametersPayload.getTokenExpiration())
-					.toInstant());
-		}
-
-		AuthenticationInfo authenticationInfo = new AuthenticationInfo(
-				user, Date.from(now.toInstant()), expiration);
-
-		String token = JWTUtils.generateToken(authenticationInfo);
-
-		return new LoginResultPayload(serviceUserCredentials.getUsername(), token);
+		return new LoginResultPayload(
+				user,
+				accessToken,
+				config.getAccessTokenExpirationSeconds(),
+				refreshToken,
+				config.getRefreshTokenExpirationSeconds()
+		);
 	}
 
 	/**
@@ -238,7 +230,7 @@ public class AuthController {
 		requestParameters.add("password",loginParametersPayload.getPassword());
 		requestParameters.add("grant_type","password");
 
-		ResponseEntity<AccessTokenResponse> response;
+		ResponseEntity<KeycloakTokenResponse> response;
 
 		try {
 			HttpEntity<MultiValueMap<String,String>> entity = new HttpEntity<>(requestParameters,
@@ -247,21 +239,29 @@ public class AuthController {
 					keycloakLoginUrl,
 					HttpMethod.POST,
 					entity,
-					AccessTokenResponse.class);
-		} catch(Exception ex) {
+					KeycloakTokenResponse.class);
+		} catch(ResourceAccessException rae) {
+			logger.error("Unable to reach keycloak service.",rae);
 			throw new UnauthorizedException(ErrorCode.KEYCLOAK_ERROR,
-					"Error contacting Keycloak service.");
+					"Unable to process login request. Unable to reach Keycloak service.");
+		} catch(Exception ex) {
+			logger.error("Exception while forwarding login attempt to keycloak.",ex);
+			throw new UnauthorizedException(ErrorCode.KEYCLOAK_ERROR,
+					"Unable to process login request. An unknown error has occurred.");
 			// TODO: Catch additional details and add as fieldErrors to the UnauthorizedException
 		}
 
 		if (response.getStatusCode() == HttpStatus.OK) {
 			logger.info("Call to Keycloak token end-point successful.");
-			AccessTokenResponse keyCloakResponse = response.getBody();
+			KeycloakTokenResponse keyCloakResponse = response.getBody();
 			if (keyCloakResponse != null) {
-				LoginResultPayload loginResultPayload = new LoginResultPayload();
-				loginResultPayload.setToken(keyCloakResponse.getAccessToken());
-				loginResultPayload.setUser(loginParametersPayload.getUser());
-				return loginResultPayload;
+				return new LoginResultPayload(
+						loginParametersPayload.getUser(),
+						keyCloakResponse.getAccessToken(),
+						keyCloakResponse.getExpiresIn(),
+						keyCloakResponse.getRefreshToken(),
+						keyCloakResponse.getRefreshExpiresIn()
+				);
 			} else {
 				logger.warn("Failed login attempt (empty response) for user {}.",
 						loginParametersPayload.getUser());
@@ -291,31 +291,25 @@ public class AuthController {
 	private void validateLoginParameters(HttpServletRequest request,
 										 LoginParametersPayload loginParametersPayload)
 			throws BadRequestException {
+
 		ControllerFunctions.validateForbiddenQueryParams(request, "user",
 				"password");
+
 		String user = loginParametersPayload.getUser();
 		String password = loginParametersPayload.getPassword();
-		Integer tokenExpiration = loginParametersPayload.getTokenExpiration();
+
 		List<HttpFieldError> fieldErrors = new ArrayList<>();
+
 		if (user == null || user.isEmpty()) {
 			fieldErrors.add(new HttpFieldError("user",
 					"Parameter 'user' not defined."));
 		}
+
 		if (password == null || password.isEmpty()) {
 			fieldErrors.add(new HttpFieldError("password",
 					"Parameter 'password' not defined."));
 		}
 
-		// If Keycloak is used for authentication, a specific token expiration can not actually be
-		// set, so we're not going to complain about it here.
-		if(!config.getKeycloakEnabled()) {
-
-			if (tokenExpiration != null && tokenExpiration <= 0) {
-				fieldErrors.add(new HttpFieldError("tokenExpiration",
-						"Parameter 'tokenExpiration' must be greater than 0 or 'never'."));
-			}
-
-		}
 		if (!fieldErrors.isEmpty()) {
 			logger.info("Failed login attempt: {}", fieldErrors);
 			throw BadRequestException.withMessageAndInvalidInput(

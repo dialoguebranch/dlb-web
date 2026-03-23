@@ -29,8 +29,6 @@
 package com.dialoguebranch.web.varservice;
 
 import com.dialoguebranch.web.varservice.auth.AuthenticationInfo;
-import com.dialoguebranch.web.varservice.auth.basic.ServiceUserCredentials;
-import com.dialoguebranch.web.varservice.auth.basic.ServiceUserFile;
 import com.dialoguebranch.web.varservice.auth.jwt.JWTUtils;
 import com.dialoguebranch.web.varservice.exception.*;
 import nl.rrd.utils.AppComponents;
@@ -105,7 +103,8 @@ public class QueryRunner {
 				// If Keycloak is enabled, the authenticated user can only request data of himself
 				// So, the "requestUser" must be the same as the username in the authentication
 				// details
-				if(application.getConfiguration().getKeycloakEnabled()) {
+				if(application.getConfiguration().getAuthService()
+						.equals(Configuration.AUTH_SERVICE_KEYCLOAK)) {
 					if (authenticationInfo.getUsername().equals(requestUser)) {
 						return query.runQuery(version, authenticationInfo.getUsername());
 					} else {
@@ -115,8 +114,9 @@ public class QueryRunner {
 					}
 				} else {
 
-					// Otherwise, the authenticated user is a "service-user" as specified in the
-					// service-users.xml and he/she/it has access to any real user data
+					// Otherwise, the authenticated user is the natively configured  "service-user"
+					// as specified in the authNativeServiceUser config parameter and he/she/it has
+					// access to any real user data
 					return query.runQuery(version, authenticationInfo.getUsername());
 				}
 
@@ -143,8 +143,8 @@ public class QueryRunner {
 	 * of the authenticated user.
 	 *
 	 * @param request the HTTP request
-	 * @param application the {@link Application} context used to access {@link
-	 *                    ServiceUserCredentials} in a non-static way.
+	 * @param application the {@link Application} context used to access {@link Configuration} in a
+	 *                    non-static way.
 	 * @return the {@link AuthenticationInfo} for the authenticated user
 	 * @throws UnauthorizedException if no token is specified, or the token is empty or invalid
 	 */
@@ -155,6 +155,18 @@ public class QueryRunner {
 
 		String token = request.getHeader("X-Auth-Token");
 
+		// If we don't have the custom "X-Auth-Token", check if we have a standard authentication
+		// token in the "Authorization" header.
+		if(token == null || token.trim().isEmpty()) {
+			String standardToken = request.getHeader("Authorization");
+			if(standardToken != null) {
+				if (standardToken.startsWith("Bearer ")) {
+					standardToken = standardToken.substring(7);
+					if(!standardToken.isEmpty()) token = standardToken;
+				}
+			}
+		}
+
 		if (token != null) {
 
 			if (token.trim().isEmpty()) {
@@ -163,10 +175,11 @@ public class QueryRunner {
 						"Authentication token invalid");
 			}
 
-			if(application.getConfiguration().getKeycloakEnabled())
-				return validateKeycloakToken(token, application);
+			if(application.getConfiguration().getAuthService()
+					.equals(Configuration.AUTH_SERVICE_KEYCLOAK))
+				return validateKeycloakAccessToken(token, application);
 			else
-				return validateDefaultToken(token);
+				return validateNativeAccessToken(token, application);
 		}
 
 		throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_NOT_FOUND,
@@ -174,35 +187,34 @@ public class QueryRunner {
 	}
 
 	/**
-	 * Validates the given token from request header, using the built-in user management and token
+	 * Validates the given token from request header, using the native user management and token
 	 * system. If it's empty or invalid, it will throw an HttpException with 401 Unauthorized.
 	 * Otherwise, it will return an {@link AuthenticationInfo} object representing the information
 	 * of the authenticated user.
 	 *
-	 * @param token the authentication token (not null)
+	 * @param token the access token (not null)
 	 * @return the {@link AuthenticationInfo}, representing the authenticated user
 	 * @throws UnauthorizedException if the token is empty or invalid
 	 */
-	private static AuthenticationInfo validateDefaultToken(String token)
+	private static AuthenticationInfo validateNativeAccessToken(String token, Application application)
 			throws UnauthorizedException {
 		Logger logger = AppComponents.getLogger(QueryRunner.class.getSimpleName());
 
 		AuthenticationInfo authenticationInfo;
 		try {
-			authenticationInfo = JWTUtils.isTokenValid(token);
+			authenticationInfo = JWTUtils.isAccessTokenValid(token);
 		} catch (ExpiredJwtException ex) {
 			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_EXPIRED,
-					"Authentication token expired");
+					"Access token expired");
 		} catch (JwtException ex) {
-			logger.info("Invalid authentication token: failed to parse: {}", ex.getMessage());
+			logger.info("Invalid access token: failed to parse: {}", ex.getMessage());
 			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_INVALID,
-					"Authentication token invalid");
+					"Access token invalid");
 		}
 
-		ServiceUserCredentials userCredentials = ServiceUserFile.findUser(
-				authenticationInfo.getUsername());
-		if (userCredentials == null) {
-			logger.info("Invalid authentication token: user not found: {}",
+		if(!authenticationInfo.getUsername()
+				.equals(application.getConfiguration().getNativeServiceUser())) {
+			logger.info("Invalid access token: user not found: {}",
 					authenticationInfo.getUsername());
 			throw new UnauthorizedException(ErrorCode.AUTH_TOKEN_INVALID,
 					"Authentication token invalid");
@@ -228,7 +240,7 @@ public class QueryRunner {
 	 * @return the {@link AuthenticationInfo} object representing the authenticated user
 	 * @throws UnauthorizedException if the token is empty or invalid
 	 */
-	private static AuthenticationInfo validateKeycloakToken(String token, Application application)
+	private static AuthenticationInfo validateKeycloakAccessToken(String token, Application application)
 			throws UnauthorizedException{
 		return application.getKeycloakManager().validateToken(token);
 	}

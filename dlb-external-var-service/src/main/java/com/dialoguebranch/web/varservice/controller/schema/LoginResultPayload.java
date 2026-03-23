@@ -53,7 +53,19 @@ public class LoginResultPayload {
 
 	@Schema(description = "The JSON Web Token that was generated for the user",
 			example = "See https://jwt.io/")
-	private String token;
+	private String access_token;
+
+	@Schema(description = "The time (in seconds) in which the access token expires",
+			example = "300")
+	private int expires_in;
+
+	@Schema(description = "The refresh token that may be used to refresh the access token",
+			example = "See https://jwt.io/")
+	private String refresh_token;
+
+	@Schema(description = "The time (in seconds) in which the refresh token expires",
+			example = "1800")
+	private int refresh_expires_in;
 
 	// --------------------------------------------------------
 	// -------------------- Constructor(s) --------------------
@@ -65,15 +77,25 @@ public class LoginResultPayload {
 	public LoginResultPayload() { }
 
 	/**
-	 * Creates an instance of a {@link LoginResultPayload} with a given {@code user} and {@code
-	 * token}.
+	 * Creates an instance of a {@link LoginResultPayload} with a given {@code user}, {@code roles}-
+	 * string, {@code access_token}, time for the access token to expire ({@code expires_in}),
+	 * refresh token ({@code refresh_token}) and time for the refresh token to expire ({@code
+	 * refresh_expires_in}).
 	 *
 	 * @param user the username of the user that performed a successful login.
-	 * @param token the JSON Web Token generated for the user as a {@link String}.
+	 * @param access_token the JSON Web Token (JWT) access token generated for the user as a {@link
+	 * 					   String}.
+	 * @param expires_in the time (in seconds) it takes for the access_token to expire.
+	 * @param refresh_token the JWT refresh token that may be used to refresh the access token.
+	 * @param refresh_expires_in the time (in seconds) it takes for the refresh token to expire.
 	 */
-	public LoginResultPayload(String user, String token) {
+	public LoginResultPayload(String user, String access_token, int expires_in,
+							  String refresh_token, int refresh_expires_in) {
 		this.user = user;
-		this.token = token;
+		this.access_token = access_token;
+		this.expires_in = expires_in;
+		this.refresh_token = refresh_token;
+		this.refresh_expires_in = refresh_expires_in;
 	}
 
 	// -------------------------------------------------------------
@@ -103,17 +125,41 @@ public class LoginResultPayload {
 	 *
 	 * @return the JSON Web Token generated for the user as a {@link String}.
 	 */
-	public String getToken() {
-		return token;
+	public String getAccessToken() {
+		return access_token;
 	}
 
 	/**
 	 * Sets the JSON Web Token generated for the user as a {@link String}.
 	 *
-	 * @param token the JSON Web Token generated for the user as a {@link String}.
+	 * @param access_token the JSON Web Token generated for the user as a {@link String}.
 	 */
-	public void setToken(String token) {
-		this.token = token;
+	public void setAccessToken(String access_token) {
+		this.access_token = access_token;
+	}
+
+	public int getExpiresIn() {
+		return this.expires_in;
+	}
+
+	public void setExpiresIn(int expires_in) {
+		this.expires_in = expires_in;
+	}
+
+	public String getRefreshToken() {
+		return this.refresh_token;
+	}
+
+	public void setRefreshToken(String refresh_token) {
+		this.refresh_token = refresh_token;
+	}
+
+	public int getRefreshExpiresIn() {
+		return this.refresh_expires_in;
+	}
+
+	public void setRefreshExpiresIn(int refresh_expires_in) {
+		this.refresh_expires_in = refresh_expires_in;
 	}
 
 }
