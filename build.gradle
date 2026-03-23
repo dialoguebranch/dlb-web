@@ -14,7 +14,7 @@ tasks.register('dockerBuildDev') {
     doLast() {
         def dir = file('..')
 
-        def cmd = ['docker', 'build', '--no-cache', '-t', 'dlb-web-service:dev', '-f', './dlb-web/dlb-web-service/with-keycloak-dev.Dockerfile', '.']
+        def cmd = ['docker', 'build', '--no-cache', '-t', 'dlb-web-service:dev', '-f', './dlb-web/dlb-web-service/all-dev.Dockerfile', '.']
         runShell(cmd, dir)
     }
 }
@@ -52,7 +52,7 @@ tasks.register('dockerComposeUpDev') {
             env[key] = value
         }
 
-        def cmd = ['docker', 'compose', '-f', 'dlb-web/docker-compose/compose-with-keycloak-dev.yml', '--project-directory', '.', 'up', '-d']
+        def cmd = ['docker', 'compose', '-f', 'dlb-web/docker-compose/compose-all-dev.yml', '--project-directory', '.', 'up', '-d']
         def dir = file('..');
 
         runShell(cmd, dir, env)
@@ -70,7 +70,7 @@ tasks.register('dockerComposeDown') {
 
 tasks.register('dockerComposeDownDev') {
     doLast() {
-        def cmd = ['docker', 'compose', '-f', 'dlb-web/docker-compose/compose-with-keycloak-dev.yml', '--project-directory', '.', 'down']
+        def cmd = ['docker', 'compose', '-f', 'dlb-web/docker-compose/compose-all-dev.yml', '--project-directory', '.', 'down']
         def dir = file('..');
 
         runShell(cmd, dir)

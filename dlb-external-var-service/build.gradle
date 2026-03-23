@@ -1,10 +1,6 @@
-import org.gradle.api.JavaVersion
-
 plugins {
 	id 'war'
-	id 'eclipse-wtp'
-	id 'org.springframework.boot' version '3.0.2'
-	id 'org.hidetake.ssh' version '2.10.1'
+	id 'org.springframework.boot' version '3.5.4'
 }
 
 group = 'com.dialoguebranch'
@@ -21,8 +17,10 @@ base {
 java {
 	sourceCompatibility = JavaVersion.VERSION_17
 	targetCompatibility = JavaVersion.VERSION_17
-	withJavadocJar()
-	withSourcesJar()
+	if (project.properties['buildEnv'] == null || !project.properties['buildEnv'].equals('dev')) {
+		withJavadocJar()
+		withSourcesJar()
+	}
 }
 
 configurations {
@@ -37,7 +35,7 @@ dependencies {
 
 	// The Jackson Java8 Module is used to serialize/deserialize ZonedDateTime objects
 	// https://mvnrepository.com/artifact/com.fasterxml.jackson.module/jackson-modules-java8
-	implementation 'com.fasterxml.jackson.module:jackson-modules-java8:2.13.4'
+	// implementation 'com.fasterxml.jackson.module:jackson-modules-java8:2.13.4'
 
 	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
@@ -48,16 +46,20 @@ dependencies {
 	implementation 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
 
 	// https://mvnrepository.com/artifact/org.springframework/spring-context-support
-	implementation 'org.springframework:spring-context-support:6.0.4'
+	implementation 'org.springframework:spring-context-support:6.2.9'
 
 	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web
-	implementation 'org.springframework.boot:spring-boot-starter-web:3.0.2'
+	implementation 'org.springframework.boot:spring-boot-starter-web:3.5.4'
 
 	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-tomcat
-	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat:3.0.2'
+	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat:3.5.4'
 
 	// https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
+
+	// Strange, but this solves Factory method 'clientHttpRequestFactoryBuilder' threw exception with message: org/apache/hc/client5/http/ssl/TlsSocketStrategy
+	implementation 'org.apache.httpcomponents.client5:httpclient5:5.4.1'
+
 }
 
 configurations {
@@ -67,14 +69,20 @@ configurations {
 	compile.exclude group: 'org.slf4j', module: 'slf4j-jdk14'
 }
 
-task updateConfig {
-	group = "configuration"
-	description = "Generates an updated version of service.properties that includes values from 'gradle.properties' starting with 'dlb-config'."
+class UpdateConfigTask extends DefaultTask {
+	private ProviderFactory providerFactory
 
-	doLast() {
+	@Inject
+	UpdateConfigTask(ProviderFactory providerFactory) {
+		this.providerFactory = providerFactory
+	}
+
+	@TaskAction
+	void doTaskAction() {
 		Properties props = new Properties()
 		def propPrefix = 'dlb-config'
-		project.properties.each { key, value ->
+
+		providerFactory.gradlePropertiesPrefixedBy(propPrefix).get().each { key, value ->
 			if (!key.startsWith(propPrefix))
 				return
 			key = key.substring(propPrefix.length())
@@ -85,7 +93,7 @@ task updateConfig {
 		// Add the current time as buildTime property
 		props['buildTime'] = new Date().format("MM/dd/yyyy HH:mm:ss")
 
-		def resDir = file('src/main/resources')
+		def resDir = new File('src/main/resources')
 		resDir.mkdirs()
 		def out = new File(resDir, 'service.properties')
 		out.withWriter('UTF-8') {
@@ -94,11 +102,24 @@ task updateConfig {
 	}
 }
 
-task updateVersion {
-	group = 'versioning'
-	description = 'Writes the current version to files containing the version number.'
+tasks.register('updateConfig', UpdateConfigTask) {
+	group = "configuration"
+	description = "Generates an updated version of service.properties that includes values from 'gradle.properties' starting with 'dlb-config'."
+}
 
-	doLast() {
+abstract class UpdateVersionTask extends DefaultTask {
+	private ProviderFactory providerFactory
+
+	@Input
+	abstract Property<String> getVersion()
+
+	@Inject
+	UpdateVersionTask(ProviderFactory providerFactory) {
+		this.providerFactory = providerFactory
+	}
+
+	@TaskAction
+	void doTaskAction() {
 		ant.replaceregexp(file: 'src/main/webapp/WEB-INF/web.xml',
 			match: "<display-name>DialogueBranch External Variable Service Dummy .+</display-name>",
 			replace: "<display-name>DialogueBranch External Variable Service Dummy ${version}</display-name>")
@@ -108,10 +129,18 @@ task updateVersion {
 	}
 }
 
-task checkResources {
+Provider<String> versionProvider = project.provider { project.version }
+
+tasks.register('updateVersion', UpdateVersionTask) {
+	group = 'versioning'
+	description = 'Writes the current version to files containing the version number.'
+	version = versionProvider
+}
+
+tasks.register('checkResources') {
 	group = 'build'
 	description = 'Checks if required resource files exist and are up-to-date.'
-	
+
 	dependsOn updateConfig
 }
 
