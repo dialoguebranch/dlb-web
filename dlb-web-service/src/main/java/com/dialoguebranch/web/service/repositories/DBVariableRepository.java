@@ -36,6 +36,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface VariableRepository extends JpaRepository<DBVariable, UUID> {
+public interface DBVariableRepository extends JpaRepository<DBVariable, UUID> {
 	List<DBVariable> findByUser_Id(UUID userId);
 }

@@ -34,8 +34,8 @@ import com.dialoguebranch.execution.VariableStore;
 import com.dialoguebranch.execution.VariableStoreChange;
 import com.dialoguebranch.web.service.models.DBUser;
 import com.dialoguebranch.web.service.models.DBVariable;
-import com.dialoguebranch.web.service.repositories.UserRepository;
-import com.dialoguebranch.web.service.repositories.VariableRepository;
+import com.dialoguebranch.web.service.repositories.DBUserRepository;
+import com.dialoguebranch.web.service.repositories.DBVariableRepository;
 import com.dialoguebranch.web.service.services.DatabaseStorageService;
 import nl.rrd.utils.AppComponents;
 import nl.rrd.utils.datetime.DateTimeUtils;
@@ -62,8 +62,8 @@ public class VariableStoreDatabaseStorageHandler implements VariableStoreStorage
 	@Override
 	public VariableStore read(User user) throws IOException, ParseException {
 		DatabaseStorageService svc = getService();
-		UserRepository userRepo = svc.getUserRepository();
-		VariableRepository varRepo = svc.getVariableRepository();
+		DBUserRepository userRepo = svc.getUserRepository();
+		DBVariableRepository varRepo = svc.getVariableRepository();
 		TransactionTemplate tx = svc.getTransactionTemplate();
 
 		List<DBVariable> dbVariables = Objects.requireNonNull(tx.execute(status -> {
@@ -86,8 +86,8 @@ public class VariableStoreDatabaseStorageHandler implements VariableStoreStorage
 	@Override
 	public void write(VariableStore variableStore) throws IOException {
 		DatabaseStorageService svc = getService();
-		UserRepository userRepo = svc.getUserRepository();
-		VariableRepository varRepo = svc.getVariableRepository();
+		DBUserRepository userRepo = svc.getUserRepository();
+		DBVariableRepository varRepo = svc.getVariableRepository();
 		TransactionTemplate tx = svc.getTransactionTemplate();
 
 		tx.execute(status -> {
@@ -125,7 +125,7 @@ public class VariableStoreDatabaseStorageHandler implements VariableStoreStorage
 		}
 	}
 
-	private DBUser getOrCreateUser(UserRepository userRepo, String username) {
+	private DBUser getOrCreateUser(DBUserRepository userRepo, String username) {
 		return userRepo.findByUsername(username)
 				.orElseGet(() -> userRepo.save(new DBUser(username)));
 	}

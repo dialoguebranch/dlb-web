@@ -36,6 +36,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface UserRepository extends JpaRepository<DBUser, UUID> {
+public interface DBUserRepository extends JpaRepository<DBUser, UUID> {
 	Optional<DBUser> findByUsername(String username);
 }

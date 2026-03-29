@@ -54,7 +54,7 @@ public class DBVariable {
 
 	private String value;
 
-	public DBVariable() {
+	protected DBVariable() {
 	}
 
 	public DBVariable(String name, String value) {

@@ -28,8 +28,8 @@
 
 package com.dialoguebranch.web.service.services;
 
-import com.dialoguebranch.web.service.repositories.UserRepository;
-import com.dialoguebranch.web.service.repositories.VariableRepository;
+import com.dialoguebranch.web.service.repositories.DBUserRepository;
+import com.dialoguebranch.web.service.repositories.DBVariableRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -37,23 +37,23 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Service
 public class DatabaseStorageService {
 
-	private final UserRepository userRepository;
-	private final VariableRepository variableRepository;
+	private final DBUserRepository userRepository;
+	private final DBVariableRepository variableRepository;
 	private final TransactionTemplate transactionTemplate;
 
-	public DatabaseStorageService(UserRepository userRepository,
-								  VariableRepository variableRepository,
-								  PlatformTransactionManager transactionManager) {
+	public DatabaseStorageService(DBUserRepository userRepository,
+			DBVariableRepository variableRepository,
+			PlatformTransactionManager transactionManager) {
 		this.userRepository = userRepository;
 		this.variableRepository = variableRepository;
 		this.transactionTemplate = new TransactionTemplate(transactionManager);
 	}
 
-	public UserRepository getUserRepository() {
+	public DBUserRepository getUserRepository() {
 		return userRepository;
 	}
 
-	public VariableRepository getVariableRepository() {
+	public DBVariableRepository getVariableRepository() {
 		return variableRepository;
 	}
 

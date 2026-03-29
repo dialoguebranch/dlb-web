@@ -53,7 +53,7 @@ public class DBUser {
 	@JsonIgnore
 	private Set<DBVariable> variables = new HashSet<>();
 
-	public DBUser() {
+	protected DBUser() {
 	}
 
 	public DBUser(String username) {
