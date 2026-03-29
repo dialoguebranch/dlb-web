@@ -15,6 +15,12 @@ services:
     volumes:
       - mariadb:/var/lib/mysql
       - ./dlb-web/docker-compose/import/mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 30s
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   ##############
   # phpMyAdmin #
@@ -41,6 +47,9 @@ services:
       authNativeJwtRefreshTokenSecret: ${dlb_web_service_auth_native_jwt_refresh_token_secret}
       authKeycloakClientSecret: ${keycloak_client_secret}
       mariadbPassword: ${mariadb_root_password}
+    depends_on:
+      mariadb:
+        condition: service_healthy
     volumes:
       - ./dlb-web/dlb-web-service/build/libs/dlb-web-service-1.2.5.war:/usr/local/tomcat/webapps/dlb-web-service.war
 
@@ -52,7 +61,10 @@ services:
     container_name: keycloak
     image: quay.io/keycloak/keycloak
     ports:
-      - "8081:8080" # external_port:internal_port 
+      - "8081:8080" # external_port:internal_port
+    depends_on:
+      mariadb:
+        condition: service_healthy
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${keycloak_admin_username}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${keycloak_admin_password}

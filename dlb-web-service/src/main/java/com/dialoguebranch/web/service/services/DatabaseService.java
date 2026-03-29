@@ -30,8 +30,6 @@ package com.dialoguebranch.web.service.services;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import nl.rrd.utils.AppComponents;
-import org.slf4j.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -51,32 +49,6 @@ public class DatabaseService {
 		config.setUsername(cfg.getMariadbUser());
 		config.setPassword(cfg.getMariadbPassword());
 
-		Logger logger = AppComponents.getLogger(getClass().getSimpleName());
-		int retryCount = 0;
-		while (true) {
-			try {
-				return new HikariDataSource(config);
-			} catch (Exception ex) {
-				if (retryCount++ < 30) {
-					logger.warn("Failed to connect to database; retrying in 10 seconds ...");
-					sleep(10000);
-				} else {
-					throw ex;
-				}
-			}
-		}
-	}
-
-	private void sleep(int ms) {
-		long now = System.currentTimeMillis();
-		long end = now + ms;
-		try {
-			while (now < end) {
-				Thread.sleep(end - now);
-				now = System.currentTimeMillis();
-			}
-		} catch (InterruptedException ex) {
-			throw new RuntimeException(ex);
-		}
+		return new HikariDataSource(config);
 	}
 }
