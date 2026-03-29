@@ -1,6 +1,6 @@
 -- Initial schema created by Flyway.
 --
--- UUID columns use binary(16), which is the default mapping for Hibernate 6/7 on MySQL/MariaDB.
+-- UUID columns use char(36), which is the default mapping for Hibernate 6/7 on MySQL/MariaDB.
 -- If your existing schema uses a different type (e.g. char(36) or the native uuid type on
 -- MariaDB 10.7+), adjust the column definitions here to match before running on a fresh database.
 --
@@ -8,15 +8,15 @@
 -- will skip this migration because baseline-on-migrate=true marks those databases at version 0.
 
 CREATE TABLE users (
-    id       binary(16)   NOT NULL,
+    id       char(36)   NOT NULL,
     username varchar(255) NOT NULL,
     PRIMARY KEY (id),
     CONSTRAINT username UNIQUE (username)
 ) ENGINE = InnoDB;
 
 CREATE TABLE variables (
-    id      binary(16)   NOT NULL,
-    user_id binary(16)   NOT NULL,
+    id      char(36)   NOT NULL,
+    user_id char(36)   NOT NULL,
     name    varchar(255) NOT NULL,
     value   varchar(255),
     PRIMARY KEY (id),

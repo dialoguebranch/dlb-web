@@ -44,6 +44,7 @@ public class DatabaseService {
 				com.dialoguebranch.web.service.Configuration.getInstance();
 
 		HikariConfig config = new HikariConfig();
+		config.setDriverClassName("org.mariadb.jdbc.Driver");
 		config.setJdbcUrl("jdbc:mariadb://" + cfg.getMariadbHost() + ":" + cfg.getMariadbPort() +
 				"/" + cfg.getMariadbDatabase() + "?createDatabaseIfNotExist=true");
 		config.setUsername(cfg.getMariadbUser());
