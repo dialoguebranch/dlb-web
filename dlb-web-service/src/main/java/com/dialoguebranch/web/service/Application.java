@@ -30,10 +30,10 @@ package com.dialoguebranch.web.service;
 
 import com.dialoguebranch.web.service.exception.DLBServiceConfigurationException;
 import com.dialoguebranch.web.service.execution.ApplicationManager;
+import com.dialoguebranch.web.service.services.DatabaseStorageService;
 import com.dialoguebranch.parser.ResourceFileLoader;
 import jakarta.annotation.PostConstruct;
 import nl.rrd.utils.AppComponents;
-import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -71,7 +71,7 @@ ApplicationListener<ApplicationEvent> {
 	private final Long launchedTime = Instant.now().toEpochMilli();
 
 	@Autowired
-	private SessionFactory sessionFactory;
+	private DatabaseStorageService databaseStorageService;
 
 	// -------------------------------------------------------- //
 	// -------------------- Constructor(s) -------------------- //
@@ -120,7 +120,7 @@ ApplicationListener<ApplicationEvent> {
 
 	@PostConstruct
 	private void initApp() {
-		AppComponents.getInstance().addComponent(sessionFactory);
+		AppComponents.getInstance().addComponent(databaseStorageService);
 	}
 
 	// ----------------------------------------------------------- //

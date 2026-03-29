@@ -28,61 +28,46 @@
 
 package com.dialoguebranch.web.service.services;
 
-import jakarta.persistence.Entity;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import nl.rrd.utils.AppComponents;
-import org.hibernate.SessionFactory;
-import org.hibernate.jpa.HibernatePersistenceConfiguration;
-import org.hibernate.service.spi.ServiceException;
-import org.hibernate.tool.schema.Action;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.type.filter.AnnotationTypeFilter;
 
-import java.util.List;
-import java.util.Set;
+import javax.sql.DataSource;
 
 @Configuration
 public class DatabaseService {
+
 	@Bean
-	public SessionFactory sessionFactory() {
+	public DataSource dataSource() {
 		com.dialoguebranch.web.service.Configuration cfg =
 				com.dialoguebranch.web.service.Configuration.getInstance();
 
-		List<? extends Class<?>> entityClasses = findEntityClasses();
-
-		HibernatePersistenceConfiguration hibernateConfig =
-				new HibernatePersistenceConfiguration("DialogueBranch");
-
-		for (Class<?> entityClass : entityClasses) {
-			hibernateConfig.managedClass(entityClass);
-		}
+		HikariConfig config = new HikariConfig();
+		config.setJdbcUrl("jdbc:mariadb://" + cfg.getMariadbHost() + ":" + cfg.getMariadbPort() +
+				"/" + cfg.getMariadbDatabase() + "?createDatabaseIfNotExist=true");
+		config.setUsername(cfg.getMariadbUser());
+		config.setPassword(cfg.getMariadbPassword());
 
 		Logger logger = AppComponents.getLogger(getClass().getSimpleName());
 		int retryCount = 0;
 		while (true) {
 			try {
-				return hibernateConfig
-						.jdbcUrl("jdbc:mariadb://" + cfg.getMariadbHost() + ":" + cfg.getMariadbPort() +
-								"/" + cfg.getMariadbDatabase() + "?createDatabaseIfNotExist=true")
-						.jdbcCredentials(cfg.getMariadbUser(), cfg.getMariadbPassword())
-						.schemaToolingAction(Action.UPDATE)
-						.createEntityManagerFactory();
-			} catch (ServiceException ex) {
-				if (retryCount < 30) {
+				return new HikariDataSource(config);
+			} catch (Exception ex) {
+				if (retryCount++ < 30) {
 					logger.warn("Failed to connect to database; retrying in 10 seconds ...");
-					wait(10000);
+					sleep(10000);
 				} else {
 					throw ex;
 				}
-				retryCount++;
 			}
 		}
 	}
 
-	private void wait(int ms) {
+	private void sleep(int ms) {
 		long now = System.currentTimeMillis();
 		long end = now + ms;
 		try {
@@ -93,21 +78,5 @@ public class DatabaseService {
 		} catch (InterruptedException ex) {
 			throw new RuntimeException(ex);
 		}
-	}
-
-	private List<? extends Class<?>> findEntityClasses() {
-		ClassPathScanningCandidateComponentProvider scanner =
-				new ClassPathScanningCandidateComponentProvider(false);
-		scanner.addIncludeFilter(new AnnotationTypeFilter(Entity.class));
-
-		Set<BeanDefinition> entities = scanner.findCandidateComponents(
-				"com.dialoguebranch.web.service.models");
-		return entities.stream().map((entity) -> {
-			try {
-				return Class.forName(entity.getBeanClassName());
-			} catch (ClassNotFoundException ex) {
-				throw new RuntimeException("Entity class not found: " + ex.getMessage(), ex);
-			}
-		}).toList();
 	}
 }

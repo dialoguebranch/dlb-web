@@ -26,71 +26,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.dialoguebranch.web.service.models;
+package com.dialoguebranch.web.service.services;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import com.dialoguebranch.web.service.repositories.UserRepository;
+import com.dialoguebranch.web.service.repositories.VariableRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.UUID;
+@Service
+public class DatabaseStorageService {
 
-@Entity
-@Table(name = "variables")
-public class DBVariable {
-	@Id
-	@GeneratedValue(strategy = GenerationType.UUID)
-	private UUID id;
+	private final UserRepository userRepository;
+	private final VariableRepository variableRepository;
+	private final TransactionTemplate transactionTemplate;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JsonIgnore
-	private DBUser user;
-
-	private String name;
-
-	private String value;
-
-	public DBVariable() {
+	public DatabaseStorageService(UserRepository userRepository,
+								  VariableRepository variableRepository,
+								  PlatformTransactionManager transactionManager) {
+		this.userRepository = userRepository;
+		this.variableRepository = variableRepository;
+		this.transactionTemplate = new TransactionTemplate(transactionManager);
 	}
 
-	public DBVariable(String name, String value) {
-		this.name = name;
-		this.value = value;
+	public UserRepository getUserRepository() {
+		return userRepository;
 	}
 
-	public UUID getId() {
-		return id;
+	public VariableRepository getVariableRepository() {
+		return variableRepository;
 	}
 
-	public void setId(UUID id) {
-		this.id = id;
-	}
-
-	public DBUser getUser() {
-		return user;
-	}
-
-	public void setUser(DBUser user) {
-		this.user = user;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getValue() {
-		return value;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
+	public TransactionTemplate getTransactionTemplate() {
+		return transactionTemplate;
 	}
 }
