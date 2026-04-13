@@ -124,7 +124,7 @@ public class ExternalVariableServiceUpdater implements VariableStoreOnChangeList
 							variablesToUpdate.add(
 								new Variable(
 									variableName,
-									null,
+									variableValue,
 									updatedTime,
 									userTimeZoneString));
 						}
