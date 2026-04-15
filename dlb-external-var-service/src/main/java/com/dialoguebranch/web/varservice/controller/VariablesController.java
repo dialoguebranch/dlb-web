@@ -186,7 +186,7 @@ public class VariablesController {
 			if(application.getConfiguration().getAuthAPIKey().equals(providedAPIKey)) {
 				return executeRetrieveUpdates(userId, timeZone, dlbVariables);
 			} else {
-				throw new UnauthorizedException(ErrorCode.API_KEY_INVALID,
+				throw new UnauthorizedException(ErrorCode.ACCESS_TOKEN_INVALID,
 						"Invalid API Key provided.");
 			}
 		}
@@ -379,7 +379,7 @@ public class VariablesController {
 			if(application.getConfiguration().getAuthAPIKey().equals(providedAPIKey)) {
 				return executeNotifyUpdated(userId, timeZone, dlbVariables);
 			} else {
-				throw new UnauthorizedException(ErrorCode.API_KEY_INVALID,
+				throw new UnauthorizedException(ErrorCode.ACCESS_TOKEN_INVALID,
 						"Invalid API Key provided.");
 			}
 		}
@@ -482,7 +482,7 @@ public class VariablesController {
 			if(application.getConfiguration().getAuthAPIKey().equals(providedAPIKey)) {
 				return executeNotifyCleared(userId, timeZone);
 			} else {
-				throw new UnauthorizedException(ErrorCode.API_KEY_INVALID,
+				throw new UnauthorizedException(ErrorCode.ACCESS_TOKEN_INVALID,
 						"Invalid API Key provided.");
 			}
 		}

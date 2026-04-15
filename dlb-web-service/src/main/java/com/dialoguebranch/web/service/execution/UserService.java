@@ -362,7 +362,8 @@ public class UserService {
 			RestTemplate restTemplate = new RestTemplate();
 			HttpHeaders requestHeaders = new HttpHeaders();
 			requestHeaders.setContentType(MediaType.valueOf("application/json"));
-			requestHeaders.set("X-API-Key", config.getExternalVariableServiceAPIKey());
+			requestHeaders.set("Authorization", "Bearer "
+					+ config.getExternalVariableServiceAPIKey());
 
 			String retrieveUpdatesUrl = config.getExternalVariableServiceURL()
 					+ "/v"+config.getExternalVariableServiceAPIVersion()

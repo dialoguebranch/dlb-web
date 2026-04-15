@@ -33,17 +33,13 @@ import com.dialoguebranch.web.varservice.exception.ErrorCode;
 import com.dialoguebranch.web.varservice.exception.HttpFieldError;
 import com.dialoguebranch.web.varservice.exception.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
-import nl.rrd.utils.AppComponents;
 import nl.rrd.utils.exception.ParseException;
 import nl.rrd.utils.http.URLParameters;
-import org.slf4j.Logger;
-import org.springframework.util.ClassUtils;
 
 import java.time.DateTimeException;
 import java.time.ZoneId;
 import java.time.zone.ZoneRulesException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
@@ -136,20 +132,22 @@ public class ControllerFunctions {
 	}
 
 	public static String extractAPIKey(HttpServletRequest request) throws UnauthorizedException {
-		String token = request.getHeader("X-API-Key");
 
-		if (token != null) {
+		String token = request.getHeader("Authorization");
 
-			if (token.trim().isEmpty()) {
-				throw new UnauthorizedException(ErrorCode.API_KEY_INVALID,
-						"Provided API Key is invalid (empty).");
-			} else {
-				return token;
+		if(token != null) {
+
+			if (token.startsWith("Bearer ")) {
+				token = token.substring(7);
+				if(!token.isEmpty()) return token;
 			}
+
+			throw new UnauthorizedException(ErrorCode.ACCESS_TOKEN_INVALID,
+					"Provided API Key is invalid (empty).");
 
 		}
 
-		throw new UnauthorizedException(ErrorCode.API_KEY_NOT_FOUND, "API Key not found");
+		throw new UnauthorizedException(ErrorCode.ACCESS_TOKEN_NOT_FOUND, "API Key not found");
 	}
 
 }

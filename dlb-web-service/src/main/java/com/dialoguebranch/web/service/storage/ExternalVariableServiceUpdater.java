@@ -74,7 +74,8 @@ public class ExternalVariableServiceUpdater implements VariableStoreOnChangeList
 					if(change instanceof VariableStoreChange.Clear) {
 						RestTemplate restTemplate = new RestTemplate();
 						HttpHeaders requestHeaders = new HttpHeaders();
-						requestHeaders.set("X-API-Key", config.getExternalVariableServiceAPIKey());
+						requestHeaders.set("Authorization", "Bearer "
+								+ config.getExternalVariableServiceAPIKey());
 
 						String notifyClearedUrl = config.getExternalVariableServiceURL()
 							+ "/v" + config.getExternalVariableServiceAPIVersion()
@@ -139,7 +140,8 @@ public class ExternalVariableServiceUpdater implements VariableStoreOnChangeList
 			RestTemplate restTemplate = new RestTemplate();
 			HttpHeaders requestHeaders = new HttpHeaders();
 			requestHeaders.setContentType(MediaType.valueOf("application/json"));
-			requestHeaders.set("X-API-Key", config.getExternalVariableServiceAPIKey());
+			requestHeaders.set("Authorization", "Bearer "
+					+ config.getExternalVariableServiceAPIKey());
 
 			String notifyUpdatesUrl = config.getExternalVariableServiceURL()
 					+ "/v" + config.getExternalVariableServiceAPIVersion()

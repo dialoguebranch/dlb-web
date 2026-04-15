@@ -41,11 +41,12 @@ public class ErrorCode {
 	 */
 	public ErrorCode() { }
 
-	/** In case no API Key was provided in the header of a request ('X-API-Key'). */
-	public static final String API_KEY_NOT_FOUND = "API_KEY_NOT_FOUND";
+	/** In case no Access Token was provided in the header of a request (Authorization:
+	 * Bearer &lt;token&gt; ). */
+	public static final String ACCESS_TOKEN_NOT_FOUND = "ACCESS_TOKEN_NOT_FOUND";
 
-	/** In case the provided API Key was not valid. */
-	public static final String API_KEY_INVALID = "API_KEY_INVALID";
+	/** In case the provided Access Token was not valid. */
+	public static final String ACCESS_TOKEN_INVALID = "ACCESS_TOKEN_INVALID";
 
 	/** In case a required input parameter is missing, or an invalid value was provided. */
 	public static final String INVALID_INPUT = "INVALID_INPUT";
