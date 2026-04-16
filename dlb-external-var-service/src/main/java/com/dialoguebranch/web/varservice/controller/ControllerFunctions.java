@@ -44,8 +44,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The {@link ControllerFunctions} class offers a set of public, static methods
- * that can be used by the service's various REST controllers.
+ * The {@link ControllerFunctions} class offers a set of public, static methods that can be used by
+ * the service's various REST controllers.
  *
  * @author Harm op den Akker
  */
@@ -131,6 +131,14 @@ public class ControllerFunctions {
 		}
 	}
 
+	/**
+	 * Convenience method for extracting a provided Access Token (an "API Key" in the case of this
+	 * dummy service implementation) from the "Authorization" header of the given {@code request}.
+	 *
+	 * @param request the {@link HttpServletRequest} from which to extract the API Key.
+	 * @return the API Key from the "Authorization: Bearer TOKEN" header.
+	 * @throws UnauthorizedException in case no valid API Key is present in the header.
+	 */
 	public static String extractAPIKey(HttpServletRequest request) throws UnauthorizedException {
 
 		String token = request.getHeader("Authorization");

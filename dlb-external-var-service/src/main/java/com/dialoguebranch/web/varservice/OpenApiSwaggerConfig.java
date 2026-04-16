@@ -98,11 +98,11 @@ public class OpenApiSwaggerConfig {
 		openAPI.addServersItem(server);
 
 		// Add the security scheme
-		openAPI.components(new Components().addSecuritySchemes("X-API-Key",
+		openAPI.components(new Components().addSecuritySchemes("Authorization",
 			new SecurityScheme()
-				.name("X-API-Key")
-				.scheme("basic")
-				.type(SecurityScheme.Type.APIKEY)
+				.name("Authorization")
+				.scheme("bearer")
+				.type(SecurityScheme.Type.HTTP)
 				.in(SecurityScheme.In.HEADER)
 
 		));

@@ -104,12 +104,18 @@ ApplicationListener<ApplicationEvent> {
 
 	/**
 	 * Return the UTC timestamp of when this service was first launched.
+	 *
 	 * @return the UTC timestamp of when this service was first launched.
 	 */
 	public Long getLaunchedTime() {
 		return launchedTime;
 	}
 
+	/**
+	 * Returns the {@link Configuration} object containing service parameters.
+	 *
+	 * @return the {@link Configuration} object containing service parameters.
+	 */
 	public Configuration getConfiguration() {
 		return config;
 	}

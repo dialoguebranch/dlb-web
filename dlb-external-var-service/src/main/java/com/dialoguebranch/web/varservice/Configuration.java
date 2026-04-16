@@ -44,6 +44,15 @@ import java.util.Properties;
  * Configuration of the Dialogue Branch External Variable Service Dummy. This is initialized from
  * resources service.properties and deployment.properties. Known property keys are defined as
  * constants in this class.
+ *
+ * <p>This class is an implementation of a {@link LinkedHashMap}, so any configuration property
+ * can simply be retrieved using that super-class's {@link LinkedHashMap#get} method.</p>
+ *
+ * <p>Any configured value from service.properties and deployment.properties may be overridden by
+ * using an environment variable. Whether you are using the simple {@link LinkedHashMap#get} methods
+ * or the provided convenience methods (e.g. {@link Configuration#getBaseUrl}), this configuration
+ * will always first check the existence of an environment variable, before returning the value
+ * as defined in the .properties files.</p>
  * 
  * @author Dennis Hofs
  * @author Harm op den Akker
@@ -106,32 +115,11 @@ public class Configuration extends LinkedHashMap<String,String> {
 	 * This private constructor is used in {@link #getInstance()
 	 * getInstance()}.
 	 */
-	private Configuration() {
-	}
+	private Configuration() { }
 
-	// ------------------------------------------------------- //
-	// -------------------- Other Methods -------------------- //
-	// ------------------------------------------------------- //
-
-	/**
-	 * Loads the resource service.properties or deployment.properties into this
-	 * configuration. This should only be called once at startup of the
-	 * service.
-	 * 
-	 * @param url the URL of service.properties or deployment.properties
-	 * @throws IOException if a reading error occurs
-	 */
-	public void loadProperties(URL url) throws IOException {
-		Properties props = new Properties();
-		if(url == null) throw new IOException("Cannot load properties file from null.");
-		try (Reader reader = new InputStreamReader(url.openStream(),
-				StandardCharsets.UTF_8)) {
-			props.load(reader);
-		}
-		for (String name : props.stringPropertyNames()) {
-			put(name, props.getProperty(name));
-		}
-	}
+	// ---------------------------------------------------------- //
+	// -------------------- Getters: General -------------------- //
+	// ---------------------------------------------------------- //
 
 	/**
 	 * Returns a date-time {@link String} representing the date and time that this version of the
@@ -143,10 +131,6 @@ public class Configuration extends LinkedHashMap<String,String> {
 		if(get(BUILD_TIME) == null) return "";
 		else return get(BUILD_TIME);
 	}
-
-	// ---------------------------------------------------------- //
-	// -------------------- Getters: General -------------------- //
-	// ---------------------------------------------------------- //
 
 	/**
 	 * Returns the configured Base URL for the DialogueBranch Web Service.
@@ -162,9 +146,36 @@ public class Configuration extends LinkedHashMap<String,String> {
 	// -------------------- Getters: Authentication -------------------- //
 	// ----------------------------------------------------------------- //
 
+	/**
+	 * Returns the API Key for authentication between Web Service and this External Variable Service.
+	 *
+	 * @return the API Key for authentication between Web Service and this External Variable Service.
+	 */
 	public String getAuthAPIKey() {
 		if(get(AUTH_API_KEY) == null) return "";
 		else return get(AUTH_API_KEY);
+	}
+
+	// ------------------------------------------------------- //
+	// -------------------- Other Methods -------------------- //
+	// ------------------------------------------------------- //
+
+	/**
+	 * Loads the resource service.properties or deployment.properties into this configuration. This
+	 * should only be called once at startup of the service.
+	 *
+	 * @param url the URL of service.properties or deployment.properties
+	 * @throws IOException if a reading error occurs
+	 */
+	public void loadProperties(URL url) throws IOException {
+		Properties props = new Properties();
+		if(url == null) throw new IOException("Cannot load properties file from null.");
+		try (Reader reader = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8)) {
+			props.load(reader);
+		}
+		for (String name : props.stringPropertyNames()) {
+			put(name, props.getProperty(name));
+		}
 	}
 
 	@Override
@@ -178,7 +189,6 @@ public class Configuration extends LinkedHashMap<String,String> {
 				}
 			}
 		}
-
 		return super.get(key);
 	}
 }

@@ -43,7 +43,7 @@ import org.springframework.stereotype.Component;
 /**
  * Spring component that handles the configuration of HTTP Headers, allowing Cross-Origin Requests.
  *
- * @author Harm op den Akker (Fruit Tree Labs)
+ * @author Harm op den Akker
  */
 @Component
 public class CorsFilter implements Filter {
@@ -64,7 +64,7 @@ public class CorsFilter implements Filter {
 		httpResponse.setHeader("Access-Control-Allow-Methods",
 				"GET, HEAD, POST, PUT, DELETE, OPTIONS");
 		httpResponse.setHeader("Access-Control-Allow-Headers",
-				"Content-Type, Accept, Accept-Language, X-API-Key");
+				"Content-Type, Accept, Accept-Language, Authorization");
 		chain.doFilter(request, response);
 	}
 

@@ -69,7 +69,7 @@ import java.util.Random;
  * @author Tessa Beinema
  */
 @RestController
-@SecurityRequirement(name = "X-API-Key")
+@SecurityRequirement(name = "Authorization")
 @RequestMapping(value = {"/v{version}/variables", "/variables"})
 @Tag(name = "1. Variables",
 	 description = "End-points for retrieving variables from- and sending to the service")
