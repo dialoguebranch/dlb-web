@@ -32,11 +32,31 @@ Open a Terminal in the current folder () `/dlb-external-var-service/`):
 Build the Docker Image using:
 
 ```dockerfile
-docker build -t dlb-external-var-service .
+docker build -t dialoguebranch/dlb-external-var-service .
 ```
 
 Then, run the docker image using:
 
 ```dockerfile
-docker run -d -p 8090:8090 --name dlb-evs dlb-external-var-service
+docker run -d -p 8090:8090 --name dlb-evs dialoguebranch/dlb-external-var-service
+```
+
+### Publishing
+
+Set an appropriate tag for the image using the following
+
+```dockerfile
+docker tag dialoguebranch/dlb-external-var-service:latest dialoguebranch/dlb-external-var-service:1.3.0
+```
+
+Make sure you are logged in to Docker Hub
+
+```dockerfile
+docker login
+```
+
+Then, push the image using the following:
+
+```dockerfile
+docker push dialoguebranch/dlb-external-var-service:1.3.0
 ```
