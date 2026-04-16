@@ -1,5 +1,12 @@
 # Dialogue Branch External Variable Service
 
+## Quickstart
+Run a standalone version of this service by pulling the latest official Docker image:
+
+```
+docker run -d -p 8090:8090 --name dlb-evs dialoguebranch/dlb-external-var-service
+```
+## What is this service?
 If you want the Dialogue Branch Web Service to synchronize its variable data with an "external" service, you can configure it to connect to an "External Variable Service". If this is setup, the following will happen:
 
   * Before starting a dialogue, the Web Service will ask the configured External Service: "Hey, I'm about to start a dialogue with variables `$A`, `$B`, and `$C` - do you have any up-to-date values for these?" (i.e. `/variables/retrieve-updates`).
