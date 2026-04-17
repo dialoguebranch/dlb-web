@@ -6,6 +6,7 @@ Run a standalone version of this service by pulling the latest official Docker i
 ```
 docker run -d -p 8090:8090 --name dlb-evs dialoguebranch/dlb-external-var-service
 ```
+
 ## What is this service?
 If you want the Dialogue Branch Web Service to synchronize its variable data with an "external" service, you can configure it to connect to an "External Variable Service". If this is setup, the following will happen:
 
@@ -46,6 +47,14 @@ Then, run the docker image using:
 
 ```dockerfile
 docker run -d -p 8090:8090 --name dlb-evs dialoguebranch/dlb-external-var-service
+```
+
+### Test
+
+After running the docker image, open a web browser and navigate to the following page to view the service's Swagger pages:
+
+```
+http://localhost:8090/dlb-external-var-service/
 ```
 
 ### Publishing
