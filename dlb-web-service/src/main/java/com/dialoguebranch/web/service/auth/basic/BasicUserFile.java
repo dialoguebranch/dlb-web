@@ -43,16 +43,24 @@ import java.util.List;
 
 /**
  * A {@link BasicUserFile} objects represents the contents of the users.xml file that contains the
- * credentials for valid users of the service.
+ * credentials for valid users of the service when using the Native Authentication Service.
  *
  * @author Harm op den Akker
  */
 public class BasicUserFile {
 
+	// -------------------------------------------------------- //
+	// -------------------- Constructor(s) -------------------- //
+	// -------------------------------------------------------- //
+
 	/**
 	 * This class may be used in a static way.
 	 */
 	public BasicUserFile() { }
+
+	// ------------------------------------------------------- //
+	// -------------------- Other Methods -------------------- //
+	// ------------------------------------------------------- //
 
 	/**
 	 * Retrieve the {@link BasicUserCredentials} matching the given {@code username}.
@@ -99,6 +107,14 @@ public class BasicUserFile {
 	private static class XMLHandler extends AbstractSimpleSAXHandler<List<BasicUserCredentials>> {
 		private final List<BasicUserCredentials> users = new ArrayList<>();
 
+		/**
+		 * Parser for all XML elements of the users.xml file.
+		 *
+		 * @param name the name of the XML element.
+		 * @param attributes the attributes of the XML element.
+		 * @param parents the list of parents of the XML element.
+		 * @throws ParseException in case of any parse error or unexpected element found.
+		 */
 		@Override
 		public void startElement(String name, Attributes attributes, List<String> parents)
 				throws ParseException {
@@ -114,6 +130,12 @@ public class BasicUserFile {
 			}
 		}
 
+		/**
+		 * XML Parser for the "username" element from the users.xml file.
+		 *
+		 * @param attributes the XML attributes.
+		 * @throws ParseException in case of any parse error or missing attribute.
+		 */
 		private void startUser(Attributes attributes) throws ParseException {
 			String username = readAttribute(attributes, "username").trim();
 			if (username.isEmpty()) {
@@ -141,8 +163,8 @@ public class BasicUserFile {
 				rolesString = BasicUserCredentials.USER_ROLE_CLIENT;
 				roles = rolesString.split(",");
 				Logger logger = AppComponents.getLogger(BasicUserFile.class.getSimpleName());
-				logger.warn("Warning while reading users.xml file: User role not defined for user '"
-						+username+"', assuming role '"+rolesString+"'.");
+                logger.warn("Warning while reading users.xml file: User role not defined " +
+						"for user '{}', assuming role '{}'.", username, rolesString);
 			}
 			users.add(new BasicUserCredentials(username, password, roles));
 		}

@@ -43,12 +43,22 @@ import java.util.function.Function;
 
 /**
  * Collection of static methods for creating and verifying JSON Web Tokens (JWTs).
+ *
+ * @author Harm op den Akker
+ * @author Dennis Hofs
  */
 public class JWTUtils {
 
     /** Used to access configuration parameters */
     private static final Configuration config = Configuration.getInstance();
 
+    /**
+     * Generates an access token (JWT) based on the given {@link BasicUserCredentials}.
+     *
+     * @param basicUserCredentials object containing username, and roles of the user for which to
+     *                             generate a JWT.
+     * @return the JWT access token as a String.
+     */
     public static String generateAccessToken(BasicUserCredentials basicUserCredentials) {
         return Jwts.builder()
                 .expiration(new Date(System.currentTimeMillis() + config.getAccessTokenExpirationSeconds() * 1000L))
@@ -62,6 +72,13 @@ public class JWTUtils {
                 .compact();
     }
 
+    /**
+     * Generates a refresh token (JWT) based on the given {@link BasicUserCredentials}.
+     *
+     * @param basicUserCredentials object containing username, and roles of the user for which to
+     *                             generate a JWT.
+     * @return the JWT refresh token as a String.
+     */
     public static String generateRefreshToken(BasicUserCredentials basicUserCredentials) {
         return Jwts.builder()
                 .expiration(new Date(System.currentTimeMillis() + config.getRefreshTokenExpirationSeconds() * 1000L))
